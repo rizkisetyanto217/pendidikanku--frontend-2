@@ -2,6 +2,7 @@ import { MenuIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { colors } from '@/constants/colorsThema'
 import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
 import UserDropdown from './DropDownTopbar'
+import { Link } from 'react-router-dom'
 
 interface AdminTopbarProps {
   onMenuClick?: () => void
@@ -13,9 +14,8 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
   const themeColors = isDark ? colors.dark : colors.light
 
   // 🔍 Ambil user dari localStorage
-  const user = JSON.parse(localStorage.getItem('userData') || '{}')
-  const userName = user.user_name || 'User'
-  const userRole = user.role || 'Role'
+  const userData = localStorage.getItem('userData')
+  const user = userData ? JSON.parse(userData) : null
 
   return (
     <header
@@ -47,8 +47,17 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
           )}
         </button>
 
-
-       <UserDropdown />
+        {/* User info or Login */}
+        {user ? (
+          <UserDropdown />
+        ) : (
+          <Link
+            to="/login"
+            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Login
+          </Link>
+        )}
       </div>
     </header>
   )
