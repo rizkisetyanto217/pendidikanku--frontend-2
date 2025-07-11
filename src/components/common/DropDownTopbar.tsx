@@ -51,10 +51,10 @@ export default function UserDropdown() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition"
       >
-        <img
-          src="https://i.pravatar.cc/32"
-          alt="Profile"
-          className="w-8 h-8 rounded-full"
+       <img
+        src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='16' fill='%23CCCCCC' /></svg>"
+        alt="Profile"
+        className="w-8 h-8 rounded-full"
         />
         <div className="text-left text-sm hidden sm:block">
           <div className="font-semibold">{userName}</div>
