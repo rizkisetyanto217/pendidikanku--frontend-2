@@ -1,4 +1,4 @@
-// src/constants/sidebarData.ts
+// src/constants/sidebarDKMMobileData.ts
 import { SidebarItem } from '@/components/common/Sidebar'
 import {
   BeakerIcon,
@@ -10,9 +10,16 @@ import {
   PieChartIcon,
 } from 'lucide-react'
 
-export const sidebarDkmDesktopData: SidebarItem[] = [
+export const sidebarDKMMobileData: SidebarItem[] = [
   { text: 'Beranda', icon: <BeakerIcon />, to: '/dkm' },
-  { text: 'Profil', icon: <LayoutDashboardIcon />, to: '/dkm/profil' },
+  {
+    text: 'Profil',
+    icon: <LayoutDashboardIcon />,
+    children: [
+      { text: 'Profil Masjid', to: '/dkm/profil' },
+      { text: 'Profil DKM', to: '/dkm/profil-dkm' },
+    ],
+  },
   { text: 'Notifikasi', icon: <BellIcon />, to: '/dkm/notifikasi' },
   { text: 'Kajian', icon: <CalendarIcon />, to: '/dkm/kajian' },
   { text: 'Sertifikat', icon: <FileIcon />, to: '/dkm/sertifikat' },

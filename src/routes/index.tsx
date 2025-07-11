@@ -33,48 +33,49 @@ import DukunganKami from '@/pages/dkm/setting/SupportUs'
 import SupportUs from '@/pages/dkm/setting/SupportUs'
 import Partnership from '@/pages/dkm/setting/Partnership'
 import FaqPage from '@/pages/dkm/setting/Faq'
+import RequireAuth from './RequireAuth'
 
 export default function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
+    
 
-        {/* ===== DKM ===== */}
-        <Route path="/dkm" element={<DkmLayout />}>
-          <Route index element={<DashboardAdminDkm />} />
-          <Route path="profil" element={<ProfilMasjid />} />
-          <Route path="profil-dkm" element={<ProfileDKMPengajar />} />
-          <Route path="notifikasi" element={<Notifikasi />} />
-          <Route path="kajian" element={<Kajian />} />
-          <Route path="sertifikat" element={<Sertifikat />} />
-          <Route path="keuangan" element={<Keuangan />} />
-          <Route path="postingan" element={<Postingan />} />
+<BrowserRouter>
+  <Routes>
+    {/* ==== Public Routes ==== */}
+    <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Register />} />
 
-          {/* Setting Pages */}
-          <Route element={<DkmSettingLayout />}>
-            <Route path="profil-saya" element={<ProfilSayaDkm />} />
-            <Route path="appereance" element={<Appereance />} />
-            <Route path='support-us' element={<SupportUs />} />
-            <Route path='partnership' element={<Partnership />} />
-            <Route path='faq' element={<FaqPage />} />
+    {/* ==== Protected Routes ==== */}
+    <Route element={<RequireAuth />}>
+      {/* ===== DKM ===== */}
+      <Route path="/dkm" element={<DkmLayout />}>
+        <Route index element={<DashboardAdminDkm />} />
+        <Route path="profil" element={<ProfilMasjid />} />
+        <Route path="profil-dkm" element={<ProfileDKMPengajar />} />
+        <Route path="notifikasi" element={<Notifikasi />} />
+        <Route path="kajian" element={<Kajian />} />
+        <Route path="sertifikat" element={<Sertifikat />} />
+        <Route path="keuangan" element={<Keuangan />} />
+        <Route path="postingan" element={<Postingan />} />
 
-
-          </Route>
+        <Route element={<DkmSettingLayout />}>
+          <Route path="profil-saya" element={<ProfilSayaDkm />} />
+          <Route path="appereance" element={<Appereance />} />
+          <Route path="support-us" element={<SupportUs />} />
+          <Route path="partnership" element={<Partnership />} />
+          <Route path="faq" element={<FaqPage />} />
         </Route>
+      </Route>
 
-        {/* ===== PENULIS ===== */}
-        <Route path="/penulis" element={<PenulisLayout />}>
-          <Route index element={<DashboardPenulis />} />
-        </Route>
+      {/* ===== PENULIS ===== */}
+      <Route path="/penulis" element={<PenulisLayout />}>
+        <Route index element={<DashboardPenulis />} />
+      </Route>
+    </Route>
 
-        {/* ===== AUTH ===== */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* ===== 404 ===== */}
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
-    </BrowserRouter>
+    {/* ===== 404 ===== */}
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+</BrowserRouter>
   )
 }
