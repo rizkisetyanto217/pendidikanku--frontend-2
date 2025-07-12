@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 interface AdminTopbarProps {
   onMenuClick?: () => void
   isMobile?: boolean
+  title?: string // ← tambahkan ini
 }
 
 export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {

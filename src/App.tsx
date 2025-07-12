@@ -1,4 +1,4 @@
-import AppRoutes from '@/routes'
+import AppRoutes from '@/routes/IndexRoute'
 import './index.css'
 
 function App() {

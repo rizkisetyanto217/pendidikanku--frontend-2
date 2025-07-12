@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import AuthLayout from '@/layout/AuthLayout'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import AuthLayout from '@/layout/AuthLayout'
 import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
 import { colors } from '@/constants/colorsThema'
+import api from '@/lib/axios' // ⬅️ ini pakai axios instance
 
 export default function Login() {
   const [identifier, setIdentifier] = useState('')
@@ -29,17 +29,31 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const response = await axios.post(
-        'https://masjidkubackend4-production.up.railway.app/auth/login',
-        { identifier, password },
-        { withCredentials: true }
-      )
+      const response = await api.post('/auth/login', { identifier, password })
 
-      if (response.data.status === 'success') {
+     if (response.data.status === 'success') {
         const user = response.data.data.user
         localStorage.setItem('userData', JSON.stringify(user))
-        navigate('/dkm')
-      } else {
+
+        // Arahkan sesuai role
+        switch (user.role) {
+            case 'dkm':
+            navigate('/dkm')
+            break
+            case 'author':
+            navigate('/author')
+            break
+            case 'admin':
+            navigate('/admin')
+            break
+            case 'teacher':
+            navigate('/teacher')
+            break
+            default:
+            navigate('/login') // fallback kalau role tidak dikenali
+        }
+        }
+    else {
         setError('Login gagal, coba lagi.')
       }
     } catch (error: any) {
@@ -56,7 +70,7 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout  mode="login">
+    <AuthLayout mode="login">
       <form onSubmit={handleLogin}>
         {/* Email / Username */}
         <div className="mb-4">
@@ -108,17 +122,19 @@ export default function Login() {
               }}
             />
             <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
-              title="Toggle Password"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none focus:ring-2 rounded"
+            style={{ color: themeColors.silver2 }}
             >
-              {showPassword ? (
-                <EyeOffIcon className="w-5 h-5 text-gray-500" />
-              ) : (
-                <EyeIcon className="w-5 h-5 text-gray-500" />
-              )}
+            {showPassword ? (
+                <EyeOffIcon className="w-5 h-5" />
+            ) : (
+                <EyeIcon className="w-5 h-5" />
+            )}
             </button>
+
           </div>
         </div>
 
