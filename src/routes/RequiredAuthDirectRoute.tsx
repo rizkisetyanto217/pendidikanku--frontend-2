@@ -23,6 +23,7 @@ export default function RequireAuthRedirect() {
 
   if (!user) return <Navigate to="/login" replace />
 
+  if (user.role === 'owner') return <Navigate to="/" replace />
   if (user.role === 'dkm') return <Navigate to="/dkm" replace />
   if (user.role === 'author') return <Navigate to="/author" replace />
   if (user.role === 'admin') return <Navigate to="/admin" replace />

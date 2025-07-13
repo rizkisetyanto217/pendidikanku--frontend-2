@@ -1,5 +1,5 @@
 // src/constants/sidebarAuthorMobileData.ts
-import { SidebarItem } from '@/components/common/Sidebar'
+import { SidebarItem } from "@/components/common/navigation/Sidebar";
 import {
   BeakerIcon,
   LayoutDashboardIcon,
@@ -8,17 +8,17 @@ import {
   FileIcon,
   UsersIcon,
   PieChartIcon,
-} from 'lucide-react'
+} from "lucide-react";
 
 export const treasurerMobileDataSidebar: SidebarItem[] = [
-  { text: 'Beranda', icon: <BeakerIcon />, to: '/dkm' },
+  { text: "Beranda", icon: <BeakerIcon />, to: "/dkm" },
   {
-    text: 'Profil',
+    text: "Profil",
     icon: <LayoutDashboardIcon />,
     children: [
-      { text: 'Profil Masjid', to: '/dkm/profil' },
-      { text: 'Profil DKM', to: '/dkm/profil-dkm' },
+      { text: "Profil Masjid", to: "/dkm/profil" },
+      { text: "Profil DKM", to: "/dkm/profil-dkm" },
     ],
   },
-  { text: 'Keuangan', icon: <PieChartIcon />, to: '/dkm/keuangan' },
-]
+  { text: "Keuangan", icon: <PieChartIcon />, to: "/dkm/keuangan" },
+];

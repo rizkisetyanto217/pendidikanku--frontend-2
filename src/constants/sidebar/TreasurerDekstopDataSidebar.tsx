@@ -1,5 +1,5 @@
 // src/constants/sidebarAuthorDesktopData.ts
-import { SidebarItem } from '@/components/common/Sidebar'
+import { SidebarItem } from "@/components/common/navigation/Sidebar";
 import {
   BeakerIcon,
   LayoutDashboardIcon,
@@ -8,10 +8,10 @@ import {
   FileIcon,
   UsersIcon,
   PieChartIcon,
-} from 'lucide-react'
+} from "lucide-react";
 
 export const treasurerDesktopDataSidebar: SidebarItem[] = [
-  { text: 'Beranda', icon: <BeakerIcon />, to: '/dkm' },
-  { text: 'Profil', icon: <LayoutDashboardIcon />, to: '/dkm/profil' },
-  { text: 'Keuangan', icon: <PieChartIcon />, to: '/dkm/keuangan' },
-]
+  { text: "Beranda", icon: <BeakerIcon />, to: "/dkm" },
+  { text: "Profil", icon: <LayoutDashboardIcon />, to: "/dkm/profil" },
+  { text: "Keuangan", icon: <PieChartIcon />, to: "/dkm/keuangan" },
+];

@@ -1,13 +1,15 @@
 // src/pages/dkm/home/DashboardAdminDKM.tsx
-import { LayoutDashboardIcon, UserIcon } from 'lucide-react'
-import DashboardSidebar, { SidebarMenuItem } from '@/components/common/SidebarMenu'
+import { LayoutDashboardIcon, UserIcon } from "lucide-react";
+import DashboardSidebar, {
+  SidebarMenuItem,
+} from "@/components/common/navigation/SidebarMenu";
 
 export default function DashboardAdminDKM() {
   const menus: SidebarMenuItem[] = [
-    { name: 'Beranda', icon: <LayoutDashboardIcon />, to: '/dkm' },
-    { name: 'Profil Saya', icon: <UserIcon />, to: '/dkm/profil-saya' },
+    { name: "Beranda", icon: <LayoutDashboardIcon />, to: "/dkm" },
+    { name: "Profil Saya", icon: <UserIcon />, to: "/dkm/profil-saya" },
     // Tambahkan menu lain jika dibutuhkan
-  ]
+  ];
 
   return (
     <div className="flex gap-4">
@@ -22,5 +24,5 @@ export default function DashboardAdminDKM() {
         <div className="bg-white rounded-xl shadow-sm p-4">Total Pengikut</div>
       </div>
     </div>
-  )
+  );
 }

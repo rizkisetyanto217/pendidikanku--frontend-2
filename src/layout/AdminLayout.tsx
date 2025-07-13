@@ -3,7 +3,7 @@ import { adminDesktopDataSidebar } from '@/constants/sidebar/AdminDekstopDataSid
 import { adminMobileDataSidebar } from '@/constants/sidebar/AdminMobileDataSidebar'
 import GenericAdminLayout from './GenericAdminLayout'
 
-export default function AdminDKMLayout() {
+export default function AdminLayout() {
   return (
     <GenericAdminLayout
       desktopSidebar={adminDesktopDataSidebar}

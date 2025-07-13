@@ -1,13 +1,13 @@
 // layout/AdminDKMLayout.tsx
-import { sidebarDkmDesktopData } from '@/constants/sidebar/DKMDekstopDataSidebar'
-import { sidebarDKMMobileData } from '@/constants/sidebar/DKMMobileDataSidebar'
+import { DKMDesktopDataSidebar } from '@/constants/sidebar/DKMDekstopDataSidebar'
+import { DKMMobileDataSidebar } from '@/constants/sidebar/DKMMobileDataSidebar'
 import GenericAdminLayout from './GenericAdminLayout'
 
-export default function AdminDKMLayout() {
+export default function DKMLayout() {
   return (
     <GenericAdminLayout
-      desktopSidebar={sidebarDkmDesktopData}
-      mobileSidebar={sidebarDKMMobileData}
+      desktopSidebar={DKMDesktopDataSidebar}
+      mobileSidebar={DKMMobileDataSidebar}
       topbarTitle="DKM"
     />
   )
