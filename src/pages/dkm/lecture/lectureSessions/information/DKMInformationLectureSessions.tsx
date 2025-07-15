@@ -1,6 +1,7 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import PageHeader from "@/components/common/PageHeader";
 
 export default function DKMInformationLectureSessions() {
   const { isDark } = useHtmlDarkMode();
@@ -35,17 +36,17 @@ export default function DKMInformationLectureSessions() {
     }
   );
 
+  const navigate = useNavigate();
+
   return (
     <div
       className="p-5 rounded-2xl shadow-sm space-y-3"
       style={{ backgroundColor: theme.white1, color: theme.black1 }}
     >
-      <h2
-        className="text-xl font-semibold leading-snug"
-        style={{ color: theme.primary }}
-      >
-        Informasi Kajian
-      </h2>
+      <PageHeader
+        title="Video & Rekaman"
+        onBackClick={() => navigate(-1)} // ✅ BENAR
+      />
 
       <div className="space-y-2 text-sm">
         <p>

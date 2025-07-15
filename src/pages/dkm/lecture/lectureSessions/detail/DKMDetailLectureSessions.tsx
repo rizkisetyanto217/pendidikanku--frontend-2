@@ -62,7 +62,7 @@ export default function DKMDetailLectureSessions() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Tema Kajian" backTo="/dkm/kajian" />
+      <PageHeader title="Kajian Detail" backTo="/dkm/kajian" />
 
       {/* Kartu Kajian */}
       <div

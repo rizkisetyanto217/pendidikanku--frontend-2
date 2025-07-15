@@ -51,8 +51,17 @@ import DKMInformationLectureSessions from "@/pages/dkm/lecture/lectureSessions/i
 import DKMVideoLectureSessions from "@/pages/dkm/lecture/lectureSessions/video/DKMVideoLectureSessions";
 import DKMQuizLectureSessions from "@/pages/dkm/lecture/lectureSessions/quiz/DKMQuizLectureSessions";
 import DKMFullTranscriptLectureSessions from "@/pages/dkm/lecture/lectureSessions/fullTranscipt/DKMFullTranscriptLectureSessions";
-import DKMDocumentLectureSessions from "@/pages/dkm/lecture/lecture/document/DKMDocumentLectureSession";
+import DKMDocumentLectureSessions from "@/pages/dkm/lecture/lectureSessions/document/DKMdocumentLectureSessions";
 import DKMSummaryLectureSessions from "@/pages/dkm/lecture/lectureSessions/summary/DKMSummaryLectureSessions";
+import DKMStatsQuizLectureSessions from "@/pages/dkm/lecture/lectureSessions/quiz/DKMStatsQuizLectureSessions";
+import DKMDetailLecture from "@/pages/dkm/lecture/lecture/detail/DKMDetailLecture";
+import DKMInformationLecture from "@/pages/dkm/lecture/lecture/information/DKMInformationSessions";
+import DKMVideoLecture from "@/pages/dkm/lecture/lecture/DKMVideoLecture";
+import DKMQuizLecture from "@/pages/dkm/lecture/lecture/quiz/DKMQuizLecture";
+import DKMFullTranscriptLecture from "@/pages/dkm/lecture/lecture/fullTranscript/DKMFullTranscriptLecture";
+import DKMSummaryLecture from "@/pages/dkm/lecture/lecture/summary/DKMSummaryLecture";
+import DKMDocumentLecture from "@/pages/dkm/lecture/lecture/document/DKMDocumentLectureSession";
+import DKMAllLectureLectureSessions from "@/pages/dkm/lecture/lecture/allLectureSessions/DKMAllLectureSession";
 
 export default function AppRoutes() {
   return (
@@ -80,7 +89,10 @@ export default function AppRoutes() {
 
             <Route path="kajian" element={<DKMLectureParent />}>
               <Route index element={<DKMLectureSessions />} />
-              <Route path="kajian-detail/:id" element={<DKMDetailLectureSessions />} />
+              <Route
+                path="kajian-detail/:id"
+                element={<DKMDetailLectureSessions />}
+              />
               <Route
                 path="kajian-detail/:id/informasi"
                 element={<DKMInformationLectureSessions />}
@@ -93,6 +105,11 @@ export default function AppRoutes() {
                 path="kajian-detail/:id/latihan-soal"
                 element={<DKMQuizLectureSessions />}
               />
+              <Route
+                path="kajian-detail/:id/statistik-soal"
+                element={<DKMStatsQuizLectureSessions />}
+              />
+
               <Route
                 path="kajian-detail/:id/materi-lengkap"
                 element={<DKMFullTranscriptLectureSessions />}
@@ -109,6 +126,38 @@ export default function AppRoutes() {
 
             <Route path="tema" element={<DKMLectureParent />}>
               <Route index element={<DKMLecture />} />
+              <Route
+                path="tema-detail/:id"
+                element={<DKMDetailLecture />}
+              />
+              <Route
+                path="tema-detail/:id/semua-kajian"
+                element={<DKMAllLectureLectureSessions />}
+              />
+              <Route
+                path="tema-detail/:id/informasi"
+                element={<DKMInformationLecture />}
+              />
+              <Route
+                path="tema-detail/:id/video"
+                element={<DKMVideoLecture />}
+              />
+              <Route
+                path="tema-detail/:id/latihan-soal"
+                element={<DKMQuizLecture />}
+              />
+              <Route
+                path="tema-detail/:id/materi-lengkap"
+                element={<DKMFullTranscriptLecture />}
+              />
+              <Route
+                path="tema-detail/:id/ringkasan"
+                element={<DKMSummaryLecture />}
+              />
+              <Route
+                path="tema-detail/:id/dokumentasi"
+                element={<DKMDocumentLecture />}
+              />
             </Route>
 
             <Route path="sertifikat" element={<Sertifikat />} />

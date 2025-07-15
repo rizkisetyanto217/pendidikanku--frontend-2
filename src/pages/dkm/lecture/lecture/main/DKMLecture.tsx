@@ -7,6 +7,7 @@ import ActionEditDelete from "@/components/common/main/actionEditDelete";
 import toast from "react-hot-toast";
 import { useDeleteLecture } from "./useDeleteLecture";
 import PageHeader from "@/components/common/PageHeader";
+import { useNavigate } from "react-router-dom";
 
 interface Lecture {
   lecture_id: string;
@@ -30,6 +31,7 @@ interface Lecture {
 }
 
 export default function DKMLecture() {
+  const navigate = useNavigate();
   const { mutate: deleteLecture } = useDeleteLecture();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -83,8 +85,13 @@ export default function DKMLecture() {
               {lectures.map((lecture, i) => (
                 <tr
                   key={lecture.lecture_id}
-                  className="border-t"
+                  className="border-t hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   style={{ borderColor: theme.silver1 }}
+                  onClick={() =>
+                    navigate(`/dkm/tema/tema-detail/${lecture.lecture_id}`, {
+                      state: lecture,
+                    })
+                  }
                 >
                   <td className="px-4 py-2">{i + 1}</td>
                   <td className="px-4 py-2">
@@ -112,7 +119,10 @@ export default function DKMLecture() {
                   <td className="px-4 py-2">
                     {lecture.lecture_is_registration_required ? "Ya" : "Tidak"}
                   </td>
-                  <td className="px-4 py-2">
+                  <td
+                    className="px-4 py-2"
+                    onClick={(e) => e.stopPropagation()} // 🔒 Hindari trigger dari tr onClick
+                  >
                     <ActionEditDelete
                       onEdit={() => console.log("Edit", lecture.lecture_id)}
                       onDelete={() => {

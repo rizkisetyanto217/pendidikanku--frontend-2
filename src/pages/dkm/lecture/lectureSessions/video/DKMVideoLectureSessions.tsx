@@ -50,7 +50,7 @@ export default function DKMVideoLectureSessions() {
     <div className="space-y-6">
       <PageHeader
         title="Video & Rekaman"
-        onBackClick={() => navigate(-1)} // ✅ BENAR
+        onBackClick={() => history.back()} // ✅ BENAR
       />
 
       <div

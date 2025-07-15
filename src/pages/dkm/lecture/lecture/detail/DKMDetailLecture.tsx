@@ -2,51 +2,131 @@ import {
   BookOpen,
   FileText,
   Home,
+  MessageSquare,
   PlayCircle,
   StickyNote,
+  Users,
   Video,
 } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
+import PageHeader from "@/components/common/PageHeader";
+
+interface Lecture {
+  lecture_id: string;
+  lecture_title: string;
+  lecture_description: string;
+  lecture_image_url: string | null;
+  lecture_teachers: string | null;
+  total_lecture_sessions: number | null;
+  lecture_is_active: boolean;
+  lecture_created_at: string;
+}
 
 export default function DKMDetailLecture() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+
+  const lecture = state as Lecture;
+
+  const navItems = [
+    {
+      icon: <Home size={20} />,
+      label: "Informasi",
+      to: `/dkm/tema/tema-detail/${id}/informasi`,
+    },
+    {
+      icon: <BookOpen size={20} />,
+      label: "Latihan Soal",
+      to: `/dkm/tema/tema-detail/${id}/latihan-soal`,
+    },
+    {
+      icon: <FileText size={20} />,
+      label: "Materi Lengkap",
+      to: `/dkm/tema/tema-detail/${id}/materi-lengkap`,
+    },
+    {
+      icon: <MessageSquare size={20} />,
+      label: "Masukan & Saran",
+      to: `/dkm/tema/tema-detail/${id}/masukan-saran`,
+    },
+    {
+      icon: <PlayCircle size={20} />,
+      label: "Kumpulan Kajian",
+      to: `/dkm/tema/tema-detail/${id}/semua-kajian`,
+    },
+    {
+      icon: <Video size={20} />,
+      label: "Video Pembelajaran",
+      to: `/dkm/tema/tema-detail/${id}/video`,
+    },
+    {
+      icon: <StickyNote size={20} />,
+      label: "Ringkasan",
+      to: `/dkm/tema/tema-detail/${id}/ringkasan`,
+    },
+    {
+      icon: <MessageSquare size={20} />,
+      label: "Tanya Jawab",
+      to: `/dkm/tema/tema-detail/${id}/tanya-jawab`,
+    },
+    {
+      icon: <FileText size={20} />,
+      label: "Dokumen",
+      to: `/dkm/tema/tema-detail/${id}/dokumentasi`,
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-        <button className="text-teal-600 hover:text-teal-800">←</button>
-        Kajian Terbaru
-      </div>
+      <PageHeader title="Kajian Detail" backTo="/dkm/kajian" />
 
       {/* Kartu Kajian */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex flex-col lg:flex-row gap-4">
-        {/* Gambar */}
+      <div
+        className="p-2 rounded-xl  flex flex-col lg:flex-row gap-4"
+        style={{ backgroundColor: theme.white1 }}
+      >
         <img
-          src="/mock/kajian.jpg"
+          src={lecture?.lecture_image_url ?? "/mock/kajian.jpg"}
           alt="Poster Kajian"
           className="w-full lg:w-40 h-40 object-cover rounded-md"
         />
-
-        {/* Konten */}
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-teal-700">
-            Fiqh Waris | Hukum Pembagian Jatah Anak
+          <h3
+            className="text-lg font-semibold"
+            style={{ color: theme.primary }}
+          >
+            {lecture?.lecture_title}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            2 Juni 2024 Pukul 20.00 WIB / Aula utama Masjid
+          <p className="text-sm" style={{ color: theme.silver2 }}>
+            {lecture?.lecture_created_at?.split("T")[0]} / Aula utama Masjid
           </p>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 font-medium">
-            Ustadz Abdullah, MA
+          <p
+            className="text-sm font-medium mt-2"
+            style={{ color: theme.black2 }}
+          >
+            {lecture?.lecture_teachers ?? "Pengajar belum ditentukan"}
           </p>
-          <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry...
+          <p className="text-sm mt-1" style={{ color: theme.silver2 }}>
+            {lecture?.lecture_description}
           </p>
-
           <div className="flex justify-between items-center mt-3">
-            <span className="text-sm text-gray-500 dark:text-gray-300">
-              👤 40 peserta
+            <span
+              className="text-xs font-semibold px-2 py-0.5 rounded"
+              style={{
+                backgroundColor: theme.specialColor,
+                color: theme.white1,
+              }}
+            >
+              Sertifikat
             </span>
-            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-semibold">
-              Soal & Materi tersedia
+            <span className="text-sm" style={{ color: theme.silver2 }}>
+              👤 {lecture?.total_lecture_sessions ?? 0} Pertemuan
             </span>
           </div>
         </div>
@@ -54,29 +134,32 @@ export default function DKMDetailLecture() {
 
       {/* Navigasi Utama */}
       <div>
-        <h4 className="text-base font-semibold mb-3 text-gray-800 dark:text-white">
+        <h4
+          className="text-base font-semibold mb-3"
+          style={{ color: theme.black1 }}
+        >
           Navigasi Utama
         </h4>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[
-            { icon: <Home size={24} />, label: "Informasi" },
-            { icon: <Video size={24} />, label: "Video Pembelajaran" },
-            { icon: <BookOpen size={24} />, label: "Latihan Soal" },
-            { icon: <FileText size={24} />, label: "Materi Lengkap" },
-            { icon: <StickyNote size={24} />, label: "Ringkasan" },
-            { icon: <PlayCircle size={24} />, label: "Dokumentasi" },
-          ].map((item) => (
-            <div
+          {navItems.map((item) => (
+            <button
               key={item.label}
-              className="flex flex-col items-center justify-center p-4 rounded-lg border border-teal-200 dark:border-teal-700 bg-white dark:bg-gray-800 hover:shadow transition"
+              onClick={() => navigate(item.to, { state: lecture })}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition"
+              style={{
+                backgroundColor: theme.white1,
+                border: `1px solid ${theme.silver1}`,
+              }}
             >
-              <div className="text-teal-600 dark:text-teal-300">
+              <div
+                className="flex items-center gap-2 text-sm font-medium"
+                style={{ color: theme.black1 }}
+              >
                 {item.icon}
-              </div>
-              <span className="text-sm mt-2 text-gray-700 dark:text-gray-200">
                 {item.label}
-              </span>
-            </div>
+              </div>
+              <span style={{ color: theme.silver2 }}>›</span>
+            </button>
           ))}
         </div>
       </div>

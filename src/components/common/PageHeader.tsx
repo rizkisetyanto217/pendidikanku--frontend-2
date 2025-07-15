@@ -8,7 +8,8 @@ interface PageHeaderProps {
   backTo?: string;
   actionButton?: {
     label: string;
-    to: string;
+    to?: string; // ← ubah jadi opsional
+    onClick?: () => void;
   };
   onBackClick?: () => void; // ✅ Tambahkan ini
 }
@@ -48,7 +49,10 @@ export default function PageHeader({
         {actionButton && (
           <div className="flex-shrink-0">
             <button
-              onClick={() => navigate(actionButton.to)}
+              onClick={() => {
+                if (actionButton.onClick) return actionButton.onClick();
+                if (actionButton.to) return navigate(actionButton.to);
+              }}
               className="py-2 px-4 rounded-lg"
               style={{
                 backgroundColor: theme.primary,
