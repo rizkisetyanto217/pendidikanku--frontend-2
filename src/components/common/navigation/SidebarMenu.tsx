@@ -1,5 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useLocation, Link, matchPath } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 
@@ -7,12 +6,12 @@ export type SidebarMenuItem = {
   name: string;
   icon: React.ReactNode;
   to: string;
+  badge?: number | string;
 };
 
 type SidebarMenuProps = {
   menus: SidebarMenuItem[];
   title?: string;
-  currentPath?: string; // 👈 tambahkan ini
 };
 
 export default function SidebarMenu({
@@ -20,9 +19,7 @@ export default function SidebarMenu({
   title = "Beranda",
 }: SidebarMenuProps) {
   const location = useLocation();
-  const activePath = location.pathname;
   const { isDark } = useHtmlDarkMode();
-
   const theme = isDark ? colors.dark : colors.light;
 
   return (
@@ -41,7 +38,10 @@ export default function SidebarMenu({
       </h2>
       <ul className="space-y-2">
         {menus.map((menu) => {
-          const active = activePath.startsWith(menu.to);
+          const active =
+            !!matchPath({ path: menu.to + "/*" }, location.pathname) ||
+            location.pathname === menu.to;
+
           const bg = active ? theme.primary2 : "transparent";
           const textColor = active ? theme.primary : theme.silver2;
 
@@ -49,11 +49,25 @@ export default function SidebarMenu({
             <Link
               to={menu.to}
               key={menu.to}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-md transition font-medium
+              className={`flex items-center justify-between px-4 py-2 rounded-lg text-md transition font-medium
                 ${active ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-teal-200 dark:hover:bg-teal-700 dark:text-gray-300"}`}
+              style={{ backgroundColor: bg, color: textColor }}
             >
-              <div className="text-lg">{menu.icon}</div>
-              <span>{menu.name}</span>
+              <div className="flex items-center gap-3">
+                <div className="text-lg">{menu.icon}</div>
+                <span>{menu.name}</span>
+              </div>
+              {menu.badge !== undefined && (
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                  style={{
+                    backgroundColor: theme.primary,
+                    color: theme.white1,
+                  }}
+                >
+                  {menu.badge}
+                </span>
+              )}
             </Link>
           );
         })}

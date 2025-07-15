@@ -1,8 +1,14 @@
-import AppRoutes from '@/routes/IndexRoute'
-import './index.css'
+import AppRoutes from '@/routes/IndexRoute';
+import { Toaster } from 'react-hot-toast';
+import './index.css';
 
 function App() {
-  return <AppRoutes />
+  return (
+    <>
+      <AppRoutes />
+      <Toaster position="top-right" />
+    </>
+  );
 }
 
-export default App
+export default App;

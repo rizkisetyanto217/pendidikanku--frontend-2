@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, matchPath } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { colors } from "@/constants/colorsThema";
 
@@ -16,7 +16,8 @@ export default function SidebarSubLink({
   onClick,
 }: SidebarSubLinkProps) {
   const location = useLocation();
-  const active = location.pathname.startsWith(to); // ✅ fix nested route active check
+  const active =
+    location.pathname === to || location.pathname.startsWith(to + "/");
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -24,7 +25,6 @@ export default function SidebarSubLink({
   }, []);
 
   const theme = isDark ? colors.dark : colors.light;
-
   const bgColor = active ? theme.primary2 : "transparent";
   const textColor = active ? theme.primary : theme.silver2;
   const fontWeight = active ? "bold" : "normal";

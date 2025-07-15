@@ -6,9 +6,9 @@ import DkmSettingLayout from "@/layout/DKMSettingLayout";
 
 // Halaman DKM
 import DashboardAdminDkm from "@/pages/dkm/home/DKMHome";
-import ProfilMasjid from "@/pages/dkm/profile/DKMProfile";
-import ProfileDKMPengajar from "@/pages/dkm/profile/DKMProfileDKMTeacher";
-import Kajian from "@/pages/dkm/lecture/DKMLectureSessions";
+import ProfilMasjid from "@/pages/dkm/profile/masjid/DKMProfile";
+import ProfileDKMPengajar from "@/pages/dkm/profile/dkm/DKMProfileDKMTeacher";
+import Kajian from "@/pages/dkm/lecture/lectureSessions/main/DKMLectureSessions";
 import Sertifikat from "@/pages/dkm/certificate/DKMCertificate";
 import Keuangan from "@/pages/dkm/finance/DKMFinance";
 import Postingan from "@/pages/dkm/post/DKMPost";
@@ -40,7 +40,19 @@ import AdminLayout from "@/layout/AdminLayout";
 import TeacherHome from "@/pages/teacher/home/TeacherHome";
 import TreasurerHome from "@/pages/treasurer/home/TreasurerHome";
 import AdminHome from "@/pages/admin/home/AdminHome";
-import DkmEditSosmedProfile from "@/pages/dkm/profile/DKMEditSosmedProfile";
+import DkmEditSosmedProfile from "@/pages/dkm/profile/masjid/DKMEditSosmedMasjid";
+import DKMEditMasjid from "@/pages/dkm/profile/masjid/DKMEditMasjid";
+import DKMEditProfileMasjid from "@/pages/dkm/profile/masjid/DKMEditProfileMasjid";
+import DKMLectureSessions from "@/pages/dkm/lecture/lectureSessions/main/DKMLectureSessions";
+import DKMLecture from "@/pages/dkm/lecture/lecture/main/DKMLecture";
+import DKMLectureParent from "@/pages/dkm/lecture/DKMLectureParent";
+import DKMDetailLectureSessions from "@/pages/dkm/lecture/lectureSessions/detail/DKMDetailLectureSessions";
+import DKMInformationLectureSessions from "@/pages/dkm/lecture/lectureSessions/information/DKMInformationLectureSessions";
+import DKMVideoLectureSessions from "@/pages/dkm/lecture/lectureSessions/video/DKMVideoLectureSessions";
+import DKMQuizLectureSessions from "@/pages/dkm/lecture/lectureSessions/quiz/DKMQuizLectureSessions";
+import DKMFullTranscriptLectureSessions from "@/pages/dkm/lecture/lectureSessions/fullTranscipt/DKMFullTranscriptLectureSessions";
+import DKMDocumentLectureSessions from "@/pages/dkm/lecture/lecture/document/DKMDocumentLectureSession";
+import DKMSummaryLectureSessions from "@/pages/dkm/lecture/lectureSessions/summary/DKMSummaryLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -58,11 +70,47 @@ export default function AppRoutes() {
             {/* Profil Masjid */}
             <Route path="profil-masjid" element={<ProfilMasjid />}>
               <Route path="edit-sosmed" element={<DkmEditSosmedProfile />} />
+              <Route path="edit-masjid" element={<DKMEditMasjid />} />
+              <Route
+                path="edit-profil-masjid"
+                element={<DKMEditProfileMasjid />}
+              />
+            </Route>
+            <Route path="profil-dkm" element={<ProfileDKMPengajar />} />
+
+            <Route path="kajian" element={<DKMLectureParent />}>
+              <Route index element={<DKMLectureSessions />} />
+              <Route path="kajian-detail/:id" element={<DKMDetailLectureSessions />} />
+              <Route
+                path="kajian-detail/:id/informasi"
+                element={<DKMInformationLectureSessions />}
+              />
+              <Route
+                path="kajian-detail/:id/video"
+                element={<DKMVideoLectureSessions />}
+              />
+              <Route
+                path="kajian-detail/:id/latihan-soal"
+                element={<DKMQuizLectureSessions />}
+              />
+              <Route
+                path="kajian-detail/:id/materi-lengkap"
+                element={<DKMFullTranscriptLectureSessions />}
+              />
+              <Route
+                path="kajian-detail/:id/ringkasan"
+                element={<DKMSummaryLectureSessions />}
+              />
+              <Route
+                path="kajian-detail/:id/dokumentasi"
+                element={<DKMDocumentLectureSessions />}
+              />
             </Route>
 
-            {/* Profil DKM & lainnya */}
-            <Route path="profil-dkm" element={<ProfileDKMPengajar />} />
-            <Route path="kajian" element={<Kajian />} />
+            <Route path="tema" element={<DKMLectureParent />}>
+              <Route index element={<DKMLecture />} />
+            </Route>
+
             <Route path="sertifikat" element={<Sertifikat />} />
             <Route path="keuangan" element={<Keuangan />} />
             <Route path="postingan" element={<Postingan />} />

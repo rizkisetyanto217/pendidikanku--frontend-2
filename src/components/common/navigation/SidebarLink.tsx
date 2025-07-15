@@ -8,6 +8,7 @@ interface SidebarLinkProps {
   to: string;
   isHorizontal?: boolean;
   onClick?: () => void;
+  activeBasePath?: string | string[]; // ✅ bisa 1 atau banyak path
 }
 
 export function SidebarLink({
@@ -16,12 +17,17 @@ export function SidebarLink({
   to,
   isHorizontal = false,
   onClick,
+  activeBasePath,
 }: SidebarLinkProps) {
   const location = useLocation();
-  const active =
-    to === "/dkm"
-      ? location.pathname === "/dkm" // exact match hanya untuk Beranda
-      : location.pathname.startsWith(to);
+  const paths = Array.isArray(activeBasePath)
+    ? activeBasePath
+    : [activeBasePath ?? to];
+  const active = paths.some((path) =>
+    path === "/dkm"
+      ? location.pathname === "/dkm"
+      : location.pathname.startsWith(path)
+  );
 
   return (
     <Link
