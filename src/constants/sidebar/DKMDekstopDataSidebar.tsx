@@ -16,7 +16,7 @@ export const DKMDesktopDataSidebar: SidebarItem[] = [
     text: "Profil",
     icon: <LayoutDashboardIcon />,
     to: "/dkm/profil-masjid",
-    activeBasePath: ["/dkm/profil-dkm"],
+    activeBasePath: ["/dkm/profil-dkm", "/dkm/profil-masjid"],
   },
   {
     text: "Kajian",

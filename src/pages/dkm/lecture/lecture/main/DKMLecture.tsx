@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import { useDeleteLecture } from "./useDeleteLecture";
 import PageHeader from "@/components/common/PageHeader";
 import { useNavigate } from "react-router-dom";
+import SimpleTable from "@/components/common/main/SimpleTable";
+import StatusBadge from "@/components/common/main/statusBadge";
 
 interface Lecture {
   lecture_id: string;
@@ -26,6 +28,7 @@ interface Lecture {
   lecture_capacity: number | null;
   lecture_is_public: boolean;
   lecture_is_active: boolean;
+  lecture_is_certificate_generated: boolean;
   lecture_created_at: string;
   lecture_updated_at: string;
 }
@@ -46,13 +49,64 @@ export default function DKMLecture() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["lectures", masjidId],
-    enabled: !!masjidId,
+    queryKey: ["lectures"],
+    enabled: !!token,
     queryFn: async () => {
-      const res = await axios.get(`/public/lectures/by-masjid/${masjidId}`);
+      const res = await axios.get(`/api/a/lectures/by-masjid`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return res.data.data as Lecture[];
     },
   });
+
+  const columns = ["No", "Gambar", "Judul", "Deskripsi", "Status", "Aksi"];
+
+  const rows =
+    lectures?.map((lecture, i) => [
+      i + 1,
+      <img
+        src={lecture.lecture_image_url ?? "/mock/kajian.jpg"}
+        alt="Gambar Kajian"
+        className="w-12 h-12 object-cover rounded"
+      />,
+      <span className="font-medium">{lecture.lecture_title}</span>,
+      lecture.lecture_description,
+      <div className="flex flex-wrap gap-1">
+        <StatusBadge
+          text={lecture.lecture_is_active ? "Aktif" : "Nonaktif"}
+          variant={lecture.lecture_is_active ? "success" : "error"}
+        />
+        <StatusBadge
+          text={
+            lecture.lecture_is_certificate_generated
+              ? "Sertifikat Aktif"
+              : "Tanpa Sertifikat"
+          }
+          variant={
+            lecture.lecture_is_certificate_generated ? "info" : "default"
+          }
+        />
+      </div>,
+      <div onClick={(e) => e.stopPropagation()}>
+        <ActionEditDelete
+          onEdit={() => console.log("Edit", lecture.lecture_id)}
+          onDelete={() => {
+            if (confirm("Yakin ingin menghapus kajian ini?")) {
+              deleteLecture(lecture.lecture_id, {
+                onSuccess: () => toast.success("Berhasil menghapus kajian"),
+                onError: () => toast.error("Gagal menghapus kajian"),
+              });
+            }
+          }}
+        />
+      </div>,
+    ]) ?? [];
+
+  if (isLoading) return <p>Loading...</p>;
+  if (isError || !lectures)
+    return <p className="text-red-500">Gagal memuat data.</p>;
 
   return (
     <>
@@ -63,86 +117,15 @@ export default function DKMLecture() {
           to: "/dkm/kajian/tambah",
         }}
       />
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : isError || !lectures ? (
-        <p className="text-red-500">Gagal memuat data.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border rounded-lg overflow-hidden">
-            <thead style={{ backgroundColor: theme.success2 }}>
-              <tr>
-                <th className="px-4 py-2 text-left">No</th>
-                <th className="px-4 py-2 text-left">Gambar</th>
-                <th className="px-4 py-2 text-left">Judul</th>
-                <th className="px-4 py-2 text-left">Deskripsi</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-left">Pendaftaran</th>
-                <th className="px-4 py-2 text-left">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lectures.map((lecture, i) => (
-                <tr
-                  key={lecture.lecture_id}
-                  className="border-t hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  style={{ borderColor: theme.silver1 }}
-                  onClick={() =>
-                    navigate(`/dkm/tema/tema-detail/${lecture.lecture_id}`, {
-                      state: lecture,
-                    })
-                  }
-                >
-                  <td className="px-4 py-2">{i + 1}</td>
-                  <td className="px-4 py-2">
-                    <img
-                      src={lecture.lecture_image_url ?? "/mock/kajian.jpg"}
-                      alt="Gambar Kajian"
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                  </td>
-                  <td className="px-4 py-2 font-medium">
-                    {lecture.lecture_title}
-                  </td>
-                  <td className="px-4 py-2">{lecture.lecture_description}</td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        lecture.lecture_is_active
-                          ? "bg-green-200 text-green-800"
-                          : "bg-red-200 text-red-800"
-                      }`}
-                    >
-                      {lecture.lecture_is_active ? "Aktif" : "Nonaktif"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2">
-                    {lecture.lecture_is_registration_required ? "Ya" : "Tidak"}
-                  </td>
-                  <td
-                    className="px-4 py-2"
-                    onClick={(e) => e.stopPropagation()} // 🔒 Hindari trigger dari tr onClick
-                  >
-                    <ActionEditDelete
-                      onEdit={() => console.log("Edit", lecture.lecture_id)}
-                      onDelete={() => {
-                        if (confirm("Yakin ingin menghapus kajian ini?")) {
-                          deleteLecture(lecture.lecture_id, {
-                            onSuccess: () =>
-                              toast.success("Berhasil menghapus kajian"),
-                            onError: () =>
-                              toast.error("Gagal menghapus kajian"),
-                          });
-                        }
-                      }}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <SimpleTable
+        columns={columns}
+        rows={rows}
+        onRowClick={(i) =>
+          navigate(`/dkm/tema/tema-detail/${lectures[i].lecture_id}`, {
+            state: lectures[i],
+          })
+        }
+      />
     </>
   );
 }
