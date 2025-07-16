@@ -34,7 +34,6 @@ import NotFound from "@/pages/NotFound";
 import RequireRoleRoute from "./RequireRoleRoute";
 import AuthorLayout from "@/layout/AuthorLayout";
 import TeacherLayout from "@/layout/TeacherLayout";
-import DashboardTeacher from "@/pages/teacher/home/TeacherHome";
 import TreasurerLayout from "@/layout/TreasurerLayout";
 import AdminLayout from "@/layout/AdminLayout";
 import TeacherHome from "@/pages/teacher/home/TeacherHome";
@@ -55,13 +54,16 @@ import DKMDocumentLectureSessions from "@/pages/dkm/lecture/lectureSessions/docu
 import DKMSummaryLectureSessions from "@/pages/dkm/lecture/lectureSessions/summary/DKMSummaryLectureSessions";
 import DKMStatsQuizLectureSessions from "@/pages/dkm/lecture/lectureSessions/quiz/DKMStatsQuizLectureSessions";
 import DKMDetailLecture from "@/pages/dkm/lecture/lecture/detail/DKMDetailLecture";
-import DKMInformationLecture from "@/pages/dkm/lecture/lecture/information/DKMInformationSessions";
-import DKMVideoLecture from "@/pages/dkm/lecture/lecture/DKMVideoLecture";
+import DKMInformationLecture from "@/pages/dkm/lecture/lecture/information/DKMInformationLecture";
+import DKMVideoLecture from "@/pages/dkm/lecture/lecture/video/DKMVideoLecture";
 import DKMQuizLecture from "@/pages/dkm/lecture/lecture/quiz/DKMQuizLecture";
 import DKMFullTranscriptLecture from "@/pages/dkm/lecture/lecture/fullTranscript/DKMFullTranscriptLecture";
 import DKMSummaryLecture from "@/pages/dkm/lecture/lecture/summary/DKMSummaryLecture";
-import DKMDocumentLecture from "@/pages/dkm/lecture/lecture/document/DKMDocumentLectureSession";
+import DKMDocumentLecture from "@/pages/dkm/lecture/lecture/document/DKMDocumentLecture";
 import DKMAllLectureLectureSessions from "@/pages/dkm/lecture/lecture/allLectureSessions/DKMAllLectureSession";
+import DKMSuggestLecture from "@/pages/dkm/lecture/lecture/suggest/DKMSuggestLecture";
+import DKMAddLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
+import DKMAddEditLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -89,6 +91,8 @@ export default function AppRoutes() {
 
             <Route path="kajian" element={<DKMLectureParent />}>
               <Route index element={<DKMLectureSessions />} />
+              <Route path="tambah-edit" element={<DKMAddEditLectureSession />} />
+              {/* ✅ Tambahan */}
               <Route
                 path="kajian-detail/:id"
                 element={<DKMDetailLectureSessions />}
@@ -109,7 +113,6 @@ export default function AppRoutes() {
                 path="kajian-detail/:id/statistik-soal"
                 element={<DKMStatsQuizLectureSessions />}
               />
-
               <Route
                 path="kajian-detail/:id/materi-lengkap"
                 element={<DKMFullTranscriptLectureSessions />}
@@ -126,10 +129,7 @@ export default function AppRoutes() {
 
             <Route path="tema" element={<DKMLectureParent />}>
               <Route index element={<DKMLecture />} />
-              <Route
-                path="tema-detail/:id"
-                element={<DKMDetailLecture />}
-              />
+              <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
               <Route
                 path="tema-detail/:id/semua-kajian"
                 element={<DKMAllLectureLectureSessions />}
@@ -149,6 +149,10 @@ export default function AppRoutes() {
               <Route
                 path="tema-detail/:id/materi-lengkap"
                 element={<DKMFullTranscriptLecture />}
+              />
+              <Route
+                path="tema-detail/:id/saran-masukan"
+                element={<DKMSuggestLecture />}
               />
               <Route
                 path="tema-detail/:id/ringkasan"

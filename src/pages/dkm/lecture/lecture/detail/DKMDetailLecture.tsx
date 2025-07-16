@@ -52,7 +52,7 @@ export default function DKMDetailLecture() {
     {
       icon: <MessageSquare size={20} />,
       label: "Masukan & Saran",
-      to: `/dkm/tema/tema-detail/${id}/masukan-saran`,
+      to: `/dkm/tema/tema-detail/${id}/saran-masukan`,
     },
     {
       icon: <PlayCircle size={20} />,
@@ -84,7 +84,7 @@ export default function DKMDetailLecture() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <PageHeader title="Kajian Detail" backTo="/dkm/kajian" />
+      <PageHeader title="Kajian Detail" backTo="/dkm/tema" />
 
       {/* Kartu Kajian */}
       <div
@@ -140,7 +140,7 @@ export default function DKMDetailLecture() {
         >
           Navigasi Utama
         </h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {navItems.map((item) => (
             <button
               key={item.label}

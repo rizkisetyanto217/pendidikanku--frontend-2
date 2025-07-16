@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { jwtDecode } from "jwt-decode";
 import { useDeleteLectureSession } from "./useDeleteDKMLectureSessions";
 import axios from "@/lib/axios";
@@ -10,6 +10,8 @@ import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
 import { useNavigate } from "react-router-dom"; // ⬅️ Pastikan sudah di-import
 import SimpleTable from "@/components/common/main/SimpleTable";
+import { format } from "date-fns";
+import { id as localeID } from "date-fns/locale";
 
 interface TokenPayload {
   masjid_admin_ids: string[];
@@ -39,7 +41,11 @@ export default function DKMLectureSessions() {
     ? jwtDecode<TokenPayload>(token).masjid_admin_ids?.[0]
     : null;
 
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data = [],
+    isLoading,
+    isError,
+  } = useQuery<LectureSession[], Error, LectureSession[], [string]>({
     queryKey: ["lecture-sessions"],
     queryFn: async () => {
       if (!token) throw new Error("Token tidak tersedia");
@@ -48,10 +54,22 @@ export default function DKMLectureSessions() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("✅ [fetchLectureSessions] Sukses:", res.data.data);
       return res.data.data as LectureSession[];
     },
     enabled: !!token,
-  });
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
+    retry: 1,
+    onError: (err: Error) => {
+      console.error("❌ [fetchLectureSessions] Gagal:", err.message);
+    },
+  } as UseQueryOptions<
+    LectureSession[], // TQueryFnData
+    Error, // TError
+    LectureSession[], // TData
+    [string] // TQueryKey
+  >);
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -80,14 +98,14 @@ export default function DKMLectureSessions() {
     />,
     <span className="font-medium">{session.lecture_session_title}</span>,
     session.lecture_title,
-    new Date(session.lecture_session_start_time).toLocaleString("id-ID", {
-      weekday: "long",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+    format(
+      new Date(session.lecture_session_start_time),
+      "EEEE, dd MMM yyyy - HH:mm",
+      {
+        locale: localeID,
+      }
+    ),
+
     <div className="flex flex-wrap gap-1">
       <StatusBadge
         text={
@@ -125,7 +143,7 @@ export default function DKMLectureSessions() {
         title="Kajian Terbaru"
         actionButton={{
           label: "Tambah Kajian",
-          to: "/dkm/kajian/tambah",
+          to: "/dkm/kajian/tambah-edit",
         }}
       />
       <SimpleTable

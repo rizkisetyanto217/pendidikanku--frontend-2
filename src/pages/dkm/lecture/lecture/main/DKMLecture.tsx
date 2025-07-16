@@ -45,19 +45,24 @@ export default function DKMLecture() {
     : null;
 
   const {
-    data: lectures,
+    data: lectures = [],
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["lectures"],
+  } = useQuery<Lecture[], Error, Lecture[], [string, string | null]>({
+    queryKey: ["lectures", masjidId],
     enabled: !!token,
+    staleTime: 1000 * 60 * 5, // ✅ 5 menit fresh
+    // cacheTime: 1000 * 60 * 10, // ✅ 10 menit disimpan
+    retry: 1,
     queryFn: async () => {
+      console.log("📦 [fetchLectures] Memulai fetch dari server...");
       const res = await axios.get(`/api/a/lectures/by-masjid`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      return res.data.data as Lecture[];
+      console.log("✅ [fetchLectures] Sukses:", res.data.data);
+      return res.data.data;
     },
   });
 
@@ -80,12 +85,12 @@ export default function DKMLecture() {
         />
         <StatusBadge
           text={
-            lecture.lecture_is_certificate_generated
+            !!lecture.lecture_is_certificate_generated
               ? "Sertifikat Aktif"
               : "Tanpa Sertifikat"
           }
           variant={
-            lecture.lecture_is_certificate_generated ? "info" : "default"
+            !!lecture.lecture_is_certificate_generated ? "info" : "default"
           }
         />
       </div>,

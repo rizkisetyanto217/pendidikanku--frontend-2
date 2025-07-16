@@ -61,9 +61,26 @@ export default function SimpleTable({
                 {cells.map((cell, cellIndex) => (
                   <td
                     key={cellIndex}
-                    className="px-4 py-2 whitespace-nowrap align-top"
+                    className="px-4 py-2 align-top max-w-[200px]"
+                    style={{
+                      maxWidth: "200px",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                    }}
                   >
-                    {cell}
+                    <div
+                      className="flex flex-wrap gap-1"
+                      style={{
+                        display:
+                          typeof cell === "string" ? "-webkit-box" : "flex",
+                        WebkitLineClamp: typeof cell === "string" ? 3 : "unset",
+                        WebkitBoxOrient: "vertical",
+                        overflow: typeof cell === "string" ? "hidden" : "unset",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {cell}
+                    </div>
                   </td>
                 ))}
               </tr>

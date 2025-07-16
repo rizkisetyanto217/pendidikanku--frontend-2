@@ -7,8 +7,12 @@ interface InputFieldProps {
   name: string;
   value: string;
   placeholder?: string;
-  type?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string; // hanya untuk input
+  as?: "input" | "textarea";
+  rows?: number; // untuk textarea
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
 }
 
 export default function InputField({
@@ -17,10 +21,18 @@ export default function InputField({
   value,
   placeholder = "",
   type = "text",
+  as = "input",
+  rows = 4,
   onChange,
 }: InputFieldProps) {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+
+  const commonStyle = {
+    backgroundColor: theme.white2,
+    borderColor: theme.silver1,
+    color: theme.black1,
+  };
 
   return (
     <div className="w-full space-y-1">
@@ -31,20 +43,30 @@ export default function InputField({
       >
         {label}
       </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
-        style={{
-          backgroundColor: theme.white2,
-          borderColor: theme.silver1,
-          color: theme.black1,
-        }}
-      />
+
+      {as === "textarea" ? (
+        <textarea
+          id={name}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          rows={rows}
+          className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
+          style={commonStyle}
+        />
+      ) : (
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
+          style={commonStyle}
+        />
+      )}
     </div>
   );
 }
