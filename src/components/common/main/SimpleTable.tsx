@@ -27,7 +27,11 @@ export default function SimpleTable({
         <thead style={{ backgroundColor: theme.success2 }}>
           <tr>
             {columns.map((col, idx) => (
-              <th key={idx} className="px-4 py-2 text-left whitespace-nowrap">
+              <th
+                key={idx}
+                className="px-4 py-2 text-left whitespace-nowrap"
+                style={{ color: theme.black2 }}
+              >
                 {col}
               </th>
             ))}
@@ -38,7 +42,10 @@ export default function SimpleTable({
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center px-4 py-6 text-gray-500 dark:text-gray-400"
+                className="text-center px-4 py-6"
+                style={{
+                  color: theme.silver2,
+                }}
               >
                 {emptyText}
               </td>
@@ -51,8 +58,7 @@ export default function SimpleTable({
                 style={{ borderColor: theme.silver1 }}
                 onClick={() => onRowClick?.(rowIndex)}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    theme.white3 ?? "#EEEEEE")
+                  (e.currentTarget.style.backgroundColor = theme.white3)
                 }
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.backgroundColor = "transparent")
@@ -63,6 +69,8 @@ export default function SimpleTable({
                     key={cellIndex}
                     className="px-4 py-2 align-top max-w-[200px]"
                     style={{
+                      color: theme.black1,
+                      backgroundColor: "transparent",
                       maxWidth: "200px",
                       whiteSpace: "normal",
                       wordBreak: "break-word",

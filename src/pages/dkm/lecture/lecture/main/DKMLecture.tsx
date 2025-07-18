@@ -10,6 +10,7 @@ import PageHeader from "@/components/common/PageHeader";
 import { useNavigate } from "react-router-dom";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import StatusBadge from "@/components/common/main/statusBadge";
+import FormattedDate from "@/constants/formattedDate";
 
 interface Lecture {
   lecture_id: string;
@@ -45,28 +46,30 @@ export default function DKMLecture() {
     : null;
 
   const {
-    data: lectures = [],
+    data: lectures,
     isLoading,
     isError,
-  } = useQuery<Lecture[], Error, Lecture[], [string, string | null]>({
+  } = useQuery<Lecture[]>({
     queryKey: ["lectures", masjidId],
-    enabled: !!token,
-    staleTime: 1000 * 60 * 5, // ✅ 5 menit fresh
-    // cacheTime: 1000 * 60 * 10, // ✅ 10 menit disimpan
-    retry: 1,
+    enabled: !!masjidId,
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      console.log("📦 [fetchLectures] Memulai fetch dari server...");
       const res = await axios.get(`/api/a/lectures/by-masjid`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("✅ [fetchLectures] Sukses:", res.data.data);
       return res.data.data;
     },
   });
 
-  const columns = ["No", "Gambar", "Judul", "Deskripsi", "Status", "Aksi"];
+  const columns = [
+    "No",
+    "Gambar",
+    "Judul",
+    "Deskripsi",
+    "Tanggal",
+    "Status",
+    "Aksi",
+  ];
 
   const rows =
     lectures?.map((lecture, i) => [
@@ -78,6 +81,7 @@ export default function DKMLecture() {
       />,
       <span className="font-medium">{lecture.lecture_title}</span>,
       lecture.lecture_description,
+      <FormattedDate value={lecture.lecture_created_at} />,
       <div className="flex flex-wrap gap-1">
         <StatusBadge
           text={lecture.lecture_is_active ? "Aktif" : "Nonaktif"}
@@ -85,18 +89,18 @@ export default function DKMLecture() {
         />
         <StatusBadge
           text={
-            !!lecture.lecture_is_certificate_generated
+            lecture.lecture_is_certificate_generated
               ? "Sertifikat Aktif"
               : "Tanpa Sertifikat"
           }
           variant={
-            !!lecture.lecture_is_certificate_generated ? "info" : "default"
+            lecture.lecture_is_certificate_generated ? "info" : "default"
           }
         />
       </div>,
       <div onClick={(e) => e.stopPropagation()}>
         <ActionEditDelete
-          onEdit={() => console.log("Edit", lecture.lecture_id)}
+          onEdit={() => navigate(`/dkm/tema/tambah-edit/${lecture.lecture_id}`)}
           onDelete={() => {
             if (confirm("Yakin ingin menghapus kajian ini?")) {
               deleteLecture(lecture.lecture_id, {
@@ -109,28 +113,26 @@ export default function DKMLecture() {
       </div>,
     ]) ?? [];
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError || !lectures)
-    return <p className="text-red-500">Gagal memuat data.</p>;
-
   return (
     <>
       <PageHeader
         title="Tema Kajian"
-        actionButton={{
-          label: "Tambah Kajian",
-          to: "/dkm/kajian/tambah",
-        }}
+        actionButton={{ label: "Tambah Kajian", to: "/dkm/tema/tambah-edit" }}
       />
-      <SimpleTable
-        columns={columns}
-        rows={rows}
-        onRowClick={(i) =>
-          navigate(`/dkm/tema/tema-detail/${lectures[i].lecture_id}`, {
-            state: lectures[i],
-          })
-        }
-      />
+
+      {isLoading && <p>Loading...</p>}
+      {isError && <p className="text-red-500">Gagal memuat data.</p>}
+      {!isLoading && !isError && (
+        <SimpleTable
+          columns={columns}
+          rows={rows}
+          onRowClick={(i) =>
+            navigate(`/dkm/tema/tema-detail/${lectures![i].lecture_id}`, {
+              state: lectures![i],
+            })
+          }
+        />
+      )}
     </>
   );
 }

@@ -64,6 +64,7 @@ import DKMAllLectureLectureSessions from "@/pages/dkm/lecture/lecture/allLecture
 import DKMSuggestLecture from "@/pages/dkm/lecture/lecture/suggest/DKMSuggestLecture";
 import DKMAddLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
+import DKMAddEditLecture from "@/pages/dkm/lecture/lecture/main/DKMAddEditLecture";
 
 export default function AppRoutes() {
   return (
@@ -91,7 +92,15 @@ export default function AppRoutes() {
 
             <Route path="kajian" element={<DKMLectureParent />}>
               <Route index element={<DKMLectureSessions />} />
-              <Route path="tambah-edit" element={<DKMAddEditLectureSession />} />
+              <Route
+                path="tambah-edit"
+                element={<DKMAddEditLectureSession />}
+              />
+              <Route
+                path="tambah-edit/:id"
+                element={<DKMAddEditLectureSession />}
+              />
+
               {/* ✅ Tambahan */}
               <Route
                 path="kajian-detail/:id"
@@ -129,6 +138,15 @@ export default function AppRoutes() {
 
             <Route path="tema" element={<DKMLectureParent />}>
               <Route index element={<DKMLecture />} />
+              <Route
+                path="tambah-edit"
+                element={<DKMAddEditLecture />}
+              />
+              <Route
+                path="tambah-edit/:id"
+                element={<DKMAddEditLecture />}
+              />
+              {/* ✅ Tambahan */}
               <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
               <Route
                 path="tema-detail/:id/semua-kajian"

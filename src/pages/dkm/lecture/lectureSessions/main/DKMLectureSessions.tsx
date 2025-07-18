@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom"; // ⬅️ Pastikan sudah di-impo
 import SimpleTable from "@/components/common/main/SimpleTable";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
+import FormattedDate from "@/constants/formattedDate";
 
 interface TokenPayload {
   masjid_admin_ids: string[];
@@ -98,14 +99,7 @@ export default function DKMLectureSessions() {
     />,
     <span className="font-medium">{session.lecture_session_title}</span>,
     session.lecture_title,
-    format(
-      new Date(session.lecture_session_start_time),
-      "EEEE, dd MMM yyyy - HH:mm",
-      {
-        locale: localeID,
-      }
-    ),
-
+    <FormattedDate value={session.lecture_session_start_time} />,
     <div className="flex flex-wrap gap-1">
       <StatusBadge
         text={
@@ -124,7 +118,9 @@ export default function DKMLectureSessions() {
     </div>,
     <div onClick={(e) => e.stopPropagation()}>
       <ActionEditDelete
-        onEdit={() => console.log("Edit", session.lecture_session_id)}
+        onEdit={() =>
+          navigate(`/dkm/kajian/tambah-edit/${session.lecture_session_id}`)
+        }
         onDelete={() => {
           if (confirm("Yakin ingin menghapus sesi kajian ini?")) {
             deleteLectureSession(session.lecture_session_id, {

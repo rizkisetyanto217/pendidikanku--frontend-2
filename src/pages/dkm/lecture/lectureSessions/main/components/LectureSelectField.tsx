@@ -17,6 +17,8 @@ interface LectureOption {
   lecture_title: string;
 }
 
+
+
 export default function LectureSelectField({
   masjidId,
   name,

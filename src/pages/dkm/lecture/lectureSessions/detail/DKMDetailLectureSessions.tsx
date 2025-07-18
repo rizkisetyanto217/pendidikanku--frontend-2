@@ -1,7 +1,6 @@
-
-
-
-import { Outlet, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
 import PageHeader from "@/components/common/PageHeader";
 import {
   BookOpen,
@@ -15,13 +14,58 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import NavigationCard from "./components/NavigationCard";
 
+// ✅ Tipe data sesi kajian
+interface LectureSessionDetail {
+  lecture_session_id: string;
+  lecture_session_title: string;
+  lecture_session_description: string;
+  lecture_session_teacher_id: string;
+  lecture_session_teacher_name: string;
+  lecture_session_start_time: string;
+  lecture_session_end_time: string;
+  lecture_session_place: string;
+  lecture_session_image_url: string;
+  lecture_session_lecture_id: string;
+  lecture_session_masjid_id: string;
+  lecture_title: string;
+  lecture_session_approved_by_admin_id: string | null;
+  lecture_session_approved_by_admin_at: string | null;
+  lecture_session_approved_by_author_id: string | null;
+  lecture_session_approved_by_author_at: string | null;
+  lecture_session_approved_by_teacher_id: string | null;
+  lecture_session_approved_by_teacher_at: string | null;
+  lecture_session_approved_by_dkm_at: string | null;
+  lecture_session_is_active: boolean;
+  lecture_session_created_at: string;
+  lecture_session_updated_at: string;
+}
+
 export default function DKMDetailLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const { id } = useParams();
 
-  const { state: session } = useLocation();
+  const {
+    data: session,
+    isLoading,
+    isError,
+  } = useQuery<LectureSessionDetail>({
+    queryKey: ["lecture-session-detail", id],
+    queryFn: async () => {
+      const res = await axios.get(`/api/a/lecture-sessions/by-id/${id}`);
+      console.log("✅ Data sesi kajian:", res.data);
+      return res.data;
+    },
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 5,
+  });
 
-  if (!session) {
+  if (isLoading) {
+    return <p className="text-gray-500">Memuat data sesi kajian...</p>;
+  }
+
+  if (isError || !session) {
     return <p className="text-red-500">Data sesi kajian tidak tersedia.</p>;
   }
 
@@ -62,7 +106,10 @@ export default function DKMDetailLectureSessions() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Kajian Detail" backTo="/dkm/kajian" />
+      <PageHeader
+        title="Kajian Detail"
+        backTo={`/dkm/kajian`}
+      />
 
       {/* Kartu Kajian */}
       <div
@@ -140,8 +187,6 @@ export default function DKMDetailLectureSessions() {
           ))}
         </div>
       </div>
-
     </div>
-    
   );
 }

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/PageHeader";
+import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
 
 export default function DKMInformationLectureSessions() {
   const { isDark } = useHtmlDarkMode();
@@ -24,18 +25,6 @@ export default function DKMInformationLectureSessions() {
     lecture_session_approved_by_dkm_at,
   } = session;
 
-  const formattedTime = new Date(lecture_session_start_time).toLocaleString(
-    "id-ID",
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
-  );
-
   const navigate = useNavigate();
 
   return (
@@ -44,8 +33,8 @@ export default function DKMInformationLectureSessions() {
       style={{ backgroundColor: theme.white1, color: theme.black1 }}
     >
       <PageHeader
-        title="Video & Rekaman"
-        onBackClick={() => navigate(-1)} // ✅ BENAR
+        title="Informasi Sesi Kajian"
+        onBackClick={() => navigate(-1)}
       />
 
       <div className="space-y-2 text-sm">
@@ -65,7 +54,10 @@ export default function DKMInformationLectureSessions() {
           <span className="font-medium text-gray-500 dark:text-gray-300">
             Jadwal:
           </span>{" "}
-          {formattedTime}
+          <FormattedDate
+            value={lecture_session_start_time}
+            fullMonth // ✅ Pakai nama bulan lengkap
+          />
         </p>
         <p>
           <span className="font-medium text-gray-500 dark:text-gray-300">
