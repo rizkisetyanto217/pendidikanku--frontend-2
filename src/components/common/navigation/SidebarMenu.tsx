@@ -12,6 +12,7 @@ export type SidebarMenuItem = {
 type SidebarMenuProps = {
   menus: SidebarMenuItem[];
   title?: string;
+  currentPath?: string;
 };
 
 export default function SidebarMenu({
