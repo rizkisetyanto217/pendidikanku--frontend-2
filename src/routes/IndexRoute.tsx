@@ -65,6 +65,7 @@ import DKMSuggestLecture from "@/pages/dkm/lecture/lecture/suggest/DKMSuggestLec
 import DKMAddLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLecture from "@/pages/dkm/lecture/lecture/main/DKMAddEditLecture";
+import PublicLinktreePage from "@/pages/user/linktree/LinkHome";
 
 export default function AppRoutes() {
   return (
@@ -73,6 +74,7 @@ export default function AppRoutes() {
         {/* ==== Public Routes ==== */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/masjid" element={<PublicLinktreePage />} />
 
         {/* ==== Protected Routes - DKM ==== */}
         <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
