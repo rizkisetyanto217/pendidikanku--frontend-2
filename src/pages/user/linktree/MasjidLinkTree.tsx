@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useIsMobile } from "@/hooks/isMobile";
@@ -31,10 +31,10 @@ interface Kajian {
   lecture_session_start_time: string;
 }
 
-export default function PublicLinktreePage() {
-  const [searchParams] = useSearchParams();
-  const slug = searchParams.get("slug");
-  const isMobile = useIsMobile(); // ✅ panggil function-nya
+export default function PublicLinktree() {
+  const navigate = useNavigate();
+  const { slug } = useParams(); // ✅ ambil dari path param
+  const isMobile = useIsMobile();
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +70,7 @@ export default function PublicLinktreePage() {
       setShowShareMenu(true);
     }
   };
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -107,9 +108,7 @@ export default function PublicLinktreePage() {
       >
         {/* Versi Mobile */}
         {kajianList && kajianList.length > 0 && (
-          <div
-            className="overflow-x-auto mb-4 p-2"
-          >
+          <div className="overflow-x-auto mb-4 p-2">
             <div className="flex space-x-4 w-max">
               {kajianList.map((kajian, idx) => (
                 <div
@@ -240,7 +239,12 @@ export default function PublicLinktreePage() {
         </div>
 
         <div className="space-y-2 mb-4">
-          <LinkItem label="Profil Masjid" icon="🏛️" />
+          <LinkItem
+            label="Profil Masjid"
+            icon="🏛️"
+            href={`/masjid/${masjidData.masjid_slug}/profil`}
+            internal
+          />
           <LinkItem
             label="Lokasi"
             icon="📍"
@@ -252,14 +256,12 @@ export default function PublicLinktreePage() {
 
         {/* ✅ Donasi Button static di bawah */}
         <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-md">
-          <a
-            href={masjidData.masjid_donation_link || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => navigate(`/masjid/${masjidData.masjid_slug}/donasi`)}
             className="block w-full text-center py-3 rounded bg-emerald-700 text-white font-bold"
           >
             Donasi
-          </a>
+          </button>
         </div>
       </div>
     );
@@ -417,24 +419,29 @@ export default function PublicLinktreePage() {
           </div>
 
           <div className="space-y-2">
-            <LinkItem label="Profil Masjid" icon="🏛️" />
+            <LinkItem
+              label="Profil Masjid"
+              icon="🏛️"
+              href={`/masjid/${masjidData.masjid_slug}/profil`}
+              internal // ⬅️ ini menandakan pakai navigate
+            />
+
             <LinkItem
               label="Lokasi"
               icon="📍"
               href={masjidData.masjid_google_maps_url}
             />
+
             <LinkItem label="Jadwal Kajian" icon="📆" />
             <LinkItem label="Soal & Materi Kajian" icon="📚" />
           </div>
 
-          <a
-            href={masjidData.masjid_donation_link || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => navigate(`/masjid/${masjidData.masjid_slug}/donasi`)}
             className="block w-full text-center py-3 rounded bg-emerald-700 text-white font-bold"
           >
             Donasi
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -445,33 +452,35 @@ function LinkItem({
   label,
   icon,
   href,
+  internal = false,
 }: {
   label: string;
   icon: string;
   href?: string;
+  internal?: boolean;
 }) {
-  const Wrapper = href
-    ? ({ children }: { children: React.ReactNode }) => (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          {children}
-        </a>
-      )
-    : ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (href) {
+      if (internal) {
+        navigate(href);
+      } else {
+        window.open(href, "_blank", "noopener noreferrer");
+      }
+    }
+  };
 
   return (
-    <Wrapper>
-      <div className="flex items-center justify-between p-3 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100">
-        <span className="flex items-center space-x-2">
-          <span>{icon}</span>
-          <span>{label}</span>
-        </span>
-        <span>›</span>
-      </div>
-    </Wrapper>
+    <div
+      onClick={handleClick}
+      className="cursor-pointer flex items-center justify-between p-3 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100"
+    >
+      <span className="flex items-center space-x-2">
+        <span>{icon}</span>
+        <span>{label}</span>
+      </span>
+      <span>›</span>
+    </div>
   );
 }

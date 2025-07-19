@@ -65,7 +65,14 @@ import DKMSuggestLecture from "@/pages/dkm/lecture/lecture/suggest/DKMSuggestLec
 import DKMAddLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLectureSession from "@/pages/dkm/lecture/lectureSessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLecture from "@/pages/dkm/lecture/lecture/main/DKMAddEditLecture";
-import PublicLinktreePage from "@/pages/user/linktree/LinkHome";
+import MasjidLinkTree from "@/pages/user/linktree/MasjidLinkTree";
+import MasjidDonationMasjid from "@/pages/user/linktree/donation/MasjidDonationMasjid";
+import MasjidLayout from "@/pages/user/MasjidLayout";
+import MasjidDonationConfirmDonation from "@/pages/user/linktree/donation/MasjidDonationConfirmMasjid";
+import MasjidProfile from "@/pages/user/linktree/profil/MasjidProfil";
+import MasjidDKMPengajarProfil from "@/pages/user/linktree/profil/MasjidDKMPengajarProfil";
+import MasjidDetailSpeech from "@/pages/user/linktree/profil/MasjidDetailSpeech";
+import MasjidProfileDetail from "@/pages/user/linktree/profil/MasjidDetailProfil";
 
 export default function AppRoutes() {
   return (
@@ -74,7 +81,29 @@ export default function AppRoutes() {
         {/* ==== Public Routes ==== */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/masjid" element={<PublicLinktreePage />} />
+        <Route path="/" element={<MasjidLayout />}>
+          <Route path="masjid/:slug">
+            <Route index element={<MasjidLinkTree />} />
+
+            <Route path="profil">
+              <Route index element={<MasjidProfile />} />
+              <Route
+                path="dkm-pengajar"
+                element={<MasjidDKMPengajarProfil />}
+              />
+              <Route path="sambutan" element={<MasjidDetailSpeech />} />
+              <Route path="detail" element={<MasjidProfileDetail />} />
+            </Route>
+
+            <Route path="donasi" element={<MasjidDonationMasjid />} />
+            <Route
+              path="donasi/konfirmasi"
+              element={<MasjidDonationConfirmDonation />}
+            />
+
+            {/* ✅ Tambahan route baru untuk halaman sambutan */}
+          </Route>
+        </Route>
 
         {/* ==== Protected Routes - DKM ==== */}
         <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
@@ -140,14 +169,8 @@ export default function AppRoutes() {
 
             <Route path="tema" element={<DKMLectureParent />}>
               <Route index element={<DKMLecture />} />
-              <Route
-                path="tambah-edit"
-                element={<DKMAddEditLecture />}
-              />
-              <Route
-                path="tambah-edit/:id"
-                element={<DKMAddEditLecture />}
-              />
+              <Route path="tambah-edit" element={<DKMAddEditLecture />} />
+              <Route path="tambah-edit/:id" element={<DKMAddEditLecture />} />
               {/* ✅ Tambahan */}
               <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
               <Route
