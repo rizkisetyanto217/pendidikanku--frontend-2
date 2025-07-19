@@ -99,10 +99,17 @@ export default function PublicLinktreePage() {
 
   if (isMobile) {
     return (
-      <div className="w-full min-h-screen bg-white p-4 overflow-auto">
+      <div
+        className="w-full min-h-screen p-4 pb-28 overflow-auto bg-cover bg-no-repeat bg-center"
+        style={{
+          backgroundImage: "url('/assets/background/background-linktree.jpg')",
+        }}
+      >
         {/* Versi Mobile */}
         {kajianList && kajianList.length > 0 && (
-          <div className="overflow-x-auto mb-4">
+          <div
+            className="overflow-x-auto mb-4 p-2"
+          >
             <div className="flex space-x-4 w-max">
               {kajianList.map((kajian, idx) => (
                 <div
@@ -137,9 +144,14 @@ export default function PublicLinktreePage() {
         )}
 
         <div className="mb-4">
-          <h1 className="text-xl font-bold">{masjidData.masjid_name}</h1>
-          <p className="text-sm text-gray-600">{masjidData.masjid_location}</p>
-          <p className="text-xs text-gray-500 italic">
+          <h1 className="text-xl font-semibold pb-2">
+            {masjidData.masjid_name}
+          </h1>
+
+          <p className="text-sm text-gray-600 pb-2">
+            {masjidData.masjid_location}
+          </p>
+          <p className="text-xs text-gray-500 italic pb-2">
             {masjidData.masjid_bio_short}
           </p>
 
@@ -229,24 +241,43 @@ export default function PublicLinktreePage() {
 
         <div className="space-y-2 mb-4">
           <LinkItem label="Profil Masjid" icon="🏛️" />
+          <LinkItem
+            label="Lokasi"
+            icon="📍"
+            href={masjidData.masjid_google_maps_url}
+          />
           <LinkItem label="Jadwal Kajian" icon="📆" />
           <LinkItem label="Soal & Materi Kajian" icon="📚" />
         </div>
 
-        <a
-          href={masjidData.masjid_donation_link || "#"}
-          target="_blank"
-          className="block w-full text-center py-3 rounded bg-emerald-700 text-white font-bold"
-        >
-          Donasi
-        </a>
+        {/* ✅ Donasi Button static di bawah */}
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-md">
+          <a
+            href={masjidData.masjid_donation_link || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center py-3 rounded bg-emerald-700 text-white font-bold"
+          >
+            Donasi
+          </a>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8 overflow-auto">
-      <div className="max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center bg-white p-6 rounded-xl shadow">
+    <div
+      className="w-full min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8 overflow-auto"
+      style={{
+        backgroundImage: "url('/background/background-linktree.jpg')",
+      }}
+    >
+      <div
+        className="max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center bg-white p-6 rounded-xl shadow"
+        style={{
+          backgroundImage: "url('/background/background-linktree.jpg')",
+        }}
+      >
         {/* Gambar Kajian */}
         <div className="relative">
           {kajianList && kajianList.length > 0 && (
@@ -288,11 +319,13 @@ export default function PublicLinktreePage() {
         {/* Masjid Info */}
         <div className="space-y-4">
           <div>
-            <h1 className="text-2xl font-bold">{masjidData.masjid_name}</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-2xl font-semibold pb-2">
+              {masjidData.masjid_name}
+            </h1>
+            <p className="text-sm text-gray-600 pb-2">
               {masjidData.masjid_location}
             </p>
-            <p className="text-xs text-gray-500 italic">
+            <p className="text-xs text-gray-500 italic pb-2">
               {masjidData.masjid_bio_short}
             </p>
           </div>
@@ -385,6 +418,11 @@ export default function PublicLinktreePage() {
 
           <div className="space-y-2">
             <LinkItem label="Profil Masjid" icon="🏛️" />
+            <LinkItem
+              label="Lokasi"
+              icon="📍"
+              href={masjidData.masjid_google_maps_url}
+            />
             <LinkItem label="Jadwal Kajian" icon="📆" />
             <LinkItem label="Soal & Materi Kajian" icon="📚" />
           </div>
@@ -403,14 +441,37 @@ export default function PublicLinktreePage() {
   );
 }
 
-function LinkItem({ label, icon }: { label: string; icon: string }) {
+function LinkItem({
+  label,
+  icon,
+  href,
+}: {
+  label: string;
+  icon: string;
+  href?: string;
+}) {
+  const Wrapper = href
+    ? ({ children }: { children: React.ReactNode }) => (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          {children}
+        </a>
+      )
+    : ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+
   return (
-    <div className="flex items-center justify-between p-3 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100">
-      <span className="flex items-center space-x-2">
-        <span>{icon}</span>
-        <span>{label}</span>
-      </span>
-      <span>›</span>
-    </div>
+    <Wrapper>
+      <div className="flex items-center justify-between p-3 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100">
+        <span className="flex items-center space-x-2">
+          <span>{icon}</span>
+          <span>{label}</span>
+        </span>
+        <span>›</span>
+      </div>
+    </Wrapper>
   );
 }
