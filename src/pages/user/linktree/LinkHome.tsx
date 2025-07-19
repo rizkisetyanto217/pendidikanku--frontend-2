@@ -4,6 +4,7 @@ import axios from "@/lib/axios";
 import { useIsMobile } from "@/hooks/isMobile";
 import { Share } from "lucide-react";
 import { useState } from "react";
+import { useRef, useEffect } from "react";
 
 const currentUrl = window.location.href;
 
@@ -35,6 +36,7 @@ export default function PublicLinktreePage() {
   const slug = searchParams.get("slug");
   const isMobile = useIsMobile(); // ✅ panggil function-nya
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: masjidData, isLoading: loadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", slug],
@@ -68,6 +70,24 @@ export default function PublicLinktreePage() {
       setShowShareMenu(true);
     }
   };
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        shareMenuRef.current &&
+        !shareMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowShareMenu(false);
+      }
+    }
+
+    if (showShareMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showShareMenu]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentUrl);
@@ -159,19 +179,51 @@ export default function PublicLinktreePage() {
               )}
             </div>
 
-            {/* Tombol Bagikan */}
+            {/* ✅ Tambahkan tombol Bagikan */}
             <button
-              onClick={() =>
-                navigator.share?.({
-                  title: masjidData.masjid_name,
-                  url: window.location.href,
-                })
-              }
-              className="flex items-center space-x-1 text-sm text-blue-600"
+              onClick={handleShareClick}
+              className="flex items-center space-x-1 text-sm text-blue-600 mt-3"
             >
-              <img src="/icons/share.svg" alt="Bagikan" className="w-4 h-4" />
+              <Share size={16} className="text-blue-600" />
               <span>Bagikan</span>
             </button>
+
+            {/* ✅ Tampilkan popup share di mobile */}
+            {showShareMenu && (
+              <div
+                ref={shareMenuRef}
+                className="mt-2 p-3 bg-white border rounded shadow w-full"
+              >
+                <p className="text-xs mb-2 text-gray-700">Bagikan link:</p>
+
+                <input
+                  type="text"
+                  readOnly
+                  value={currentUrl}
+                  className="w-full text-xs p-1 border rounded mb-2 bg-gray-100"
+                />
+
+                <div className="flex justify-between">
+                  <button
+                    onClick={handleCopy}
+                    className="text-sm text-emerald-700 font-semibold hover:underline"
+                  >
+                    Salin Link
+                  </button>
+
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-green-600 font-semibold hover:underline"
+                  >
+                    WhatsApp
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -294,7 +346,10 @@ export default function PublicLinktreePage() {
 
               {/* Share Popup */}
               {showShareMenu && (
-                <div className="absolute z-10 mt-2 p-3 bg-white border rounded shadow w-64 right-0">
+                <div
+                  ref={shareMenuRef}
+                  className="absolute z-10 mt-2 p-3 bg-white border rounded shadow w-64 right-0"
+                >
                   <p className="text-xs mb-2 text-gray-700">Bagikan link:</p>
 
                   <input
