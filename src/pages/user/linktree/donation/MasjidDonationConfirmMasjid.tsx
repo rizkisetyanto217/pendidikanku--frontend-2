@@ -1,7 +1,16 @@
-import PageHeader from "@/components/common/PageHeader";
+import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "@/lib/axios"; // Pastikan path-nya sesuai dengan letak file api.ts Anda
+import axios, { AxiosError } from "axios"; // Import AxiosError untuk menangani error dari Axios
+import PageHeader from "@/components/common/PageHeader"; // Gantilah dengan path yang sesuai
 
-export default function MasjidDonationConfirmMasjid() {
+declare global {
+  interface Window {
+    snap: any; // Menambahkan snap di window
+  }
+}
+
+const MasjidDonationConfirmMasjid = () => {
   const [searchParams] = useSearchParams();
   const masjidDonation = Number(searchParams.get("masjid")) || 0;
   const masjidkuDonation = Number(searchParams.get("masjidku")) || 0;
@@ -12,6 +21,119 @@ export default function MasjidDonationConfirmMasjid() {
   const format = (n: number) =>
     `Rp ${new Intl.NumberFormat("id-ID").format(n)}`;
 
+  // Memuat script Snap.js secara dinamis
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.setAttribute("data-client-key", "Mid-client-l1lXV0xwBLRhI_62");
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  // Perbaikan error handling yang benar
+  const handlePayment = async () => {
+    const donationData = {
+      donation_amount: total,
+      donation_message: "Donasi test dari rendi",
+      donation_name: "rendi",
+      donation_email: "muhammadrizkisetyanto217@gmail.com",
+      donation_masjid_id: "fdb6ae90-5900-42f0-a9b9-deb25bf438f2",
+    };
+
+    // 🐛 Debug: Log data yang akan dikirim
+    console.log(
+      "📤 Sending donation data:",
+      JSON.stringify(donationData, null, 2)
+    );
+    console.log("🌐 API Base URL:", api.defaults.baseURL);
+    console.log("📋 Request headers:", api.defaults.headers);
+
+    try {
+      // 🔍 Debug: Tambah explicit headers
+      const response = await api.post("/public/donations", donationData, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      console.log("✅ Response status:", response.status);
+      console.log("📥 Response data:", response.data);
+
+      if (response.status === 200) {
+        const snapToken = response.data.snap_token;
+
+        if (window.snap) {
+          window.snap.pay(snapToken, {
+            onSuccess: (result: any) => {
+              console.log("💳 Payment success:", result);
+              navigate("/donation-success");
+            },
+            onPending: (result: any) => {
+              console.log("⏳ Payment pending:", result);
+              alert("Pembayaran sedang diproses...");
+            },
+            onError: (result: any) => {
+              console.log("❌ Payment error:", result);
+              alert("Pembayaran gagal. Silakan coba lagi.");
+            },
+          });
+        } else {
+          alert("Payment system not ready. Please refresh the page.");
+        }
+      }
+    } catch (error) {
+      // 🐛 Debug: Log error detail lengkap
+      console.error("🚨 Full error object:", error);
+
+      if (axios.isAxiosError(error)) {
+        console.log("📊 Error details:");
+        console.log("- Status:", error.response?.status);
+        console.log("- Status Text:", error.response?.statusText);
+        console.log("- Response Data:", error.response?.data);
+        console.log("- Request URL:", error.config?.url);
+        console.log("- Request Method:", error.config?.method);
+        console.log("- Request Headers:", error.config?.headers);
+        console.log("- Request Data:", error.config?.data);
+
+        if (error.response) {
+          const errorMessage =
+            error.response.data?.error ||
+            error.response.data?.message ||
+            "Server error";
+          alert(`❌ Server Error (${error.response.status}): ${errorMessage}`);
+        } else if (error.request) {
+          console.error("🌐 Network error - no response:", error.request);
+          alert("❌ Network Error: Tidak dapat terhubung ke server");
+        } else {
+          console.error("⚙️ Request setup error:", error.message);
+          alert(`❌ Request Error: ${error.message}`);
+        }
+      } else {
+        console.error("🤷 Unknown error:", error);
+        alert("❌ Unknown Error");
+      }
+    }
+  };
+
+  // 🔍 Debug: Test koneksi API saat component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        console.log("🧪 Testing API connection...");
+        const response = await api.get("/");
+        console.log("✅ API connection test successful:", response.status);
+      } catch (error) {
+        console.error("❌ API connection test failed:", error);
+      }
+    };
+
+    testConnection();
+  }, []);
+
   return (
     <>
       <PageHeader
@@ -21,7 +143,7 @@ export default function MasjidDonationConfirmMasjid() {
         }}
       />
 
-      <div className=" max-w-md mx-auto">
+      <div className="max-w-md mx-auto">
         <p className="text-sm text-gray-700">
           Berikut adalah rincian donasi detail
         </p>
@@ -70,11 +192,16 @@ export default function MasjidDonationConfirmMasjid() {
 
       <div className="fixed bottom-0 left-0 w-full px-4 py-4 bg-white border-t shadow-md">
         <div className="max-w-xl mx-auto">
-          <button className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded font-semibold">
+          <button
+            onClick={handlePayment}
+            className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded font-semibold"
+          >
             Lanjut
           </button>
         </div>
       </div>
     </>
   );
-}
+};
+
+export default MasjidDonationConfirmMasjid;
