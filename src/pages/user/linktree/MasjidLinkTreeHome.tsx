@@ -359,6 +359,11 @@ export default function PublicLinktree() {
                 {kajianList.map((kajian, idx) => (
                   <div
                     key={idx}
+                    onClick={() =>
+                      navigate(
+                        `/masjid/${slug}/kajian/${kajian.lecture_session_id}`
+                      )
+                    }
                     className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow"
                     style={{ backgroundColor: themeColors.white1 }}
                   >

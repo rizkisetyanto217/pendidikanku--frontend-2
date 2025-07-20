@@ -4,6 +4,7 @@ import axios from "@/lib/axios";
 import { ArrowLeft } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 
 export default function MasjidDetailLecture() {
   const { id } = useParams();
@@ -52,27 +53,24 @@ export default function MasjidDetailLecture() {
     );
 
   return (
-    <div
-      className="pb-20"
-      style={{
-        backgroundColor: themeColors.white1,
-        color: themeColors.black1,
-      }}
-    >
+    <div className="pb-20">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 rounded-full"
-          style={{ backgroundColor: themeColors.white2 }}
-        >
-          <ArrowLeft className="w-5 h-5" color={themeColors.black1} />
-        </button>
-        <h1 className="text-lg font-semibold">Detail Agenda</h1>
-      </div>
+      <PageHeaderUser
+        title="Detail Kajian"
+        onBackClick={() => {
+          if (window.history.length > 1) navigate(-1);
+        }}
+      />
 
-      {/* Gambar Kajian */}
-      <div className="px-4">
+      {/* Detail Kajian */}
+      <div
+        className="p-4 space-y-4 rounded-md shadow-sm"
+        style={{
+          backgroundColor: themeColors.white1,
+          color: themeColors.black1,
+        }}
+      >
+        {/* Gambar Kajian */}
         <img
           src={
             kajian.lecture_session_image_url ||
@@ -81,10 +79,8 @@ export default function MasjidDetailLecture() {
           alt={kajian.lecture_session_title}
           className="w-full rounded-xl mb-4"
         />
-      </div>
 
-      {/* Informasi Kajian */}
-      <div className="px-4 space-y-4">
+        {/* Informasi Kajian */}
         <div>
           <h2
             className="text-base font-semibold"

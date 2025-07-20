@@ -31,11 +31,8 @@ export default function MasjidProfileDetail() {
   );
 
   return (
-    <div
-      className="min-h-screen px-4 py-4 md:px-6 md:py-6 rounded-md"
-      style={{ backgroundColor: themeColors.white1 }}
-    >
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screenrounded-md">
+      <div className="mx-auto">
         <PageHeaderUser
           title="Profil Lembaga"
           onBackClick={() => {
@@ -43,7 +40,7 @@ export default function MasjidProfileDetail() {
           }}
         />
 
-        <div className="mt-4">
+        <div className="mt-4 p-4" style={{ backgroundColor: themeColors.white1 }}>
           <InfoItem label="Tahun Didirikan" content={data.tahun_didirikan} />
           <InfoItem label="Latar Belakang" content={data.latar_belakang} />
           <InfoItem label="Visi" content={data.visi} />

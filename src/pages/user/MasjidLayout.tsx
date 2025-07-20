@@ -6,19 +6,6 @@ export default function MasjidLayout() {
   const { isDark, toggleDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  const DarkToggle = () => (
-    <button
-      onClick={toggleDark}
-      className="text-sm px-3 py-1 rounded border font-medium"
-      style={{
-        backgroundColor: themeColors.white3,
-        color: themeColors.black1,
-        borderColor: themeColors.silver1,
-      }}
-    >
-      {isDark ? "☀️" : "🌙"}
-    </button>
-  );
 
   return (
     <div
@@ -28,7 +15,6 @@ export default function MasjidLayout() {
       <div className="w-full max-w-3xl mx-auto">
         <Outlet />
         <div className="flex justify-end lg:mt-4">
-          <DarkToggle />
         </div>
       </div>
     </div>
