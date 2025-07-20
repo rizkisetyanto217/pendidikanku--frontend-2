@@ -4,10 +4,10 @@ import { useDeleteLectureSession } from "./useDeleteDKMLectureSessions";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import StatusBadge from "@/components/common/main/statusBadge";
-import ActionEditDelete from "@/components/common/main/actionEditDelete";
+import StatusBadge from "@/components/common/main/MainStatusBadge";
+import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import toast from "react-hot-toast";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { useNavigate } from "react-router-dom"; // ⬅️ Pastikan sudah di-import
 import SimpleTable from "@/components/common/main/SimpleTable";
 import { format } from "date-fns";

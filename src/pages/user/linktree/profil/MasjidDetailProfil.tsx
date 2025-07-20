@@ -1,9 +1,14 @@
 // MasjidProfileDetail.tsx
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { useNavigate } from "react-router-dom";
+import { colors } from "@/constants/colorsThema";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 
 export default function MasjidProfileDetail() {
   const navigate = useNavigate();
+  const { isDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
 
   // Dummy data
   const data = {
@@ -18,15 +23,20 @@ export default function MasjidProfileDetail() {
 
   const InfoItem = ({ label, content }: { label: string; content: string }) => (
     <div className="mb-4">
-      <p className="text-sky-600 font-semibold">{label}</p>
-      <p className="text-gray-800 text-sm">{content}</p>
+      <p style={{ color: themeColors.quaternary, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: themeColors.black1, fontSize: "0.875rem" }}>
+        {content}
+      </p>
     </div>
   );
 
   return (
-    <div className="min-h-screen px-4 py-4 md:px-6 md:py-6 bg-white">
+    <div
+      className="min-h-screen px-4 py-4 md:px-6 md:py-6 rounded-md"
+      style={{ backgroundColor: themeColors.white1 }}
+    >
       <div className="max-w-2xl mx-auto">
-        <PageHeader
+        <PageHeaderUser
           title="Profil Lembaga"
           onBackClick={() => {
             if (window.history.length > 1) navigate(-1);

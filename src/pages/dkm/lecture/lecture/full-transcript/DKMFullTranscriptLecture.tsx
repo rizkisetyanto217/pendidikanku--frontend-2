@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import axios from "@/lib/axios";
 import { ExternalLink } from "lucide-react";
 
@@ -11,7 +11,7 @@ interface Summary {
   lecture_sessions_material_title: string;
   lecture_sessions_material_summary: string;
   lecture_sessions_material_created_at: string;
-  lecture_sessions_material_transcript_full : string
+  lecture_sessions_material_transcript_full: string;
 }
 
 export default function DKMTranscriptLecture() {

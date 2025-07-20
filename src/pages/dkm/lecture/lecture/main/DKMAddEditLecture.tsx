@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import toast from "react-hot-toast";
 import InputField from "@/components/common/main/InputField";
 import RichEditor from "@/components/common/main/RichEditor";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { Plus, X } from "lucide-react";

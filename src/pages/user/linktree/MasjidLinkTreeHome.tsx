@@ -5,6 +5,8 @@ import { useIsMobile } from "@/hooks/isMobile";
 import { Share } from "lucide-react";
 import { useState } from "react";
 import { useRef, useEffect } from "react";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 
 const currentUrl = window.location.href;
 
@@ -24,6 +26,7 @@ interface Masjid {
 }
 
 interface Kajian {
+  lecture_session_id: string;
   lecture_session_title: string;
   lecture_session_image_url: string;
   lecture_session_teacher_name: string;
@@ -33,10 +36,12 @@ interface Kajian {
 
 export default function PublicLinktree() {
   const navigate = useNavigate();
-  const { slug } = useParams(); // ✅ ambil dari path param
+  const { slug } = useParams();
   const isMobile = useIsMobile();
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
+  const { isDark, toggleDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
 
   const { data: masjidData, isLoading: loadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", slug],
@@ -45,27 +50,29 @@ export default function PublicLinktree() {
       return res.data?.data;
     },
     enabled: !!slug,
+    staleTime: 5 * 60 * 1000, // ✅ tahan cache 5 menit
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const { data: kajianList, isLoading: loadingKajian } = useQuery<Kajian[]>({
     queryKey: ["kajianList", masjidData?.masjid_id],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-u/${masjidData?.masjid_id}`
+        `/public/lecture-sessions-u/by-masjid/${masjidData?.masjid_id}`
       );
       return res.data?.data?.slice(0, 3) ?? [];
     },
     enabled: !!masjidData?.masjid_id,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const handleShareClick = () => {
     if (!masjidData) return;
-
     if (isMobile && navigator.share) {
-      navigator.share({
-        title: masjidData.masjid_name,
-        url: currentUrl,
-      });
+      navigator.share({ title: masjidData.masjid_name, url: currentUrl });
     } else {
       setShowShareMenu(true);
     }
@@ -80,11 +87,9 @@ export default function PublicLinktree() {
         setShowShareMenu(false);
       }
     }
-
     if (showShareMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -98,41 +103,70 @@ export default function PublicLinktree() {
   if (loadingMasjid || loadingKajian || !masjidData)
     return <div>Loading...</div>;
 
+  const DarkToggle = () => (
+    <button
+      onClick={toggleDark}
+      className="text-sm px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+    >
+      {isDark ? "☀️" : "🌙"}
+    </button>
+  );
   if (isMobile) {
     return (
-      <div
-        className="w-full min-h-screen p-4 pb-28 overflow-auto bg-cover bg-no-repeat bg-center"
-        style={{
-          backgroundImage: "url('/assets/background/background-linktree.jpg')",
-        }}
-      >
-        {/* Versi Mobile */}
+      <div className="w-full min-h-screen p-4 pb-28 overflow-auto bg-cover bg-no-repeat bg-center">
+        <DarkToggle />
+
         {kajianList && kajianList.length > 0 && (
-          <div className="overflow-x-auto mb-4 p-2">
+          <div className="overflow-x-auto mb-4 p-2 pt-4">
             <div className="flex space-x-4 w-max">
               {kajianList.map((kajian, idx) => (
                 <div
                   key={idx}
-                  className="min-w-[260px] max-w-xs rounded-lg overflow-hidden shadow-md bg-white"
+                  onClick={() =>
+                    navigate(
+                      `/masjid/${slug}/kajian/${kajian.lecture_session_id}`
+                    )
+                  }
+                  className="min-w-[260px] max-w-xs rounded-lg overflow-hidden shadow-md cursor-pointer hover:opacity-90 transition"
+                  style={{ backgroundColor: themeColors.white1 }}
                 >
                   <img
-                    src={kajian.lecture_session_image_url}
+                    src={
+                      kajian.lecture_session_image_url ||
+                      "/assets/placeholder/lecture.png"
+                    }
                     alt={kajian.lecture_session_title}
                     className="w-full aspect-[3/4] object-cover"
                   />
                   <div className="p-3">
-                    <h2 className="font-semibold text-sm truncate">
+                    <h2
+                      className="font-semibold text-sm truncate"
+                      style={{
+                        color: themeColors.black1,
+                      }}
+                    >
                       {kajian.lecture_session_title}
                     </h2>
-                    <p className="text-xs text-gray-600">
+
+                    <p
+                      className="text-xs"
+                      style={{ color: themeColors.silver2 }}
+                    >
                       {kajian.lecture_session_teacher_name} •{" "}
                       {kajian.lecture_session_start_time
                         ? new Date(
                             kajian.lecture_session_start_time
-                          ).toLocaleDateString()
+                          ).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
                         : "-"}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p
+                      className="text-xs"
+                      style={{ color: themeColors.silver4 }}
+                    >
                       {kajian.lecture_session_place}
                     </p>
                   </div>
@@ -143,19 +177,23 @@ export default function PublicLinktree() {
         )}
 
         <div className="mb-4">
-          <h1 className="text-xl font-semibold pb-2">
+          <h1
+            className="text-xl font-semibold pb-2"
+            style={{ color: isDark ? colors.dark.black1 : colors.light.black1 }}
+          >
             {masjidData.masjid_name}
           </h1>
-
-          <p className="text-sm text-gray-600 pb-2">
+          <p className="text-sm" style={{ color: themeColors.silver2 }}>
             {masjidData.masjid_location}
           </p>
-          <p className="text-xs text-gray-500 italic pb-2">
+          <p
+            className="text-xs italic pb-2"
+            style={{ color: themeColors.silver4 }}
+          >
             {masjidData.masjid_bio_short}
           </p>
 
           <div className="flex items-center justify-between mt-2">
-            {/* Sosial Media Icons */}
             <div className="flex items-center space-x-3">
               {masjidData.masjid_instagram_url && (
                 <a
@@ -190,34 +228,47 @@ export default function PublicLinktree() {
               )}
             </div>
 
-            {/* ✅ Tambahkan tombol Bagikan */}
             <button
               onClick={handleShareClick}
-              className="flex items-center space-x-1 text-sm text-blue-600 mt-3"
+              className="flex items-center space-x-1 text-sm mt-3"
+              style={{ color: themeColors.quaternary }}
             >
-              <Share size={16} className="text-blue-600" />
+              <Share size={16} />
               <span>Bagikan</span>
             </button>
 
-            {/* ✅ Tampilkan popup share di mobile */}
             {showShareMenu && (
               <div
                 ref={shareMenuRef}
-                className="mt-2 p-3 bg-white border rounded shadow w-full"
+                className="mt-2 p-3 border rounded shadow w-full"
+                style={{
+                  backgroundColor: themeColors.white1,
+                  borderColor: themeColors.silver1,
+                }}
               >
-                <p className="text-xs mb-2 text-gray-700">Bagikan link:</p>
+                <p
+                  className="text-xs mb-2"
+                  style={{ color: themeColors.black2 }}
+                >
+                  Bagikan link:
+                </p>
 
                 <input
                   type="text"
                   readOnly
                   value={currentUrl}
-                  className="w-full text-xs p-1 border rounded mb-2 bg-gray-100"
+                  className="w-full text-xs p-1 border rounded mb-2"
+                  style={{
+                    backgroundColor: themeColors.white3,
+                    borderColor: themeColors.silver1,
+                  }}
                 />
 
                 <div className="flex justify-between">
                   <button
                     onClick={handleCopy}
-                    className="text-sm text-emerald-700 font-semibold hover:underline"
+                    className="text-sm font-semibold hover:underline"
+                    style={{ color: themeColors.success1 }}
                   >
                     Salin Link
                   </button>
@@ -228,7 +279,8 @@ export default function PublicLinktree() {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-green-600 font-semibold hover:underline"
+                    className="text-sm font-semibold hover:underline"
+                    style={{ color: themeColors.success1 }}
                   >
                     WhatsApp
                   </a>
@@ -250,15 +302,35 @@ export default function PublicLinktree() {
             icon="📍"
             href={masjidData.masjid_google_maps_url}
           />
-          <LinkItem label="Jadwal Kajian" icon="📆" />
+          <LinkItem
+            label="Jadwal Kajian"
+            icon="📆"
+            href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
+            internal
+          />
           <LinkItem label="Soal & Materi Kajian" icon="📚" />
+          <LinkItem
+            label="Laporan Keuangan"
+            icon="📰"
+            href={`/masjid/${masjidData.masjid_slug}/keuangan`}
+            internal
+          />
         </div>
 
-        {/* ✅ Donasi Button static di bawah */}
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t shadow-md">
+        <div
+          className="fixed bottom-0 left-0 w-full p-4 border-t shadow-md"
+          style={{
+            backgroundColor: themeColors.white1,
+            borderColor: themeColors.silver1,
+          }}
+        >
           <button
             onClick={() => navigate(`/masjid/${masjidData.masjid_slug}/donasi`)}
-            className="block w-full text-center py-3 rounded bg-emerald-700 text-white font-bold"
+            className="block w-full text-center py-3 rounded font-bold"
+            style={{
+              backgroundColor: themeColors.primary,
+              color: themeColors.white1,
+            }}
           >
             Donasi
           </button>
@@ -269,16 +341,15 @@ export default function PublicLinktree() {
 
   return (
     <div
-      className="w-full min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8 overflow-auto"
+      className="w-full pt-5 flex items-center justify-center"
       style={{
-        backgroundImage: "url('/background/background-linktree.jpg')",
+        backgroundColor: themeColors.white2,
+        overflow: "hidden", // ⬅️ tidak bisa scroll
       }}
     >
       <div
-        className="max-w-5xl w-full grid md:grid-cols-2 gap-8 items-center bg-white p-6 rounded-xl shadow"
-        style={{
-          backgroundImage: "url('/background/background-linktree.jpg')",
-        }}
+        className="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-center p-6 rounded-xl shadow"
+        style={{ backgroundColor: themeColors.white1 }}
       >
         {/* Gambar Kajian */}
         <div className="relative">
@@ -288,7 +359,8 @@ export default function PublicLinktree() {
                 {kajianList.map((kajian, idx) => (
                   <div
                     key={idx}
-                    className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow bg-white"
+                    className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow"
+                    style={{ backgroundColor: themeColors.white1 }}
                   >
                     <img
                       src={kajian.lecture_session_image_url}
@@ -296,10 +368,17 @@ export default function PublicLinktree() {
                       className="w-full aspect-[3/4] object-cover"
                     />
                     <div className="p-3">
-                      <h2 className="font-semibold text-sm truncate">
+                      <h2
+                        className="font-semibold text-sm truncate"
+                        style={{ color: themeColors.black1 }}
+                      >
                         {kajian.lecture_session_title}
                       </h2>
-                      <p className="text-xs text-gray-600">
+
+                      <p
+                        className="text-xs"
+                        style={{ color: themeColors.silver2 }}
+                      >
                         {kajian.lecture_session_teacher_name} •{" "}
                         {kajian.lecture_session_start_time
                           ? new Date(
@@ -307,7 +386,10 @@ export default function PublicLinktree() {
                             ).toLocaleDateString()
                           : "-"}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p
+                        className="text-xs"
+                        style={{ color: themeColors.silver4 }}
+                      >
                         {kajian.lecture_session_place}
                       </p>
                     </div>
@@ -321,19 +403,25 @@ export default function PublicLinktree() {
         {/* Masjid Info */}
         <div className="space-y-4">
           <div>
-            <h1 className="text-2xl font-semibold pb-2">
+            <h1
+              className="text-2xl font-semibold pb-2"
+              style={{ color: themeColors.black1 }}
+            >
               {masjidData.masjid_name}
             </h1>
-            <p className="text-sm text-gray-600 pb-2">
+
+            <p className="text-sm pb-2" style={{ color: themeColors.silver2 }}>
               {masjidData.masjid_location}
             </p>
-            <p className="text-xs text-gray-500 italic pb-2">
+            <p
+              className="text-xs italic pb-2"
+              style={{ color: themeColors.silver4 }}
+            >
               {masjidData.masjid_bio_short}
             </p>
           </div>
 
           <div className="flex items-center justify-between mt-2">
-            {/* Sosial Media Icons */}
             <div className="flex items-center space-x-3">
               {masjidData.masjid_instagram_url && (
                 <a
@@ -368,47 +456,58 @@ export default function PublicLinktree() {
               )}
             </div>
 
-            {/* Tombol Bagikan */}
-            {/* Tombol Bagikan */}
             <div className="relative">
               <button
                 onClick={handleShareClick}
-                className="flex items-center space-x-1 text-sm text-blue-600"
+                className="flex items-center space-x-1 text-sm"
+                style={{ color: themeColors.quaternary }}
               >
-                <Share size={16} className="text-blue-600" />
+                <Share size={16} />
                 <span>Bagikan</span>
               </button>
 
-              {/* Share Popup */}
               {showShareMenu && (
                 <div
                   ref={shareMenuRef}
-                  className="absolute z-10 mt-2 p-3 bg-white border rounded shadow w-64 right-0"
+                  className="absolute z-10 mt-2 p-3 border rounded shadow w-64 right-0"
+                  style={{
+                    backgroundColor: themeColors.white1,
+                    borderColor: themeColors.silver1,
+                  }}
                 >
-                  <p className="text-xs mb-2 text-gray-700">Bagikan link:</p>
+                  <p
+                    className="text-xs mb-2"
+                    style={{ color: themeColors.black2 }}
+                  >
+                    Bagikan link:
+                  </p>
 
                   <input
                     type="text"
                     readOnly
                     value={currentUrl}
-                    className="w-full text-xs p-1 border rounded mb-2 bg-gray-100"
+                    className="w-full text-xs p-1 border rounded mb-2"
+                    style={{
+                      backgroundColor: themeColors.white3,
+                      borderColor: themeColors.silver1,
+                    }}
                   />
 
                   <div className="flex justify-between">
                     <button
                       onClick={handleCopy}
-                      className="text-sm text-emerald-700 font-semibold hover:underline"
+                      className="text-sm font-semibold hover:underline"
+                      style={{ color: themeColors.success1 }}
                     >
                       Salin Link
                     </button>
 
                     <a
-                      href={`https://wa.me/?text=${encodeURIComponent(
-                        `Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`
-                      )}`}
+                      href={`https://wa.me/?text=${encodeURIComponent(`Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-green-600 font-semibold hover:underline"
+                      className="text-sm font-semibold hover:underline"
+                      style={{ color: themeColors.success1 }}
                     >
                       WhatsApp
                     </a>
@@ -423,22 +522,35 @@ export default function PublicLinktree() {
               label="Profil Masjid"
               icon="🏛️"
               href={`/masjid/${masjidData.masjid_slug}/profil`}
-              internal // ⬅️ ini menandakan pakai navigate
+              internal
             />
-
             <LinkItem
               label="Lokasi"
               icon="📍"
               href={masjidData.masjid_google_maps_url}
             />
-
-            <LinkItem label="Jadwal Kajian" icon="📆" />
+            <LinkItem
+              label="Jadwal Kajian"
+              icon="📆"
+              href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
+              internal
+            />
             <LinkItem label="Soal & Materi Kajian" icon="📚" />
+            <LinkItem
+              label="Laporan Keuangan"
+              icon="📰"
+              href={`/masjid/${masjidData.masjid_slug}/keuangan`}
+              internal
+            />
           </div>
 
           <button
             onClick={() => navigate(`/masjid/${masjidData.masjid_slug}/donasi`)}
-            className="block w-full text-center py-3 rounded bg-emerald-700 text-white font-bold"
+            className="block w-full text-center py-3 rounded font-bold"
+            style={{
+              backgroundColor: themeColors.primary,
+              color: themeColors.white1,
+            }}
           >
             Donasi
           </button>
@@ -460,6 +572,8 @@ function LinkItem({
   internal?: boolean;
 }) {
   const navigate = useNavigate();
+  const { isDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
 
   const handleClick = () => {
     if (href) {
@@ -474,13 +588,17 @@ function LinkItem({
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer flex items-center justify-between p-3 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100"
+      className="cursor-pointer flex items-center justify-between p-3 rounded hover:opacity-90"
+      style={{
+        backgroundColor: themeColors.white2,
+        border: `1px solid ${themeColors.silver1}`,
+      }}
     >
       <span className="flex items-center space-x-2">
         <span>{icon}</span>
-        <span>{label}</span>
+        <span style={{ color: themeColors.black1 }}>{label}</span>
       </span>
-      <span>›</span>
+      <span style={{ color: themeColors.silver4 }}>›</span>
     </div>
   );
 }

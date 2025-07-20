@@ -1,7 +1,10 @@
 import { useIsMobile } from "@/hooks/isMobile";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 
 const dummyPengurus = [
   {
@@ -68,6 +71,8 @@ export default function MasjidDKMPengajarProfil() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [selectedDetail, setSelectedDetail] = useState<any>(null);
+  const { isDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
 
   const handleSelect = (person: any) => {
     if (isMobile) {
@@ -85,13 +90,28 @@ export default function MasjidDKMPengajarProfil() {
       <button
         key={`${item.type}-${item.id}`}
         onClick={() => handleSelect(item)}
-        className={`w-full flex justify-between items-center p-3 rounded border ${
-          isActive ? "bg-emerald-50" : "bg-white"
-        } hover:bg-gray-100 mt-2`}
+        className="w-full flex justify-between items-center p-3 rounded border mt-2"
+        style={{
+          backgroundColor: isActive ? themeColors.success2 : themeColors.white1,
+          borderColor: themeColors.silver1,
+          color: themeColors.black1,
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = themeColors.white2;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.backgroundColor = themeColors.white1;
+          }
+        }}
       >
         <span className="flex flex-col items-start text-left">
           <span className="font-medium">{label || item.title}</span>
-          <span className="text-sm text-gray-600">{item.name}</span>
+          <span className="text-sm" style={{ color: themeColors.silver2 }}>
+            {item.name}
+          </span>
         </span>
         <span className="text-lg">›</span>
       </button>
@@ -100,7 +120,7 @@ export default function MasjidDKMPengajarProfil() {
 
   return (
     <>
-      <PageHeader
+      <PageHeaderUser
         title="Profil DKM & Pengajar"
         onBackClick={() => {
           if (window.history.length > 1) navigate(-1);
@@ -110,25 +130,44 @@ export default function MasjidDKMPengajarProfil() {
       <div className="md:flex md:gap-6">
         <div className="md:w-1/2 space-y-4">
           <div>
-            <h2 className="font-semibold text-lg text-gray-800">DKM Masjid</h2>
+            <h2
+              className="font-semibold text-lg"
+              style={{ color: themeColors.black1 }}
+            >
+              DKM Masjid
+            </h2>
             {dummyPengurus.map((item) => renderPersonCard(item, item.role))}
           </div>
 
           <div className="pt-4">
-            <h3 className="text-md font-semibold text-emerald-700">Pengajar</h3>
+            <h3
+              className="text-md font-semibold"
+              style={{ color: themeColors.primary }}
+            >
+              Pengajar
+            </h3>
             {dummyPengajar.map((item) => renderPersonCard(item))}
           </div>
         </div>
 
         {!isMobile && (
-          <div className="md:w-1/2 bg-white rounded shadow p-4 space-y-3 mt-6 md:mt-0">
+          <div
+            className="md:w-1/2 rounded shadow p-4 space-y-3 mt-6 md:mt-0"
+            style={{ backgroundColor: themeColors.white1 }}
+          >
             {selectedDetail ? (
               <>
-                <h3 className="text-lg font-semibold text-sky-700">
+                <h3
+                  className="text-lg font-semibold"
+                  style={{ color: themeColors.quaternary }}
+                >
                   {selectedDetail.name}
                 </h3>
 
-                <div className="space-y-2 text-sm text-gray-700">
+                <div
+                  className="space-y-2 text-sm"
+                  style={{ color: themeColors.black2 }}
+                >
                   {selectedDetail.jabatan && (
                     <div>
                       <p className="font-semibold">Jabatan</p>
@@ -175,7 +214,7 @@ export default function MasjidDKMPengajarProfil() {
                 </div>
               </>
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm" style={{ color: themeColors.silver2 }}>
                 Klik salah satu untuk melihat detail.
               </p>
             )}

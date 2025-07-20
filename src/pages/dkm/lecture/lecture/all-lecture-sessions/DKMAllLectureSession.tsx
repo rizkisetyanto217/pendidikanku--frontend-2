@@ -4,10 +4,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import { ReactNode } from "react";
-import ActionEditDelete from "@/components/common/main/actionEditDelete";
+import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import toast from "react-hot-toast";
-import PageHeader from "@/components/common/PageHeader";
-import StatusBadge from "@/components/common/main/statusBadge";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import StatusBadge from "@/components/common/main/MainStatusBadge";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 

@@ -1,6 +1,6 @@
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import SimpleTable from "@/components/common/main/SimpleTable";
-import ActionEditDelete from "@/components/common/main/actionEditDelete";
+import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";

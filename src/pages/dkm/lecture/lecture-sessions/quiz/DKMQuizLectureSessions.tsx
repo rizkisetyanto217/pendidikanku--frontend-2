@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { Pencil, Trash2 } from "lucide-react";
@@ -313,7 +313,6 @@ export default function DKMQuizLectureSessions() {
               >
                 Batal
               </button>
-
 
               <button
                 disabled

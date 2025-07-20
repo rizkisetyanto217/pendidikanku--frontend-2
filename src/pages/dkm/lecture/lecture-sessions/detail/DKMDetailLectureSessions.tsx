@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import {
   BookOpen,
   FileText,
@@ -106,10 +106,7 @@ export default function DKMDetailLectureSessions() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Kajian Detail"
-        backTo={`/dkm/kajian`}
-      />
+      <PageHeader title="Kajian Detail" backTo={`/dkm/kajian`} />
 
       {/* Kartu Kajian */}
       <div

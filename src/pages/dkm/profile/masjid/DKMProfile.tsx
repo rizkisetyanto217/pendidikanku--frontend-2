@@ -8,8 +8,8 @@ import DashboardSidebar, {
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import PageHeader from "@/components/common/PageHeader";
-import CommonButton from "@/components/common/main/button";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import CommonButton from "@/components/common/main/MainButton";
 
 interface TokenPayload {
   masjid_admin_ids: string[];

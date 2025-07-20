@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
 
 export default function DKMInformationLectureSessions() {

@@ -3,13 +3,13 @@ import { jwtDecode } from "jwt-decode";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import ActionEditDelete from "@/components/common/main/actionEditDelete";
+import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import toast from "react-hot-toast";
 import { useDeleteLecture } from "./useDeleteLecture";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { useNavigate } from "react-router-dom";
 import SimpleTable from "@/components/common/main/SimpleTable";
-import StatusBadge from "@/components/common/main/statusBadge";
+import StatusBadge from "@/components/common/main/MainStatusBadge";
 import FormattedDate from "@/constants/formattedDate";
 
 interface Lecture {

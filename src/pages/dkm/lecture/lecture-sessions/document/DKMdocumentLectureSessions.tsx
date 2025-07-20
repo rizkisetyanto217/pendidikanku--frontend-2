@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useOutletContext } from "react-router-dom";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { ExternalLink, Trash2 } from "lucide-react";

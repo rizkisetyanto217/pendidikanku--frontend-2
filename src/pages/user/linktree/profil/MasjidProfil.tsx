@@ -1,11 +1,16 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import PageHeader from "@/components/common/PageHeader";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 
 export default function MasjidProfile() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { isDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
 
   const { data: masjid, isLoading } = useQuery({
     queryKey: ["masjid-profile", slug],
@@ -35,59 +40,68 @@ export default function MasjidProfile() {
 
   return (
     <>
-      <PageHeader
+      <PageHeaderUser
         title="Profil Masjid"
         onBackClick={() => {
           if (window.history.length > 1) navigate(-1);
         }}
       />
 
-      {/* Kontainer utama */}
-      <div className="rounded-xl overflow-hidden shadow bg-white">
-        {/* 🏞️ Foto Masjid */}
+      <div
+        className="rounded-xl overflow-hidden shadow"
+        style={{ backgroundColor: themeColors.white1 }}
+      >
         <img
           src={masjid.masjid_image_url || "/assets/placeholder/masjid.jpg"}
           alt={`Foto ${masjid.masjid_name}`}
           className="w-full h-48 md:h-64 object-cover"
         />
 
-        {/* 🏛️ Info Masjid */}
-        <div className="p-4 md:p-5 space-y-2">
-          <h1 className="text-xl font-bold text-emerald-700">
+        <div
+          className="p-4 md:p-5 space-y-2"
+          style={{ color: themeColors.black1 }}
+        >
+          <h1 style={{ color: themeColors.primary }}>
             🏛️ {masjid.masjid_name}
           </h1>
-          <p className="text-gray-700 text-sm md:text-base">
+          <p style={{ color: themeColors.silver2 }}>
             Dikelola oleh DKM Masjid untuk umat muslim
           </p>
-          <p className="text-gray-800 text-sm md:text-base font-medium">
+          <p style={{ color: themeColors.black2, fontWeight: 500 }}>
             {masjid.masjid_location}
           </p>
-          <p className="text-gray-500 text-xs">Bergabung pada April 2025</p>
+          <p style={{ color: themeColors.silver2, fontSize: 12 }}>
+            Bergabung pada April 2025
+          </p>
         </div>
 
-        {/* 📘 Profil Lembaga */}
-        <div className="border-t-[5px] border-[#dfdfdf] p-4 md:p-5 space-y-2">
-          <h2 className="text-base md:text-lg font-semibold text-sky-700">
-            📘 Profil Lembaga
-          </h2>
-          <p className="text-sm text-gray-700 leading-relaxed">
+        <div
+          className="border-t-[5px] p-4 md:p-5 space-y-2"
+          style={{ borderColor: themeColors.white3 }}
+        >
+          <h2 style={{ color: themeColors.quaternary }}>📘 Profil Lembaga</h2>
+          <p style={{ color: themeColors.black2, fontSize: 14 }}>
             {masjid.masjid_profile_story ||
               "Masjid ini didirikan dengan tujuan menjadi tempat ibadah dan pusat kegiatan umat Islam di lingkungan sekitarnya."}
           </p>
           <button
             onClick={() => navigate("detail")}
-            className="mt-2 px-4 py-2 text-sm border border-sky-600 text-sky-600 rounded hover:bg-sky-50"
+            style={{
+              borderColor: themeColors.quaternary,
+              color: themeColors.quaternary,
+            }}
+            className="mt-2 px-4 py-2 text-sm rounded hover:opacity-80 border"
           >
             Profil Lengkap
           </button>
         </div>
 
-        {/* 📄 Pengurus & Pengajar */}
-        <div className="border-t-[5px] border-[#dfdfdf] p-4 md:p-5 space-y-2">
-          <h2 className="text-base md:text-lg font-semibold text-emerald-700">
-            📄 Pengurus & Pengajar
-          </h2>
-          <p className="text-sm text-gray-700">
+        <div
+          className="border-t-[5px] p-4 md:p-5 space-y-2"
+          style={{ borderColor: themeColors.white3 }}
+        >
+          <h2 style={{ color: themeColors.primary }}>📄 Pengurus & Pengajar</h2>
+          <p style={{ color: themeColors.black2, fontSize: 14 }}>
             Pengurus dan Pengajar berasal dari masyarakat setempat yang memiliki
             tujuan memajukan Masjid.
           </p>
@@ -95,7 +109,13 @@ export default function MasjidProfile() {
           <div className="space-y-2 pt-1">
             <button
               onClick={() => navigate("dkm-pengajar")}
-              className="w-full flex justify-between items-center p-3 rounded border border-gray-200 bg-gray-50 hover:bg-gray-100"
+              className="w-full flex justify-between items-center p-3 rounded hover:opacity-80"
+              style={{
+                backgroundColor: themeColors.white2,
+                borderColor: themeColors.white3,
+                borderWidth: 1,
+                color: themeColors.black1,
+              }}
             >
               <span className="flex items-center space-x-2">
                 <span>📋</span>
@@ -106,13 +126,18 @@ export default function MasjidProfile() {
           </div>
         </div>
 
-        {/* 🧑‍🤝‍🧑 Sambutan dan Motivasi */}
-        <div className="border-t-[5px] border-[#dfdfdf] p-4 md:p-5 space-y-3">
-          <h2 className="text-base md:text-lg font-semibold text-sky-700 flex items-center space-x-2">
+        <div
+          className="border-t-[5px] p-4 md:p-5 space-y-3"
+          style={{ borderColor: themeColors.white3 }}
+        >
+          <h2
+            className="flex items-center space-x-2"
+            style={{ color: themeColors.quaternary }}
+          >
             <span>🧑‍🤝‍🧑</span>
             <span>Sambutan dan Motivasi</span>
           </h2>
-          <p className="text-sm text-gray-700">
+          <p style={{ color: themeColors.black2, fontSize: 14 }}>
             Tulisan dari pengurus, pengajar dan jamaah{" "}
             <strong>{masjid.masjid_name}</strong>
           </p>
@@ -120,19 +145,30 @@ export default function MasjidProfile() {
           {greetings.map((greet, i) => (
             <div
               key={i}
-              className="p-3 border border-gray-200 rounded-lg bg-gray-50 text-sm space-y-1"
+              className="p-3 rounded-lg text-sm space-y-1"
+              style={{
+                backgroundColor: themeColors.white2,
+                borderColor: themeColors.white3,
+                borderWidth: 1,
+              }}
             >
-              <p className="font-semibold text-gray-800">{greet.name}</p>
-              <p className="text-xs text-gray-500">{greet.role}</p>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                {greet.message}
+              <p style={{ color: themeColors.black1, fontWeight: 600 }}>
+                {greet.name}
               </p>
+              <p style={{ color: themeColors.silver2, fontSize: 12 }}>
+                {greet.role}
+              </p>
+              <p style={{ color: themeColors.black2 }}>{greet.message}</p>
             </div>
           ))}
 
           <button
             onClick={() => navigate("sambutan")}
-            className="w-full text-sm border border-sky-500 text-sky-600 rounded px-4 py-2 font-medium flex justify-between items-center hover:bg-sky-50"
+            style={{
+              borderColor: themeColors.quaternary,
+              color: themeColors.quaternary,
+            }}
+            className="w-full text-sm rounded px-4 py-2 font-medium flex justify-between items-center border hover:opacity-80"
           >
             <span>Selengkapnya</span>
             <span>›</span>
@@ -140,7 +176,11 @@ export default function MasjidProfile() {
 
           <button
             onClick={() => navigate(`/masjid/${slug}/donasi`)}
-            className="w-full bg-teal-700 hover:bg-teal-800 text-white py-3 rounded font-semibold"
+            style={{
+              backgroundColor: themeColors.primary,
+              color: themeColors.white1,
+            }}
+            className="w-full py-3 rounded font-semibold hover:opacity-90"
           >
             Donasi
           </button>
