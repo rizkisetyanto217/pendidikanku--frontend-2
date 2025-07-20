@@ -62,7 +62,7 @@ export default function MasjidDetailLecture() {
         }}
       />
 
-      {/* Detail Kajian */}
+      {/* Detail Kajian  */}
       <div
         className="p-4 space-y-4 rounded-md shadow-sm"
         style={{

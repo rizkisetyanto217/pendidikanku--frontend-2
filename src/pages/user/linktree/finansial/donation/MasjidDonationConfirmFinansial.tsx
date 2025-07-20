@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "@/lib/axios";
 import axios, { AxiosError } from "axios";
@@ -18,6 +18,9 @@ const MasjidDonationConfirmMasjid = () => {
   const { isDark } = useHtmlDarkMode();
   const masjidDonation = Number(searchParams.get("masjid")) || 0;
   const masjidkuDonation = Number(searchParams.get("masjidku")) || 0;
+  const [donationName, setDonationName] = useState("");
+  const [donationMessage, setDonationMessage] = useState("");
+
   const fee = 4000;
   const total = masjidDonation + masjidkuDonation + fee;
   const navigate = useNavigate();
@@ -48,6 +51,8 @@ const MasjidDonationConfirmMasjid = () => {
     const donationData = {
       donation_amount: total,
       donation_masjid_id: masjidIdFromUrl,
+      donation_name: donationName,
+      donation_message: donationMessage,
     };
 
     try {
@@ -158,6 +163,45 @@ const MasjidDonationConfirmMasjid = () => {
           <br />* Dukungan perkembangan aplikasi digunakan untuk operasional dan
           pengembangan fitur Masjidku.
         </p>
+      </div>
+
+      <div className="mt-4 max-w-md mx-auto space-y-3">
+        <input
+          type="text"
+          placeholder="Nama Anda (opsional)"
+          value={donationName}
+          onChange={(e) => setDonationName(e.target.value)}
+          className="w-full p-3 rounded-md border text-sm outline-none transition-all duration-200"
+          style={{
+            borderColor: themeColors.silver1,
+            backgroundColor: themeColors.white1,
+            color: themeColors.black1,
+          }}
+          onFocus={(e) =>
+            (e.currentTarget.style.borderColor = themeColors.primary)
+          }
+          onBlur={(e) =>
+            (e.currentTarget.style.borderColor = themeColors.silver1)
+          }
+        />
+        <textarea
+          placeholder="Ucapan atau pesan (opsional)"
+          value={donationMessage}
+          onChange={(e) => setDonationMessage(e.target.value)}
+          className="w-full p-3 rounded-md border text-sm outline-none transition-all duration-200"
+          rows={3}
+          style={{
+            borderColor: themeColors.silver1,
+            backgroundColor: themeColors.white1,
+            color: themeColors.black1,
+          }}
+          onFocus={(e) =>
+            (e.currentTarget.style.borderColor = themeColors.primary)
+          }
+          onBlur={(e) =>
+            (e.currentTarget.style.borderColor = themeColors.silver1)
+          }
+        />
       </div>
 
       <div

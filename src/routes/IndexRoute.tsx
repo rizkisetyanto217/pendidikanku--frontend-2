@@ -66,16 +66,17 @@ import DKMAddLectureSession from "@/pages/dkm/lecture/lecture-sessions/main/DKMA
 import DKMAddEditLectureSession from "@/pages/dkm/lecture/lecture-sessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLecture from "@/pages/dkm/lecture/lecture/main/DKMAddEditLecture";
 import MasjidLinkTree from "@/pages/user/linktree/MasjidLinkTreeHome";
-import MasjidDonationMasjid from "@/pages/user/linktree/finansial/MasjidDonationMasjidFinansial";
+import MasjidDonationMasjid from "@/pages/user/linktree/finansial/donation/MasjidDonationMasjidFinansial";
 import MasjidLayout from "@/pages/user/MasjidLayout";
-import MasjidDonationConfirmDonation from "@/pages/user/linktree/finansial/MasjidDonationConfirmFinansial";
+import MasjidDonationConfirmDonation from "@/pages/user/linktree/finansial/donation/MasjidDonationConfirmFinansial";
 import MasjidProfile from "@/pages/user/linktree/profil/MasjidProfil";
 import MasjidDKMPengajarProfil from "@/pages/user/linktree/profil/MasjidDKMPengajarProfil";
 import MasjidDetailSpeech from "@/pages/user/linktree/profil/MasjidDetailSpeechProfil";
 import MasjidProfileDetail from "@/pages/user/linktree/profil/MasjidDetailProfil";
 import MasjidScheduleLecture from "@/pages/user/linktree/lecture/MasjidScheduleLecture";
-import MasjidReportFinansial from "@/pages/user/linktree/finansial/MasjidReportFinansial";
+import MasjidReportFinansial from "@/pages/user/linktree/finansial/report/MasjidReportFinansial";
 import MasjidDetailLecture from "@/pages/user/linktree/lecture/MasjidDetailLecture";
+import MasjidDonationMotivation from "@/pages/user/linktree/finansial/donation/MasjidDonationMotivation";
 
 export default function AppRoutes() {
   return (
@@ -99,6 +100,7 @@ export default function AppRoutes() {
             path="donasi/konfirmasi"
             element={<MasjidDonationConfirmDonation />}
           />
+          <Route path="donasi/pesan" element={<MasjidDonationMotivation />} />
 
           <Route path="keuangan" element={<MasjidReportFinansial />} />
           <Route path="jadwal-kajian" element={<MasjidScheduleLecture />} />
