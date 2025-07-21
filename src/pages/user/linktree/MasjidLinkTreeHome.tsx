@@ -59,7 +59,7 @@ export default function PublicLinktree() {
     queryKey: ["kajianListBySlug", slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-u/by-masjid-slug/${slug}`
+        `/public/lecture-sessions-u/mendatang/${slug}`
       );
       return res.data?.data?.slice(0, 3) ?? [];
     },

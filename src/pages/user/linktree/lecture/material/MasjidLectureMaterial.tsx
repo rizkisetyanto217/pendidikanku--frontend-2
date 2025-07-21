@@ -2,8 +2,22 @@ import React, { useState } from "react";
 import LectureMaterialMonthList from "@/components/pages/lecture/LectureMonthList";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
+
+type LectureSessionAPIItem = {
+  lecture_session_id: string;
+  lecture_session_title: string;
+  lecture_session_teacher_name: string;
+  lecture_session_start_time: string;
+  lecture_session_place: string;
+  lecture_session_image_url: string;
+  lecture_session_approved_by_dkm_at: string | null;
+  lecture_session_lecture_id: string;
+  lecture_title: string;
+};
 
 type LectureMaterialItem = {
   id: string;
@@ -13,7 +27,13 @@ type LectureMaterialItem = {
   location: string;
   time: string;
   status: "tersedia" | "proses";
-  lectureId: string; // id tema
+  lectureId: string;
+};
+
+type LectureTheme = {
+  lecture_id: string;
+  lecture_title: string;
+  lecture_total_sessions: number;
 };
 
 const monthData = [
@@ -22,53 +42,61 @@ const monthData = [
   { month: "Maret", total: 12 },
 ];
 
-const lectureThemes = [
-  { id: "tema-1", name: "Tauhid" },
-  { id: "tema-2", name: "Akhlaq" },
-  { id: "tema-3", name: "Fiqih" },
-];
-
-const materialData: LectureMaterialItem[] = [
-  {
-    id: "1",
-    title: "Mengenal Allah Sang Pencipta",
-    teacher: "Ustadz Ahmad",
-    masjidName: "Masjid Al-Furqan",
-    location: "Depok",
-    time: "1 Januari 2025, 08:00 WIB",
-    status: "tersedia",
-    lectureId: "tema-1",
-  },
-  {
-    id: "2",
-    title: "Adab kepada Orang Tua",
-    teacher: "Ustadzah Salma",
-    masjidName: "Masjid Nurul Huda",
-    location: "Bandung",
-    time: "15 Januari 2025, 10:00 WIB",
-    status: "tersedia",
-    lectureId: "tema-2",
-  },
-  {
-    id: "3",
-    title: "Hukum Wudhu dan Shalat",
-    teacher: "Ustadz Fajar",
-    masjidName: "Masjid As-Salam",
-    location: "Bekasi",
-    time: "20 Februari 2025, 13:00 WIB",
-    status: "proses",
-    lectureId: "tema-3",
-  },
-];
-
 export default function MasjidLectureMaterial() {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [tab, setTab] = useState("tanggal");
+  const [tab, setTab] = useState("terbaru");
   const [selectedTheme, setSelectedTheme] = useState<string>("");
-
   const navigate = useNavigate();
+  const { slug = "" } = useParams();
 
-  const filteredByTheme = materialData.filter(
+  const { data: kajianList, isLoading: loadingKajian } = useQuery<
+    LectureSessionAPIItem[]
+  >({
+    queryKey: ["kajianListBySlug", slug],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/lecture-sessions-u/soal-materi/${slug}`
+      );
+      console.log("✅ Response data lecture sessions:", res.data);
+      return res.data?.data ?? [];
+    },
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: lectureThemes = [], isLoading: loadingThemes } = useQuery<
+    LectureTheme[]
+  >({
+    queryKey: ["lectureThemesBySlug", slug],
+    queryFn: async () => {
+      const res = await axios.get(`/public/lectures/slug/${slug}`);
+      console.log("📚 Tema kajian:", res.data.data);
+      return res.data?.data ?? [];
+    },
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const mappedMaterial: LectureMaterialItem[] =
+    kajianList?.map((item) => ({
+      id: item.lecture_session_id,
+      title: item.lecture_session_title,
+      teacher: item.lecture_session_teacher_name,
+      masjidName: "", // optional, bisa ambil dari masjid jika disediakan
+      location: item.lecture_session_place,
+      time: new Date(item.lecture_session_start_time).toLocaleString("id-ID", {
+        dateStyle: "long",
+        timeStyle: "short",
+      }),
+      status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
+      lectureId: item.lecture_session_lecture_id,
+    })) ?? [];
+
+  const filteredByTheme = mappedMaterial.filter(
     (item) => selectedTheme === "" || item.lectureId === selectedTheme
   );
 
@@ -92,7 +120,11 @@ export default function MasjidLectureMaterial() {
       />
 
       <TabsContent value="terbaru" current={tab}>
-        <LectureMaterialList data={materialData} />
+        {loadingKajian ? (
+          <p>Memuat data...</p>
+        ) : (
+          <LectureMaterialList data={mappedMaterial} />
+        )}
       </TabsContent>
 
       <TabsContent value="tanggal" current={tab}>
@@ -105,7 +137,7 @@ export default function MasjidLectureMaterial() {
               ← Kembali ke daftar bulan
             </button>
             <h2 className="text-base font-semibold">Bulan {selectedMonth}</h2>
-            <LectureMaterialList data={materialData} />
+            <LectureMaterialList data={mappedMaterial} />
           </div>
         ) : (
           <LectureMaterialMonthList
@@ -117,22 +149,38 @@ export default function MasjidLectureMaterial() {
 
       <TabsContent value="tema" current={tab}>
         <div className="space-y-3">
-          <label htmlFor="tema" className="text-sm font-medium">
-            Pilih Tema Kajian
-          </label>
-          <select
-            id="tema"
-            className="border border-gray-300 rounded px-3 py-2 w-full dark:bg-gray-800 dark:text-white"
-            value={selectedTheme}
-            onChange={(e) => setSelectedTheme(e.target.value)}
-          >
-            <option value="">Semua Tema</option>
-            {lectureThemes.map((theme) => (
-              <option key={theme.id} value={theme.id}>
-                {theme.name}
-              </option>
-            ))}
-          </select>
+          <h2 className="text-sm font-medium">Daftar Tema Kajian</h2>
+
+          {loadingThemes ? (
+            <p>Memuat tema kajian...</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedTheme("")}
+                className={`px-3 py-1 rounded border text-sm ${
+                  selectedTheme === ""
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white"
+                }`}
+              >
+                Semua Tema
+              </button>
+
+              {lectureThemes.map((theme) => (
+                <button
+                  key={theme.lecture_id}
+                  onClick={() => setSelectedTheme(theme.lecture_id)}
+                  className={`px-3 py-1 rounded border text-sm ${
+                    selectedTheme === theme.lecture_id
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white"
+                  }`}
+                >
+                  {theme.lecture_title}
+                </button>
+              ))}
+            </div>
+          )}
 
           <LectureMaterialList data={filteredByTheme} />
         </div>

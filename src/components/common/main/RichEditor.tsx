@@ -160,7 +160,7 @@ export default function RichEditor({
         className="min-h-[120px] text-sm rounded border p-2 prose dark:prose-invert"
         style={{
           backgroundColor: theme.white2,
-          color: isDark ? theme.white1 : theme.black1,
+          color: isDark ? theme.black1 : theme.black1,
           borderColor: theme.silver1,
         }}
         data-placeholder={placeholder}

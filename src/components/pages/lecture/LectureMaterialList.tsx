@@ -1,5 +1,6 @@
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface LectureMaterialItem {
   id: string;
@@ -18,19 +19,27 @@ export default function LectureMaterialList({
 }) {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const navigate = useNavigate();
+  const { slug = "" } = useParams();
 
   return (
     <div className="space-y-4">
       {data.map((item) => (
         <div
           key={item.id}
-          className="p-3 rounded-md shadow-sm"
+          onClick={() =>
+            navigate(`/masjid/${slug}/soal-materi-kajian/${item.id}`)
+          }
+          className="p-3 rounded-md shadow-sm cursor-pointer transition hover:opacity-90"
           style={{
             backgroundColor: theme.white1,
             border: `1px solid ${theme.silver1}`,
           }}
         >
-          <p className="font-semibold text-sm mb-2" style={{ color: theme.black1 }}>
+          <p
+            className="font-semibold text-sm mb-2"
+            style={{ color: theme.black1 }}
+          >
             {item.title}
           </p>
           <p className="text-xs mb-1" style={{ color: theme.silver2 }}>

@@ -79,6 +79,11 @@ import MasjidDetailLecture from "@/pages/user/linktree/lecture/MasjidDetailLectu
 import MasjidDonationMotivation from "@/pages/user/linktree/finansial/donation/MasjidDonationMotivation";
 import MasjidLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidLectureMaterial";
 import MasjidDetailLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidDetailLectureMaterial";
+import MasjidInformationDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidInformationDetailLectureSessions";
+import MasjidQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidQuizDetailLectureSessions";
+import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidFullTranscriptLectureSessions";
+import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidSummaryDetailLectureSessions";
+import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidDocsLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -114,14 +119,36 @@ export default function AppRoutes() {
           <Route path="jadwal-kajian" element={<MasjidScheduleLecture />} />
           <Route path="jadwal-kajian/:id" element={<MasjidDetailLecture />} />
 
-          {/* Soal & Materi Kajian  */}
+          {/* Soal & Materi Kajian */}
           <Route
             path="soal-materi-kajian"
             element={<MasjidLectureMaterial />}
           />
+
+          {/* Detail & Sub Halaman */}
           <Route
             path="soal-materi-kajian/:id"
             element={<MasjidDetailLectureMaterial />}
+          />
+          <Route
+            path="soal-materi-kajian/:id/informasi"
+            element={<MasjidInformationDetailLectureSessions />}
+          />
+          <Route
+            path="soal-materi-kajian/:id/latihan-soal"
+            element={<MasjidQuizDetailLectureSessions />}
+          />
+          <Route
+            path="soal-materi-kajian/:id/materi-lengkap"
+            element={<MasjidFullTranscriptDetailLectureSessions />}
+          />
+          <Route
+            path="soal-materi-kajian/:id/ringkasan"
+            element={<MasjidSummaryDetailLectureSessions />}
+          />
+          <Route
+            path="soal-materi-kajian/:id/dokumen"
+            element={<MasjidDocsDetailLectureSessions />}
           />
         </Route>
       </Route>
