@@ -62,65 +62,73 @@ export default function MasjidDetailLecture() {
         }}
       />
 
-      {/* Detail Kajian  */}
       <div
-        className="p-4 space-y-4 rounded-md shadow-sm"
+        className="p-4 rounded-md shadow-sm"
         style={{
           backgroundColor: themeColors.white1,
           color: themeColors.black1,
         }}
       >
-        {/* Gambar Kajian */}
-        <img
-          src={
-            kajian.lecture_session_image_url ||
-            "/assets/placeholder/lecture.png"
-          }
-          alt={kajian.lecture_session_title}
-          className="w-full rounded-xl mb-4"
-        />
+        {/* Kontainer Responsif */}
+        <div className="md:flex md:gap-6">
+          {/* Gambar Kajian */}
+          <div className="w-full md:w-1/2 aspect-[3/4] md:aspect-auto md:h-[420px] rounded-xl overflow-hidden mb-4 md:mb-0">
+            <img
+              src={
+                kajian.lecture_session_image_url ||
+                "/assets/placeholder/lecture.png"
+              }
+              alt={kajian.lecture_session_title}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-        {/* Informasi Kajian */}
-        <div>
-          <h2
-            className="text-base font-semibold"
-            style={{ color: themeColors.quaternary }}
-          >
-            Informasi Kajian
-          </h2>
-          <ul className="text-sm space-y-1 mt-1">
-            <li>
-              📘 <strong>Materi:</strong> {kajian.lecture_session_title}
-            </li>
-            <li>
-              👤 <strong>Pengajar:</strong>{" "}
-              {kajian.lecture_session_teacher_name || "-"}
-            </li>
-            <li>
-              🕒 <strong>Jadwal:</strong>{" "}
-              {formatDate(kajian.lecture_session_start_time)}
-            </li>
-            <li>
-              📍 <strong>Tempat:</strong> {kajian.lecture_session_place || "-"}
-            </li>
-          </ul>
-        </div>
+          {/* Informasi & Keterangan */}
+          <div className="w-full md:w-1/2 space-y-4">
+            {/* Informasi Kajian */}
+            <div>
+              <h2
+                className="text-base font-semibold"
+                style={{ color: themeColors.quaternary }}
+              >
+                Informasi Kajian
+              </h2>
+              <ul className="text-sm space-y-1 mt-1">
+                <li>
+                  📘 <strong>Materi:</strong> {kajian.lecture_session_title}
+                </li>
+                <li>
+                  👤 <strong>Pengajar:</strong>{" "}
+                  {kajian.lecture_session_teacher_name || "-"}
+                </li>
+                <li>
+                  🕒 <strong>Jadwal:</strong>{" "}
+                  {formatDate(kajian.lecture_session_start_time)}
+                </li>
+                <li>
+                  📍 <strong>Tempat:</strong>{" "}
+                  {kajian.lecture_session_place || "-"}
+                </li>
+              </ul>
+            </div>
 
-        {/* Keterangan Kajian */}
-        <div>
-          <h2
-            className="text-base font-semibold"
-            style={{ color: themeColors.quaternary }}
-          >
-            Keterangan
-          </h2>
-          <p
-            className="text-sm leading-relaxed"
-            style={{ color: themeColors.black2 }}
-          >
-            {kajian.lecture_session_description ||
-              "Tidak ada deskripsi yang tersedia."}
-          </p>
+            {/* Keterangan Kajian */}
+            <div>
+              <h2
+                className="text-base font-semibold"
+                style={{ color: themeColors.quaternary }}
+              >
+                Keterangan
+              </h2>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: themeColors.black2 }}
+              >
+                {kajian.lecture_session_description ||
+                  "Tidak ada deskripsi yang tersedia."}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

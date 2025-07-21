@@ -50,20 +50,20 @@ export default function PublicLinktree() {
       return res.data?.data;
     },
     enabled: !!slug,
-    staleTime: 5 * 60 * 1000, // ✅ tahan cache 5 menit
+    staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 
   const { data: kajianList, isLoading: loadingKajian } = useQuery<Kajian[]>({
-    queryKey: ["kajianList", masjidData?.masjid_id],
+    queryKey: ["kajianListBySlug", slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-u/by-masjid/${masjidData?.masjid_id}`
+        `/public/lecture-sessions-u/by-masjid-slug/${slug}`
       );
       return res.data?.data?.slice(0, 3) ?? [];
     },
-    enabled: !!masjidData?.masjid_id,
+    enabled: !!slug,
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -124,7 +124,7 @@ export default function PublicLinktree() {
                   key={idx}
                   onClick={() =>
                     navigate(
-                      `/masjid/${slug}/kajian/${kajian.lecture_session_id}`
+                      `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
                     )
                   }
                   className="min-w-[260px] max-w-xs rounded-lg overflow-hidden shadow-md cursor-pointer hover:opacity-90 transition"
@@ -308,7 +308,12 @@ export default function PublicLinktree() {
             href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
             internal
           />
-          <LinkItem label="Soal & Materi Kajian" icon="📚" />
+          <LinkItem
+            label="Soal & Materi Kajian"
+            icon="📚"
+            href={`/masjid/${masjidData.masjid_slug}/soal-materi-kajian`}
+            internal
+          />
           <LinkItem
             label="Laporan Keuangan"
             icon="📰"
@@ -361,7 +366,7 @@ export default function PublicLinktree() {
                     key={idx}
                     onClick={() =>
                       navigate(
-                        `/masjid/${slug}/kajian/${kajian.lecture_session_id}`
+                        `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
                       )
                     }
                     className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow"
@@ -540,7 +545,12 @@ export default function PublicLinktree() {
               href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
               internal
             />
-            <LinkItem label="Soal & Materi Kajian" icon="📚" />
+            <LinkItem
+              label="Soal & Materi Kajian"
+              icon="📚"
+              href={`/masjid/${masjidData.masjid_slug}/soal-materi-kajian`}
+              internal
+            />
             <LinkItem
               label="Laporan Keuangan"
               icon="📰"
