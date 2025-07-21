@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -14,12 +14,12 @@ interface LectureQuizQuestion {
   lecture_sessions_question_correct: string;
   lecture_sessions_question_explanation: string;
 }
-
 export default function MasjidQuizDetailLectureSessions() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const startTimeRef = useRef<number>(Date.now());
 
   const { data, isLoading } = useQuery({
     queryKey: ["quiz", id],
@@ -31,7 +31,7 @@ export default function MasjidQuizDetailLectureSessions() {
       return res.data.data;
     },
     enabled: !!id,
-    staleTime: 5 * 60 * 1000, // 5 menit
+    staleTime: 5 * 60 * 1000,
   });
 
   const [wrongQuestions, setWrongQuestions] = useState<LectureQuizQuestion[]>(
@@ -44,19 +44,43 @@ export default function MasjidQuizDetailLectureSessions() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [progressCount, setProgressCount] = useState(0);
 
+  // ⛔️ JANGAN TARUH `question` sebelum data siap
   const questions: LectureQuizQuestion[] = isRetrying
     ? wrongQuestions
     : data?.questions || [];
+
+  useEffect(() => {
+    const endTime = Date.now();
+    const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
+
+    if (isRetrying && wrongQuestions.length === 0) {
+      navigate(`/masjid/${slug}/soal-materi-kajian/${id}/latihan-soal/hasil`, {
+        state: {
+          correct: progressCount,
+          total: data?.questions?.length || 1,
+          duration: durationSec,
+          id,
+          slug,
+        },
+      });
+    }
+  }, [isRetrying, wrongQuestions.length]);
+
+  if (isLoading || !data) {
+    return <div className="p-4">Memuat soal...</div>;
+  }
+
   const question = questions[index];
 
-  if (isLoading) return <div className="p-4">Memuat soal...</div>;
-  if (!question) return <div className="p-4">Soal tidak ditemukan.</div>;
+  if (!question && (!isRetrying || wrongQuestions.length === 0)) {
+    return <div className="p-4">Soal tidak ditemukan.</div>;
+  }
 
   const handleCheck = () => {
     if (!selected) return;
+
     const correct = question.lecture_sessions_question_correct;
     const isRight = selected.startsWith(correct);
-
     setIsCorrect(isRight);
     setShowAnswer(true);
 
@@ -96,15 +120,25 @@ export default function MasjidQuizDetailLectureSessions() {
     } else if (isRetrying && wrongQuestions.length > 0) {
       setIndex(0);
     } else {
-      alert("✅ Semua soal telah dijawab dengan benar!");
-      navigate(-1);
+      const endTime = Date.now();
+      const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
+
+      navigate(`/masjid/${slug}/soal-materi-kajian/${id}/latihan-soal/hasil`, {
+        state: {
+          correct: progressCount + (isCorrect ? 1 : 0),
+          total: data?.questions?.length || 1,
+          duration: durationSec,
+          id,
+          slug,
+        },
+      });
     }
   };
 
   return (
     <div className="p-4 pb-28">
       <PageHeaderUser
-        title={data?.quiz?.lecture_sessions_quiz_title || "Latihan Soal"}
+        title={data.quiz?.lecture_sessions_quiz_title || "Latihan Soal"}
         onBackClick={() => navigate(-1)}
       />
 
