@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LectureMaterialMonthList from "@/components/pages/lecture/LectureMonthList";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
@@ -7,7 +7,8 @@ import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-type LectureSessionAPIItem = {
+// Types
+interface LectureSessionAPIItem {
   lecture_session_id: string;
   lecture_session_title: string;
   lecture_session_teacher_name: string;
@@ -17,9 +18,9 @@ type LectureSessionAPIItem = {
   lecture_session_approved_by_dkm_at: string | null;
   lecture_session_lecture_id: string;
   lecture_title: string;
-};
+}
 
-type LectureMaterialItem = {
+interface LectureMaterialItem {
   id: string;
   title: string;
   teacher: string;
@@ -28,13 +29,13 @@ type LectureMaterialItem = {
   time: string;
   status: "tersedia" | "proses";
   lectureId: string;
-};
+}
 
-type LectureTheme = {
+interface LectureTheme {
   lecture_id: string;
   lecture_title: string;
   lecture_total_sessions: number;
-};
+}
 
 const monthData = [
   { month: "Januari", total: 12 },
@@ -57,36 +58,42 @@ export default function MasjidLectureMaterial() {
       const res = await axios.get(
         `/public/lecture-sessions-u/soal-materi/${slug}`
       );
-      console.log("✅ Response data lecture sessions:", res.data);
       return res.data?.data ?? [];
     },
-    enabled: !!slug,
+    enabled: Boolean(slug),
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 
-  const { data: lectureThemes = [], isLoading: loadingThemes } = useQuery<
-    LectureTheme[]
-  >({
+  const {
+    data: lectureThemes = [],
+    isLoading: loadingThemes,
+    refetch: refetchThemes,
+  } = useQuery<LectureTheme[]>({
     queryKey: ["lectureThemesBySlug", slug],
     queryFn: async () => {
       const res = await axios.get(`/public/lectures/slug/${slug}`);
-      console.log("📚 Tema kajian:", res.data.data);
       return res.data?.data ?? [];
     },
-    enabled: !!slug,
+    enabled: Boolean(slug),
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (tab === "tema" && slug) {
+      refetchThemes();
+    }
+  }, [tab, slug]);
 
   const mappedMaterial: LectureMaterialItem[] =
     kajianList?.map((item) => ({
       id: item.lecture_session_id,
       title: item.lecture_session_title,
       teacher: item.lecture_session_teacher_name,
-      masjidName: "", // optional, bisa ambil dari masjid jika disediakan
+      masjidName: "",
       location: item.lecture_session_place,
       time: new Date(item.lecture_session_start_time).toLocaleString("id-ID", {
         dateStyle: "long",
