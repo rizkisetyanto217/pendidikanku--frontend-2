@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import useHtmlDarkMode  from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 
 interface CommonButtonProps {
   to: string;
@@ -17,6 +19,9 @@ export default function CommonButton({
   className = "",
   style = {},
 }: CommonButtonProps) {
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+
   const isOutline = variant === "outline";
 
   return (
@@ -24,9 +29,9 @@ export default function CommonButton({
       <button
         className={`px-4 py-2 text-sm font-semibold rounded ${className}`}
         style={{
-          backgroundColor: isOutline ? "transparent" : "#2563eb",
-          color: isOutline ? "#2563eb" : "#fff",
-          border: isOutline ? "1px solid #2563eb" : "none",
+          backgroundColor: isOutline ? "transparent" : theme.primary,
+          color: isOutline ? theme.primary : "#ffffff",
+          border: isOutline ? `1px solid ${theme.primary}` : "none",
           ...style,
         }}
       >

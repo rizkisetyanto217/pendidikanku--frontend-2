@@ -101,7 +101,7 @@ export default function DKMDetailLectureSessions() {
       to: "materi-lengkap",
     },
     { icon: <StickyNote size={36} />, label: "Ringkasan", to: "ringkasan" },
-    { icon: <PlayCircle size={36} />, label: "Dokumentasi", to: "dokumentasi" },
+    { icon: <PlayCircle size={36} />, label: "Dokumen", to: "dokumen" },
   ];
 
   return (

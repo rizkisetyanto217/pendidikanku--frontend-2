@@ -54,6 +54,9 @@ export default function Login() {
           default:
             navigate("/login");
         }
+
+        // ⬅️ Tambahkan reload agar state global dan query re-sync
+        window.location.reload();
       } else {
         setError("Login gagal, coba lagi.");
       }

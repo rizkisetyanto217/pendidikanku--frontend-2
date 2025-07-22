@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { useOutletContext } from "react-router-dom";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { ExternalLink, Trash2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
+import toast from "react-hot-toast";
 
 interface LectureSessionsAsset {
   lecture_sessions_asset_id: string;
@@ -18,37 +20,61 @@ interface LectureSessionsAsset {
 }
 
 export default function DKMDocumentLectureSessions() {
-  const session = useOutletContext<any>();
+  const { id: lecture_session_id } = useParams();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const navigate = useNavigate();
 
   const {
     data: documents = [],
     isLoading,
     isError,
   } = useQuery<LectureSessionsAsset[]>({
-    queryKey: ["lecture-sessions-documents", session?.lecture_session_id],
+    queryKey: ["lecture-sessions-documents", lecture_session_id],
     queryFn: async () => {
       const res = await axios.get(
-        `/api/a/lecture-sessions-assets/filter?lecture_session_id=${session?.lecture_session_id}&file_type=3,4,5,6`
+        `/api/a/lecture-sessions-assets/filter?lecture_session_id=${lecture_session_id}&file_type=3,4,5,6`
       );
+      console.log("✅ Dokumen berhasil diambil:", res.data);
       return res.data;
     },
-    enabled: !!session?.lecture_session_id,
+    select: (data) => (Array.isArray(data) ? data : []),
+    enabled: !!lecture_session_id,
   });
+
+  const handleDelete = async (doc: LectureSessionsAsset) => {
+    const konfirmasi = confirm("Yakin ingin menghapus dokumen ini?");
+    if (!konfirmasi) return;
+
+    try {
+      await axios.delete(
+        `/api/a/lecture-sessions-assets/${doc.lecture_sessions_asset_id}`
+      );
+      toast.success("Dokumen berhasil dihapus");
+    } catch (error) {
+      console.error("❌ Gagal menghapus dokumen:", error);
+      toast.error("Gagal menghapus dokumen");
+    }
+  };
+
+  const handleAdd = () => {
+    navigate(
+      `/dkm/kajian/kajian-detail/${lecture_session_id}/dokumen/tambah-edit`
+    );
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader title="Dokumen" onBackClick={() => history.back()} />
 
-      <div className="overflow-x-auto rounded-2xl shadow-sm">
-        <table
-          className="w-full text-sm border"
-          style={{ backgroundColor: theme.white1 }}
-        >
+      <div
+        className="overflow-x-auto rounded-2xl shadow-sm"
+        style={{ backgroundColor: theme.white1, color: theme.black1 }}
+      >
+        <table className="w-full text-sm">
           <thead
             className="text-left"
-            style={{ backgroundColor: theme.success2 }}
+            style={{ backgroundColor: theme.success2, color: theme.black1 }}
           >
             <tr>
               <th className="px-4 py-2">No</th>
@@ -62,7 +88,7 @@ export default function DKMDocumentLectureSessions() {
             {isLoading || isError ? (
               <tr>
                 <td colSpan={5} className="px-4 py-2 text-center">
-                  {isLoading ? "Memuat dokumen..." : "Gagal memuat dokumen."}
+                  {isLoading ? "Memuat dokumen..." : "❌ Gagal memuat dokumen."}
                 </td>
               </tr>
             ) : documents.length === 0 ? (
@@ -79,13 +105,17 @@ export default function DKMDocumentLectureSessions() {
                   style={{ borderColor: theme.silver1 }}
                 >
                   <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2 font-medium text-sky-700">
+                  <td
+                    className="px-4 py-2 font-medium truncate"
+                    style={{ color: theme.quaternary }}
+                  >
                     {doc.lecture_sessions_asset_title}
                   </td>
                   <td className="px-4 py-2 truncate max-w-[250px]">
                     <a
                       href={doc.lecture_sessions_asset_file_url}
-                      className="text-blue-600 underline"
+                      className="underline"
+                      style={{ color: theme.primary }}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -93,32 +123,28 @@ export default function DKMDocumentLectureSessions() {
                     </a>
                   </td>
                   <td className="px-4 py-2">
-                    <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                    <span
+                      className="px-2 py-1 rounded text-xs font-medium"
+                      style={{
+                        backgroundColor: theme.primary2,
+                        color: theme.primary,
+                      }}
+                    >
                       {doc.lecture_sessions_asset_file_type_label}
                     </span>
                   </td>
-                  <td className="px-4 py-2 space-x-2">
-                    <a
-                      href={doc.lecture_sessions_asset_file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Lihat"
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
-                      <ExternalLink size={16} />
-                    </a>
-                    <button
-                      title="Hapus"
-                      className="p-1 hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        if (confirm("Yakin ingin menghapus dokumen ini?")) {
-                          console.log("Hapus", doc.lecture_sessions_asset_id);
-                          // TODO: Tambahkan fungsi hapus
-                        }
-                      }}
-                    >
-                      <Trash2 size={16} className="text-red-500" />
-                    </button>
+                  <td className="px-4 py-2 space-x-2 flex items-center gap-2">
+                
+
+                    <ActionEditDelete
+                      showEdit={true}
+                      onDelete={() => handleDelete(doc)}
+                      onEdit={() =>
+                        navigate(
+                          `/dkm/kajian/kajian-detail/${lecture_session_id}/dokumen/tambah-edit/${doc.lecture_sessions_asset_id}`
+                        )
+                      }
+                    />
                   </td>
                 </tr>
               ))
@@ -129,6 +155,7 @@ export default function DKMDocumentLectureSessions() {
 
       <div className="text-right">
         <button
+          onClick={handleAdd}
           className="px-5 py-2 rounded-lg font-semibold"
           style={{ backgroundColor: theme.primary, color: theme.white1 }}
         >

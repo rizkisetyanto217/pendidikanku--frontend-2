@@ -77,7 +77,7 @@ export default function DKMDetailLecture() {
     {
       icon: <FileText size={20} />,
       label: "Dokumen",
-      to: `/dkm/tema/tema-detail/${id}/dokumentasi`,
+      to: `/dkm/tema/tema-detail/${id}/dokumen`,
     },
   ];
 

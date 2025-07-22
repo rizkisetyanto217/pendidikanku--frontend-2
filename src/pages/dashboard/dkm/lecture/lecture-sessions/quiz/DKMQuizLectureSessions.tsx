@@ -137,7 +137,7 @@ export default function DKMQuizLectureSessions() {
             }}
           >
             <p
-              className="font-semibold text-base"
+              className="font-medium text-base"
               style={{ color: theme.black1 }}
             >
               {index + 1}. {q.question}
@@ -147,7 +147,7 @@ export default function DKMQuizLectureSessions() {
               {q.options.map((option, i) => (
                 <div
                   key={i}
-                  className="text-sm px-4 py-2 rounded-lg font-semibold"
+                  className="text-sm px-4 py-2 rounded-lg font-normal"
                   style={{
                     backgroundColor:
                       i === q.correctAnswerIndex
@@ -304,7 +304,7 @@ export default function DKMQuizLectureSessions() {
                   });
                   setIsEditingIndex(null);
                 }}
-                className="px-4 py-2 rounded-lg text-sm font-semibold border"
+                className="px-4 py-2 rounded-lg text-sm font-medium border"
                 style={{
                   backgroundColor: theme.white1,
                   borderColor: theme.silver1,
@@ -316,7 +316,7 @@ export default function DKMQuizLectureSessions() {
 
               <button
                 disabled
-                className="px-5 py-2 rounded-lg text-sm font-semibold opacity-60 cursor-not-allowed"
+                className="px-5 py-2 rounded-lg text-sm font-medium opacity-60 cursor-not-allowed"
                 style={{
                   backgroundColor: theme.success1,
                   color: theme.white1,
@@ -329,7 +329,7 @@ export default function DKMQuizLectureSessions() {
             <>
               <button
                 onClick={handleAddClick}
-                className="px-4 py-2 rounded-lg text-sm font-semibold"
+                className="px-4 py-2 rounded-lg text-sm font-medium"
                 style={{
                   backgroundColor: theme.primary,
                   color: theme.white1,
@@ -340,7 +340,7 @@ export default function DKMQuizLectureSessions() {
 
               <button
                 onClick={() => alert("Perubahan disimpan!")}
-                className="px-5 py-2 rounded-lg text-sm font-semibold"
+                className="px-5 py-2 rounded-lg text-sm font-medium"
                 style={{
                   backgroundColor: theme.success1,
                   color: theme.white1,

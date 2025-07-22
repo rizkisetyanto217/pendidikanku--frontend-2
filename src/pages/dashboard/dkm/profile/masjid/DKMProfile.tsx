@@ -293,7 +293,6 @@ export default function ProfilMasjid() {
                     text="Edit Profil Masjid"
                     variant="outline"
                   />
-
                   <CommonButton
                     to="/dkm/profil-masjid/edit-masjid"
                     text="Edit Masjid"

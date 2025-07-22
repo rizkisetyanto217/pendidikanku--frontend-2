@@ -5,11 +5,11 @@ import React from "react";
 interface InputFieldProps {
   label: string;
   name: string;
-  value: string;
+  value?: string; // ✅ bikin optional agar file input tidak error
   placeholder?: string;
-  type?: string; // hanya untuk input
+  type?: string;
   as?: "input" | "textarea";
-  rows?: number; // untuk textarea
+  rows?: number;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -52,6 +52,16 @@ export default function InputField({
           onChange={onChange}
           placeholder={placeholder}
           rows={rows}
+          className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
+          style={commonStyle}
+        />
+      ) : type === "file" ? (
+        <input
+          id={name}
+          name={name}
+          type="file"
+          onChange={onChange}
+          placeholder={placeholder}
           className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
           style={commonStyle}
         />

@@ -85,6 +85,7 @@ import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lec
 import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidSummaryDetailLectureSessions";
 import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidDocsLectureSessions";
 import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quiz/MasjidResultQuizDetailLectureSessions";
+import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/document/DKMAddEditDocumentLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -213,8 +214,16 @@ export default function AppRoutes() {
               element={<DKMSummaryLectureSessions />}
             />
             <Route
-              path="kajian-detail/:id/dokumentasi"
+              path="kajian-detail/:id/dokumen"
               element={<DKMDocumentLectureSessions />}
+            />
+            <Route
+              path="kajian-detail/:id/dokumen/tambah-edit"
+              element={<DKMAddEditDocumentLectureSessions />}
+            />
+            <Route
+              path="kajian-detail/:id/dokumen/tambah-edit/:docId"
+              element={<DKMAddEditDocumentLectureSessions />}
             />
           </Route>
 
@@ -250,7 +259,7 @@ export default function AppRoutes() {
               element={<DKMSummaryLecture />}
             />
             <Route
-              path="tema-detail/:id/dokumentasi"
+              path="tema-detail/:id/dokumen"
               element={<DKMDocumentLecture />}
             />
           </Route>

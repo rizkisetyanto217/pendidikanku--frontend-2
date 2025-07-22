@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Tambahan: Hilangkan overscroll putih dan dukung dark mode */
+html,
+body {
+  @apply min-h-screen bg-white text-black dark:bg-[#121212] dark:text-white overscroll-none;
+}
