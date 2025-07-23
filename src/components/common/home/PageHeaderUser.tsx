@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import clsx from "clsx";
+import toast from "react-hot-toast";
 
 interface PageHeaderProps {
   title: string;
@@ -171,15 +172,46 @@ export default function PageHeaderUser({
                       )
                     }
                   />
-                  <LinkDropdownItem
+                  <LinkDropdownSubmenu
                     label="📚 Soal & Materi"
-                    onClick={() => alert("Coming soon")}
+                    items={[
+                      {
+                        label: "📄 Soal Latihan",
+                        onClick: () =>
+                          navigate(
+                            `/masjid/${masjidData.masjid_slug}/soal-latihan`
+                          ),
+                      },
+                      {
+                        label: "📘 Materi Kajian",
+                        onClick: () =>
+                          navigate(
+                            `/masjid/${masjidData.masjid_slug}/materi-kajian`
+                          ),
+                      },
+                      {
+                        label: "🎓 Sertifikat",
+                        onClick: () =>
+                          navigate(
+                            `/masjid/${masjidData.masjid_slug}/sertifikat`
+                          ),
+                      },
+                    ]}
                   />
+
                   <LinkDropdownItem
                     label="📰 Laporan Keuangan"
                     onClick={() =>
                       navigate(`/masjid/${masjidData.masjid_slug}/keuangan`)
                     }
+                  />
+                  <LinkDropdownItem
+                    label="🔗 Bagikan Halaman Ini"
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Link halaman berhasil disalin!");
+                      setShowMenu(false);
+                    }}
                   />
                 </>
               )}
@@ -209,5 +241,68 @@ function LinkDropdownItem({
     >
       {label}
     </button>
+  );
+}
+
+function LinkDropdownSubmenu({
+  label,
+  items,
+}: {
+  label: string;
+  items: { label: string; onClick: () => void }[];
+}) {
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div
+      className="relative group"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      ref={ref}
+    >
+      <button
+        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        style={{ color: theme.black1 }}
+      >
+        {label} ▸
+      </button>
+
+      <div
+        className={clsx(
+          "absolute top-0 left-full ml-1 w-48 rounded-md shadow-md border z-50 transition-all duration-150",
+          open
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-95 pointer-events-none"
+        )}
+        style={{
+          backgroundColor: theme.white1,
+          borderColor: theme.silver1,
+        }}
+      >
+        {items.map((item, i) => (
+          <button
+            key={i}
+            onClick={item.onClick}
+            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            style={{ color: theme.black1 }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

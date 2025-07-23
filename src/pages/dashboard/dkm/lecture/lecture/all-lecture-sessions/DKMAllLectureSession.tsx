@@ -41,7 +41,7 @@ const fetchLectureSessions = async (
   lectureId: string
 ): Promise<LectureSession[]> => {
   const res = await axios.get(
-    `/public/lecture-sessions/by-lecture-sessions/${lectureId}`
+    `/public/lecture-sessions-u/by-lecture/${lectureId}`
   );
   if (!res?.data || !Array.isArray(res.data.data)) return [];
   return res.data.data as LectureSession[];

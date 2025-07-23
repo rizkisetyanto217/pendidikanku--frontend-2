@@ -80,11 +80,11 @@ import MasjidDonationMotivation from "@/pages/user/linktree/finansial/donation/M
 import MasjidLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidLectureMaterial";
 import MasjidDetailLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidDetailLectureMaterial";
 import MasjidInformationDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidInformationDetailLectureSessions";
-import MasjidQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quiz/MasjidQuizDetailLectureSessions";
+import MasjidQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidQuizDetailLectureSessions";
 import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidFullTranscriptLectureSessions";
 import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidSummaryDetailLectureSessions";
-import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidDocsLectureSessions";
-import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quiz/MasjidResultQuizDetailLectureSessions";
+import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidDocsLectureSessions";
+import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizDetailLectureSessions";
 import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/document/DKMAddEditDocumentLectureSessions";
 
 export default function AppRoutes() {

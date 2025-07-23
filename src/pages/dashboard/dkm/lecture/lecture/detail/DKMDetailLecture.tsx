@@ -5,10 +5,11 @@ import {
   MessageSquare,
   PlayCircle,
   StickyNote,
-  Users,
   Video,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -18,7 +19,7 @@ interface Lecture {
   lecture_title: string;
   lecture_description: string;
   lecture_image_url: string | null;
-  lecture_teachers: string | null;
+  lecture_teachers: any; // Bisa string atau object
   total_lecture_sessions: number | null;
   lecture_is_active: boolean;
   lecture_created_at: string;
@@ -31,68 +32,76 @@ export default function DKMDetailLecture() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
-  const lecture = state as Lecture;
+  const initialLecture = state as Lecture | undefined;
+
+  const {
+    data: lecture,
+    isLoading,
+    isError,
+  } = useQuery<Lecture>({
+    queryKey: ["lecture", id],
+    enabled: !!id, // Tetap fetch walaupun ada state
+    queryFn: async () => {
+      const res = await axios.get(`/api/a/lectures/${id}`);
+      console.log("🚀 ~ response from /api/a/lectures/:id", res.data);
+      return res.data.data;
+    },
+    initialData: initialLecture, // ini masih oke untuk immediate render
+    staleTime: 1000 * 60 * 5,
+  });
 
   const navItems = [
-    {
-      icon: <Home size={20} />,
-      label: "Informasi",
-      to: `/dkm/tema/tema-detail/${id}/informasi`,
-    },
-    {
-      icon: <BookOpen size={20} />,
-      label: "Latihan Soal",
-      to: `/dkm/tema/tema-detail/${id}/latihan-soal`,
-    },
+    { icon: <Home size={20} />, label: "Informasi", to: "informasi" },
+    { icon: <BookOpen size={20} />, label: "Latihan Soal", to: "latihan-soal" },
     {
       icon: <FileText size={20} />,
       label: "Materi Lengkap",
-      to: `/dkm/tema/tema-detail/${id}/materi-lengkap`,
+      to: "materi-lengkap",
     },
     {
       icon: <MessageSquare size={20} />,
       label: "Masukan & Saran",
-      to: `/dkm/tema/tema-detail/${id}/saran-masukan`,
+      to: "saran-masukan",
     },
     {
       icon: <PlayCircle size={20} />,
       label: "Kumpulan Kajian",
-      to: `/dkm/tema/tema-detail/${id}/semua-kajian`,
+      to: "semua-kajian",
     },
-    {
-      icon: <Video size={20} />,
-      label: "Video Pembelajaran",
-      to: `/dkm/tema/tema-detail/${id}/video`,
-    },
-    {
-      icon: <StickyNote size={20} />,
-      label: "Ringkasan",
-      to: `/dkm/tema/tema-detail/${id}/ringkasan`,
-    },
+    { icon: <Video size={20} />, label: "Video Pembelajaran", to: "video" },
+    { icon: <StickyNote size={20} />, label: "Ringkasan", to: "ringkasan" },
     {
       icon: <MessageSquare size={20} />,
       label: "Tanya Jawab",
-      to: `/dkm/tema/tema-detail/${id}/tanya-jawab`,
+      to: "tanya-jawab",
     },
-    {
-      icon: <FileText size={20} />,
-      label: "Dokumen",
-      to: `/dkm/tema/tema-detail/${id}/dokumen`,
-    },
+    { icon: <FileText size={20} />, label: "Dokumen", to: "dokumen" },
   ];
+
+  if (isLoading) return <p>Loading...</p>;
+  if (isError || !lecture)
+    return <p className="text-red-500">Gagal memuat data kajian.</p>;
+
+  const teacherName = Array.isArray(lecture.lecture_teachers)
+    ? lecture.lecture_teachers
+        .map((t: any) => t.name?.trim())
+        .filter((name) => name)
+        .join(", ") || "Pengajar belum ditentukan"
+    : typeof lecture.lecture_teachers === "string"
+      ? lecture.lecture_teachers
+      : (lecture.lecture_teachers?.name ?? "Pengajar belum ditentukan");
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <PageHeader title="Kajian Detail" backTo="/dkm/tema" />
 
       {/* Kartu Kajian */}
       <div
-        className="p-2 rounded-xl  flex flex-col lg:flex-row gap-4"
+        className="p-2 rounded-xl flex flex-col lg:flex-row gap-4"
         style={{ backgroundColor: theme.white1 }}
       >
         <img
-          src={lecture?.lecture_image_url ?? "/mock/kajian.jpg"}
+          src={lecture.lecture_image_url ?? "/mock/kajian.jpg"}
           alt="Poster Kajian"
           className="w-full lg:w-40 h-40 object-cover rounded-md"
         />
@@ -101,19 +110,19 @@ export default function DKMDetailLecture() {
             className="text-lg font-semibold"
             style={{ color: theme.primary }}
           >
-            {lecture?.lecture_title}
+            {lecture.lecture_title}
           </h3>
           <p className="text-sm" style={{ color: theme.silver2 }}>
-            {lecture?.lecture_created_at?.split("T")[0]} / Aula utama Masjid
+            {lecture.lecture_created_at?.split("T")[0]} / Aula utama Masjid
           </p>
           <p
             className="text-sm font-medium mt-2"
             style={{ color: theme.black2 }}
           >
-            {lecture?.lecture_teachers ?? "Pengajar belum ditentukan"}
+            {teacherName}
           </p>
           <p className="text-sm mt-1" style={{ color: theme.silver2 }}>
-            {lecture?.lecture_description}
+            {lecture.lecture_description}
           </p>
           <div className="flex justify-between items-center mt-3">
             <span
@@ -126,7 +135,7 @@ export default function DKMDetailLecture() {
               Sertifikat
             </span>
             <span className="text-sm" style={{ color: theme.silver2 }}>
-              👤 {lecture?.total_lecture_sessions ?? 0} Pertemuan
+              👤 {lecture.total_lecture_sessions ?? 0} Pertemuan
             </span>
           </div>
         </div>
@@ -144,7 +153,14 @@ export default function DKMDetailLecture() {
           {navItems.map((item) => (
             <button
               key={item.label}
-              onClick={() => navigate(item.to, { state: lecture })}
+              onClick={() =>
+                navigate(
+                  `/dkm/tema/tema-detail/${lecture.lecture_id}/${item.to}`,
+                  {
+                    state: lecture,
+                  }
+                )
+              }
               className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition"
               style={{
                 backgroundColor: theme.white1,

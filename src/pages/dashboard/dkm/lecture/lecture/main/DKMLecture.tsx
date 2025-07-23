@@ -65,7 +65,7 @@ export default function DKMLecture() {
     "No",
     "Gambar",
     "Judul",
-    "Deskripsi",
+    "Total Kajian",
     "Tanggal",
     "Status",
     "Aksi",
@@ -80,7 +80,7 @@ export default function DKMLecture() {
         className="w-12 h-12 object-cover rounded"
       />,
       <span className="font-medium">{lecture.lecture_title}</span>,
-      lecture.lecture_description,
+      lecture.total_lecture_sessions,
       <FormattedDate value={lecture.lecture_created_at} />,
       <div className="flex flex-wrap gap-1">
         <StatusBadge

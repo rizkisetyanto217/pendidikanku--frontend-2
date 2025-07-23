@@ -22,6 +22,7 @@ export default function MasjidDetailLecture() {
     queryFn: async () => {
       console.log("[🔁 FETCH] Meminta detail kajian dari API");
       const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`);
+      console.log("[🔁 RESPONSE] Detail kajian:", res.data);
       return res.data;
     },
     enabled: !!id,

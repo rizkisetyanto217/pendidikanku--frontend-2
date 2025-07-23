@@ -8,7 +8,11 @@ interface Lecture {
   lecture_title: string;
   lecture_description: string;
   lecture_image_url: string | null;
-  lecture_teachers: string | null;
+  lecture_teachers:
+    | string
+    | { id: string; name: string }[]
+    | { id: string; name: string }
+    | null;
   total_lecture_sessions: number | null;
   lecture_is_active: boolean;
   lecture_created_at: string;
@@ -60,8 +64,17 @@ export default function DKMInformationLecture() {
               - 20.00 WIB
             </p>
             <p className="text-sm font-medium" style={{ color: theme.black2 }}>
-              {lecture?.lecture_teachers ?? "Pengajar belum ditentukan"}
+              {Array.isArray(lecture.lecture_teachers)
+                ? lecture.lecture_teachers
+                    .map((t) => t.name?.trim())
+                    .filter(Boolean)
+                    .join(", ") || "Pengajar belum ditentukan"
+                : typeof lecture.lecture_teachers === "string"
+                  ? lecture.lecture_teachers
+                  : (lecture.lecture_teachers?.name ??
+                    "Pengajar belum ditentukan")}
             </p>
+
             <p className="text-sm" style={{ color: theme.silver2 }}>
               {lecture?.lecture_description}
             </p>
