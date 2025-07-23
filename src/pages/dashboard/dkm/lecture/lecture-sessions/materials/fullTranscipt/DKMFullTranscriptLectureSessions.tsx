@@ -1,13 +1,15 @@
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import FormattedDate from "@/constants/formattedDate";
 
 export default function DKMFullTranscriptLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const navigate = useNavigate();
   const { id: lecture_session_id } = useParams();
   const { state: session } = useLocation();
 
@@ -24,6 +26,7 @@ export default function DKMFullTranscriptLectureSessions() {
     lecture_session_place,
   } = session;
 
+  // === Ambil data materi lengkap ===
   const {
     data: materialData,
     isLoading,
@@ -38,21 +41,21 @@ export default function DKMFullTranscriptLectureSessions() {
       return result ?? null;
     },
     enabled: !!lecture_session_id,
+    staleTime: 1000 * 60 * 5, // cache 5 menit
   });
 
   const transcript =
     materialData?.lecture_sessions_material_transcript_full || "";
+  const materialId = materialData?.lecture_sessions_material_id;
 
-  const formattedTime = lecture_session_start_time
-    ? new Date(lecture_session_start_time).toLocaleString("id-ID", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "-";
+  const handleEditClick = () => {
+    const base = `/dkm/kajian/kajian-detail/${lecture_session_id}/materi-lengkap`;
+    const targetUrl = materialId
+      ? `${base}/tambah-edit/${materialId}`
+      : `${base}/tambah-edit`;
+
+    navigate(targetUrl, { state: session });
+  };
 
   return (
     <div className="space-y-4">
@@ -68,12 +71,20 @@ export default function DKMFullTranscriptLectureSessions() {
           <p className="text-red-500">Gagal memuat data materi lengkap.</p>
         ) : (
           <>
+            {/* Informasi Kajian */}
             <div className="space-y-1 mb-4">
               <h2 className="text-base font-semibold text-sky-600 hover:underline cursor-pointer">
                 {lecture_session_title || "-"}
               </h2>
               <p className="text-sm text-gray-500">
-                {formattedTime} / {lecture_session_place || "-"}
+                {lecture_session_start_time && (
+                  <FormattedDate
+                    value={lecture_session_start_time}
+                    fullMonth
+                    className="inline"
+                  />
+                )}{" "}
+                / {lecture_session_place || "-"}
               </p>
               <p
                 className="text-sm font-semibold"
@@ -83,6 +94,7 @@ export default function DKMFullTranscriptLectureSessions() {
               </p>
             </div>
 
+            {/* Konten Materi */}
             <div
               className="space-y-4 text-sm leading-relaxed text-justify"
               style={{ color: theme.black1 }}
@@ -96,12 +108,14 @@ export default function DKMFullTranscriptLectureSessions() {
               )}
             </div>
 
+            {/* Tombol Edit */}
             <div className="mt-6 text-right">
               <button
                 className="px-5 py-2 rounded-lg font-semibold"
                 style={{ backgroundColor: theme.primary, color: theme.white1 }}
+                onClick={handleEditClick}
               >
-                Edit Materi
+                {materialId ? "Edit Materi" : "Tambah Materi"}
               </button>
             </div>
           </>

@@ -11,6 +11,8 @@ export default function MasjidDetailLecture() {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
+  const { slug } = useParams();
+
 
   const {
     data: kajian,
@@ -57,10 +59,8 @@ export default function MasjidDetailLecture() {
     <div className="pb-20">
       {/* Header */}
       <PageHeaderUser
-        title="Detail Kajian"
-        onBackClick={() => {
-          if (window.history.length > 1) navigate(-1);
-        }}
+        title="Detail Kajian ini"
+        onBackClick={() => navigate(`/masjid/${slug}`)}
       />
 
       <div

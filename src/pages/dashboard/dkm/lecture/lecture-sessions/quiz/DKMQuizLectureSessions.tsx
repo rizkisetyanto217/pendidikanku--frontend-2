@@ -42,17 +42,45 @@ export default function DKMQuizLectureSessions() {
     correctAnswerIndex: 0,
     explanation: "",
   });
-
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["quiz-questions", lecture_session_id],
     queryFn: async () => {
-      const res = await axios.get(
-        `/public/lecture-sessions-quiz/by-lecture-sessions/${lecture_session_id}`
-      );
-      return res.data.data;
+      try {
+        const res = await axios.get(
+          `/public/lecture-sessions-quiz/by-lecture-sessions/${lecture_session_id}`
+        );
+        return res.data.data;
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          // jika belum ada quiz, anggap sebagai data kosong
+          return null;
+        }
+        throw err;
+      }
     },
     enabled: !!lecture_session_id,
   });
+
+  useEffect(() => {
+    if (lecture_session_id && data === null) {
+      axios
+        .post("/api/a/lecture-sessions-quiz", {
+          lecture_sessions_quiz_title: "Latihan Soal Kajian",
+          lecture_sessions_quiz_description: "-",
+          lecture_sessions_quiz_lecture_session_id: lecture_session_id,
+        })
+        .then(() => {
+          toast.success("Quiz berhasil dibuat.");
+          queryClient.invalidateQueries({
+            queryKey: ["quiz-questions", lecture_session_id],
+          });
+        })
+        .catch((err) => {
+          console.error("❌ Gagal membuat quiz otomatis:", err);
+          toast.error("Gagal membuat quiz otomatis.");
+        });
+    }
+  }, [data, lecture_session_id]);
 
   useEffect(() => {
     if (data?.questions) {
@@ -332,73 +360,79 @@ export default function DKMQuizLectureSessions() {
       />
       {isLoading ? (
         <p>Loading...</p>
-      ) : isError ? (
-        <p className="text-red-500">❌ Gagal mengambil data soal.</p>
       ) : (
         <>
           <div className="space-y-6">
-            {questions.map((q, index) => (
-              <div
-                key={q.id}
-                className="rounded-2xl border p-4 space-y-3 shadow-sm"
-                style={{
-                  backgroundColor: theme.white1,
-                  borderColor: theme.silver1,
-                }}
-              >
-                {isEditingIndex === index ? (
-                  renderForm()
-                ) : (
-                  <>
-                    <p
-                      className="font-medium text-base"
-                      style={{ color: theme.black1 }}
-                    >
-                      {index + 1}. {q.question}
-                    </p>
-                    <div className="space-y-2">
-                      {q.options.map((opt, i) => (
-                        <div
-                          key={i}
-                          className="text-sm px-4 py-2 rounded-lg font-normal"
-                          style={{
-                            backgroundColor:
-                              i === q.correctAnswerIndex
-                                ? theme.success1
-                                : theme.white2,
-                            color:
-                              i === q.correctAnswerIndex
-                                ? theme.white1
-                                : theme.black1,
-                          }}
+            {/* Jika belum ada soal sama sekali */}
+            {questions.length === 0
+              ? renderForm()
+              : questions.map((q, index) => (
+                  <div
+                    key={q.id}
+                    className="rounded-2xl border p-4 space-y-3 shadow-sm"
+                    style={{
+                      backgroundColor: theme.white1,
+                      borderColor: theme.silver1,
+                    }}
+                  >
+                    {isEditingIndex === index ? (
+                      renderForm()
+                    ) : (
+                      <>
+                        <p
+                          className="font-medium text-base"
+                          style={{ color: theme.black1 }}
                         >
-                          {opt}
+                          {index + 1}. {q.question}
+                        </p>
+                        <div className="space-y-2">
+                          {q.options.map((opt, i) => (
+                            <div
+                              key={i}
+                              className="text-sm px-4 py-2 rounded-lg font-normal"
+                              style={{
+                                backgroundColor:
+                                  i === q.correctAnswerIndex
+                                    ? theme.success1
+                                    : theme.white2,
+                                color:
+                                  i === q.correctAnswerIndex
+                                    ? theme.white1
+                                    : theme.black1,
+                              }}
+                            >
+                              {opt}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-end gap-3">
-                      <button
-                        onClick={() => handleEdit(index)}
-                        className="flex items-center gap-1 text-sm font-medium"
-                        style={{ color: theme.quaternary }}
-                      >
-                        <Pencil size={16} /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(index)}
-                        className="flex items-center gap-1 text-sm font-medium"
-                        style={{ color: theme.error1 }}
-                      >
-                        <Trash2 size={16} /> Hapus
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-            {isEditingIndex === questions.length && renderForm()}
+                        <div className="flex justify-end gap-3">
+                          <button
+                            onClick={() => handleEdit(index)}
+                            className="flex items-center gap-1 text-sm font-medium"
+                            style={{ color: theme.quaternary }}
+                          >
+                            <Pencil size={16} /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(index)}
+                            className="flex items-center gap-1 text-sm font-medium"
+                            style={{ color: theme.error1 }}
+                          >
+                            <Trash2 size={16} /> Hapus
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+            {/* Form tambah soal hanya muncul jika user klik "Tambah Soal" */}
+            {isEditingIndex === questions.length &&
+              questions.length > 0 &&
+              renderForm()}
           </div>
 
+          {/* Tombol tambah soal */}
           <div className="flex justify-end gap-2 pt-6 border-t mt-10">
             <button
               onClick={handleAddClick}

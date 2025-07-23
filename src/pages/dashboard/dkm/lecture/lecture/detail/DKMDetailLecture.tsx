@@ -68,7 +68,7 @@ export default function DKMDetailLecture() {
       label: "Kumpulan Kajian",
       to: "semua-kajian",
     },
-    { icon: <Video size={20} />, label: "Video Pembelajaran", to: "video" },
+    { icon: <Video size={20} />, label: "Video Audio", to: "video" },
     { icon: <StickyNote size={20} />, label: "Ringkasan", to: "ringkasan" },
     {
       icon: <MessageSquare size={20} />,

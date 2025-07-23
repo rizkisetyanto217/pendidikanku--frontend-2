@@ -87,6 +87,8 @@ import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/mater
 import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizDetailLectureSessions";
 import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMAddEditDocumentLectureSessions";
 import MasjidVideoAudioDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioDetailLectureSessions";
+import DKMAddEditFullTransciptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMAddEditFullTransciptLectureSessions";
+import DKMAddEditSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMAddEditSummaryLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -145,7 +147,7 @@ export default function AppRoutes() {
             path="soal-materi-kajian/:id/latihan-soal/hasil"
             element={<MasjidResultQuizDetailLectureSessions />}
           />
-          <Route 
+          <Route
             path="soal-materi-kajian/:id/video-audio"
             element={<MasjidVideoAudioDetailLectureSessions />}
           />
@@ -189,7 +191,7 @@ export default function AppRoutes() {
               element={<DKMAddEditLectureSession />}
             />
 
-            {/* ✅ Tambahan */}
+            {/* Detail & Subhalaman */}
             <Route
               path="kajian-detail/:id"
               element={<DKMDetailLectureSessions />}
@@ -210,14 +212,36 @@ export default function AppRoutes() {
               path="kajian-detail/:id/statistik-soal"
               element={<DKMStatsQuizLectureSessions />}
             />
+            
+            {/* Materi Lengkap */}
             <Route
               path="kajian-detail/:id/materi-lengkap"
               element={<DKMFullTranscriptLectureSessions />}
             />
             <Route
+              path="kajian-detail/:id/materi-lengkap/tambah-edit"
+              element={<DKMAddEditFullTransciptLectureSessions />}
+            />
+            <Route
+              path="kajian-detail/:id/materi-lengkap/tambah-edit/:materialId"
+              element={<DKMAddEditFullTransciptLectureSessions />}
+            />
+
+            {/* Ringkasan */}
+            <Route
               path="kajian-detail/:id/ringkasan"
               element={<DKMSummaryLectureSessions />}
             />
+            <Route
+              path="kajian-detail/:id/ringkasan/tambah-edit"
+              element={<DKMAddEditSummaryLectureSessions />}
+            />
+            <Route
+              path="kajian-detail/:id/ringkasan/tambah-edit/:materialId"
+              element={<DKMAddEditSummaryLectureSessions />}
+            />
+
+            {/* Dokumen */}
             <Route
               path="kajian-detail/:id/dokumen"
               element={<DKMDocumentLectureSessions />}

@@ -1,21 +1,17 @@
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { useEffect } from "react";
+import FormattedDate from "@/constants/formattedDate";
 
 export default function DKMSummaryLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { id: lecture_session_id } = useParams();
   const { state: session } = useLocation();
-
-  useEffect(() => {
-    console.log("📦 Params: lecture_session_id =", lecture_session_id);
-    console.log("📦 Session state:", session);
-  }, [lecture_session_id, session]);
+  const navigate = useNavigate();
 
   const {
     data: materialData,
@@ -24,31 +20,18 @@ export default function DKMSummaryLectureSessions() {
   } = useQuery({
     queryKey: ["lecture-session-summary", lecture_session_id],
     queryFn: async () => {
-      console.log("📡 Fetching summary with ID:", lecture_session_id);
-      try {
-        const res = await axios.get(
-          `/public/lecture-sessions-materials/filter?lecture_session_id=${lecture_session_id}&type=summary`
-        );
-        const result = res?.data?.data?.[0];
-        console.log("✅ Fetched Summary Data:", result);
-        return result ?? null;
-      } catch (error) {
-        console.error("❌ Error fetching summary:", error);
-        return null;
-      }
+      const res = await axios.get(
+        `/public/lecture-sessions-materials/filter?lecture_session_id=${lecture_session_id}&type=summary`
+      );
+      return res?.data?.data?.[0] ?? null;
     },
     enabled: !!lecture_session_id,
+    staleTime: 1000 * 60 * 5,
   });
 
-  useEffect(() => {
-    if (materialData) {
-      console.log("📥 Summary data loaded:", materialData);
-    }
-  }, [materialData]);
-
   const summary = materialData?.lecture_sessions_material_summary || "";
+  const materialId = materialData?.lecture_sessions_material_id;
 
-  // ambil data sesi dari state
   const {
     lecture_session_title,
     lecture_session_teacher_name,
@@ -56,20 +39,17 @@ export default function DKMSummaryLectureSessions() {
     lecture_session_place,
   } = session || {};
 
-  const formattedTime = lecture_session_start_time
-    ? new Date(lecture_session_start_time).toLocaleString("id-ID", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "-";
+  const handleEditClick = () => {
+    const base = `/dkm/kajian/kajian-detail/${lecture_session_id}/ringkasan/tambah-edit`;
+    const targetUrl = materialId ? `${base}/${materialId}` : base;
+
+    navigate(targetUrl, { state: session });
+  };
 
   return (
     <div className="space-y-4">
       <PageHeader title="Ringkasan" onBackClick={() => history.back()} />
+
       <div
         className="p-6 rounded-2xl shadow-sm"
         style={{ backgroundColor: theme.white1, color: theme.black1 }}
@@ -80,13 +60,20 @@ export default function DKMSummaryLectureSessions() {
           <p className="text-red-500">Gagal memuat data ringkasan.</p>
         ) : (
           <>
-            {/* Info sesi dari state */}
+            {/* Informasi Sesi Kajian */}
             <div className="space-y-1 mb-4">
               <h2 className="text-base font-semibold text-sky-600 hover:underline cursor-pointer">
                 {lecture_session_title || "-"}
               </h2>
               <p className="text-sm text-gray-500">
-                {formattedTime} / {lecture_session_place || "-"}
+                {lecture_session_start_time && (
+                  <FormattedDate
+                    value={lecture_session_start_time}
+                    fullMonth
+                    className="inline"
+                  />
+                )}{" "}
+                / {lecture_session_place || "-"}
               </p>
               <p
                 className="text-sm font-semibold"
@@ -96,7 +83,7 @@ export default function DKMSummaryLectureSessions() {
               </p>
             </div>
 
-            {/* Summary dari API */}
+            {/* Isi Ringkasan */}
             <div
               className="space-y-4 text-sm leading-relaxed text-justify"
               style={{ color: theme.black1 }}
@@ -110,13 +97,14 @@ export default function DKMSummaryLectureSessions() {
               )}
             </div>
 
-            {/* Tombol */}
+            {/* Tombol Tambah/Edit */}
             <div className="mt-6 text-right">
               <button
+                onClick={handleEditClick}
                 className="px-5 py-2 rounded-lg font-semibold"
                 style={{ backgroundColor: theme.primary, color: theme.white1 }}
               >
-                Edit Ringkasan
+                {materialId ? "Edit Ringkasan" : "Tambah Ringkasan"}
               </button>
             </div>
           </>

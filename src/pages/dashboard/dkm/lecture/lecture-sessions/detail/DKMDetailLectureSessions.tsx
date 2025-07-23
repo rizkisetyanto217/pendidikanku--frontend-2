@@ -93,7 +93,7 @@ export default function DKMDetailLectureSessions() {
 
   const navigations = [
     { icon: <Home size={36} />, label: "Informasi", to: "informasi" },
-    { icon: <Video size={36} />, label: "Video Pembelajaran", to: "video" },
+    { icon: <Video size={36} />, label: "Video Audio", to: "video" },
     { icon: <BookOpen size={36} />, label: "Latihan Soal", to: "latihan-soal" },
     {
       icon: <FileText size={36} />,

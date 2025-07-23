@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import LectureMaterialMonthList from "@/components/pages/lecture/LectureMonthList";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
@@ -7,7 +7,6 @@ import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-// Types
 interface LectureSessionAPIItem {
   lecture_session_id: string;
   lecture_session_title: string;
@@ -44,13 +43,17 @@ const monthData = [
 ];
 
 export default function MasjidLectureMaterial() {
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [tab, setTab] = useState("terbaru");
-  const [selectedTheme, setSelectedTheme] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { slug = "" } = useParams();
+  const { slug } = useParams();
 
-  const { data: kajianList, isLoading: loadingKajian } = useQuery<
+  const handleTabChange = (val: string) => {
+    setTab(val);
+    if (val === "tanggal") setSelectedMonth(null);
+  };
+
+  const { data: kajianList = [], isLoading: loadingKajian } = useQuery<
     LectureSessionAPIItem[]
   >({
     queryKey: ["kajianListBySlug", slug],
@@ -60,57 +63,46 @@ export default function MasjidLectureMaterial() {
       );
       return res.data?.data ?? [];
     },
-    enabled: Boolean(slug),
+    enabled: !!slug,
     staleTime: 5 * 60 * 1000,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
-  const {
-    data: lectureThemes = [],
-    isLoading: loadingThemes,
-    refetch: refetchThemes,
-  } = useQuery<LectureTheme[]>({
+  const { data: lectureThemes = [], isLoading: loadingThemes } = useQuery<
+    LectureTheme[]
+  >({
     queryKey: ["lectureThemesBySlug", slug],
     queryFn: async () => {
       const res = await axios.get(`/public/lectures/slug/${slug}`);
       return res.data?.data ?? [];
     },
-    enabled: Boolean(slug),
+    enabled: !!slug,
     staleTime: 5 * 60 * 1000,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (tab === "tema" && slug) {
-      refetchThemes();
-    }
-  }, [tab, slug]);
+  const mappedMaterial: LectureMaterialItem[] = kajianList.map((item) => ({
+    id: item.lecture_session_id,
+    title: item.lecture_session_title,
+    teacher: item.lecture_session_teacher_name,
+    masjidName: "",
+    location: item.lecture_session_place,
+    time: new Date(item.lecture_session_start_time).toLocaleString("id-ID", {
+      dateStyle: "long",
+      timeStyle: "short",
+    }),
+    status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
+    lectureId: item.lecture_session_lecture_id,
+  }));
 
-  const mappedMaterial: LectureMaterialItem[] =
-    kajianList?.map((item) => ({
-      id: item.lecture_session_id,
-      title: item.lecture_session_title,
-      teacher: item.lecture_session_teacher_name,
-      masjidName: "",
-      location: item.lecture_session_place,
-      time: new Date(item.lecture_session_start_time).toLocaleString("id-ID", {
-        dateStyle: "long",
-        timeStyle: "short",
-      }),
-      status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
-      lectureId: item.lecture_session_lecture_id,
-    })) ?? [];
-
-  const filteredByTheme = mappedMaterial.filter(
-    (item) => selectedTheme === "" || item.lectureId === selectedTheme
-  );
+  if (!slug) return null;
 
   return (
     <div className="p-4 space-y-4 pb-20">
       <PageHeaderUser
-        title="Soal & Materi Kajian"
+        title="Soal & Materi Kajian ini"
         onBackClick={() => {
           if (window.history.length > 1) navigate(-1);
         }}
@@ -118,7 +110,7 @@ export default function MasjidLectureMaterial() {
 
       <Tabs
         value={tab}
-        onChange={setTab}
+        onChange={handleTabChange}
         tabs={[
           { label: "Terbaru", value: "terbaru" },
           { label: "Tema", value: "tema" },
@@ -157,39 +149,25 @@ export default function MasjidLectureMaterial() {
       <TabsContent value="tema" current={tab}>
         <div className="space-y-3">
           <h2 className="text-sm font-medium">Daftar Tema Kajian</h2>
-
           {loadingThemes ? (
             <p>Memuat tema kajian...</p>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedTheme("")}
-                className={`px-3 py-1 rounded border text-sm ${
-                  selectedTheme === ""
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white"
-                }`}
-              >
-                Semua Tema
-              </button>
-
+            <div className="space-y-3">
               {lectureThemes.map((theme) => (
-                <button
+                <div
                   key={theme.lecture_id}
-                  onClick={() => setSelectedTheme(theme.lecture_id)}
-                  className={`px-3 py-1 rounded border text-sm ${
-                    selectedTheme === theme.lecture_id
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-white"
-                  }`}
+                  className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800"
                 >
-                  {theme.lecture_title}
-                </button>
+                  <h3 className="text-base font-semibold">
+                    {theme.lecture_title}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Total {theme.lecture_total_sessions} kajian
+                  </p>
+                </div>
               ))}
             </div>
           )}
-
-          <LectureMaterialList data={filteredByTheme} />
         </div>
       </TabsContent>
     </div>

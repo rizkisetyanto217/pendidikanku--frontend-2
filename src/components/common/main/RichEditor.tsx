@@ -157,7 +157,7 @@ export default function RichEditor({
     { label: "Link", command: "createLink" },
   ];
 
-  const headingButtons = [1, 2, 3, 4, 5, 6].map((n) => ({
+  const headingButtons = [1, 2, 3, 4].map((n) => ({
     label: `H${n}`,
     command: "formatBlock",
     value: `<h${n}>`,
@@ -252,7 +252,7 @@ export default function RichEditor({
             setRefreshToolbar((v) => v + 1);
           }}
           onBlur={() => setIsFocused(false)}
-          className="min-h-[200px] text-sm rounded border p-2 prose dark:prose-invert"
+          className="w-full min-h-[200px] text-sm rounded border p-2 prose dark:prose-invert"
           style={{
             backgroundColor: theme.white2,
             color: theme.black1,
