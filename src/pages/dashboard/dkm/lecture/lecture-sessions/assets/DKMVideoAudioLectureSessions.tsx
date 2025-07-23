@@ -28,7 +28,7 @@ export default function DKMVideoLectureSessions() {
   const { data: assets = [] } = useQuery({
     queryKey: ["lecture-session-assets", id],
     queryFn: async () => {
-      const res = await axios.get("/api/a/lecture-sessions-assets/filter", {
+      const res = await axios.get("/public/lecture-sessions-assets/filter", {
         params: { lecture_session_id: id, file_type: "1,2" },
       });
       return Array.isArray(res.data) ? res.data : [];

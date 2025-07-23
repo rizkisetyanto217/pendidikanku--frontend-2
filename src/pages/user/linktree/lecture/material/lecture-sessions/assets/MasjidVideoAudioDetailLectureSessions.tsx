@@ -1,3 +1,107 @@
-export default function MasjidVideoDetailLectureSessions(){
-    return <div>Detail Video Kajian</div>
+// File ini cocok digunakan ulang untuk halaman user dan halaman Linktree publik
+import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
+import { Tabs, TabsContent } from "@/components/common/main/Tabs";
+
+export default function MasjidVideoAudioDetailLectureSessions() {
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+  const { id } = useParams();
+  const [tab, setTab] = useState("youtube");
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const { data: assets = [] } = useQuery({
+    queryKey: ["lecture-session-assets", id],
+    queryFn: async () => {
+      const res = await axios.get("/public/lecture-sessions-assets/filter", {
+        params: { lecture_session_id: id, file_type: "1,2" },
+      });
+      return Array.isArray(res.data) ? res.data : [];
+    },
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+
+  const videoAssets = assets.filter(
+    (a) => a.lecture_sessions_asset_file_type === 1
+  );
+  const audioAssets = assets.filter(
+    (a) => a.lecture_sessions_asset_file_type === 2
+  );
+  const currentAssets = tab === "youtube" ? videoAssets : audioAssets;
+
+  const getYoutubeEmbed = (url: string) => {
+    const idMatch = url.match(/(?:v=|\/embed\/|\.be\/)([a-zA-Z0-9_-]{11})/);
+    return idMatch?.[1] ?? "";
+  };
+
+  return (
+    <div className="space-y-6">
+      <Tabs
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { label: "YouTube", value: "youtube" },
+          { label: "Audio", value: "audio" },
+        ]}
+      />
+
+      <div
+        className="p-5 rounded-2xl shadow-sm"
+        style={{ backgroundColor: theme.white1, color: theme.black1 }}
+      >
+        <TabsContent value="youtube" current={tab}>
+          {videoAssets.length > 0 && (
+            <div
+              className="aspect-video w-full mb-6 rounded-xl overflow-hidden"
+              style={{ backgroundColor: theme.black1 }}
+            >
+              <iframe
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${getYoutubeEmbed(videoAssets[activeIndex]?.lecture_sessions_asset_file_url)}`}
+                title="YouTube Video"
+                allowFullScreen
+              ></iframe>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="audio" current={tab}>
+          {audioAssets.length > 0 && (
+            <div className="w-full mb-6">
+              <audio
+                controls
+                className="w-full"
+                src={audioAssets[activeIndex]?.lecture_sessions_asset_file_url}
+              />
+            </div>
+          )}
+        </TabsContent>
+
+        <div className="mb-4 flex flex-wrap gap-3">
+          {currentAssets.map((asset, index) => (
+            <div
+              key={asset.lecture_sessions_asset_id}
+              className={`flex items-center gap-2 border px-3 py-1 rounded-full cursor-pointer ${activeIndex === index ? "border-primary" : "border-gray-300"}`}
+              style={{
+                backgroundColor:
+                  activeIndex === index ? theme.primary2 : theme.white2,
+                color: theme.black1,
+              }}
+              onClick={() => setActiveIndex(index)}
+            >
+              <span className="text-xs truncate max-w-[160px]">
+                {asset.lecture_sessions_asset_title}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

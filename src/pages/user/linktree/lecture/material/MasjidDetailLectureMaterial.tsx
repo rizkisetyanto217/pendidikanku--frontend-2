@@ -35,7 +35,7 @@ export default function MasjidDetailLectureMaterial() {
 
   const menuItems = [
     { label: "Informasi", icon: "🏠", path: "informasi" },
-    { label: "Video", icon: "🎥", path: "video" },
+    { label: "Video-Audio", icon: "🎥", path: "video-audio" },
     { label: "Latihan Soal", icon: "📘", path: "latihan-soal" },
     { label: "Materi Lengkap", icon: "📖", path: "materi-lengkap" },
     { label: "Ringkasan", icon: "📝", path: "ringkasan" },

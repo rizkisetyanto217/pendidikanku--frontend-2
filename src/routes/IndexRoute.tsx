@@ -47,19 +47,19 @@ import DKMLecture from "@/pages/dashboard/dkm/lecture/lecture/main/DKMLecture";
 import DKMLectureParent from "@/pages/dashboard/dkm/lecture/DKMLectureParent";
 import DKMDetailLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/DKMDetailLectureSessions";
 import DKMInformationLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/information/DKMInformationLectureSessions";
-import DKMVideoLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/video/DKMVideoLectureSessions";
+import DKMVideoLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMVideoAudioLectureSessions";
 import DKMQuizLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/quiz/DKMQuizLectureSessions";
-import DKMFullTranscriptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/fullTranscipt/DKMFullTranscriptLectureSessions";
-import DKMDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/document/DKMdocumentLectureSessions";
-import DKMSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/summary/DKMSummaryLectureSessions";
+import DKMFullTranscriptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMFullTranscriptLectureSessions";
+import DKMDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMdocumentLectureSessions";
+import DKMSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMSummaryLectureSessions";
 import DKMStatsQuizLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/quiz/DKMStatsQuizLectureSessions";
 import DKMDetailLecture from "@/pages/dashboard/dkm/lecture/lecture/detail/DKMDetailLecture";
 import DKMInformationLecture from "@/pages/dashboard/dkm/lecture/lecture/information/DKMInformationLecture";
-import DKMVideoLecture from "@/pages/dashboard/dkm/lecture/lecture/video/DKMVideoLecture";
+import DKMVideoLecture from "@/pages/dashboard/dkm/lecture/lecture/assets/DKMVideoAudioLecture";
 import DKMQuizLecture from "@/pages/dashboard/dkm/lecture/lecture/quiz/DKMQuizLecture";
-import DKMFullTranscriptLecture from "@/pages/dashboard/dkm/lecture/lecture/full-transcript/DKMFullTranscriptLecture";
-import DKMSummaryLecture from "@/pages/dashboard/dkm/lecture/lecture/summary/DKMSummaryLecture";
-import DKMDocumentLecture from "@/pages/dashboard/dkm/lecture/lecture/document/DKMDocumentLecture";
+import DKMFullTranscriptLecture from "@/pages/dashboard/dkm/lecture/lecture/materials/DKMFullTranscriptLecture";
+import DKMSummaryLecture from "@/pages/dashboard/dkm/lecture/lecture/materials/DKMSummaryLecture";
+import DKMDocumentLecture from "@/pages/dashboard/dkm/lecture/lecture/assets/DKMDocumentLecture";
 import DKMAllLectureLectureSessions from "@/pages/dashboard/dkm/lecture/lecture/all-lecture-sessions/DKMAllLectureSession";
 import DKMSuggestLecture from "@/pages/dashboard/dkm/lecture/lecture/suggest/DKMSuggestLecture";
 import DKMAddLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/main/DKMAddEditLectureSessions";
@@ -85,7 +85,8 @@ import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lec
 import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidSummaryDetailLectureSessions";
 import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidDocsLectureSessions";
 import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizDetailLectureSessions";
-import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/document/DKMAddEditDocumentLectureSessions";
+import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMAddEditDocumentLectureSessions";
+import MasjidVideoAudioDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioDetailLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -143,6 +144,10 @@ export default function AppRoutes() {
           <Route
             path="soal-materi-kajian/:id/latihan-soal/hasil"
             element={<MasjidResultQuizDetailLectureSessions />}
+          />
+          <Route 
+            path="soal-materi-kajian/:id/video-audio"
+            element={<MasjidVideoAudioDetailLectureSessions />}
           />
 
           <Route
