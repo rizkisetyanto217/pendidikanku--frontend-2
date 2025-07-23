@@ -43,6 +43,9 @@ export default function PublicLinktree() {
   const { isDark, toggleDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
+  const [searchParams] = useSearchParams();
+  const cacheKey = searchParams.get("k") || "default";
+
   const { data: masjidData, isLoading: loadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", slug],
     queryFn: async () => {
@@ -51,12 +54,12 @@ export default function PublicLinktree() {
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: kajianList, isLoading: loadingKajian } = useQuery<Kajian[]>({
-    queryKey: ["kajianListBySlug", slug],
+    queryKey: ["kajianListBySlug", slug, cacheKey],
     queryFn: async () => {
       const res = await axios.get(
         `/public/lecture-sessions-u/mendatang/${slug}`
@@ -64,9 +67,9 @@ export default function PublicLinktree() {
       return res.data?.data?.slice(0, 3) ?? [];
     },
     enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const handleShareClick = () => {
@@ -311,7 +314,7 @@ export default function PublicLinktree() {
           <LinkItem
             label="Soal & Materi Kajian"
             icon="📚"
-            href={`/masjid/${masjidData.masjid_slug}/soal-materi-kajian`}
+            href={`/masjid/${masjidData.masjid_slug}/soal-materi?k=${Date.now()}`}
             internal
           />
           <LinkItem
@@ -548,7 +551,7 @@ export default function PublicLinktree() {
             <LinkItem
               label="Soal & Materi Kajian"
               icon="📚"
-              href={`/masjid/${masjidData.masjid_slug}/soal-materi-kajian`}
+              href={`/masjid/${masjidData.masjid_slug}/soal-materi?k=${Date.now()}`}
               internal
             />
             <LinkItem

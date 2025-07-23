@@ -61,7 +61,7 @@ export default function MasjidQuizDetailLectureSessions() {
     const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
 
     if (isRetrying && wrongQuestions.length === 0) {
-      navigate(`/masjid/${slug}/soal-materi-kajian/${id}/latihan-soal/hasil`, {
+      navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {
           correct: progressCount,
           total: data?.questions?.length || 1,
@@ -140,7 +140,7 @@ export default function MasjidQuizDetailLectureSessions() {
       const endTime = Date.now();
       const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
 
-      navigate(`/masjid/${slug}/soal-materi-kajian/${id}/latihan-soal/hasil`, {
+      navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {
           correct: progressCount + (isCorrect ? 1 : 0),
           total: data?.questions?.length || 1,

@@ -27,9 +27,7 @@ export default function LectureMaterialList({
       {data.map((item) => (
         <div
           key={item.id}
-          onClick={() =>
-            navigate(`/masjid/${slug}/soal-materi-kajian/${item.id}`)
-          }
+          onClick={() => navigate(`/masjid/${slug}/soal-materi/${item.id}`)}
           className="p-3 rounded-md shadow-sm cursor-pointer transition hover:opacity-90"
           style={{
             backgroundColor: theme.white1,

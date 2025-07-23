@@ -39,7 +39,7 @@ export default function MasjidDetailLectureMaterial() {
     { label: "Latihan Soal", icon: "📘", path: "latihan-soal" },
     { label: "Materi Lengkap", icon: "📖", path: "materi-lengkap" },
     { label: "Ringkasan", icon: "📝", path: "ringkasan" },
-    { label: "Dokumen", icon: "📂", path: "dokumen" }
+    { label: "Dokumen", icon: "📂", path: "dokumen" },
   ];
 
   return (
@@ -98,9 +98,7 @@ export default function MasjidDetailLectureMaterial() {
             <div
               key={item.label}
               onClick={() =>
-                navigate(
-                  `/masjid/${slug}/soal-materi-kajian/${id}/${item.path}`
-                )
+                navigate(`/masjid/${slug}/soal-materi/${id}/${item.path}`)
               }
               className="flex flex-col items-center text-center text-sm p-3 rounded-md cursor-pointer hover:opacity-90 transition"
               style={{

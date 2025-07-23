@@ -126,42 +126,42 @@ export default function AppRoutes() {
 
           {/* Soal & Materi Kajian */}
           <Route
-            path="soal-materi-kajian"
+            path="soal-materi"
             element={<MasjidLectureMaterial />}
           />
 
           {/* Detail & Sub Halaman */}
           <Route
-            path="soal-materi-kajian/:id"
+            path="soal-materi/:id"
             element={<MasjidDetailLectureMaterial />}
           />
           <Route
-            path="soal-materi-kajian/:id/informasi"
+            path="soal-materi/:id/informasi"
             element={<MasjidInformationDetailLectureSessions />}
           />
           <Route
-            path="soal-materi-kajian/:id/latihan-soal"
+            path="soal-materi/:id/latihan-soal"
             element={<MasjidQuizDetailLectureSessions />}
           />
           <Route
-            path="soal-materi-kajian/:id/latihan-soal/hasil"
+            path="soal-materi/:id/latihan-soal/hasil"
             element={<MasjidResultQuizDetailLectureSessions />}
           />
           <Route
-            path="soal-materi-kajian/:id/video-audio"
+            path="soal-materi/:id/video-audio"
             element={<MasjidVideoAudioDetailLectureSessions />}
           />
 
           <Route
-            path="soal-materi-kajian/:id/materi-lengkap"
+            path="soal-materi/:id/materi-lengkap"
             element={<MasjidFullTranscriptDetailLectureSessions />}
           />
           <Route
-            path="soal-materi-kajian/:id/ringkasan"
+            path="soal-materi/:id/ringkasan"
             element={<MasjidSummaryDetailLectureSessions />}
           />
           <Route
-            path="soal-materi-kajian/:id/dokumen"
+            path="soal-materi/:id/dokumen"
             element={<MasjidDocsDetailLectureSessions />}
           />
         </Route>
@@ -212,7 +212,7 @@ export default function AppRoutes() {
               path="kajian-detail/:id/statistik-soal"
               element={<DKMStatsQuizLectureSessions />}
             />
-            
+
             {/* Materi Lengkap */}
             <Route
               path="kajian-detail/:id/materi-lengkap"

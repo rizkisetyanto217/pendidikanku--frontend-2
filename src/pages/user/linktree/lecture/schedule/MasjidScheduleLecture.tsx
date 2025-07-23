@@ -26,10 +26,10 @@ export default function MasjidScheduleLecture() {
     queryKey: ["kajianList", slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-u/by-masjid-slug/${slug}`
+        `/public/lecture-sessions-u/mendatang/${slug}`
       );
       console.log("📦 Data kajian terbaru dari endpoint:", res.data);
-      return res.data?.data?.slice(0, 3) ?? [];
+      return res.data?.data ?? [];
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
@@ -46,7 +46,7 @@ export default function MasjidScheduleLecture() {
   return (
     <div className="pb-20">
       <PageHeaderUser
-        title="Detail Kajian"
+        title="Jadwal Kajian"
         onBackClick={() => {
           if (window.history.length > 1) navigate(-1);
         }}

@@ -39,7 +39,7 @@ export default function MasjidResultQuizDetailLectureSessions() {
         </p>
 
         <button
-          onClick={() => navigate(`/masjid/${slug}/soal-materi-kajian/${id}`)}
+          onClick={() => navigate(`/masjid/${slug}/soal-materi/${id}`)}
           className="w-full py-3 rounded-lg text-white font-semibold transition-all"
           style={{ backgroundColor: theme.primary }}
         >
