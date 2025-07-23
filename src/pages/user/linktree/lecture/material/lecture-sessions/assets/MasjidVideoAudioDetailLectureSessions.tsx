@@ -1,13 +1,17 @@
 // File ini cocok digunakan ulang untuk halaman user dan halaman Linktree publik
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
+import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import { Check } from "lucide-react";
 
 export default function MasjidVideoAudioDetailLectureSessions() {
+  const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { id } = useParams();
@@ -40,8 +44,28 @@ export default function MasjidVideoAudioDetailLectureSessions() {
     return idMatch?.[1] ?? "";
   };
 
+  if (videoAssets.length === 0 && audioAssets.length === 0) {
+    return (
+      <div className="p-4 pb-28">
+        <PageHeaderUser
+          title="Video & Audio"
+          onBackClick={() => navigate(-1)}
+        />
+        <div className="mt-4 text-sm text-center text-gray-500 dark:text-white/70">
+          Belum ada video atau audio untuk sesi ini.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      <PageHeaderUser
+        title="Video & Audio"
+        onBackClick={() => {
+          if (window.history.length > 1) navigate(-1);
+        }}
+      />
       <Tabs
         value={tab}
         onChange={setTab}
@@ -83,24 +107,30 @@ export default function MasjidVideoAudioDetailLectureSessions() {
           )}
         </TabsContent>
 
-        <div className="mb-4 flex flex-wrap gap-3">
+        <ul className="space-y-2">
           {currentAssets.map((asset, index) => (
-            <div
+            <li
               key={asset.lecture_sessions_asset_id}
-              className={`flex items-center gap-2 border px-3 py-1 rounded-full cursor-pointer ${activeIndex === index ? "border-primary" : "border-gray-300"}`}
+              onClick={() => setActiveIndex(index)}
+              className="cursor-pointer rounded-lg border px-4 py-3 flex items-center justify-between transition"
               style={{
                 backgroundColor:
                   activeIndex === index ? theme.primary2 : theme.white2,
+                borderColor:
+                  activeIndex === index ? theme.primary : theme.silver1,
                 color: theme.black1,
+                borderWidth: 1,
               }}
-              onClick={() => setActiveIndex(index)}
             >
-              <span className="text-xs truncate max-w-[160px]">
+              <span className="text-sm font-medium">
                 {asset.lecture_sessions_asset_title}
               </span>
-            </div>
+              {activeIndex === index && (
+                <Check size={16} style={{ color: theme.primary }} />
+              )}
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </div>
   );

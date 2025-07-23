@@ -21,14 +21,21 @@ export default function MasjidQuizDetailLectureSessions() {
   const theme = isDark ? colors.dark : colors.light;
   const startTimeRef = useRef<number>(Date.now());
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["quiz", id],
     queryFn: async () => {
-      const res = await axios.get(
-        `/public/lecture-sessions-quiz/by-lecture-sessions/${id}`
-      );
-      console.log("📦 Quiz Data:", res.data.data);
-      return res.data.data;
+      try {
+        const res = await axios.get(
+          `/public/lecture-sessions-quiz/by-lecture-sessions/${id}`
+        );
+        console.log("📦 Quiz Data:", res.data.data);
+        return res.data.data;
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          return null; // secara eksplisit dianggap "data tidak tersedia"
+        }
+        throw err; // error lainnya tetap dilempar
+      }
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
@@ -66,8 +73,18 @@ export default function MasjidQuizDetailLectureSessions() {
     }
   }, [isRetrying, wrongQuestions.length]);
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return <div className="p-4">Memuat soal...</div>;
+  }
+  if (!data) {
+    return (
+      <div className="p-4 pb-28">
+        <PageHeaderUser title="Latihan Soal" onBackClick={() => navigate(-1)} />
+        <div className="mt-4 text-sm text-center text-gray-500 dark:text-white/70">
+          Belum ada soal tersedia untuk sesi ini.
+        </div>
+      </div>
+    );
   }
 
   const question = questions[index];

@@ -39,11 +39,7 @@ export default function MasjidDetailLectureMaterial() {
     { label: "Latihan Soal", icon: "📘", path: "latihan-soal" },
     { label: "Materi Lengkap", icon: "📖", path: "materi-lengkap" },
     { label: "Ringkasan", icon: "📝", path: "ringkasan" },
-    { label: "Dokumen", icon: "📂", path: "dokumen" },
-    { label: "Tanya Jawab", icon: "🙋", path: "tanya-jawab" },
-    { label: "Masukan", icon: "📋", path: "masukan" },
-    { label: "Ajukan Pertanyaan", icon: "❓", path: "ajukan-pertanyaan" },
-    { label: "Catatan Peserta", icon: "🗒️", path: "catatan-peserta" },
+    { label: "Dokumen", icon: "📂", path: "dokumen" }
   ];
 
   return (

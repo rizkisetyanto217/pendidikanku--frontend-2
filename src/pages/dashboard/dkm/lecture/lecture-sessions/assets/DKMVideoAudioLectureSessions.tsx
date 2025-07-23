@@ -93,7 +93,7 @@ export default function DKMVideoLectureSessions() {
         "lecture_sessions_asset_title",
         audioTitle.trim() || `Audio - ${new Date().toLocaleTimeString("id-ID")}`
       );
-      formData.append("lecture_sessions_asset_file", newAudioFile);
+      formData.append("lecture_sessions_asset_file_url", newAudioFile);
       formData.append("lecture_sessions_asset_file_type", "2");
       formData.append("lecture_sessions_asset_lecture_session_id", id);
 

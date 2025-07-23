@@ -78,11 +78,11 @@ import MasjidReportFinansial from "@/pages/user/linktree/finansial/report/Masjid
 import MasjidDetailLecture from "@/pages/user/linktree/lecture/MasjidDetailLecture";
 import MasjidDonationMotivation from "@/pages/user/linktree/finansial/donation/MasjidDonationMotivation";
 import MasjidLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidLectureMaterial";
-import MasjidDetailLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidDetailLectureMaterial";
-import MasjidInformationDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidInformationDetailLectureSessions";
+import MasjidDetailLectureMaterial from "@/pages/user/linktree/lecture/material/lecture-sessions/detail/MasjidDetailLectureMaterial";
+import MasjidInformationDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/main/MasjidInformationDetailLectureSessions";
 import MasjidQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidQuizDetailLectureSessions";
-import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidFullTranscriptLectureSessions";
-import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/MasjidSummaryDetailLectureSessions";
+import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/materials/MasjidFullTranscriptLectureSessions";
+import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/materials/MasjidSummaryDetailLectureSessions";
 import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidDocsLectureSessions";
 import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizDetailLectureSessions";
 import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMAddEditDocumentLectureSessions";

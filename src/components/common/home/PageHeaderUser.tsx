@@ -267,22 +267,18 @@ function LinkDropdownSubmenu({
   }, [open]);
 
   return (
-    <div
-      className="relative group"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      ref={ref}
-    >
+    <div className="relative" ref={ref}>
       <button
+        onClick={() => setOpen((prev) => !prev)}
         className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         style={{ color: theme.black1 }}
       >
-        {label} ▸
+        {label} ▾
       </button>
 
       <div
         className={clsx(
-          "absolute top-0 left-full ml-1 w-48 rounded-md shadow-md border z-50 transition-all duration-150",
+          "absolute left-0 mt-1 w-full rounded-md shadow-md border z-50 transition-all duration-150",
           open
             ? "opacity-100 scale-100"
             : "opacity-0 scale-95 pointer-events-none"
@@ -295,7 +291,10 @@ function LinkDropdownSubmenu({
         {items.map((item, i) => (
           <button
             key={i}
-            onClick={item.onClick}
+            onClick={() => {
+              item.onClick();
+              setOpen(false);
+            }}
             className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
             style={{ color: theme.black1 }}
           >
