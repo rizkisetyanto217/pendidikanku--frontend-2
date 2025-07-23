@@ -44,20 +44,6 @@ export default function MasjidVideoAudioDetailLectureSessions() {
     return idMatch?.[1] ?? "";
   };
 
-  if (videoAssets.length === 0 && audioAssets.length === 0) {
-    return (
-      <div className="p-4 pb-28">
-        <PageHeaderUser
-          title="Video & Audio"
-          onBackClick={() => navigate(-1)}
-        />
-        <div className="mt-4 text-sm text-center text-gray-500 dark:text-white/70">
-          Belum ada video atau audio untuk sesi ini.
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <PageHeaderUser

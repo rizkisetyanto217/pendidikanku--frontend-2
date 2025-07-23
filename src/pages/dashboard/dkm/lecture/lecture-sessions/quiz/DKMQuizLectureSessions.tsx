@@ -137,7 +137,7 @@ export default function DKMQuizLectureSessions() {
       lecture_sessions_question: newQuestion.question,
       lecture_sessions_question_answers: newQuestion.options.map((opt, i) => {
         // hapus label huruf ganda dari input seperti "A. A. A. tes 1"
-        const cleanText = opt.replace(/^[A-Z](\.\s*)?/g, "").trim();
+        const cleanText = opt.replace(/^[a-zA-Z]\.\s*/, "").trim();
         return `${String.fromCharCode(65 + i)}. ${cleanText}`;
       }),
 
@@ -460,20 +460,20 @@ function getChangedFields(
 
   const cleanedNewOptions = newQ.options.map(
     (opt, i) =>
-      `${String.fromCharCode(65 + i)}. ${opt.replace(/^[A-Z](\.\s*)?/g, "").trim()}`
+      `${String.fromCharCode(65 + i)}. ${opt.replace(/^[a-zA-Z]\.\s*/, "").trim()}`
   );
 
   const cleanedOldOptions = oldQ.options.map((opt) =>
-    opt.replace(/^[A-Z](\.\s*)?/g, "").trim()
+    opt.replace(/^[a-zA-Z]\.\s*/, "").trim()
   );
 
   const cleanedNewOptionsWithoutLabel = newQ.options.map((opt) =>
-    opt.replace(/^[A-Z](\.\s*)?/g, "").trim()
+    opt.replace(/^[a-zA-Z]\.\s*/, "").trim()
   );
 
   const cleanedOldOptionsWithLabel = oldQ.options.map(
     (opt, i) =>
-      `${String.fromCharCode(65 + i)}. ${opt.replace(/^[A-Z](\.\s*)?/g, "").trim()}`
+      `${String.fromCharCode(65 + i)}. ${opt.replace(/^[a-zA-Z]\.\s*/, "").trim()}`
   );
 
   if (
