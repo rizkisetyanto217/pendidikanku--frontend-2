@@ -9,7 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 
-export default function DKMVideoLectureSessions() {
+export default function DKMVideoAudioLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { id } = useParams();
@@ -173,6 +173,7 @@ export default function DKMVideoLectureSessions() {
             <div className="w-full mb-6">
               <audio
                 controls
+                preload="none"
                 className="w-full"
                 src={audioAssets[activeIndex]?.lecture_sessions_asset_file_url}
               />

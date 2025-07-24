@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -44,9 +44,13 @@ export default function DKMDetailLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const session = location.state?.session;
+  const from = location.state?.from || -1;
 
   const {
-    data: session,
+    data: fetchedSession,
     isLoading,
     isError,
   } = useQuery<LectureSessionDetail>({
@@ -65,7 +69,7 @@ export default function DKMDetailLectureSessions() {
     return <p className="text-gray-500">Memuat data sesi kajian...</p>;
   }
 
-  if (isError || !session) {
+  if (isError || !fetchedSession) {
     return <p className="text-red-500">Data sesi kajian tidak tersedia.</p>;
   }
 
@@ -77,7 +81,7 @@ export default function DKMDetailLectureSessions() {
     lecture_session_place,
     lecture_session_image_url,
     lecture_session_approved_by_dkm_at,
-  } = session;
+  } = fetchedSession;
 
   const formattedTime = new Date(lecture_session_start_time).toLocaleString(
     "id-ID",
@@ -93,7 +97,7 @@ export default function DKMDetailLectureSessions() {
 
   const navigations = [
     { icon: <Home size={36} />, label: "Informasi", to: "informasi" },
-    { icon: <Video size={36} />, label: "Video Audio", to: "video" },
+    { icon: <Video size={36} />, label: "Video Audio", to: "video-audio" },
     { icon: <BookOpen size={36} />, label: "Latihan Soal", to: "latihan-soal" },
     {
       icon: <FileText size={36} />,
@@ -106,7 +110,12 @@ export default function DKMDetailLectureSessions() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Kajian Detail" backTo={`/dkm/kajian`} />
+      <PageHeader
+        title="Kajian Detail sekarang"
+        onBackClick={() =>
+          typeof from === "string" ? navigate(from) : navigate(-1)
+        }
+      />
 
       {/* Kartu Kajian */}
       <div
@@ -180,7 +189,7 @@ export default function DKMDetailLectureSessions() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {navigations.map((item) => (
-            <NavigationCard key={item.label} {...item} state={session} />
+            <NavigationCard key={item.label} {...item} state={fetchedSession} />
           ))}
         </div>
       </div>

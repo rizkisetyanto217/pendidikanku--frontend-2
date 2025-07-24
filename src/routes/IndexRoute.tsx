@@ -47,7 +47,7 @@ import DKMLecture from "@/pages/dashboard/dkm/lecture/lecture/main/DKMLecture";
 import DKMLectureParent from "@/pages/dashboard/dkm/lecture/DKMLectureParent";
 import DKMDetailLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/detail/DKMDetailLectureSessions";
 import DKMInformationLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/information/DKMInformationLectureSessions";
-import DKMVideoLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMVideoAudioLectureSessions";
+import DKMVideoAudioLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMVideoAudioLectureSessions";
 import DKMQuizLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/quiz/DKMQuizLectureSessions";
 import DKMFullTranscriptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMFullTranscriptLectureSessions";
 import DKMDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMdocumentLectureSessions";
@@ -151,7 +151,6 @@ export default function AppRoutes() {
             path="soal-materi/:id/video-audio"
             element={<MasjidVideoAudioDetailLectureSessions />}
           />
-
           <Route
             path="soal-materi/:id/materi-lengkap"
             element={<MasjidFullTranscriptDetailLectureSessions />}
@@ -201,8 +200,8 @@ export default function AppRoutes() {
               element={<DKMInformationLectureSessions />}
             />
             <Route
-              path="kajian-detail/:id/video"
-              element={<DKMVideoLectureSessions />}
+              path="kajian-detail/:id/video-audio"
+              element={<DKMVideoAudioLectureSessions />}
             />
             <Route
               path="kajian-detail/:id/latihan-soal"

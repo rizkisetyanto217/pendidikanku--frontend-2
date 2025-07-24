@@ -15,6 +15,8 @@ export default function DKMAddEditSummaryLectureSessions() {
   const { state: session } = useLocation();
   const [content, setContent] = useState("");
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const from = location.state?.from || -1;
 
   // Ambil data summary jika ada
   const { data: materialData, isLoading } = useQuery({
@@ -72,7 +74,9 @@ export default function DKMAddEditSummaryLectureSessions() {
     <div className="space-y-4">
       <PageHeader
         title={materialData ? "Edit Ringkasan" : "Tambah Ringkasan"}
-        onBackClick={() => history.back()}
+        onBackClick={() =>
+          typeof from === "string" ? navigate(from) : navigate(-1)
+        }
       />
 
       <div

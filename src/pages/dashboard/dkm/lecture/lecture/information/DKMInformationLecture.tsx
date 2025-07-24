@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -21,6 +21,7 @@ interface Lecture {
 export default function DKMInformationLecture() {
   const { state } = useLocation();
   const lecture = state as Lecture;
+  const navigate = useNavigate();
 
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -105,6 +106,11 @@ export default function DKMInformationLecture() {
         {/* Tombol Edit */}
         <div className="flex justify-end mt-6">
           <button
+            onClick={() =>
+              navigate(`/dkm/tema/tambah-edit/${lecture.lecture_id}`, {
+                state: lecture,
+              })
+            }
             className="px-6 py-2 rounded-md font-semibold"
             style={{
               backgroundColor: theme.primary,

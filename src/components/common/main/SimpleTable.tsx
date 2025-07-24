@@ -119,15 +119,35 @@ export default function SimpleTable({
               }}
               onClick={() => onRowClick?.(rowIndex)}
             >
-              {cells.map((cell, cellIndex) => (
-                <div
-                  key={cellIndex}
-                  className="text-sm"
-                  style={{ color: theme.black1 }}
-                >
-                  {cell}
-                </div>
-              ))}
+              {cells.map((cell, cellIndex) => {
+                // Gabung kolom 0 (No) dan kolom 2 (Deskripsi atau teks)
+                if (cellIndex === 0) {
+                  const no = cell;
+                  const deskripsi = cells[2]; // kolom ke-3
+                  return (
+                    <div
+                      key={`mobile-combined-${rowIndex}`}
+                      className="text-sm font-medium"
+                      style={{ color: theme.black1 }}
+                    >
+                      {no}. {deskripsi}
+                    </div>
+                  );
+                }
+
+                // Skip kolom ke-2 karena sudah ditampilkan
+                if (cellIndex === 2) return null;
+
+                return (
+                  <div
+                    key={cellIndex}
+                    className="text-sm"
+                    style={{ color: theme.black1 }}
+                  >
+                    {cell}
+                  </div>
+                );
+              })}
             </div>
           ))
         )}

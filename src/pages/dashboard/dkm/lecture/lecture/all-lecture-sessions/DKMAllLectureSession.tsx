@@ -4,12 +4,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import { ReactNode } from "react";
-import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
-import toast from "react-hot-toast";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
+import { ExternalLink } from "lucide-react";
 
 export interface LectureSession {
   lecture_session_id: string;
@@ -43,8 +42,7 @@ const fetchLectureSessions = async (
   const res = await axios.get(
     `/public/lecture-sessions-u/by-lecture/${lectureId}`
   );
-  if (!res?.data || !Array.isArray(res.data.data)) return [];
-  return res.data.data as LectureSession[];
+  return Array.isArray(res.data.data) ? res.data.data : [];
 };
 
 export default function DKMAllLectureSession() {
@@ -79,9 +77,7 @@ export default function DKMAllLectureSession() {
       format(
         new Date(session.lecture_session_start_time),
         "EEEE, dd MMMM yyyy - HH:mm",
-        {
-          locale: localeID,
-        }
+        { locale: localeID }
       ),
       <>
         <StatusBadge
@@ -99,19 +95,19 @@ export default function DKMAllLectureSession() {
           variant={session.lecture_session_is_active ? "success" : "error"}
         />
       </>,
-      <div onClick={(e) => e.stopPropagation()}>
-        <ActionEditDelete
-          onEdit={() =>
-            navigate(`/dkm/kajian/sesi/edit/${session.lecture_session_id}`)
-          }
-          onDelete={() => {
-            if (confirm("Yakin ingin menghapus sesi kajian ini?")) {
-              console.log("Delete", session.lecture_session_id);
-              toast.success("Berhasil menghapus sesi kajian (mock)");
-            }
-          }}
-        />
-      </div>,
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/dkm/kajian/kajian-detail/${session.lecture_session_id}`, {
+            state: {
+              session,
+              from: location.pathname,
+            },
+          });
+        }}
+      >
+        <ExternalLink size={16} />
+      </button>,
     ]);
   }, [sessions, navigate]);
 
@@ -135,12 +131,6 @@ export default function DKMAllLectureSession() {
         columns={columns}
         rows={isLoading || isError ? [] : rows}
         emptyText={emptyText}
-        onRowClick={(i) => {
-          const session = sessions[i];
-          navigate(`/dkm/kajian/kajian-detail/${session.lecture_session_id}`, {
-            state: session,
-          });
-        }}
       />
     </>
   );

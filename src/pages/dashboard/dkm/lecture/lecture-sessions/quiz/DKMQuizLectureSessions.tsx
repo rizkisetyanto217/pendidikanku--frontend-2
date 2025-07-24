@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -26,6 +26,8 @@ interface TransformedQuestion {
 }
 
 export default function DKMQuizLectureSessions() {
+  const location = useLocation();
+  const from = location.state?.from || -1;
   const { id: lecture_session_id } = useParams();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -349,7 +351,9 @@ export default function DKMQuizLectureSessions() {
     <div className="space-y-6">
       <PageHeader
         title="Latihan Soal"
-        onBackClick={() => history.back()}
+        onBackClick={() =>
+          typeof from === "string" ? navigate(from) : navigate(-1)
+        }
         actionButton={{
           label: "Statistik Soal",
           onClick: () =>

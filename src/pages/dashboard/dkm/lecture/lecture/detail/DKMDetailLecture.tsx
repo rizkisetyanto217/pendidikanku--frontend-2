@@ -19,7 +19,7 @@ interface Lecture {
   lecture_title: string;
   lecture_description: string;
   lecture_image_url: string | null;
-  lecture_teachers: any; // Bisa string atau object
+  lecture_teachers: any;
   total_lecture_sessions: number | null;
   lecture_is_active: boolean;
   lecture_created_at: string;
@@ -38,16 +38,15 @@ export default function DKMDetailLecture() {
     data: lecture,
     isLoading,
     isError,
-  } = useQuery<Lecture>({
+    error,
+  } = useQuery<Lecture, Error>({
     queryKey: ["lecture", id],
-    enabled: !!id, // Tetap fetch walaupun ada state
+    enabled: !!id,
     queryFn: async () => {
       const res = await axios.get(`/api/a/lectures/${id}`);
-      console.log("🚀 ~ response from /api/a/lectures/:id", res.data);
       return res.data.data;
     },
-    initialData: initialLecture, // ini masih oke untuk immediate render
-    staleTime: 1000 * 60 * 5,
+    initialData: initialLecture,
   });
 
   const navItems = [
@@ -78,22 +77,42 @@ export default function DKMDetailLecture() {
     { icon: <FileText size={20} />, label: "Dokumen", to: "dokumen" },
   ];
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError || !lecture)
-    return <p className="text-red-500">Gagal memuat data kajian.</p>;
+  if (isLoading) return <p className="text-sm text-gray-500">Memuat data...</p>;
 
-  const teacherName = Array.isArray(lecture.lecture_teachers)
-    ? lecture.lecture_teachers
-        .map((t: any) => t.name?.trim())
-        .filter((name) => name)
-        .join(", ") || "Pengajar belum ditentukan"
-    : typeof lecture.lecture_teachers === "string"
-      ? lecture.lecture_teachers
-      : (lecture.lecture_teachers?.name ?? "Pengajar belum ditentukan");
+  if (isError && !lecture) {
+    // Hanya render error jika benar-benar tidak ada data sama sekali
+    const errMsg =
+      (error as any)?.response?.data?.message ||
+      (error as any)?.message ||
+      "Data tidak ditemukan.";
+    return (
+      <p className="text-sm text-red-500 p-4">
+        Gagal memuat data kajian. {errMsg}
+      </p>
+    );
+  }
+
+  if (!lecture) {
+    // Jika data belum tersedia (bahkan dari initialData), tampilkan placeholder
+    return <p className="text-sm text-gray-500">Memuat data kajian...</p>;
+  }
+
+  // Nama Pengajar
+  let teacherName = "Pengajar belum ditentukan";
+  if (Array.isArray(lecture.lecture_teachers)) {
+    const names = lecture.lecture_teachers
+      .map((t: any) => t?.name?.trim())
+      .filter(Boolean);
+    if (names.length > 0) teacherName = names.join(", ");
+  } else if (typeof lecture.lecture_teachers === "string") {
+    teacherName = lecture.lecture_teachers;
+  } else if (lecture.lecture_teachers?.name) {
+    teacherName = lecture.lecture_teachers.name;
+  }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Kajian Detail" backTo="/dkm/tema" />
+      <PageHeader title="Kajian Detail" backTo="/dkm/kajian" />
 
       {/* Kartu Kajian */}
       <div
