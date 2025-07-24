@@ -26,7 +26,7 @@ export default function MasjidQuizDetailLectureSessions() {
     queryFn: async () => {
       try {
         const res = await axios.get(
-          `/public/lecture-sessions-quiz/by-lecture-sessions/${id}`
+          `/public/lecture-sessions-quiz/${id}/with-questions`
         );
         console.log("📦 Quiz Data:", res.data.data);
         return res.data.data;

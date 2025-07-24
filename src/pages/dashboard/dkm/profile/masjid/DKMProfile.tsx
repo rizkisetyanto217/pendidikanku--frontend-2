@@ -63,10 +63,6 @@ export default function ProfilMasjid() {
     location.pathname.includes("edit-profil-masjid") ||
     location.pathname.includes("edit-masjid");
 
-  const menus: SidebarMenuItem[] = [
-    { name: "Masjid", icon: <BuildingIcon />, to: "/dkm/profil-masjid" },
-    { name: "DKM & Pengajar", icon: <UserIcon />, to: "/dkm/profil-dkm" },
-  ];
 
   const { data: masjid, isLoading: isLoadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", masjidId],
@@ -101,9 +97,7 @@ export default function ProfilMasjid() {
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
-      <div className="w-full md:w-64 shrink-0">
-        <DashboardSidebar menus={menus} title="Profil" />
-      </div>
+
 
       <div className="flex-1">
         <div

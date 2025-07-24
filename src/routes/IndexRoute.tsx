@@ -89,6 +89,7 @@ import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lec
 import MasjidVideoAudioDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioDetailLectureSessions";
 import DKMAddEditFullTransciptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMAddEditFullTransciptLectureSessions";
 import DKMAddEditSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMAddEditSummaryLectureSessions";
+import DKMProfilMasjidParent from "@/pages/dashboard/dkm/profile/DKMProfileParent";
 
 export default function AppRoutes() {
   return (
@@ -125,10 +126,7 @@ export default function AppRoutes() {
           <Route path="jadwal-kajian/:id" element={<MasjidDetailLecture />} />
 
           {/* Soal & Materi Kajian */}
-          <Route
-            path="soal-materi"
-            element={<MasjidLectureMaterial />}
-          />
+          <Route path="soal-materi" element={<MasjidLectureMaterial />} />
 
           {/* Detail & Sub Halaman */}
           <Route
@@ -172,7 +170,8 @@ export default function AppRoutes() {
           <Route index element={<DashboardAdminDkm />} />
 
           {/* Profil Masjid */}
-          <Route path="profil-masjid" element={<ProfilMasjid />}>
+          <Route path="profil-masjid" element={<DKMProfilMasjidParent />}>
+            <Route index element={<ProfilMasjid />} />
             <Route path="edit-sosmed" element={<DkmEditSosmedProfile />} />
             <Route path="edit-masjid" element={<DKMEditMasjid />} />
             <Route
@@ -180,7 +179,9 @@ export default function AppRoutes() {
               element={<DKMEditProfileMasjid />}
             />
           </Route>
-          <Route path="profil-dkm" element={<ProfileDKMPengajar />} />
+          <Route path="profil-dkm" element={<DKMProfilMasjidParent />}>
+            <Route index element={<ProfileDKMPengajar />} />
+          </Route>
 
           <Route path="kajian" element={<DKMLectureParent />}>
             <Route index element={<DKMLectureSessions />} />
