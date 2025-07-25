@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 
-export default function MasjidFullTranscriptDetailLectureSessions() {
+export default function MasjidFullTranscriptLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { id: lecture_session_id } = useParams();

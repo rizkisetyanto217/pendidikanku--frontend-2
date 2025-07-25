@@ -77,19 +77,26 @@ import MasjidScheduleLecture from "@/pages/user/linktree/lecture/schedule/Masjid
 import MasjidReportFinansial from "@/pages/user/linktree/finansial/report/MasjidReportFinansial";
 import MasjidDetailLecture from "@/pages/user/linktree/lecture/MasjidDetailLecture";
 import MasjidDonationMotivation from "@/pages/user/linktree/finansial/donation/MasjidDonationMotivation";
-import MasjidLectureMaterial from "@/pages/user/linktree/lecture/material/MasjidLectureMaterial";
-import MasjidDetailLectureMaterial from "@/pages/user/linktree/lecture/material/lecture-sessions/detail/MasjidDetailLectureMaterial";
-import MasjidInformationDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/main/MasjidInformationDetailLectureSessions";
-import MasjidQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidQuizDetailLectureSessions";
+import MasjidLectureMaterial from "@/pages/user/linktree/lecture/material/lecture/main/MasjidLectureMaterial";
+import MasjidDetailLectureMaterial from "@/pages/user/linktree/lecture/MasjidDetailLecture";
+import MasjidInformationDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/main/MasjidInformationLectureSessions";
+import MasjidQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidQuizLectureSessions";
 import MasjidFullTranscriptDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/materials/MasjidFullTranscriptLectureSessions";
-import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/materials/MasjidSummaryDetailLectureSessions";
+import MasjidSummaryDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/materials/MasjidSummaryLectureSessions";
 import MasjidDocsDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidDocsLectureSessions";
-import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizDetailLectureSessions";
+import MasjidResultQuizDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/quizzes/MasjidResultQuizLectureSessions";
 import DKMAddEditDocumentLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/assets/DKMAddEditDocumentLectureSessions";
-import MasjidVideoAudioDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioDetailLectureSessions";
+import MasjidVideoAudioDetailLectureSessions from "@/pages/user/linktree/lecture/material/lecture-sessions/assets/MasjidVideoAudioLectureSessions";
 import DKMAddEditFullTransciptLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/fullTranscipt/DKMAddEditFullTransciptLectureSessions";
 import DKMAddEditSummaryLectureSessions from "@/pages/dashboard/dkm/lecture/lecture-sessions/materials/summary/DKMAddEditSummaryLectureSessions";
 import DKMProfilMasjidParent from "@/pages/dashboard/dkm/profile/DKMProfileParent";
+import MasjidMaterial from "@/pages/user/linktree/lecture/material/MasjidMaterial";
+import MasjidCertificateLecture from "@/pages/user/linktree/lecture/certificate/MasjidCertificate";
+import MasjidDocsLecture from "@/pages/user/linktree/lecture/material/lecture/assets/MasjidDocsLecture";
+import MasjidVideoAudioLecture from "@/pages/user/linktree/lecture/material/lecture/assets/MasjidVideoAudioLecture";
+import MasjidQuizLecture from "@/pages/user/linktree/lecture/material/lecture/quizzes/MasjidQuizLecture";
+import MasjidFullTransciptLecture from "@/pages/user/linktree/lecture/material/lecture/materials/MasjidFullTransciptLecture";
+import MasjidSummaryLecture from "@/pages/user/linktree/lecture/material/lecture/materials/MasjidSummaryLecture";
 
 export default function AppRoutes() {
   return (
@@ -126,7 +133,7 @@ export default function AppRoutes() {
           <Route path="jadwal-kajian/:id" element={<MasjidDetailLecture />} />
 
           {/* Soal & Materi Kajian */}
-          <Route path="soal-materi" element={<MasjidLectureMaterial />} />
+          <Route path="soal-materi" element={<MasjidMaterial />} />
 
           {/* Detail & Sub Halaman */}
           <Route
@@ -161,6 +168,25 @@ export default function AppRoutes() {
             path="soal-materi/:id/dokumen"
             element={<MasjidDocsDetailLectureSessions />}
           />
+
+          <Route path="tema/:id" element={<MasjidLectureMaterial />} />
+          <Route
+            path="tema/:id/certificate"
+            element={<MasjidCertificateLecture />}
+          />
+          <Route path="tema/:id/dokumen" element={<MasjidDocsLecture />} />
+          <Route
+            path="tema/:id/video-audio"
+            element={<MasjidVideoAudioLecture />}
+          />
+          <Route path="tema/:id/latihan-soal" element={<MasjidQuizLecture />} />
+
+          <Route
+            path="tema/:id/materi-lengkap"
+            element={<MasjidFullTransciptLecture />}
+          />
+
+          <Route path="tema/:id/ringkasan" element={<MasjidSummaryLecture />} />
         </Route>
       </Route>
 

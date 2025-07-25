@@ -128,17 +128,6 @@ export default function PageHeaderUser({
                 borderColor: theme.silver1,
               }}
             >
-              <button
-                onClick={() => {
-                  toggleDark();
-                  setShowMenu(false);
-                }}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                style={{ color: theme.black1 }}
-              >
-                {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
-              </button>
-
               {masjidData && (
                 <>
                   <LinkDropdownItem
@@ -147,64 +136,42 @@ export default function PageHeaderUser({
                       navigate(`/masjid/${masjidData.masjid_slug}`)
                     }
                   />
-                  <LinkDropdownItem
-                    label="🏛️ Profil Masjid"
-                    onClick={() =>
-                      navigate(`/masjid/${masjidData.masjid_slug}/profil`)
-                    }
-                  />
-                  <LinkDropdownItem
-                    label="📍 Lokasi"
-                    onClick={() => {
-                      if (masjidData.masjid_google_maps_url) {
-                        window.open(
-                          masjidData.masjid_google_maps_url,
-                          "_blank"
-                        );
-                      }
-                    }}
-                  />
-                  <LinkDropdownItem
-                    label="📆 Jadwal Kajian"
-                    onClick={() =>
-                      navigate(
-                        `/masjid/${masjidData.masjid_slug}/jadwal-kajian`
-                      )
-                    }
-                  />
                   <LinkDropdownSubmenu
-                    label="📚 Soal & Materi"
+                    label="📚 Menu"
                     items={[
                       {
-                        label: "📄 Soal Latihan",
+                        label: "🏛️ Profil Masjid",
+                        onClick: () =>
+                          navigate(`/masjid/${masjidData.masjid_slug}/profil`),
+                      },
+                      {
+                        label: "📆 Jadwal Kajian",
                         onClick: () =>
                           navigate(
-                            `/masjid/${masjidData.masjid_slug}/soal-latihan`
+                            `/masjid/${masjidData.masjid_slug}/jadwal-kajian`
                           ),
                       },
                       {
-                        label: "📘 Materi Kajian",
+                        label: "📰 Laporan Keuangan",
                         onClick: () =>
                           navigate(
-                            `/masjid/${masjidData.masjid_slug}/materi-kajian`
-                          ),
-                      },
-                      {
-                        label: "🎓 Sertifikat",
-                        onClick: () =>
-                          navigate(
-                            `/masjid/${masjidData.masjid_slug}/sertifikat`
+                            `/masjid/${masjidData.masjid_slug}/keuangan`
                           ),
                       },
                     ]}
                   />
 
-                  <LinkDropdownItem
-                    label="📰 Laporan Keuangan"
-                    onClick={() =>
-                      navigate(`/masjid/${masjidData.masjid_slug}/keuangan`)
-                    }
-                  />
+                  <button
+                    onClick={() => {
+                      toggleDark();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                    style={{ color: theme.black1 }}
+                  >
+                    {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
+                  </button>
+
                   <LinkDropdownItem
                     label="🔗 Bagikan Halaman Ini"
                     onClick={() => {

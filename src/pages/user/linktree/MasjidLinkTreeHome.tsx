@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRef, useEffect } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import { ChevronLeft, ChevronRight } from "lucide-react"; // ikon arrow
 
 const currentUrl = window.location.href;
 
@@ -43,8 +44,29 @@ export default function PublicLinktree() {
   const { isDark, toggleDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
+  const [showLeft, setShowLeft] = useState(false);
+  const [showRight, setShowRight] = useState(false);
+
   const [searchParams] = useSearchParams();
   const cacheKey = searchParams.get("k") || "default";
+
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    sliderRef.current?.scrollBy({ left: -300, behavior: "smooth" });
+
+    setTimeout(() => {
+      updateArrowVisibility();
+    }, 50); // delay untuk memastikan scrollLeft ter-update
+  };
+
+  const scrollRight = () => {
+    sliderRef.current?.scrollBy({ left: 300, behavior: "smooth" });
+
+    setTimeout(() => {
+      updateArrowVisibility();
+    }, 50); // delay untuk memastikan scrollLeft ter-update
+  };
 
   const { data: masjidData, isLoading: loadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", slug],
@@ -81,6 +103,32 @@ export default function PublicLinktree() {
     }
   };
 
+  const updateArrowVisibility = () => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    const atStart = Math.floor(el.scrollLeft) <= 0;
+    const atEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth;
+
+    setShowLeft(!atStart);
+    setShowRight(!atEnd);
+  };
+
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    updateArrowVisibility(); // initial check
+    el.addEventListener("scroll", updateArrowVisibility);
+
+    return () => el.removeEventListener("scroll", updateArrowVisibility);
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(updateArrowVisibility, 100); // sedikit delay setelah render
+    return () => clearTimeout(timeout);
+  }, [kajianList]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -116,68 +164,93 @@ export default function PublicLinktree() {
   );
   if (isMobile) {
     return (
-      <div className="w-full min-h-screen p-4 pb-28 overflow-auto bg-cover bg-no-repeat bg-center">
+      <div className="w-full min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center">
         <DarkToggle />
 
-        {kajianList && kajianList.length > 0 && (
-          <div className="overflow-x-auto mb-4 p-2 pt-4">
-            <div className="flex space-x-4 w-max">
-              {kajianList.map((kajian, idx) => (
-                <div
-                  key={idx}
-                  onClick={() =>
-                    navigate(
-                      `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
-                    )
-                  }
-                  className="min-w-[260px] max-w-xs rounded-lg overflow-hidden shadow-md cursor-pointer hover:opacity-90 transition"
-                  style={{ backgroundColor: themeColors.white1 }}
+        {/* Gambar Kajian */}
+        <div className="relative">
+          {kajianList && kajianList.length > 0 && (
+            <div className="relative">
+              {/* Tombol kiri */}
+              {showLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
                 >
-                  <img
-                    src={
-                      kajian.lecture_session_image_url ||
-                      "/assets/placeholder/lecture.png"
-                    }
-                    alt={kajian.lecture_session_title}
-                    className="w-full aspect-[3/4] object-cover"
-                  />
-                  <div className="p-3">
-                    <h2
-                      className="font-semibold text-sm truncate"
-                      style={{
-                        color: themeColors.black1,
-                      }}
-                    >
-                      {kajian.lecture_session_title}
-                    </h2>
+                  <ChevronLeft size={20} />
+                </button>
+              )}
 
-                    <p
-                      className="text-xs"
-                      style={{ color: themeColors.silver2 }}
+              {/* Tombol kanan */}
+              {showRight && (
+                <button
+                  onClick={scrollRight}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              )}
+
+              <div className="overflow-hidden">
+                <div
+                  ref={sliderRef}
+                  className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
+                >
+                  {kajianList.map((kajian, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() =>
+                        navigate(
+                          `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+                        )
+                      }
+                      className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
+                      style={{ backgroundColor: themeColors.white1 }}
                     >
-                      {kajian.lecture_session_teacher_name} •{" "}
-                      {kajian.lecture_session_start_time
-                        ? new Date(
-                            kajian.lecture_session_start_time
-                          ).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "-"}
-                    </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: themeColors.silver4 }}
-                    >
-                      {kajian.lecture_session_place}
-                    </p>
-                  </div>
+                      <img
+                        src={
+                          kajian.lecture_session_image_url ||
+                          "/assets/placeholder/lecture.png"
+                        }
+                        alt={kajian.lecture_session_title}
+                        className="w-full aspect-[3/4] object-cover"
+                      />
+                      <div className="p-3">
+                        <h2
+                          className="font-semibold text-sm truncate"
+                          style={{ color: themeColors.black1 }}
+                        >
+                          {kajian.lecture_session_title}
+                        </h2>
+                        <p
+                          className="text-xs"
+                          style={{ color: themeColors.silver2 }}
+                        >
+                          {kajian.lecture_session_teacher_name} •{" "}
+                          {kajian.lecture_session_start_time
+                            ? new Date(
+                                kajian.lecture_session_start_time
+                              ).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "-"}
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{ color: themeColors.silver4 }}
+                        >
+                          {kajian.lecture_session_place}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="mb-4">
           <h1
@@ -314,7 +387,7 @@ export default function PublicLinktree() {
           <LinkItem
             label="Soal & Materi Kajian"
             icon="📚"
-            href={`/masjid/${masjidData.masjid_slug}/soal-materi?k=${Date.now()}`}
+            href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
             internal
           />
           <LinkItem
@@ -349,10 +422,9 @@ export default function PublicLinktree() {
 
   return (
     <div
-      className="w-full pt-5 flex items-center justify-center"
+      className="w-full min-h-screen flex items-center justify-center overflow-hidden"
       style={{
         backgroundColor: themeColors.white2,
-        overflow: "hidden", // ⬅️ tidak bisa scroll
       }}
     >
       <div
@@ -362,52 +434,83 @@ export default function PublicLinktree() {
         {/* Gambar Kajian */}
         <div className="relative">
           {kajianList && kajianList.length > 0 && (
-            <div className="relative overflow-hidden">
-              <div className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x">
-                {kajianList.map((kajian, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() =>
-                      navigate(
-                        `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
-                      )
-                    }
-                    className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow"
-                    style={{ backgroundColor: themeColors.white1 }}
-                  >
-                    <img
-                      src={kajian.lecture_session_image_url}
-                      alt={kajian.lecture_session_title}
-                      className="w-full aspect-[3/4] object-cover"
-                    />
-                    <div className="p-3">
-                      <h2
-                        className="font-semibold text-sm truncate"
-                        style={{ color: themeColors.black1 }}
-                      >
-                        {kajian.lecture_session_title}
-                      </h2>
+            <div className="relative">
+              {/* Tombol kiri */}
+              {showLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+              )}
 
-                      <p
-                        className="text-xs"
-                        style={{ color: themeColors.silver2 }}
-                      >
-                        {kajian.lecture_session_teacher_name} •{" "}
-                        {kajian.lecture_session_start_time
-                          ? new Date(
-                              kajian.lecture_session_start_time
-                            ).toLocaleDateString()
-                          : "-"}
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: themeColors.silver4 }}
-                      >
-                        {kajian.lecture_session_place}
-                      </p>
+              {/* Tombol kanan */}
+              {showRight && (
+                <button
+                  onClick={scrollRight}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              )}
+
+              <div className="overflow-hidden">
+                <div
+                  ref={sliderRef}
+                  className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
+                >
+                  {kajianList.map((kajian, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() =>
+                        navigate(
+                          `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+                        )
+                      }
+                      className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
+                      style={{ backgroundColor: themeColors.white1 }}
+                    >
+                      <img
+                        src={
+                          kajian.lecture_session_image_url ||
+                          "/assets/placeholder/lecture.png"
+                        }
+                        alt={kajian.lecture_session_title}
+                        className="w-full aspect-[3/4] object-cover"
+                      />
+                      <div className="p-3">
+                        <h2
+                          className="font-semibold text-sm truncate"
+                          style={{ color: themeColors.black1 }}
+                        >
+                          {kajian.lecture_session_title}
+                        </h2>
+                        <p
+                          className="text-xs"
+                          style={{ color: themeColors.silver2 }}
+                        >
+                          {kajian.lecture_session_teacher_name} •{" "}
+                          {kajian.lecture_session_start_time
+                            ? new Date(
+                                kajian.lecture_session_start_time
+                              ).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "-"}
+                        </p>
+                        <p
+                          className="text-xs"
+                          style={{ color: themeColors.silver4 }}
+                        >
+                          {kajian.lecture_session_place}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -551,7 +654,7 @@ export default function PublicLinktree() {
             <LinkItem
               label="Soal & Materi Kajian"
               icon="📚"
-              href={`/masjid/${masjidData.masjid_slug}/soal-materi?k=${Date.now()}`}
+              href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
               internal
             />
             <LinkItem

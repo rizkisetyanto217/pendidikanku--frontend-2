@@ -6,6 +6,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 
 interface LectureSessionAPIItem {
   lecture_session_id: string;
@@ -42,11 +44,13 @@ const monthData = [
   { month: "Maret", total: 12 },
 ];
 
-export default function MasjidLectureMaterial() {
+export default function MasjidMaterial() {
   const [tab, setTab] = useState("terbaru");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const navigate = useNavigate();
   const { slug } = useParams();
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
 
   const handleTabChange = (val: string) => {
     setTab(val);
@@ -100,7 +104,10 @@ export default function MasjidLectureMaterial() {
   if (!slug) return null;
 
   return (
-    <div className="p-4 space-y-4 pb-20">
+    <div
+      className="pt-4 space-y-4 pb-20"
+      // style={{ backgroundColor: theme.white1, color: theme.black1 }}
+    >
       <PageHeaderUser
         title="Soal & Materi Kajian ini"
         onBackClick={() => {
@@ -131,7 +138,8 @@ export default function MasjidLectureMaterial() {
           <div className="space-y-3">
             <button
               onClick={() => setSelectedMonth(null)}
-              className="text-sm text-primary font-medium"
+              className="text-sm font-medium"
+              style={{ color: theme.primary }}
             >
               ← Kembali ke daftar bulan
             </button>
@@ -148,21 +156,28 @@ export default function MasjidLectureMaterial() {
 
       <TabsContent value="tema" current={tab}>
         <div className="space-y-3">
-          <h2 className="text-sm font-medium">Daftar Tema Kajian</h2>
+          <h2 className="text-sm font-medium">Tema Kajian</h2>
           {loadingThemes ? (
             <p>Memuat tema kajian...</p>
           ) : (
             <div className="space-y-3">
-              {lectureThemes.map((theme) => (
+              {lectureThemes.map((themeItem) => (
                 <div
-                  key={theme.lecture_id}
-                  className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800"
+                  key={themeItem.lecture_id}
+                  onClick={() =>
+                    navigate(`/masjid/${slug}/tema/${themeItem.lecture_id}`)
+                  }
+                  className="p-4 rounded-lg cursor-pointer hover:opacity-90"
+                  style={{
+                    backgroundColor: theme.white1,
+                    border: `1px solid ${theme.silver1}`,
+                  }}
                 >
                   <h3 className="text-base font-semibold">
-                    {theme.lecture_title}
+                    {themeItem.lecture_title}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Total {theme.lecture_total_sessions} kajian
+                  <p className="text-sm" style={{ color: theme.silver2 }}>
+                    Total {themeItem.lecture_total_sessions} kajian
                   </p>
                 </div>
               ))}

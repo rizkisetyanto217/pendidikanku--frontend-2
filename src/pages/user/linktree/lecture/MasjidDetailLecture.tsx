@@ -56,7 +56,7 @@ export default function MasjidDetailLecture() {
     );
 
   return (
-    <div className="pb-20">
+    <div className="pt-4">
       {/* Header */}
       <PageHeaderUser
         title="Detail Kajian ini"

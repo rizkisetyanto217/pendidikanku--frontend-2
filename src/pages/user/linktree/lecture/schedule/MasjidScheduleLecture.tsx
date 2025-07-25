@@ -6,6 +6,7 @@ import { colors } from "@/constants/colorsThema";
 import FormattedDate from "@/constants/formattedDate";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import QRCodeLink from "@/components/common/main/QRCodeLink";
 
 interface Kajian {
   lecture_session_id: string;
@@ -44,7 +45,7 @@ export default function MasjidScheduleLecture() {
     return <p className="p-4">Belum ada jadwal kajian.</p>;
 
   return (
-    <div className="pb-20">
+    <div className="p-4 pb-20">
       <PageHeaderUser
         title="Jadwal Kajian"
         onBackClick={() => {
@@ -57,7 +58,7 @@ export default function MasjidScheduleLecture() {
           <div
             key={kajian.lecture_session_id}
             onClick={() =>
-              navigate(`/masjid/${slug}/kajian/${kajian.lecture_session_id}`)
+              navigate(`/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`)
             }
             className="border rounded-xl overflow-hidden shadow-sm cursor-pointer transition hover:scale-[1.01]"
             style={{

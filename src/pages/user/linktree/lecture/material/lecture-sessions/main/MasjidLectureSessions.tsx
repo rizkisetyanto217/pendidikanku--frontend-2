@@ -6,7 +6,7 @@ import { colors } from "@/constants/colorsThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-export default function MasjidDetailLectureMaterial() {
+export default function MasjidLectureMaterial() {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
