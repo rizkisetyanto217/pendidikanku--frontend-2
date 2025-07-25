@@ -45,7 +45,7 @@ export default function MasjidScheduleLecture() {
     return <p className="p-4">Belum ada jadwal kajian.</p>;
 
   return (
-    <div className="p-4 pb-20">
+    <div className="pt-4 pb-20 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Jadwal Kajian"
         onBackClick={() => {
@@ -58,7 +58,9 @@ export default function MasjidScheduleLecture() {
           <div
             key={kajian.lecture_session_id}
             onClick={() =>
-              navigate(`/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`)
+              navigate(
+                `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+              )
             }
             className="border rounded-xl overflow-hidden shadow-sm cursor-pointer transition hover:scale-[1.01]"
             style={{
@@ -70,7 +72,7 @@ export default function MasjidScheduleLecture() {
               <img
                 src={kajian.lecture_session_image_url}
                 alt={kajian.lecture_session_title}
-                className="w-20 h-20 object-cover rounded"
+                className="w-36 h-36 object-cover rounded"
               />
               <div className="flex-1 text-sm">
                 <p

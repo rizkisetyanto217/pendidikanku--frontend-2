@@ -43,7 +43,7 @@ export default function MasjidLectureMaterial() {
   ];
 
   return (
-    <div className="lg:p-4 pb-20 space-y-4">
+    <div className="lg:p-4 pb-20 space-y-4 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Kajian Detail"
         onBackClick={() => {

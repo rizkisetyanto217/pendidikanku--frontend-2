@@ -153,7 +153,7 @@ export default function MasjidQuizDetailLectureSessions() {
   };
 
   return (
-    <div className="p-4 pb-28">
+    <div className="p-4 max-w-2xl mx-auto">
       <PageHeaderUser
         title={data.quiz?.lecture_sessions_quiz_title || "Latihan Soal"}
         onBackClick={() => navigate(-1)}

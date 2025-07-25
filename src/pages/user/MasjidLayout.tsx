@@ -9,7 +9,7 @@ export default function MasjidLayout() {
 
   return (
     <div
-      className="w-full min-h-screen px-4 md:px-6 md:py-4"
+      className="w-full min-h-screen px-4 md:px-6"
       style={{ backgroundColor: themeColors.white2 }}
     >
       <div className="w-full max-w-4xl mx-auto">

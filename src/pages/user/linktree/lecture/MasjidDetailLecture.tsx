@@ -5,14 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
 
 export default function MasjidDetailLecture() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
-  const { slug } = useParams();
-
 
   const {
     data: kajian,
@@ -33,20 +32,6 @@ export default function MasjidDetailLecture() {
     staleTime: 5 * 60 * 1000, // cache 5 menit
   });
 
-  const formatDate = (iso: string) => {
-    try {
-      return new Date(iso).toLocaleString("id-ID", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return "-";
-    }
-  };
-
   if (isLoading) return <p className="p-4">Memuat data...</p>;
   if (isError || !kajian)
     return (
@@ -56,7 +41,7 @@ export default function MasjidDetailLecture() {
     );
 
   return (
-    <div className="pt-4">
+    <div className="pt-4 max-w-2xl mx-auto">
       {/* Header */}
       <PageHeaderUser
         title="Detail Kajian ini"
@@ -104,7 +89,11 @@ export default function MasjidDetailLecture() {
                 </li>
                 <li>
                   🕒 <strong>Jadwal:</strong>{" "}
-                  {formatDate(kajian.lecture_session_start_time)}
+                  <FormattedDate
+                    value={kajian.lecture_session_start_time}
+                    fullMonth
+                    className="inline"
+                  />
                 </li>
                 <li>
                   📍 <strong>Tempat:</strong>{" "}

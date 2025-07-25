@@ -60,7 +60,9 @@ export default function PageHeaderUser({
   }, [showMenu]);
 
   return (
-    <div className="px-1 pt-1 pb-1 mb-5 relative">
+    <div
+      className="sticky top-0 z-30 px-1 pt-1 pb-1 mb-5 backdrop-blur-md bg-opacity-80"
+    >
       <div className="flex items-center justify-between mb-2">
         {/* Back & Title */}
         <div className="flex items-center gap-4">

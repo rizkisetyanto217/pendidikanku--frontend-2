@@ -51,7 +51,7 @@ export default function MasjidFullTranscriptLectureSessions() {
     materialData?.lecture_sessions_material_transcript_full || "";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-2xl mx-auto">
       <PageHeader title="Materi Lengkap" onBackClick={() => history.back()} />
 
       <div

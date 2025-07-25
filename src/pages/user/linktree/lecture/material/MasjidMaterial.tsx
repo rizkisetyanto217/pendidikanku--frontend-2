@@ -105,7 +105,7 @@ export default function MasjidMaterial() {
 
   return (
     <div
-      className="pt-4 space-y-4 pb-20"
+      className="max-w-2xl mx-auto pt-4 space-y-4 pb-20"
       // style={{ backgroundColor: theme.white1, color: theme.black1 }}
     >
       <PageHeaderUser

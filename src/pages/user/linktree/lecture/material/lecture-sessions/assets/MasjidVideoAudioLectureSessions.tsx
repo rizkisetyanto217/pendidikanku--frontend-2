@@ -45,7 +45,7 @@ export default function MasjidVideoAudioDetailLectureSessions() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Video & Audio"
         onBackClick={() => {

@@ -27,28 +27,28 @@ const dataKajian = [
 ];
 
 export default function MasjidLectureMaterial() {
-  const [tab, setTab] = useState("kajian");
+  const [tab, setTab] = useState("navigasi");
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
 
   return (
-    <div className="pt-4">
+    <div className="pt-4 max-w-2xl mx-auto">
       <PageHeaderUser
-        title="Kajian Detail"
+        title="Tema Kajian Detail"
         onBackClick={() => {
           if (window.history.length > 1) navigate(-1);
         }}
       />
+
       <Tabs
         value={tab}
         onChange={setTab}
         tabs={[
-          { label: "Kajian", value: "kajian" },
           { label: "Navigasi", value: "navigasi" },
+          { label: "Kajian", value: "kajian" },
         ]}
       />
-
       {/* Daftar Kajian */}
       <TabsContent value="kajian" current={tab}>
         <div className="space-y-4 mt-4">
@@ -83,7 +83,7 @@ export default function MasjidLectureMaterial() {
       {/* Navigasi Utama Kajian */}
       <TabsContent value="navigasi" current={tab}>
         <div
-          className="rounded-lg p-4 shadow"
+          className="rounded-lg p-4 shadow mt-4"
           style={{ backgroundColor: theme.white1 }}
         >
           <h2
