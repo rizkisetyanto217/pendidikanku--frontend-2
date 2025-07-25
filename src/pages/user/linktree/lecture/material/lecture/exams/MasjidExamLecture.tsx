@@ -7,41 +7,34 @@ import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-interface LectureQuizQuestion {
+interface LectureExamQuestion {
   lecture_sessions_question_id: string;
   lecture_sessions_question: string;
   lecture_sessions_question_answers: string[];
   lecture_sessions_question_correct: string;
   lecture_sessions_question_explanation: string;
 }
-export default function MasjidQuizLectureSessions() {
+
+export default function MasjidExamLecture() {
   const { id, slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const startTimeRef = useRef<number>(Date.now());
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["quiz", id],
+  const { data, isLoading } = useQuery({
+    queryKey: ["exam-questions", id],
     queryFn: async () => {
-      try {
-        const res = await axios.get(
-          `/public/lecture-sessions-quiz/${id}/with-questions`
-        );
-        console.log("📦 Quiz Data:", res.data.data);
-        return res.data.data;
-      } catch (err: any) {
-        if (err.response?.status === 404) {
-          return null; // secara eksplisit dianggap "data tidak tersedia"
-        }
-        throw err; // error lainnya tetap dilempar
-      }
+      const res = await axios.get(
+        `/public/lecture-exams/${id}/questions/by-lecture`
+      );
+      return res.data;
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });
 
-  const [wrongQuestions, setWrongQuestions] = useState<LectureQuizQuestion[]>(
+  const [wrongQuestions, setWrongQuestions] = useState<LectureExamQuestion[]>(
     []
   );
   const [index, setIndex] = useState(0);
@@ -51,23 +44,22 @@ export default function MasjidQuizLectureSessions() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [progressCount, setProgressCount] = useState(0);
 
-  // ⛔️ JANGAN TARUH `question` sebelum data siap
-  const questions: LectureQuizQuestion[] = isRetrying
+  const questions: LectureExamQuestion[] = isRetrying
     ? wrongQuestions
     : data?.questions || [];
 
   useEffect(() => {
-    const endTime = Date.now();
-    const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
+    const durationSec = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
     if (isRetrying && wrongQuestions.length === 0) {
-      navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
+      navigate(`/masjid/${slug}/tema/${id}/ujian/hasil`, {
         state: {
           correct: progressCount,
           total: data?.questions?.length || 1,
           duration: durationSec,
           id,
           slug,
+          exam_id: data.exam_id, // ← tambahkan ini
         },
       });
     }
@@ -76,7 +68,8 @@ export default function MasjidQuizLectureSessions() {
   if (isLoading) {
     return <div className="p-4">Memuat soal...</div>;
   }
-  if (!data) {
+
+  if (!data || !data.questions?.length) {
     return (
       <div className="p-4 pb-28">
         <PageHeaderUser title="Latihan Soal" onBackClick={() => navigate(-1)} />
@@ -89,39 +82,29 @@ export default function MasjidQuizLectureSessions() {
 
   const question = questions[index];
 
-  if (!question && (!isRetrying || wrongQuestions.length === 0)) {
-    return <div className="p-4">Soal tidak ditemukan.</div>;
-  }
-
   const handleCheck = () => {
     if (!selected) return;
-
     const correct = question.lecture_sessions_question_correct;
     const isRight = selected.startsWith(correct);
     setIsCorrect(isRight);
     setShowAnswer(true);
 
     if (!isRight) {
-      const updated = [...questions];
-      updated.push(question);
+      const updated = [...questions, question];
+      isRetrying
+        ? setWrongQuestions(updated)
+        : setWrongQuestions((prev) => [...prev, question]);
+    } else {
+      setProgressCount((prev) => prev + 1);
       if (isRetrying) {
-        setWrongQuestions(updated);
-      } else {
-        setWrongQuestions((prev) => [...prev, question]);
+        setWrongQuestions((prev) =>
+          prev.filter(
+            (q) =>
+              q.lecture_sessions_question_id !==
+              question.lecture_sessions_question_id
+          )
+        );
       }
-      return;
-    }
-
-    setProgressCount((prev) => prev + 1);
-
-    if (isRetrying) {
-      setWrongQuestions((prev) =>
-        prev.filter(
-          (q) =>
-            q.lecture_sessions_question_id !==
-            question.lecture_sessions_question_id
-        )
-      );
     }
   };
 
@@ -137,16 +120,17 @@ export default function MasjidQuizLectureSessions() {
     } else if (isRetrying && wrongQuestions.length > 0) {
       setIndex(0);
     } else {
-      const endTime = Date.now();
-      const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
-
-      navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
+      const durationSec = Math.floor(
+        (Date.now() - startTimeRef.current) / 1000
+      );
+      navigate(`/masjid/${slug}/tema/${id}/ujian/hasil`, {
         state: {
-          correct: progressCount + (isCorrect ? 1 : 0),
+          correct: progressCount,
           total: data?.questions?.length || 1,
           duration: durationSec,
           id,
           slug,
+          exam_id: data.exam_id, // ← tambahkan ini
         },
       });
     }
@@ -154,10 +138,7 @@ export default function MasjidQuizLectureSessions() {
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <PageHeaderUser
-        title={data.quiz?.lecture_sessions_quiz_title || "Latihan Soal"}
-        onBackClick={() => navigate(-1)}
-      />
+      <PageHeaderUser title="Latihan Soal" onBackClick={() => navigate(-1)} />
 
       <div className="relative h-2 rounded-full bg-gray-200 dark:bg-white/10 mb-6 mt-2">
         <div

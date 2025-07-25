@@ -1,18 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-export default function MasjidLectureMaterial() {
-  const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-  const { id = "", slug = "" } = useParams();
+// =====================
+// ✅ Interface
+// =====================
+interface LectureSession {
+  lecture_session_title: string;
+  lecture_session_teacher_name: string;
+  lecture_session_start_time: string;
+  lecture_session_place: string;
+}
 
-  const { data, isLoading } = useQuery({
+export default function MasjidLectureSessions() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+
+  const { id = "", slug = "" } = useParams<{ id: string; slug: string }>();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get("tab") || "navigasi";
+  const fromTab = location.state?.fromTab;
+  const lectureId = location.state?.lectureId;
+
+  const { data, isLoading } = useQuery<LectureSession>({
     queryKey: ["lectureSessionDetail", id],
     queryFn: async () => {
       const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`);
@@ -25,11 +46,12 @@ export default function MasjidLectureMaterial() {
   const info = {
     materi: data?.lecture_session_title || "-",
     ustadz: data?.lecture_session_teacher_name || "-",
-    jadwal:
-      new Date(data?.lecture_session_start_time).toLocaleString("id-ID", {
-        dateStyle: "full",
-        timeStyle: "short",
-      }) || "-",
+    jadwal: data?.lecture_session_start_time
+      ? new Date(data.lecture_session_start_time).toLocaleString("id-ID", {
+          dateStyle: "full",
+          timeStyle: "short",
+        })
+      : "-",
     tempat: data?.lecture_session_place || "-",
   };
 
@@ -47,49 +69,52 @@ export default function MasjidLectureMaterial() {
       <PageHeaderUser
         title="Kajian Detail"
         onBackClick={() => {
-          if (window.history.length > 1) navigate(-1);
+          if (fromTab && lectureId) {
+            navigate(`/masjid/${slug}/tema/${lectureId}?tab=${fromTab}`);
+          } else {
+            navigate(-1); // fallback
+          }
         }}
       />
 
-      {/* Informasi Kajian */}
+      {/* 📘 Informasi Kajian */}
       <div
         className="p-4 rounded-lg space-y-2 text-sm"
         style={{
-          backgroundColor: themeColors.white1,
-          color: themeColors.black1,
-          border: `1px solid ${themeColors.silver1}`,
+          backgroundColor: theme.white1,
+          color: theme.black1,
+          border: `1px solid ${theme.silver1}`,
         }}
       >
         {isLoading ? (
-          <p style={{ color: themeColors.silver2 }}>Memuat data...</p>
+          <p style={{ color: theme.silver2 }}>Memuat data...</p>
         ) : (
           <>
             <div>
-              📘 <strong style={{ color: themeColors.black1 }}>Materi:</strong>{" "}
+              📘 <strong style={{ color: theme.black1 }}>Materi:</strong>{" "}
               {info.materi}
             </div>
             <div>
-              👤{" "}
-              <strong style={{ color: themeColors.black1 }}>Pengajar:</strong>{" "}
+              👤 <strong style={{ color: theme.black1 }}>Pengajar:</strong>{" "}
               {info.ustadz}
             </div>
             <div>
-              📅 <strong style={{ color: themeColors.black1 }}>Jadwal:</strong>{" "}
+              📅 <strong style={{ color: theme.black1 }}>Jadwal:</strong>{" "}
               {info.jadwal}
             </div>
             <div>
-              📍 <strong style={{ color: themeColors.black1 }}>Tempat:</strong>{" "}
+              📍 <strong style={{ color: theme.black1 }}>Tempat:</strong>{" "}
               {info.tempat}
             </div>
           </>
         )}
       </div>
 
-      {/* Navigasi Utama */}
+      {/* 🧭 Navigasi Utama */}
       <div>
         <h2
           className="text-base font-semibold mb-2"
-          style={{ color: themeColors.quaternary }}
+          style={{ color: theme.quaternary }}
         >
           Navigasi Utama
         </h2>
@@ -98,12 +123,15 @@ export default function MasjidLectureMaterial() {
             <div
               key={item.label}
               onClick={() =>
-                navigate(`/masjid/${slug}/soal-materi/${id}/${item.path}`)
+                navigate(
+                  `/masjid/${slug}/soal-materi/${id}/${item.path}?tab=${tab}`,
+                  { state: { fromTab: tab } }
+                )
               }
               className="flex flex-col items-center text-center text-sm p-3 rounded-md cursor-pointer hover:opacity-90 transition"
               style={{
-                backgroundColor: themeColors.white3,
-                color: themeColors.black1,
+                backgroundColor: theme.white3,
+                color: theme.black1,
               }}
             >
               <div className="text-2xl mb-1">{item.icon}</div>

@@ -37,7 +37,7 @@ export default function PageHeaderUser({
       return res.data?.data;
     },
     enabled: !!slug,
-    staleTime: 10 * 60 * 1000, // ⏳ cache 10 menit
+    staleTime: 10 * 60 * 1000, 
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
@@ -82,7 +82,7 @@ export default function PageHeaderUser({
             </button>
           )}
 
-          <h1 className="text-2xl font-medium" style={{ color: theme.black1 }}>
+          <h1 className="text-xl font-medium" style={{ color: theme.black1 }}>
             {title}
           </h1>
         </div>

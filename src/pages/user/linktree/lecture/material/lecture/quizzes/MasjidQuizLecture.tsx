@@ -1,4 +1,4 @@
 
 export default function MasjidQuizLecture(){
-    return <div>Kuis Masjid</div>
+    return <div>Detail Quiz Kajian</div>
 }

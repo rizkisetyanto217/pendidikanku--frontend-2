@@ -1,6 +1,9 @@
 import React from "react";
-import { colors } from "@/constants/colorsThema";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
@@ -9,6 +12,34 @@ import QRCodeLink from "@/components/common/main/QRCodeLink";
 export default function MasjidCertificateLecture() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const { user_exam_id } = useParams();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["certificate-by-user-exam", user_exam_id],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/certificates/by-user-exam/${user_exam_id}`
+      );
+      console.log("📦 Data sertifikat:", res.data);
+      return res.data;
+    },
+    enabled: !!user_exam_id,
+  });
+
+  const formatGrade = (n: number | null | undefined): string => {
+    if (n == null) return "-";
+    if (n >= 91) return `${n} (Istimewa)`;
+    if (n >= 81) return `${n} (Sangat Baik)`;
+    if (n >= 71) return `${n} (Baik)`;
+    if (n >= 61) return `${n} (Cukup)`;
+    return `${n} (Perlu Bimbingan)`;
+  };
+
+  if (isLoading) {
+    return <p className="text-center py-10">Memuat sertifikat...</p>;
+  }
+
+  const certificate = data;
 
   return (
     <div
@@ -29,24 +60,11 @@ export default function MasjidCertificateLecture() {
           color: theme.black1,
         }}
       >
-        <div className="flex justify-center">
-          <div className="flex items-center space-x-2">
-            <div
-              className="w-10 h-10 rounded-full"
-              style={{ backgroundColor: theme.primary }}
-            />
-            <div
-              className="w-10 h-10 rounded-full"
-              style={{ backgroundColor: theme.primary }}
-            />
-          </div>
-        </div>
-
         <h2
           className="text-center font-semibold text-lg"
           style={{ color: theme.primary }}
         >
-          Sertifikat Kelulusan
+          {certificate?.certificate_title || "Sertifikat Kelulusan"}
         </h2>
         <p className="text-center text-sm" style={{ color: theme.silver2 }}>
           No. 221/03-05-2025
@@ -54,7 +72,9 @@ export default function MasjidCertificateLecture() {
 
         <div className="text-center text-sm" style={{ color: theme.black1 }}>
           <p>Diberikan Kepada</p>
-          <p className="font-semibold text-base">Nama Lengkap</p>
+          <p className="font-semibold text-base">
+            {certificate?.user_lecture_exam_user_name || "Nama Tidak Diketahui"}
+          </p>
           <p>Nomor Induk Peserta : 10202025</p>
         </div>
 
@@ -63,10 +83,13 @@ export default function MasjidCertificateLecture() {
             Atas pencapaiannya sebagai peserta telah menyelesaikan pembelajaran
           </p>
           <p className="font-semibold" style={{ color: theme.primary }}>
-            Fiqh Mawaris - Masjid At-Taqwa Ciracas
+            {certificate?.lecture_title} - {certificate?.masjid_name}
           </p>
           <p>
-            Dengan Nilai <span className="font-bold">90 (Baik Sekali)</span>
+            Dengan Nilai{" "}
+            <span className="font-bold">
+              {formatGrade(certificate?.user_lecture_exam_grade_result)}
+            </span>
           </p>
           <p>
             Semoga ilmu yang telah dipelajari bermanfaat dan mendapatkan ridho
@@ -106,6 +129,7 @@ export default function MasjidCertificateLecture() {
           </div>
         </div>
       </div>
+
       <div className="pt-4 space-y-3">
         <Button className="w-full" style={{ backgroundColor: theme.primary }}>
           Unduh Sertifikat
