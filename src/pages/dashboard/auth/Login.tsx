@@ -24,11 +24,17 @@ export default function Login() {
 
   useEffect(() => {
     // Attach global callback from Google Sign-In
+    console.log("[INIT] Menyiapkan Google Sign-In...");
+
     window.handleCredentialResponse = async (response: any) => {
+      console.log("[GOOGLE LOGIN] ID Token diterima:", response.credential);
+
       try {
         const res = await api.post("/auth/login-google", {
           id_token: response.credential,
         });
+
+        console.log("[GOOGLE LOGIN] Respons dari backend:", res.data);
 
         if (res.data.status === "success") {
           const user = res.data.data.user;
@@ -36,6 +42,8 @@ export default function Login() {
 
           localStorage.setItem("userData", JSON.stringify(user));
           sessionStorage.setItem("token", token);
+
+          console.log("[GOOGLE LOGIN] Login sukses. Role:", user.role);
 
           switch (user.role) {
             case "dkm":
@@ -51,26 +59,30 @@ export default function Login() {
               navigate("/teacher");
               break;
             case "user":
-              navigate("/masjid/masjid-baitusalam");
+              navigate("/masjid/masjid-baitussalam");
+              break;
             default:
               navigate("/login");
           }
 
+          console.log("[GOOGLE LOGIN] Navigasi dan reload halaman...");
           window.location.reload();
         } else {
+          console.warn("[GOOGLE LOGIN] Status bukan success:", res.data);
           setError("Login Google gagal.");
         }
-      } catch (err) {
-        console.error("[GOOGLE LOGIN FAILED]", err);
+      } catch (err: any) {
+        console.error("[GOOGLE LOGIN ERROR]", err);
         setError("Login Google gagal. Silakan coba lagi.");
       }
     };
 
-    // Load Google Sign-In script
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
+    script.onload = () => console.log("[GSI] Script Google Sign-In dimuat.");
+    script.onerror = () => console.error("[GSI] Gagal memuat script.");
     document.body.appendChild(script);
 
     return () => {
@@ -112,6 +124,8 @@ export default function Login() {
           case "teacher":
             navigate("/teacher");
             break;
+          case "user":
+            navigate("/masjid/masjid-baitussalam");
           default:
             navigate("/login");
         }
