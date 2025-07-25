@@ -3,34 +3,49 @@ import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
 
-const dataKajian = [
-  {
-    title: "Aqidah Bagian ke-1",
-    teacher: "Ustadz Abdullah",
-    date: "4 Maret 2025, Pukul 10.00 WIB",
-    status: "Hadir Online",
-    progress: "Materi & Soal : 90",
-    statusColor: "bg-green-100 text-green-800",
-    progressColor: "bg-green-100 text-green-800",
-  },
-  {
-    title: "Aqidah Bagian ke-2",
-    teacher: "Ustadz Abdullah",
-    date: "4 Maret 2025, Pukul 10.00 WIB",
-    status: "Hadir Langsung",
-    progress: "Soal Belum Dikerjakan",
-    statusColor: "bg-blue-100 text-blue-800",
-    progressColor: "bg-red-100 text-red-800",
-  },
-];
+// =====================
+// ✅ Interface lokal
+// =====================
+interface Teacher {
+  id: string;
+  name: string;
+}
+
+interface Lecture {
+  lecture_id: string;
+  lecture_title: string;
+  lecture_description: string;
+  lecture_image_url: string;
+  lecture_is_certificate_generated: boolean;
+  lecture_teachers: Teacher[];
+}
 
 export default function MasjidLectureMaterial() {
   const [tab, setTab] = useState("navigasi");
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  const {
+    data: lecture,
+    isLoading,
+    isError,
+  } = useQuery<Lecture>({
+    queryKey: ["lecture-theme", id],
+    queryFn: async () => {
+      const res = await axios.get(`/public/lectures/${id}`);
+      return res.data?.data;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
   return (
     <div className="pt-4 max-w-2xl mx-auto">
@@ -49,34 +64,13 @@ export default function MasjidLectureMaterial() {
           { label: "Kajian", value: "kajian" },
         ]}
       />
+
       {/* Daftar Kajian */}
       <TabsContent value="kajian" current={tab}>
         <div className="space-y-4 mt-4">
-          {dataKajian.map((k, i) => (
-            <div
-              key={i}
-              className="p-4 rounded-lg shadow"
-              style={{ backgroundColor: theme.white1 }}
-            >
-              <h3 className="font-semibold" style={{ color: theme.black1 }}>
-                {k.title}
-              </h3>
-              <p className="text-sm" style={{ color: theme.silver2 }}>
-                {k.teacher}
-              </p>
-              <p className="text-xs pb-2" style={{ color: theme.silver2 }}>
-                {k.date}
-              </p>
-              <div className="flex flex-wrap gap-2 text-xs font-medium">
-                <span className={`px-2 py-1 rounded ${k.statusColor}`}>
-                  {k.status}
-                </span>
-                <span className={`px-2 py-1 rounded ${k.progressColor}`}>
-                  {k.progress}
-                </span>
-              </div>
-            </div>
-          ))}
+          <p className="text-sm text-silver-500">
+            Daftar sesi kajian menyusul...
+          </p>
         </div>
       </TabsContent>
 
@@ -92,17 +86,45 @@ export default function MasjidLectureMaterial() {
           >
             Informasi Tema Kajian
           </h2>
-          <ul
-            className="text-sm space-y-1 mb-4"
-            style={{ color: theme.silver2 }}
-          >
-            <li>📖 Materi: Kitab Fiqh Syafi'i Matan Abu Syuja'</li>
-            <li>👤 Pengajar: Ustadz Budi Hariadi</li>
-            <li>🕒 Jadwal: Tiap Sabtu pukul 20.00 WIB</li>
-            <li>📅 Mulai: 24 Mei 2024 – Sekarang</li>
-            <li>📍 Lokasi: Masjid At-Taqwa, Ciracas</li>
-            <li className="italic text-red-500">Sertifikat belum tersedia</li>
-          </ul>
+
+          {isLoading ? (
+            <p className="text-sm text-silver-400">Memuat informasi...</p>
+          ) : isError || !lecture ? (
+            <p className="text-red-500 text-sm">Gagal memuat data.</p>
+          ) : (
+            <ul
+              className="text-sm space-y-1 mb-4"
+              style={{ color: theme.silver2 }}
+            >
+              <li>📖 Materi: {lecture.lecture_title}</li>
+              <li>
+                👤 Pengajar:{" "}
+                {lecture.lecture_teachers
+                  .map((t: Teacher) => t.name)
+                  .join(", ") || "-"}
+              </li>
+              <li>
+                📝 Deskripsi:{" "}
+                {lecture.lecture_description || "Belum ada deskripsi."}
+              </li>
+              <li>
+                📷 Gambar:
+                <a
+                  href={lecture.lecture_image_url}
+                  className="text-blue-500 ml-1 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Lihat
+                </a>
+              </li>
+              <li className="italic text-red-500">
+                {lecture.lecture_is_certificate_generated
+                  ? "Sertifikat tersedia"
+                  : "Sertifikat belum tersedia"}
+              </li>
+            </ul>
+          )}
 
           <h2
             className="text-base font-semibold mb-2"
