@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import AuthLayout from "@/layout/AuthLayout";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import api from "@/lib/axios"; // ⬅️ ini pakai axios instance
+import api from "@/lib/axios";
+
+declare global {
+  interface Window {
+    handleCredentialResponse: (response: any) => void;
+  }
+}
 
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
@@ -13,9 +19,64 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
+
+  useEffect(() => {
+    // Attach global callback from Google Sign-In
+    window.handleCredentialResponse = async (response: any) => {
+      try {
+        const res = await api.post("/auth/login-google", {
+          id_token: response.credential,
+        });
+
+        if (res.data.status === "success") {
+          const user = res.data.data.user;
+          const token = res.data.data.access_token;
+
+          localStorage.setItem("userData", JSON.stringify(user));
+          sessionStorage.setItem("token", token);
+
+          switch (user.role) {
+            case "dkm":
+              navigate("/dkm");
+              break;
+            case "author":
+              navigate("/author");
+              break;
+            case "admin":
+              navigate("/admin");
+              break;
+            case "teacher":
+              navigate("/teacher");
+              break;
+            case "user":
+              navigate("/masjid/masjid-baitusalam");
+            default:
+              navigate("/login");
+          }
+
+          window.location.reload();
+        } else {
+          setError("Login Google gagal.");
+        }
+      } catch (err) {
+        console.error("[GOOGLE LOGIN FAILED]", err);
+        setError("Login Google gagal. Silakan coba lagi.");
+      }
+    };
+
+    // Load Google Sign-In script
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      delete (window as any).handleCredentialResponse;
+    };
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +94,7 @@ export default function Login() {
 
       if (response.data.status === "success") {
         const user = response.data.data.user;
-        const token = response.data.data.access_token; // ✅ ambil yang benar
+        const token = response.data.data.access_token;
 
         localStorage.setItem("userData", JSON.stringify(user));
         sessionStorage.setItem("token", token);
@@ -55,7 +116,6 @@ export default function Login() {
             navigate("/login");
         }
 
-        // ⬅️ Tambahkan reload agar state global dan query re-sync
         window.location.reload();
       } else {
         setError("Login gagal, coba lagi.");
@@ -76,7 +136,6 @@ export default function Login() {
   return (
     <AuthLayout mode="login">
       <form onSubmit={handleLogin}>
-        {/* Email / Username */}
         <div className="mb-4">
           <label
             htmlFor="identifier"
@@ -101,7 +160,6 @@ export default function Login() {
           />
         </div>
 
-        {/* Password */}
         <div className="mb-6">
           <label
             htmlFor="password"
@@ -143,14 +201,12 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mb-4 text-sm" style={{ color: themeColors.error1 }}>
             {error}
           </div>
         )}
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
@@ -165,6 +221,27 @@ export default function Login() {
           {loading ? "Memproses..." : "Login"}
         </button>
       </form>
+
+      {/* Divider */}
+      <div
+        className="my-6 text-center text-sm"
+        style={{ color: themeColors.silver2 }}
+      >
+        — atau —
+      </div>
+
+      {/* Google Sign In */}
+      <div
+        id="g_id_onload"
+        data-client_id="330051036041-8src8un315p823ap640hv70vp3448ruh.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false"
+      ></div>
+      <div
+        className="g_id_signin"
+        data-type="standard"
+        data-theme={isDark ? "outline" : "filled_blue"}
+      ></div>
     </AuthLayout>
   );
 }
