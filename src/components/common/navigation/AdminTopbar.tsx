@@ -1,22 +1,22 @@
-import { MenuIcon, MoonIcon, SunIcon } from 'lucide-react'
-import { colors } from '@/constants/colorsThema'
-import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
-import UserDropdown from './DropDownTopbar'
-import { Link } from 'react-router-dom'
+import { MenuIcon, MoonIcon, SunIcon } from "lucide-react";
+import { colors } from "@/constants/colorsThema";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import UserDropdown from "./DropDownTopbar";
+import { Link } from "react-router-dom";
 
 interface AdminTopbarProps {
-  onMenuClick?: () => void
-  isMobile?: boolean
-  title?: string // ← tambahkan ini
+  onMenuClick?: () => void;
+  isMobile?: boolean;
+  title?: string; // ← tambahkan ini
 }
 
 export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
-  const { isDark, toggleDark } = useHtmlDarkMode()
-  const themeColors = isDark ? colors.dark : colors.light
+  const { isDark, toggleDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
 
   // 🔍 Ambil user dari localStorage
-  const userData = localStorage.getItem('userData')
-  const user = userData ? JSON.parse(userData) : null
+  const userData = sessionStorage.getItem("userData");
+  const user = userData ? JSON.parse(userData) : null;
 
   return (
     <header
@@ -39,7 +39,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
         <button
           onClick={toggleDark}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {isDark ? (
             <SunIcon className="w-5 h-5 text-yellow-400" />
@@ -61,5 +61,5 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
         )}
       </div>
     </header>
-  )
+  );
 }

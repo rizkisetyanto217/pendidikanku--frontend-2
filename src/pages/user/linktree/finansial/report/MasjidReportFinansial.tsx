@@ -136,7 +136,6 @@ const FinancialReportPage = () => {
 
   return (
     <>
-      <div className="pt-4 max-w-2xl mx-auto">
         <PageHeaderUser
           title="Laporan Keuangan"
           onBackClick={() => history.back()}
@@ -190,7 +189,7 @@ const FinancialReportPage = () => {
             [Coming soon]
           </p>
         </TabsContent>
-      </div>
+
     </>
   );
 };

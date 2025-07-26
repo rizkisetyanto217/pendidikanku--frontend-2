@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import BottomNavbar from "@/components/common/public/ButtonNavbar";
+import PublicNavbar from "@/components/common/public/PublicNavbar";
 
 interface LectureSessionAPIItem {
   lecture_session_id: string;
@@ -104,16 +106,8 @@ export default function MasjidMaterial() {
   if (!slug) return null;
 
   return (
-    <div
-      className="max-w-2xl mx-auto pt-4 space-y-4 pb-20"
-      // style={{ backgroundColor: theme.white1, color: theme.black1 }}
-    >
-      <PageHeaderUser
-        title="Soal & Materi Kajian ini"
-        onBackClick={() => {
-          if (window.history.length > 1) navigate(-1);
-        }}
-      />
+    <>
+      <PublicNavbar masjidName="Materi Saya" />
 
       <Tabs
         value={tab}
@@ -185,6 +179,8 @@ export default function MasjidMaterial() {
           )}
         </div>
       </TabsContent>
-    </div>
+      {/* Bottom navigation */}
+      <BottomNavbar />
+    </>
   );
 }

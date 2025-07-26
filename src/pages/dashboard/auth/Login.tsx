@@ -251,11 +251,15 @@ export default function Login() {
         data-callback="handleCredentialResponse"
         data-auto_prompt="false"
       ></div>
-      <div
-        className="g_id_signin"
-        data-type="standard"
-        data-theme={isDark ? "outline" : "filled_blue"}
-      ></div>
+      <div className="flex justify-center">
+        <div
+          className="g_id_signin w-full max-w-sm"
+          data-type="standard"
+          data-size="large"
+          data-theme={isDark ? "outline" : "filled_blue"}
+          data-width="100%"
+        ></div>
+      </div>
     </AuthLayout>
   );
 }

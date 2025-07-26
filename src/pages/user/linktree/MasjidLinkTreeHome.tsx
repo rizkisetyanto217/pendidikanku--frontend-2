@@ -8,6 +8,9 @@ import { useRef, useEffect } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // ikon arrow
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import PublicNavbar from "@/components/common/public/PublicNavbar";
+import BottomNavbar from "@/components/common/public/ButtonNavbar";
 
 const currentUrl = window.location.href;
 
@@ -51,6 +54,17 @@ export default function PublicLinktree() {
   const cacheKey = searchParams.get("k") || "default";
 
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  const [userName, setUserName] = useState("");
+  const token = sessionStorage.getItem("token");
+
+  useEffect(() => {
+    const userData = localStorage.getItem("userData");
+    if (token && userData) {
+      const parsed = JSON.parse(userData);
+      setUserName(parsed?.user_name || "");
+    }
+  }, [token]);
 
   const scrollLeft = () => {
     sliderRef.current?.scrollBy({ left: -300, behavior: "smooth" });
@@ -154,530 +168,540 @@ export default function PublicLinktree() {
   if (loadingMasjid || loadingKajian || !masjidData)
     return <div>Loading...</div>;
 
-  const DarkToggle = () => (
-    <button
-      onClick={toggleDark}
-      className="text-sm px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
-    >
-      {isDark ? "☀️" : "🌙"}
-    </button>
-  );
   if (isMobile) {
     return (
-      <div className="w-full min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center">
-        <DarkToggle />
-
-        {/* Gambar Kajian */}
-        <div className="relative">
-          {kajianList && kajianList.length > 0 && (
-            <div className="relative">
-              {/* Tombol kiri */}
-              {showLeft && (
-                <button
-                  onClick={scrollLeft}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-
-              {/* Tombol kanan */}
-              {showRight && (
-                <button
-                  onClick={scrollRight}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              )}
-
-              <div className="overflow-hidden">
-                <div
-                  ref={sliderRef}
-                  className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
-                >
-                  {kajianList.map((kajian, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() =>
-                        navigate(
-                          `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
-                        )
-                      }
-                      className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
-                      style={{ backgroundColor: themeColors.white1 }}
-                    >
-                      <img
-                        src={
-                          kajian.lecture_session_image_url ||
-                          "/assets/placeholder/lecture.png"
-                        }
-                        alt={kajian.lecture_session_title}
-                        className="w-full aspect-[3/4] object-cover"
-                      />
-                      <div className="p-3">
-                        <h2
-                          className="font-semibold text-sm truncate"
-                          style={{ color: themeColors.black1 }}
-                        >
-                          {kajian.lecture_session_title}
-                        </h2>
-                        <p
-                          className="text-xs"
-                          style={{ color: themeColors.silver2 }}
-                        >
-                          {kajian.lecture_session_teacher_name} •{" "}
-                          {kajian.lecture_session_start_time
-                            ? new Date(
-                                kajian.lecture_session_start_time
-                              ).toLocaleDateString("id-ID", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })
-                            : "-"}
-                        </p>
-                        <p
-                          className="text-xs"
-                          style={{ color: themeColors.silver4 }}
-                        >
-                          {kajian.lecture_session_place}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <h1
-            className="text-xl font-semibold pb-2"
-            style={{ color: isDark ? colors.dark.black1 : colors.light.black1 }}
-          >
-            {masjidData.masjid_name}
-          </h1>
-          <p className="text-sm" style={{ color: themeColors.silver2 }}>
-            {masjidData.masjid_location}
-          </p>
-          <p
-            className="text-xs italic pb-2"
-            style={{ color: themeColors.silver4 }}
-          >
-            {masjidData.masjid_bio_short}
-          </p>
-
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center space-x-3">
-              {masjidData.masjid_instagram_url && (
-                <a
-                  href={masjidData.masjid_instagram_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src="/icons/instagram.svg"
-                    alt="IG"
-                    className="w-6 h-6"
-                  />
-                </a>
-              )}
-              {masjidData.masjid_youtube_url && (
-                <a
-                  href={masjidData.masjid_youtube_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src="/icons/youtube.svg" alt="YT" className="w-6 h-6" />
-                </a>
-              )}
-              {masjidData.masjid_whatsapp_url && (
-                <a
-                  href={masjidData.masjid_whatsapp_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src="/icons/whatsapp.svg" alt="WA" className="w-6 h-6" />
-                </a>
-              )}
-            </div>
-
-            <button
-              onClick={handleShareClick}
-              className="flex items-center space-x-1 text-sm mt-3"
-              style={{ color: themeColors.quaternary }}
-            >
-              <Share size={16} />
-              <span>Bagikan</span>
-            </button>
-
-            {showShareMenu && (
-              <div
-                ref={shareMenuRef}
-                className="mt-2 p-3 border rounded shadow w-full"
-                style={{
-                  backgroundColor: themeColors.white1,
-                  borderColor: themeColors.silver1,
-                }}
-              >
-                <p
-                  className="text-xs mb-2"
-                  style={{ color: themeColors.black2 }}
-                >
-                  Bagikan link:
-                </p>
-
-                <input
-                  type="text"
-                  readOnly
-                  value={currentUrl}
-                  className="w-full text-xs p-1 border rounded mb-2"
-                  style={{
-                    backgroundColor: themeColors.white3,
-                    borderColor: themeColors.silver1,
-                  }}
-                />
-
-                <div className="flex justify-between">
-                  <button
-                    onClick={handleCopy}
-                    className="text-sm font-semibold hover:underline"
-                    style={{ color: themeColors.success1 }}
-                  >
-                    Salin Link
-                  </button>
-
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(
-                      `Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-semibold hover:underline"
-                    style={{ color: themeColors.success1 }}
-                  >
-                    WhatsApp
-                  </a>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-2 mb-4">
-          <LinkItem
-            label="Profil Masjid"
-            icon="🏛️"
-            href={`/masjid/${masjidData.masjid_slug}/profil`}
-            internal
-          />
-          <LinkItem
-            label="Lokasi"
-            icon="📍"
-            href={masjidData.masjid_google_maps_url}
-          />
-          <LinkItem
-            label="Jadwal Kajian"
-            icon="📆"
-            href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
-            internal
-          />
-          <LinkItem
-            label="Soal & Materi Kajian"
-            icon="📚"
-            href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
-            internal
-          />
-          <LinkItem
-            label="Laporan Keuangan"
-            icon="📰"
-            href={`/masjid/${masjidData.masjid_slug}/keuangan`}
-            internal
-          />
-        </div>
-
-        <div
-          className="fixed bottom-0 left-0 w-full p-4 border-t shadow-md"
-          style={{
-            backgroundColor: themeColors.white1,
-            borderColor: themeColors.silver1,
-          }}
-        >
-          <button
-            onClick={() => navigate(`/masjid/${masjidData.masjid_slug}/donasi`)}
-            className="block w-full text-center py-3 rounded font-bold"
-            style={{
-              backgroundColor: themeColors.primary,
-              color: themeColors.white1,
-            }}
-          >
-            Donasi
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="w-full min-h-screen flex items-center justify-center overflow-hidden"
-      style={{
-        backgroundColor: themeColors.white2,
-      }}
-    >
-      <div
-        className="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-center p-6 rounded-xl shadow"
-        style={{ backgroundColor: themeColors.white1 }}
-      >
-        {/* Gambar Kajian */}
-        <div className="relative">
-          {kajianList && kajianList.length > 0 && (
-            <div className="relative">
-              {/* Tombol kiri */}
-              {showLeft && (
-                <button
-                  onClick={scrollLeft}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-
-              {/* Tombol kanan */}
-              {showRight && (
-                <button
-                  onClick={scrollRight}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              )}
-
-              <div className="overflow-hidden">
-                <div
-                  ref={sliderRef}
-                  className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
-                >
-                  {kajianList.map((kajian, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() =>
-                        navigate(
-                          `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
-                        )
-                      }
-                      className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
-                      style={{ backgroundColor: themeColors.white1 }}
-                    >
-                      <img
-                        src={
-                          kajian.lecture_session_image_url ||
-                          "/assets/placeholder/lecture.png"
-                        }
-                        alt={kajian.lecture_session_title}
-                        className="w-full aspect-[3/4] object-cover"
-                      />
-                      <div className="p-3">
-                        <h2
-                          className="font-semibold text-sm truncate"
-                          style={{ color: themeColors.black1 }}
-                        >
-                          {kajian.lecture_session_title}
-                        </h2>
-                        <p
-                          className="text-xs"
-                          style={{ color: themeColors.silver2 }}
-                        >
-                          {kajian.lecture_session_teacher_name} •{" "}
-                          {kajian.lecture_session_start_time
-                            ? new Date(
-                                kajian.lecture_session_start_time
-                              ).toLocaleDateString("id-ID", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })
-                            : "-"}
-                        </p>
-                        <p
-                          className="text-xs"
-                          style={{ color: themeColors.silver4 }}
-                        >
-                          {kajian.lecture_session_place}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Masjid Info */}
-        <div className="space-y-4">
-          <div>
-            <h1
-              className="text-2xl font-semibold pb-2"
-              style={{ color: themeColors.black1 }}
-            >
-              {masjidData.masjid_name}
-            </h1>
-
-            <p className="text-sm pb-2" style={{ color: themeColors.silver2 }}>
-              {masjidData.masjid_location}
-            </p>
-            <p
-              className="text-xs italic pb-2"
-              style={{ color: themeColors.silver4 }}
-            >
-              {masjidData.masjid_bio_short}
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center space-x-3">
-              {masjidData.masjid_instagram_url && (
-                <a
-                  href={masjidData.masjid_instagram_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src="/icons/instagram.svg"
-                    alt="IG"
-                    className="w-6 h-6"
-                  />
-                </a>
-              )}
-              {masjidData.masjid_youtube_url && (
-                <a
-                  href={masjidData.masjid_youtube_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src="/icons/youtube.svg" alt="YT" className="w-6 h-6" />
-                </a>
-              )}
-              {masjidData.masjid_whatsapp_url && (
-                <a
-                  href={masjidData.masjid_whatsapp_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src="/icons/whatsapp.svg" alt="WA" className="w-6 h-6" />
-                </a>
-              )}
-            </div>
-
-            <div className="relative">
-              <button
-                onClick={handleShareClick}
-                className="flex items-center space-x-1 text-sm"
-                style={{ color: themeColors.quaternary }}
-              >
-                <Share size={16} />
-                <span>Bagikan</span>
-              </button>
-
-              {showShareMenu && (
-                <div
-                  ref={shareMenuRef}
-                  className="absolute z-10 mt-2 p-3 border rounded shadow w-64 right-0"
-                  style={{
-                    backgroundColor: themeColors.white1,
-                    borderColor: themeColors.silver1,
-                  }}
-                >
-                  <p
-                    className="text-xs mb-2"
-                    style={{ color: themeColors.black2 }}
-                  >
-                    Bagikan link:
-                  </p>
-
-                  <input
-                    type="text"
-                    readOnly
-                    value={currentUrl}
-                    className="w-full text-xs p-1 border rounded mb-2"
-                    style={{
-                      backgroundColor: themeColors.white3,
-                      borderColor: themeColors.silver1,
-                    }}
-                  />
-
-                  <div className="flex justify-between">
+      <>
+        <PublicNavbar masjidName={masjidData.masjid_name} />
+        <div className="w-full min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center">
+          <div className="p-4">
+            {/* Gambar Kajian */}
+            <div className="relative pt-16">
+              {kajianList && kajianList.length > 0 && (
+                <div className="relative">
+                  {/* Tombol kiri */}
+                  {showLeft && (
                     <button
-                      onClick={handleCopy}
-                      className="text-sm font-semibold hover:underline"
-                      style={{ color: themeColors.success1 }}
+                      onClick={scrollLeft}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
                     >
-                      Salin Link
+                      <ChevronLeft size={20} />
                     </button>
+                  )}
 
-                    <a
-                      href={`https://wa.me/?text=${encodeURIComponent(`Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-semibold hover:underline"
-                      style={{ color: themeColors.success1 }}
+                  {/* Tombol kanan */}
+                  {showRight && (
+                    <button
+                      onClick={scrollRight}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
                     >
-                      WhatsApp
-                    </a>
+                      <ChevronRight size={20} />
+                    </button>
+                  )}
+
+                  <div className="overflow-hidden">
+                    <div
+                      ref={sliderRef}
+                      className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
+                    >
+                      {kajianList.map((kajian, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() =>
+                            navigate(
+                              `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+                            )
+                          }
+                          className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
+                          style={{ backgroundColor: themeColors.white1 }}
+                        >
+                          <img
+                            src={
+                              kajian.lecture_session_image_url ||
+                              "/assets/placeholder/lecture.png"
+                            }
+                            alt={kajian.lecture_session_title}
+                            className="w-full aspect-[3/4] object-cover"
+                          />
+                          <div className="p-3">
+                            <h2
+                              className="font-semibold text-sm truncate"
+                              style={{ color: themeColors.black1 }}
+                            >
+                              {kajian.lecture_session_title}
+                            </h2>
+                            <p
+                              className="text-xs"
+                              style={{ color: themeColors.silver2 }}
+                            >
+                              {kajian.lecture_session_teacher_name} •{" "}
+                              {kajian.lecture_session_start_time
+                                ? new Date(
+                                    kajian.lecture_session_start_time
+                                  ).toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })
+                                : "-"}
+                            </p>
+                            <p
+                              className="text-xs"
+                              style={{ color: themeColors.silver4 }}
+                            >
+                              {kajian.lecture_session_place}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
+
+            <div className="mb-4">
+              <h1
+                className="text-xl font-semibold pb-2 mt-4"
+                style={{
+                  color: isDark ? colors.dark.black1 : colors.light.black1,
+                }}
+              >
+                {masjidData.masjid_name}
+              </h1>
+              <p className="text-sm" style={{ color: themeColors.silver2 }}>
+                {masjidData.masjid_location}
+              </p>
+              <p
+                className="text-xs italic pb-2 mt-2"
+                style={{ color: themeColors.silver4 }}
+              >
+                {masjidData.masjid_bio_short}
+              </p>
+
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center space-x-3">
+                  {masjidData.masjid_instagram_url && (
+                    <a
+                      href={masjidData.masjid_instagram_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="/icons/instagram.svg"
+                        alt="IG"
+                        className="w-6 h-6"
+                      />
+                    </a>
+                  )}
+                  {masjidData.masjid_youtube_url && (
+                    <a
+                      href={masjidData.masjid_youtube_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="/icons/youtube.svg"
+                        alt="YT"
+                        className="w-6 h-6"
+                      />
+                    </a>
+                  )}
+                  {masjidData.masjid_whatsapp_url && (
+                    <a
+                      href={masjidData.masjid_whatsapp_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="/icons/whatsapp.svg"
+                        alt="WA"
+                        className="w-6 h-6"
+                      />
+                    </a>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleShareClick}
+                  className="flex items-center space-x-1 text-sm mt-3"
+                  style={{ color: themeColors.quaternary }}
+                >
+                  <Share size={16} />
+                  <span>Bagikan</span>
+                </button>
+
+                {showShareMenu && (
+                  <div
+                    ref={shareMenuRef}
+                    className="mt-2 p-3 border rounded shadow w-full"
+                    style={{
+                      backgroundColor: themeColors.white1,
+                      borderColor: themeColors.silver1,
+                    }}
+                  >
+                    <p
+                      className="text-xs mb-2"
+                      style={{ color: themeColors.black2 }}
+                    >
+                      Bagikan link:
+                    </p>
+
+                    <input
+                      type="text"
+                      readOnly
+                      value={currentUrl}
+                      className="w-full text-xs p-1 border rounded mb-2"
+                      style={{
+                        backgroundColor: themeColors.white3,
+                        borderColor: themeColors.silver1,
+                      }}
+                    />
+
+                    <div className="flex justify-between">
+                      <button
+                        onClick={handleCopy}
+                        className="text-sm font-semibold hover:underline"
+                        style={{ color: themeColors.success1 }}
+                      >
+                        Salin Link
+                      </button>
+
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(
+                          `Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold hover:underline"
+                        style={{ color: themeColors.success1 }}
+                      >
+                        WhatsApp
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 mb-4">
+              <LinkItem
+                label="Profil Masjid"
+                icon="🏛️"
+                href={`/masjid/${masjidData.masjid_slug}/profil`}
+                internal
+              />
+              <LinkItem
+                label="Lokasi"
+                icon="📍"
+                href={masjidData.masjid_google_maps_url}
+              />
+              <LinkItem
+                label="Jadwal Kajian"
+                icon="📆"
+                href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
+                internal
+              />
+              <LinkItem
+                label="Soal & Materi Kajian"
+                icon="📚"
+                href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
+                internal
+              />
+              <LinkItem
+                label="Laporan Keuangan"
+                icon="📰"
+                href={`/masjid/${masjidData.masjid_slug}/keuangan`}
+                internal
+              />
+            </div>
+
+            {/* Bottom navigation */}
+            <BottomNavbar />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* Navbar Atas */}
+      <PublicNavbar masjidName={masjidData.masjid_name} />
+
+      <div
+        className="w-full min-h-screen flex items-center justify-center overflow-hidden"
+        style={{
+          backgroundColor: themeColors.white2,
+        }}
+      >
+        <div
+          className="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-center p-6 rounded-xl shadow"
+          style={{ backgroundColor: themeColors.white1 }}
+        >
+          {/* Gambar Kajian */}
+          <div className="relative">
+            {kajianList && kajianList.length > 0 && (
+              <div className="relative">
+                {/* Tombol kiri */}
+                {showLeft && (
+                  <button
+                    onClick={scrollLeft}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+
+                {/* Tombol kanan */}
+                {showRight && (
+                  <button
+                    onClick={scrollRight}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                )}
+
+                <div className="overflow-hidden">
+                  <div
+                    ref={sliderRef}
+                    className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
+                  >
+                    {kajianList.map((kajian, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() =>
+                          navigate(
+                            `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+                          )
+                        }
+                        className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
+                        style={{ backgroundColor: themeColors.white1 }}
+                      >
+                        <img
+                          src={
+                            kajian.lecture_session_image_url ||
+                            "/assets/placeholder/lecture.png"
+                          }
+                          alt={kajian.lecture_session_title}
+                          className="w-full aspect-[3/4] object-cover"
+                        />
+                        <div className="p-3">
+                          <h2
+                            className="font-semibold text-sm truncate"
+                            style={{ color: themeColors.black1 }}
+                          >
+                            {kajian.lecture_session_title}
+                          </h2>
+                          <p
+                            className="text-xs"
+                            style={{ color: themeColors.silver2 }}
+                          >
+                            {kajian.lecture_session_teacher_name} •{" "}
+                            {kajian.lecture_session_start_time
+                              ? new Date(
+                                  kajian.lecture_session_start_time
+                                ).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "-"}
+                          </p>
+                          <p
+                            className="text-xs"
+                            style={{ color: themeColors.silver4 }}
+                          >
+                            {kajian.lecture_session_place}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <LinkItem
-              label="Profil Masjid"
-              icon="🏛️"
-              href={`/masjid/${masjidData.masjid_slug}/profil`}
-              internal
-            />
-            <LinkItem
-              label="Lokasi"
-              icon="📍"
-              href={masjidData.masjid_google_maps_url}
-            />
-            <LinkItem
-              label="Jadwal Kajian"
-              icon="📆"
-              href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
-              internal
-            />
-            <LinkItem
-              label="Soal & Materi Kajian"
-              icon="📚"
-              href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
-              internal
-            />
-            <LinkItem
-              label="Laporan Keuangan"
-              icon="📰"
-              href={`/masjid/${masjidData.masjid_slug}/keuangan`}
-              internal
-            />
-          </div>
+          {/* Masjid Info */}
+          <div className="space-y-4">
+            <div>
+              <h1
+                className="text-2xl font-semibold pb-2 mt-2"
+                style={{ color: themeColors.black1 }}
+              >
+                {masjidData.masjid_name}
+              </h1>
 
-          <button
-            onClick={() => navigate(`/masjid/${masjidData.masjid_slug}/donasi`)}
-            className="block w-full text-center py-3 rounded font-bold"
-            style={{
-              backgroundColor: themeColors.primary,
-              color: themeColors.white1,
-            }}
-          >
-            Donasi
-          </button>
+              <p
+                className="text-sm pb-2"
+                style={{ color: themeColors.silver2 }}
+              >
+                {masjidData.masjid_location}
+              </p>
+              <p
+                className="text-xs italic pb-2"
+                style={{ color: themeColors.silver4 }}
+              >
+                {masjidData.masjid_bio_short}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center space-x-3">
+                {masjidData.masjid_instagram_url && (
+                  <a
+                    href={masjidData.masjid_instagram_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="/icons/instagram.svg"
+                      alt="IG"
+                      className="w-6 h-6"
+                    />
+                  </a>
+                )}
+                {masjidData.masjid_youtube_url && (
+                  <a
+                    href={masjidData.masjid_youtube_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="/icons/youtube.svg"
+                      alt="YT"
+                      className="w-6 h-6"
+                    />
+                  </a>
+                )}
+                {masjidData.masjid_whatsapp_url && (
+                  <a
+                    href={masjidData.masjid_whatsapp_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="/icons/whatsapp.svg"
+                      alt="WA"
+                      className="w-6 h-6"
+                    />
+                  </a>
+                )}
+              </div>
+
+              <div className="relative">
+                <button
+                  onClick={handleShareClick}
+                  className="flex items-center space-x-1 text-sm"
+                  style={{ color: themeColors.quaternary }}
+                >
+                  <Share size={16} />
+                  <span>Bagikan</span>
+                </button>
+
+                {showShareMenu && (
+                  <div
+                    ref={shareMenuRef}
+                    className="absolute z-10 mt-2 p-3 border rounded shadow w-64 right-0"
+                    style={{
+                      backgroundColor: themeColors.white1,
+                      borderColor: themeColors.silver1,
+                    }}
+                  >
+                    <p
+                      className="text-xs mb-2"
+                      style={{ color: themeColors.black2 }}
+                    >
+                      Bagikan link:
+                    </p>
+
+                    <input
+                      type="text"
+                      readOnly
+                      value={currentUrl}
+                      className="w-full text-xs p-1 border rounded mb-2"
+                      style={{
+                        backgroundColor: themeColors.white3,
+                        borderColor: themeColors.silver1,
+                      }}
+                    />
+
+                    <div className="flex justify-between">
+                      <button
+                        onClick={handleCopy}
+                        className="text-sm font-semibold hover:underline"
+                        style={{ color: themeColors.success1 }}
+                      >
+                        Salin Link
+                      </button>
+
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(`Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold hover:underline"
+                        style={{ color: themeColors.success1 }}
+                      >
+                        WhatsApp
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <LinkItem
+                label="Profil Masjid"
+                icon="🏛️"
+                href={`/masjid/${masjidData.masjid_slug}/profil`}
+                internal
+              />
+              <LinkItem
+                label="Lokasi"
+                icon="📍"
+                href={masjidData.masjid_google_maps_url}
+              />
+              <LinkItem
+                label="Jadwal Kajian"
+                icon="📆"
+                href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
+                internal
+              />
+              <LinkItem
+                label="Soal & Materi Kajian"
+                icon="📚"
+                href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
+                internal
+              />
+              <LinkItem
+                label="Laporan Keuangan"
+                icon="📰"
+                href={`/masjid/${masjidData.masjid_slug}/keuangan`}
+                internal
+              />
+            </div>
+
+            <button
+              onClick={() =>
+                navigate(`/masjid/${masjidData.masjid_slug}/donasi`)
+              }
+              className="block w-full text-center py-3 rounded font-bold"
+              style={{
+                backgroundColor: themeColors.primary,
+                color: themeColors.white1,
+              }}
+            >
+              Donasi
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Bottom navigation */}
+      <BottomNavbar />
+    </>
   );
 }
 

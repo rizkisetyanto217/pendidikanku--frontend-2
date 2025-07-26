@@ -12,7 +12,7 @@ export default function MasjidLayout() {
       className="w-full min-h-screen px-4 md:px-6"
       style={{ backgroundColor: themeColors.white2 }}
     >
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="w-full max-w-2xl mx-auto pt-4">
         <Outlet />
         <div className="flex justify-end lg:mt-4">
         </div>

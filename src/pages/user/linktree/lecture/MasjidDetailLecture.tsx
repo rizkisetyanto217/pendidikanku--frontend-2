@@ -121,6 +121,7 @@ export default function MasjidDetailLecture() {
           </div>
         </div>
       </div>
+      
     </div>
   );
 }

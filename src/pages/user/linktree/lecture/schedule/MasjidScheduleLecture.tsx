@@ -7,6 +7,8 @@ import FormattedDate from "@/constants/formattedDate";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import QRCodeLink from "@/components/common/main/QRCodeLink";
+import BottomNavbar from "@/components/common/public/ButtonNavbar";
+import PublicNavbar from "@/components/common/public/PublicNavbar";
 
 interface Kajian {
   lecture_session_id: string;
@@ -45,15 +47,10 @@ export default function MasjidScheduleLecture() {
     return <p className="p-4">Belum ada jadwal kajian.</p>;
 
   return (
-    <div className="pt-4 pb-20 max-w-2xl mx-auto">
-      <PageHeaderUser
-        title="Jadwal Kajian"
-        onBackClick={() => {
-          if (window.history.length > 1) navigate(-1);
-        }}
-      />
+    <>
+      <PublicNavbar masjidName="Jadwal Kajian" />
 
-      <div className="space-y-4">
+      <div className="space-y-4 pt-16">
         {kajianList.map((kajian) => (
           <div
             key={kajian.lecture_session_id}
@@ -98,6 +95,9 @@ export default function MasjidScheduleLecture() {
           </div>
         ))}
       </div>
-    </div>
+
+      {/* Bottom navigation */}
+      <BottomNavbar />
+    </>
   );
 }

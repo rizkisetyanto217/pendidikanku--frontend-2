@@ -48,15 +48,17 @@ export default function MasjidProfile() {
       />
 
       <div
-        className="rounded-xl overflow-hidden shadow"
-        style={{ backgroundColor: themeColors.white1 }}
+        className="rounded-xl overflow-hidden "
+        // style={{ backgroundColor: themeColors.white1 }}
       >
+        {/* Gambar Masjid */}
         <img
           src={masjid.masjid_image_url || "/assets/placeholder/masjid.jpg"}
           alt={`Foto ${masjid.masjid_name}`}
           className="w-full h-48 md:h-64 object-cover"
         />
 
+        {/* Informasi Umum */}
         <div
           className="p-4 md:p-5 space-y-2"
           style={{ color: themeColors.black1 }}
@@ -75,6 +77,7 @@ export default function MasjidProfile() {
           </p>
         </div>
 
+        {/* Profil Lembaga */}
         <div
           className="border-t-[5px] p-4 md:p-5 space-y-2"
           style={{ borderColor: themeColors.white3 }}
@@ -96,6 +99,7 @@ export default function MasjidProfile() {
           </button>
         </div>
 
+        {/* Pengurus & Pengajar */}
         <div
           className="border-t-[5px] p-4 md:p-5 space-y-2"
           style={{ borderColor: themeColors.white3 }}
@@ -126,6 +130,7 @@ export default function MasjidProfile() {
           </div>
         </div>
 
+        {/* Sambutan & Donasi */}
         <div
           className="border-t-[5px] p-4 md:p-5 space-y-3"
           style={{ borderColor: themeColors.white3 }}

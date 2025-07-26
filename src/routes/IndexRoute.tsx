@@ -107,11 +107,11 @@ export default function AppRoutes() {
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      // 1. Tanpa layout untuk LinkTree
+      <Route path="masjid/:slug" index element={<MasjidLinkTree />} />
+      // 2. Dengan layout untuk halaman lainnya
       <Route path="/" element={<MasjidLayout />}>
         <Route path="masjid/:slug">
-          {/* Halaman utama (Linktree) */}
-          <Route index element={<MasjidLinkTree />} />
-
           {/* Profil Masjid */}
           <Route path="profil">
             <Route index element={<MasjidProfile />} />
@@ -137,8 +137,6 @@ export default function AppRoutes() {
 
           {/* Soal & Materi Kajian */}
           <Route path="soal-materi" element={<MasjidMaterial />} />
-
-          {/* Detail & Sub Halaman */}
           <Route path="soal-materi/:id" element={<MasjidLectureSessions />} />
           <Route
             path="soal-materi/:id/informasi"
@@ -169,6 +167,7 @@ export default function AppRoutes() {
             element={<MasjidDocsLectureSessions />}
           />
 
+          {/* Tema */}
           <Route path="tema/:id" element={<MasjidLectureMaterial />} />
           <Route
             path="tema/:id/certificate/:user_exam_id"
@@ -192,7 +191,6 @@ export default function AppRoutes() {
           <Route path="tema/:id/ringkasan" element={<MasjidSummaryLecture />} />
         </Route>
       </Route>
-
       {/* ==== Protected Routes - DKM ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
         <Route path="/dkm" element={<DkmLayout />}>
@@ -336,35 +334,30 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Route>
-
       {/* ==== Protected Routes - Author ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["author"]} />}>
         <Route path="/author" element={<AuthorLayout />}>
           <Route index element={<AuthorHome />} />
         </Route>
       </Route>
-
       {/* ==== Protected Routes - Teacher ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
         <Route path="/teacher" element={<TeacherLayout />}>
           <Route index element={<TeacherHome />} />
         </Route>
       </Route>
-
       {/* ==== Protected Routes - Teacher ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["treasurer"]} />}>
         <Route path="/treasurer" element={<TreasurerLayout />}>
           <Route index element={<TreasurerHome />} />
         </Route>
       </Route>
-
       {/* ==== Protected Routes - Teacher ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />
     </Routes>

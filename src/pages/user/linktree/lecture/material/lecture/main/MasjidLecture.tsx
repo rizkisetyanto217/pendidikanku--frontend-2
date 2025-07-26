@@ -73,7 +73,7 @@ export default function MasjidLectureMaterial() {
   });
 
   return (
-    <div className="pt-4 max-w-2xl mx-auto">
+    <>
       <PageHeaderUser
         title="Tema Kajian Detail"
         onBackClick={() => {
@@ -155,7 +155,7 @@ export default function MasjidLectureMaterial() {
             <p className="text-red-500 text-sm">Gagal memuat data.</p>
           ) : (
             <div
-              className="rounded-lg shadow"
+              className="rounded-lg"
               style={{ backgroundColor: theme.white1 }}
             >
               <div
@@ -273,6 +273,6 @@ export default function MasjidLectureMaterial() {
           </div>
         </div>
       </TabsContent>
-    </div>
+    </>
   );
 }
