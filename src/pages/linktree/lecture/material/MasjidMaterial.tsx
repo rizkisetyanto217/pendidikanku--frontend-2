@@ -107,80 +107,80 @@ export default function MasjidMaterial() {
 
   return (
     <>
-      <PublicNavbar masjidName="Materi Saya" />
+      <PublicNavbar masjidName="Materi Kajian" />
+      <div className="mt-16">
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          tabs={[
+            { label: "Terbaru", value: "terbaru" },
+            { label: "Tema", value: "tema" },
+            { label: "Tanggal", value: "tanggal" },
+          ]}
+        />
 
-      <Tabs
-        value={tab}
-        onChange={handleTabChange}
-        tabs={[
-          { label: "Terbaru", value: "terbaru" },
-          { label: "Tema", value: "tema" },
-          { label: "Tanggal", value: "tanggal" },
-        ]}
-      />
-
-      <TabsContent value="terbaru" current={tab}>
-        {loadingKajian ? (
-          <p>Memuat data...</p>
-        ) : (
-          <LectureMaterialList data={mappedMaterial} />
-        )}
-      </TabsContent>
-
-      <TabsContent value="tanggal" current={tab}>
-        {selectedMonth ? (
-          <div className="space-y-3">
-            <button
-              onClick={() => setSelectedMonth(null)}
-              className="text-sm font-medium"
-              style={{ color: theme.primary }}
-            >
-              ← Kembali ke daftar bulan
-            </button>
-            <h2 className="text-base font-semibold">Bulan {selectedMonth}</h2>
-            <LectureMaterialList data={mappedMaterial} />
-          </div>
-        ) : (
-          <LectureMaterialMonthList
-            data={monthData}
-            onSelectMonth={setSelectedMonth}
-          />
-        )}
-      </TabsContent>
-
-      <TabsContent value="tema" current={tab}>
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium">Tema Kajian</h2>
-          {loadingThemes ? (
-            <p>Memuat tema kajian...</p>
+        <TabsContent value="terbaru" current={tab}>
+          {loadingKajian ? (
+            <p>Memuat data...</p>
           ) : (
-            <div className="space-y-3">
-              {lectureThemes.map((themeItem) => (
-                <div
-                  key={themeItem.lecture_id}
-                  onClick={() =>
-                    navigate(`/masjid/${slug}/tema/${themeItem.lecture_id}`)
-                  }
-                  className="p-4 rounded-lg cursor-pointer hover:opacity-90"
-                  style={{
-                    backgroundColor: theme.white1,
-                    border: `1px solid ${theme.silver1}`,
-                  }}
-                >
-                  <h3 className="text-base font-semibold">
-                    {themeItem.lecture_title}
-                  </h3>
-                  <p className="text-sm" style={{ color: theme.silver2 }}>
-                    Total {themeItem.lecture_total_sessions} kajian
-                  </p>
-                </div>
-              ))}
-            </div>
+            <LectureMaterialList data={mappedMaterial} />
           )}
-        </div>
-      </TabsContent>
-      {/* Bottom navigation */}
-      <BottomNavbar />
+        </TabsContent>
+
+        <TabsContent value="tanggal" current={tab}>
+          {selectedMonth ? (
+            <div className="space-y-3">
+              <button
+                onClick={() => setSelectedMonth(null)}
+                className="text-sm font-medium"
+                style={{ color: theme.primary }}
+              >
+                ← Kembali ke daftar bulan
+              </button>
+              <h2 className="text-base font-medium">Bulan {selectedMonth}</h2>
+              <LectureMaterialList data={mappedMaterial} />
+            </div>
+          ) : (
+            <LectureMaterialMonthList
+              data={monthData}
+              onSelectMonth={setSelectedMonth}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="tema" current={tab}>
+          <div className="space-y-3">
+            {loadingThemes ? (
+              <p>Memuat tema kajian...</p>
+            ) : (
+              <div className="space-y-3">
+                {lectureThemes.map((themeItem) => (
+                  <div
+                    key={themeItem.lecture_id}
+                    onClick={() =>
+                      navigate(`/masjid/${slug}/tema/${themeItem.lecture_id}`)
+                    }
+                    className="p-4 rounded-lg cursor-pointer hover:opacity-90"
+                    style={{
+                      backgroundColor: theme.white1,
+                      border: `1px solid ${theme.silver1}`,
+                    }}
+                  >
+                    <h3 className="text-base font-medium">
+                      {themeItem.lecture_title}
+                    </h3>
+                    <p className="text-sm" style={{ color: theme.silver2 }}>
+                      Total {themeItem.lecture_total_sessions} kajian
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        {/* Bottom navigation */}
+        <BottomNavbar />
+      </div>
     </>
   );
 }

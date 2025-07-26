@@ -137,7 +137,7 @@ export default function DonationMasjid() {
 
       {/* Tombol Aksi */}
       <div
-        className=" left-0 right-0 z-40 border-t px-4 py-4 flex flex-col items-center space-y-2"
+        className=" left-0 right-0 z-40 px-4 py-4 flex flex-col items-center space-y-2"
       >
         <button
           className="w-full max-w-xl flex justify-between items-center font-medium px-4 py-2 rounded text-sm md:text-base"

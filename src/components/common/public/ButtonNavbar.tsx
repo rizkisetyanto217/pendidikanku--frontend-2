@@ -34,10 +34,10 @@ export default function BottomNavbar() {
       path: `/masjid/${slug}/soal-materi`,
     },
     {
-      key: "laporan",
-      label: "Laporan",
+      key: "aktivitas",
+      label: "Aktivitas",
       icon: FileText,
-      path: `/masjid/${slug}/keuangan`,
+      path: `/masjid/${slug}/aktivitas`,
     },
   ];
 
@@ -47,7 +47,7 @@ export default function BottomNavbar() {
     if (currentPath.includes("/jadwal-kajian")) return "jadwal";
     if (currentPath.includes("/donasi")) return "donasi";
     if (currentPath.includes("/soal-materi")) return "materi";
-    if (currentPath.includes("/keuangan")) return "laporan";
+    if (currentPath.includes("/aktivitas")) return "aktivitas";
     return "beranda";
   })();
 

@@ -1,22 +1,22 @@
 import { MenuIcon, MoonIcon, SunIcon } from "lucide-react";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import UserDropdown from "./DropDownTopbar";
+import UserDropdown from "./AdminDropDownTopbar";
 import { Link } from "react-router-dom";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface AdminTopbarProps {
   onMenuClick?: () => void;
   isMobile?: boolean;
-  title?: string; // ← tambahkan ini
+  title?: string;
 }
 
 export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
   const { isDark, toggleDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  // 🔍 Ambil user dari localStorage
-  const userData = sessionStorage.getItem("userData");
-  const user = userData ? JSON.parse(userData) : null;
+  const { data: user, isLoading } = useCurrentUser();
+  const isLoggedIn = !!user;
 
   return (
     <header
@@ -35,11 +35,9 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
       <div className="flex-1" />
 
       <div className="flex items-center gap-3">
-        {/* Dark mode toggle */}
         <button
           onClick={toggleDark}
           className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {isDark ? (
             <SunIcon className="w-5 h-5 text-yellow-400" />
@@ -48,8 +46,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
           )}
         </button>
 
-        {/* User info or Login */}
-        {user ? (
+        {isLoading ? null : isLoggedIn ? (
           <UserDropdown />
         ) : (
           <Link

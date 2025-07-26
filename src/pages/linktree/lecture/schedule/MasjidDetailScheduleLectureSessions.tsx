@@ -45,7 +45,7 @@ export default function MasjidDetailLecture() {
       {/* Header */}
       <PageHeaderUser
         title="Detail Kajian ini"
-        onBackClick={() => navigate(`/masjid/${slug}`)}
+        onBackClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
       />
 
       <div

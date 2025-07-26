@@ -1,57 +1,50 @@
-import { useState, useRef, useEffect } from "react";
-import { LogOut, Settings, User, HelpCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "@/lib/axios";
-import { colors } from "@/constants/colorsThema";
+import { LogOut, Settings, User, HelpCircle } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
+import api from "@/lib/axios";
 
-export default function UserDropdown() {
+export default function PublicUserDropdown() {
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+  const { data: user } = useCurrentUser();
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
 
-  const user = JSON.parse(localStorage.getItem("userData") || "{}");
-  const userName = user.user_name || "User";
-  const userRole = user.role || "Role";
+  const userName = user?.user_name || "User";
+  const userRole = user?.role || "Publik";
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const res = await api.post(
-        "/api/auth/logout",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          },
-        }
-      );
-      console.log("✅ Logout berhasil:", res.data);
+      await api.post("/api/auth/logout"); // logout API
     } catch (err) {
-      console.error("Logout gagal:", err);
+      console.error("Logout error:", err);
     } finally {
-      localStorage.removeItem("userData");
-      localStorage.removeItem("authToken");
       setTimeout(() => {
-        navigate("/login");
-      }, 500);
+        location.href = "/login";
+      }, 400);
     }
   };
 
+  // close on click outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(e.target as Node)
       ) {
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (

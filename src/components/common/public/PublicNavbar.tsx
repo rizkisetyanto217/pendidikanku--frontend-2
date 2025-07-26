@@ -1,8 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Settings, HelpCircle, LogOut } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import PublicUserDropdown from "./UserDropDown";
 
 interface PublicNavbarProps {
   masjidName: string;
@@ -13,26 +15,25 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  const [userName, setUserName] = useState<string | null>(null);
-  const [tokenExists, setTokenExists] = useState(false);
+  const { data: user, isLoading } = useCurrentUser();
+  const isLoggedIn = !!user;
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Throttle logic with requestAnimationFrame
+  // Scroll hide navbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
-          if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
-            setVisible(false); // Scroll down
-          } else {
-            setVisible(true); // Scroll up
-          }
+          setVisible(
+            currentScrollY <= lastScrollY.current || currentScrollY < 80
+          );
           lastScrollY.current = currentScrollY;
           ticking.current = false;
         });
@@ -45,7 +46,7 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Detect click outside dropdown
+  // Click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -59,29 +60,12 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Get token and user data
-  useEffect(() => {
-    const token = sessionStorage.getItem("token");
-    const userData = localStorage.getItem("userData");
-
-    setTokenExists(!!token);
-
-    if (token && userData) {
-      try {
-        const user = JSON.parse(userData);
-        if (user?.user_name) {
-          setUserName(user.user_name);
-        }
-      } catch (error) {
-        console.error("❌ Gagal parsing userData:", error);
-      }
-    }
-  }, []);
-
   const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
+    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).then(
+      () => {
+        window.location.href = "/login";
+      }
+    );
   };
 
   return (
@@ -98,65 +82,8 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
         {masjidName}
       </h2>
 
-      {tokenExists && userName ? (
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="text-sm font-medium flex items-center gap-2"
-            style={{ color: themeColors.black2 }}
-          >
-            👤 {userName}
-          </button>
-
-          {dropdownOpen && (
-            <div
-              className="absolute right-0 mt-2 w-48 rounded-lg border z-50"
-              style={{
-                backgroundColor: themeColors.white1,
-                borderColor: themeColors.silver1,
-                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-              }}
-            >
-              <ul
-                className="py-2 text-sm"
-                style={{ color: themeColors.black1 }}
-              >
-                <li>
-                  <button
-                    onClick={() => navigate("/profil")}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <User className="w-4 h-4" /> Profil
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/dkm/profil-saya")}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <Settings className="w-4 h-4" /> Pengaturan
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/bantuan")}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <HelpCircle className="w-4 h-4" /> Bantuan
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-left text-red-600 hover:bg-red-100 dark:hover:bg-red-800"
-                  >
-                    <LogOut className="w-4 h-4" /> Keluar
-                  </button>
-                </li>
-              </ul>
-            </div>
-          )}
-        </div>
+      {!isLoading && isLoggedIn ? (
+        <PublicUserDropdown />
       ) : (
         <button
           onClick={() => navigate("/login")}
