@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
+
 interface LectureQuizQuestion {
   lecture_sessions_question_id: string;
   lecture_sessions_question: string;
@@ -20,6 +21,20 @@ export default function MasjidQuizLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const startTimeRef = useRef<number>(Date.now());
+  const [isFinishing, setIsFinishing] = useState(false);
+
+  const submitQuizResult = async (grade: number) => {
+    try {
+      await axios.post(`/public/user-lecture-sessions-quiz/${slug}`, {
+        user_lecture_sessions_quiz_grade_result: grade,
+        user_lecture_sessions_quiz_quiz_id: data.quiz.lecture_sessions_quiz_id,
+        user_lecture_sessions_quiz_lecture_session_id:
+          data.quiz.lecture_sessions_quiz_lecture_session_id,
+      });
+    } catch (error) {
+      console.error("❌ Gagal menyimpan hasil quiz:", error);
+    }
+  };
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["quiz", id],
@@ -125,32 +140,59 @@ export default function MasjidQuizLectureSessions() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setShowAnswer(false);
     setSelected(null);
 
-    if (index + 1 < questions.length) {
+    const isLastQuestion = index + 1 === questions.length;
+    const hasWrong = wrongQuestions.length > 0;
+
+    if (!isLastQuestion) {
       setIndex(index + 1);
-    } else if (!isRetrying && wrongQuestions.length > 0) {
+      return;
+    }
+
+    if (!isRetrying && hasWrong) {
       setIndex(0);
       setIsRetrying(true);
-    } else if (isRetrying && wrongQuestions.length > 0) {
-      setIndex(0);
-    } else {
-      const endTime = Date.now();
-      const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
+      return;
+    }
 
+    if (isRetrying && hasWrong) {
+      setIndex(0);
+      return;
+    }
+
+    // ✅ Saat semua soal selesai dan tidak ada salah
+    setIsFinishing(true); // tampilkan "menyiapkan hasil"
+
+    const endTime = Date.now();
+    const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
+    const finalScore = progressCount;
+
+    await submitQuizResult(finalScore);
+
+    setTimeout(() => {
       navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {
-          correct: progressCount + (isCorrect ? 1 : 0),
+          correct: finalScore,
           total: data?.questions?.length || 1,
           duration: durationSec,
           id,
           slug,
         },
       });
-    }
+    }, 1000); // kasih delay biar circular loader terlihat
   };
+
+  if (isFinishing) {
+    return (
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] text-sm text-gray-500 dark:text-white/70">
+        <div className="animate-spin w-8 h-8 border-4 border-t-transparent border-gray-400 rounded-full mb-4" />
+        Menyiapkan hasil...
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 max-w-2xl mx-auto">

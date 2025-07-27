@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // =====================
 // ✅ Interface lokal
@@ -41,21 +42,33 @@ export default function MasjidLectureMaterial() {
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
   const { id, slug } = useParams<{ id: string; slug: string }>();
+  const { data: currentUser } = useCurrentUser();
 
   // 🔁 Dapatkan data tema kajian
   const {
-    data: lecture,
+    data: lectureData,
     isLoading: loadingLecture,
     isError: errorLecture,
-  } = useQuery<Lecture>({
-    queryKey: ["lecture-theme", id],
+  } = useQuery<{
+    lecture: Lecture;
+    user_progress: {
+      grade_result?: number;
+      total_completed_sessions?: number;
+    } | null;
+  }>({
+    queryKey: ["lecture-theme", id, currentUser?.id],
     queryFn: async () => {
-      const res = await axios.get(`/public/lectures/${id}`);
-      return res.data?.data;
+      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+      const res = await axios.get(`/public/lectures/${id}`, { headers });
+      console.log("📦 Data tema kajian:", res.data);
+      return res.data?.data; // ✅ isinya { lecture, user_progress }
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });
+
+  const lecture = lectureData?.lecture;
+  const userProgress = lectureData?.user_progress;
 
   // 🔁 Dapatkan daftar sesi kajian
   const {
@@ -183,6 +196,27 @@ export default function MasjidLectureMaterial() {
                   📍 <strong style={{ color: theme.black1 }}>Lokasi:</strong>{" "}
                   Masjid At-Taqwa, Ciracas
                 </p>
+                {userProgress && (
+                  <div
+                    className="mt-3 space-y-1 text-sm"
+                    style={{ color: theme.silver2 }}
+                  >
+                    <p>
+                      🧮{" "}
+                      <strong style={{ color: theme.black1 }}>
+                        Nilai Akhir:
+                      </strong>{" "}
+                      {userProgress.grade_result ?? "-"}
+                    </p>
+                    <p>
+                      📚{" "}
+                      <strong style={{ color: theme.black1 }}>
+                        Sesi Selesai:
+                      </strong>{" "}
+                      {userProgress.total_completed_sessions ?? 0}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {!lecture.lecture_is_certificate_generated && (

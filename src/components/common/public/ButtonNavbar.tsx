@@ -74,8 +74,8 @@ export default function BottomNavbar() {
       style={{
         backgroundColor: theme.white1,
         borderColor: theme.silver1,
-        paddingTop: "0.5rem",
-        paddingBottom: "0.5rem",
+        paddingTop: "0rem",
+        paddingBottom: "0rem",
         minHeight: "56px",
       }}
     >

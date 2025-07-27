@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import {
   useNavigate,
@@ -10,6 +10,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // =====================
 // ✅ Interface
@@ -19,6 +20,8 @@ interface LectureSession {
   lecture_session_teacher_name: string;
   lecture_session_start_time: string;
   lecture_session_place: string;
+  user_grade_result?: number;
+  user_attendance_status?: number; // 1 = Hadir, 0 = Tidak Hadir, undefined/null = Belum
 }
 
 export default function MasjidLectureSessions() {
@@ -33,15 +36,33 @@ export default function MasjidLectureSessions() {
   const fromTab = location.state?.fromTab;
   const lectureId = location.state?.lectureId;
 
+  const { data: currentUser } = useCurrentUser();
+
   const { data, isLoading } = useQuery<LectureSession>({
-    queryKey: ["lectureSessionDetail", id],
+    queryKey: ["lectureSessionDetail", id, currentUser?.id],
     queryFn: async () => {
-      const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`);
+      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+
+      const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`, {
+        headers,
+      });
       return res.data;
     },
-    enabled: !!id,
+    enabled: !!id, // ✅ tetap dijalankan meskipun user belum login
     staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    const cookies = document.cookie;
+    console.log("🍪 Semua cookie:", cookies);
+
+    const hasUserId = cookies.includes("user_id=");
+    if (hasUserId) {
+      console.log("✅ Cookie 'user_id' ditemukan");
+    } else {
+      console.log("❌ Cookie 'user_id' tidak ditemukan");
+    }
+  }, []);
 
   const info = {
     materi: data?.lecture_session_title || "-",
@@ -106,6 +127,26 @@ export default function MasjidLectureSessions() {
               📍 <strong style={{ color: theme.black1 }}>Tempat:</strong>{" "}
               {info.tempat}
             </div>
+
+            {/* 🧮 Nilai Akhir */}
+            {data?.user_grade_result !== undefined && (
+              <div>
+                🧮 <strong style={{ color: theme.black1 }}>Nilai Akhir:</strong>{" "}
+                {data.user_grade_result}
+              </div>
+            )}
+
+            {/* ✅ Kehadiran */}
+            {data?.user_attendance_status !== undefined && (
+              <div>
+                ✅ <strong style={{ color: theme.black1 }}>Kehadiran:</strong>{" "}
+                {data.user_attendance_status === 1
+                  ? "Hadir"
+                  : data.user_attendance_status === 0
+                    ? "Tidak Hadir"
+                    : "Belum Tercatat"}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -116,7 +157,7 @@ export default function MasjidLectureSessions() {
           className="text-base font-semibold mb-2"
           style={{ color: theme.quaternary }}
         >
-          Navigasi Utama
+          Navigasi Utama disini
         </h2>
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-4">
           {menuItems.map((item) => (
