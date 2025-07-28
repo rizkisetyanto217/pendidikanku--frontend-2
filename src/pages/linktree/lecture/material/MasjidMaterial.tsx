@@ -10,6 +10,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface LectureSessionAPIItem {
   lecture_session_id: string;
@@ -21,6 +22,9 @@ interface LectureSessionAPIItem {
   lecture_session_approved_by_dkm_at: string | null;
   lecture_session_lecture_id: string;
   lecture_title: string;
+
+  user_grade_result?: number;
+  user_attendance_status?: number;
 }
 
 interface LectureMaterialItem {
@@ -32,6 +36,8 @@ interface LectureMaterialItem {
   time: string;
   status: "tersedia" | "proses";
   lectureId: string;
+  gradeResult?: number;
+  attendanceStatus?: number;
 }
 
 interface LectureTheme {
@@ -59,20 +65,23 @@ export default function MasjidMaterial() {
     if (val === "tanggal") setSelectedMonth(null);
   };
 
-  const { data: kajianList = [], isLoading: loadingKajian } = useQuery<
-    LectureSessionAPIItem[]
-  >({
-    queryKey: ["kajianListBySlug", slug],
+  const { data: currentUser } = useCurrentUser();
+
+  const {
+    data: kajianList = [],
+    isLoading: loadingKajian, // ✅ tambahkan ini
+  } = useQuery<LectureSessionAPIItem[]>({
+    queryKey: ["kajianListBySlug", slug, currentUser?.id],
     queryFn: async () => {
+      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
       const res = await axios.get(
-        `/public/lecture-sessions-u/soal-materi/${slug}`
+        `/public/lecture-sessions-u/soal-materi/${slug}`,
+        { headers }
       );
+      console.log("📦 Data kajian:", res.data);
       return res.data?.data ?? [];
     },
     enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
   });
 
   const { data: lectureThemes = [], isLoading: loadingThemes } = useQuery<
@@ -81,6 +90,7 @@ export default function MasjidMaterial() {
     queryKey: ["lectureThemesBySlug", slug],
     queryFn: async () => {
       const res = await axios.get(`/public/lectures/slug/${slug}`);
+      console.log("📦 Data tema kajian:", res.data);
       return res.data?.data ?? [];
     },
     enabled: !!slug,
@@ -101,6 +111,8 @@ export default function MasjidMaterial() {
     }),
     status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
     lectureId: item.lecture_session_lecture_id,
+    gradeResult: item.user_grade_result,
+    attendanceStatus: item.user_attendance_status,
   }));
 
   if (!slug) return null;

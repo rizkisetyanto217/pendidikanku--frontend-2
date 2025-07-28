@@ -7,7 +7,6 @@ import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-
 interface LectureQuizQuestion {
   lecture_sessions_question_id: string;
   lecture_sessions_question: string;
@@ -23,13 +22,14 @@ export default function MasjidQuizLectureSessions() {
   const startTimeRef = useRef<number>(Date.now());
   const [isFinishing, setIsFinishing] = useState(false);
 
-  const submitQuizResult = async (grade: number) => {
+  const submitQuizResult = async (grade: number, duration: number) => {
     try {
       await axios.post(`/public/user-lecture-sessions-quiz/${slug}`, {
         user_lecture_sessions_quiz_grade_result: grade,
         user_lecture_sessions_quiz_quiz_id: data.quiz.lecture_sessions_quiz_id,
         user_lecture_sessions_quiz_lecture_session_id:
           data.quiz.lecture_sessions_quiz_lecture_session_id,
+        user_lecture_sessions_quiz_duration_seconds: duration,
       });
     } catch (error) {
       console.error("❌ Gagal menyimpan hasil quiz:", error);
@@ -170,7 +170,7 @@ export default function MasjidQuizLectureSessions() {
     const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
     const finalScore = progressCount;
 
-    await submitQuizResult(finalScore);
+    await submitQuizResult(finalScore, durationSec);
 
     setTimeout(() => {
       navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {

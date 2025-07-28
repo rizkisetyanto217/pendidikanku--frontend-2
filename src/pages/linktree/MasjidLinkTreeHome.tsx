@@ -2,7 +2,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useIsMobile } from "@/hooks/isMobile";
-import { Share } from "lucide-react";
+import { LocationEditIcon, Share } from "lucide-react";
 import { useState } from "react";
 import { useRef, useEffect } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -18,6 +18,7 @@ import {
   Compass as JelajahiIcon,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import BorderLine from "@/components/common/main/Border";
 
 const currentUrl = window.location.href;
 
@@ -175,52 +176,133 @@ export default function PublicLinktree() {
       <>
         {/* NAVBAR */}
         <PublicNavbar masjidName={masjidData.masjid_name} />
-
-        <div className="w-full min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center">
+        <div className="w-full min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center pt-16">
           <div className="p-4">
-            {/* --- SECTION: HEADER MASJID --- */}
-            <div className="mb-4 rounded-xl overflow-hidden pt-16">
-              {/* Gambar Masjid */}
-              <div className="w-full h-48">
-                <img
-                  src={
-                    masjidData.masjid_image_url ||
-                    "/assets/placeholder/masjid-header.jpg"
-                  }
-                  alt={masjidData.masjid_name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+            {/* Gambar Kajian */}
+            <div className="relative">
+              {kajianList && kajianList.length > 0 && (
+                <div className="relative">
+                  {/* Tombol kiri */}
+                  {showLeft && (
+                    <button
+                      onClick={scrollLeft}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                  )}
 
-              {/* Konten Informasi */}
-              <div className="pt-4">
-                <h1
-                  className="text-lg font-semibold"
-                  style={{ color: themeColors.black1 }}
-                >
-                  {masjidData.masjid_name}
-                </h1>
-                <p
-                  className="text-base mt-2"
-                  style={{ color: themeColors.silver2 }}
-                >
-                  Dikelola oleh DKM Masjid untuk ummat muslim
-                </p>
-                <p
-                  className="text-sm mt-2"
-                  style={{ color: themeColors.silver4 }}
-                >
-                  {masjidData.masjid_location}
-                </p>
-                <p
-                  className="text-sm italic mt-2"
-                  style={{ color: themeColors.silver4 }}
-                >
-                  Bergabung pada April 2025
-                </p>
-              </div>
+                  {/* Tombol kanan */}
+                  {showRight && (
+                    <button
+                      onClick={scrollRight}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  )}
 
-              {/* Sosial Media + Bagikan */}
+                  <div className="overflow-hidden">
+                    <div
+                      ref={sliderRef}
+                      className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
+                    >
+                      {kajianList.map((kajian, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() =>
+                            navigate(
+                              `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
+                            )
+                          }
+                          className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
+                          style={{ backgroundColor: themeColors.white1 }}
+                        >
+                          <img
+                            src={
+                              kajian.lecture_session_image_url ||
+                              "/assets/placeholder/lecture.png"
+                            }
+                            alt={kajian.lecture_session_title}
+                            className="w-full aspect-[3/4] object-cover"
+                          />
+                          <div className="p-3">
+                            <h2
+                              className="font-semibold text-sm truncate"
+                              style={{ color: themeColors.black1 }}
+                            >
+                              {kajian.lecture_session_title}
+                            </h2>
+                            <p
+                              className="text-xs"
+                              style={{ color: themeColors.silver2 }}
+                            >
+                              {kajian.lecture_session_teacher_name} •{" "}
+                              {kajian.lecture_session_start_time
+                                ? new Date(
+                                    kajian.lecture_session_start_time
+                                  ).toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })
+                                : "-"}
+                            </p>
+                            <p
+                              className="text-xs"
+                              style={{ color: themeColors.silver4 }}
+                            >
+                              {kajian.lecture_session_place}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tambahan teks "Kajian Terbaru Lainnya" */}
+                  <div className="mt-2 pr-4 text-right">
+                    <span
+                      className="text-sm underline cursor-pointer hover:text-primary transition"
+                      style={{ color: themeColors.primary }}
+                      onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
+                    >
+                      Kajian Terbaru Lainnya
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <BorderLine />
+
+            {/* --- SECTION: INFO MASJID --- */}
+            <div className="mb-4 mt-4">
+              <h1
+                className="text-lg font-semibold"
+                style={{ color: themeColors.black1 }}
+              >
+                {masjidData.masjid_name}
+              </h1>
+              <p
+                className="text-base mt-2"
+                style={{ color: themeColors.silver2 }}
+              >
+                Dikelola oleh DKM Masjid untuk ummat muslim
+              </p>
+              <p
+                className="text-sm mt-2"
+                style={{ color: themeColors.silver4 }}
+              >
+                {masjidData.masjid_location}
+              </p>
+              <p
+                className="text-sm italic mt-2"
+                style={{ color: themeColors.silver4 }}
+              >
+                Bergabung pada April 2025
+              </p>
+
               <div className="flex justify-between items-center mt-4">
                 <div className="flex space-x-3">
                   {masjidData.masjid_whatsapp_url && (
@@ -263,10 +345,7 @@ export default function PublicLinktree() {
               </div>
             </div>
 
-            <div
-              className="border-t my-6"
-              style={{ borderColor: themeColors.silver1 }}
-            />
+            <BorderLine />
 
             {/* --- SECTION: MENU UTAMA --- */}
             <div>
@@ -278,8 +357,8 @@ export default function PublicLinktree() {
               </h2>
               <div className="grid grid-cols-4 gap-3 pt-4">
                 <LucideMenuItem
-                  label="Postingan"
-                  icon={<PostinganIcon size={24} color={themeColors.black1} />}
+                  label="Lokasi"
+                  icon={<LocationEditIcon size={24} color={themeColors.black1} />}
                   onClick={() => navigate(`/masjid/${slug}/postingan`)}
                 />
                 <LucideMenuItem
@@ -300,114 +379,7 @@ export default function PublicLinktree() {
               </div>
             </div>
 
-            <div
-              className="border-t my-6"
-              style={{ borderColor: themeColors.silver1 }}
-            />
-
-            {/* --- SECTION: KAJIAN TERBARU --- */}
-            {kajianList && kajianList.length > 0 && (
-              <div className="mb-6">
-                <h2
-                  className="text-base font-semibold mb-2"
-                  style={{ color: themeColors.primary }}
-                >
-                  Kajian
-                </h2>
-                <div className="overflow-hidden pt-2">
-                  <div
-                    ref={sliderRef}
-                    className="flex overflow-x-auto no-scrollbar snap-x scroll-smooth"
-                  >
-                    {kajianList.map((kajian, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() =>
-                          navigate(
-                            `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
-                          )
-                        }
-                        className="min-w-full flex rounded-lg shadow overflow-hidden cursor-pointer snap-start hover:opacity-90 transition mx-1"
-                        style={{ backgroundColor: themeColors.white1 }}
-                      >
-                        {/* Thumbnail Kajian */}
-                        <div className="w-[120px] h-auto flex-shrink-0">
-                          <img
-                            src={
-                              kajian.lecture_session_image_url ||
-                              "/assets/placeholder/lecture.png"
-                            }
-                            alt={kajian.lecture_session_title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        {/* Konten Kajian */}
-                        <div className="flex flex-col justify-between p-3 w-full">
-                          <div className="space-y-1 ">
-                            <p
-                              className="text-xs font-semibold uppercase"
-                              style={{ color: themeColors.black2 }}
-                            >
-                              Fiqh
-                            </p>
-                            <h3
-                              className="text-sm font-medium leading-snug"
-                              style={{ color: themeColors.black1 }}
-                            >
-                              {kajian.lecture_session_title}
-                            </h3>
-                            <p
-                              className="text-xs"
-                              style={{ color: themeColors.silver2 }}
-                            >
-                              {kajian.lecture_session_teacher_name}
-                            </p>
-                            <p
-                              className="text-xs"
-                              style={{ color: themeColors.silver4 }}
-                            >
-                              {new Date(
-                                kajian.lecture_session_start_time
-                              ).toLocaleDateString("id-ID", {
-                                weekday: "long",
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })}{" "}
-                              pukul{" "}
-                              {new Date(
-                                kajian.lecture_session_start_time
-                              ).toLocaleTimeString("id-ID", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}{" "}
-                              WIB
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Dot Indicator Optional (opsional) */}
-                  {kajianList.length > 1 && (
-                    <div className="flex justify-center mt-2 space-x-1">
-                      {kajianList.map((_, idx) => (
-                        <span
-                          key={idx}
-                          className="w-2 h-2 rounded-full"
-                          style={{
-                            backgroundColor: themeColors.success1,
-                            opacity: 0.4,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+           
 
             {/* Bottom Navigation */}
             <BottomNavbar />
@@ -512,6 +484,17 @@ export default function PublicLinktree() {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Tambahan teks "Kajian Terbaru Lainnya" */}
+                <div className="mt-2 pr-4 text-right">
+                  <span
+                    className="text-sm underline cursor-pointer hover:text-primary transition"
+                    style={{ color: themeColors.primary }}
+                    onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
+                  >
+                    Kajian Terbaru Lainnya
+                  </span>
                 </div>
               </div>
             )}

@@ -2,18 +2,24 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios"; // harus pakai withCredentials: true
 
 export function useCurrentUser() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
       try {
         const res = await axios.get("/api/auth/me");
-        return res.data?.user ?? null; // fallback ke null kalau kosong
+        return res.data?.user ?? null;
       } catch (err: any) {
-        if (err?.response?.status === 401) return null; // user belum login
-        throw err; // selain 401 dilempar
+        if (err?.response?.status === 401) return null;
+        throw err;
       }
     },
-    retry: false, // supaya tidak spam kalau 401
-    staleTime: 1000 * 60 * 5, // cache 5 menit
+    retry: false,
+    staleTime: 1000 * 60 * 5,
   });
+
+  return {
+    user: query.data,
+    isLoggedIn: !!query.data,
+    ...query, // kalau mau akses isLoading, refetch, dll
+  };
 }

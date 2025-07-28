@@ -16,10 +16,10 @@ export default function BottomNavbar() {
   const tabs = [
     { key: "beranda", label: "Beranda", icon: Home, path: `/masjid/${slug}` },
     {
-      key: "jadwal",
-      label: "Jadwal",
-      icon: Calendar,
-      path: `/masjid/${slug}/jadwal-kajian`,
+      key: "materi",
+      label: "Kajian",
+      icon: BookOpen,
+      path: `/masjid/${slug}/soal-materi`,
     },
     {
       key: "donasi",
@@ -28,10 +28,10 @@ export default function BottomNavbar() {
       path: `/masjid/${slug}/donasi`,
     },
     {
-      key: "materi",
-      label: "Materi",
-      icon: BookOpen,
-      path: `/masjid/${slug}/soal-materi`,
+      key: "post",
+      label: "Postingan",
+      icon: Calendar,
+      path: `/masjid/${slug}/post`,
     },
     {
       key: "aktivitas",
@@ -44,7 +44,7 @@ export default function BottomNavbar() {
   // Menentukan tab aktif dari URL saat ini
   const currentPath = location.pathname;
   const activeTab = (() => {
-    if (currentPath.includes("/jadwal-kajian")) return "jadwal";
+    if (currentPath.includes("/post")) return "post";
     if (currentPath.includes("/donasi")) return "donasi";
     if (currentPath.includes("/soal-materi")) return "materi";
     if (currentPath.includes("/aktivitas")) return "aktivitas";

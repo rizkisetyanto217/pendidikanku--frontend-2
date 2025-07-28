@@ -10,6 +10,8 @@ interface LectureMaterialItem {
   location: string;
   time: string;
   status: "tersedia" | "proses";
+  gradeResult?: number;
+  attendanceStatus?: number;
 }
 
 export default function LectureMaterialList({
@@ -50,7 +52,8 @@ export default function LectureMaterialList({
             {item.time}
           </p>
 
-          <div className="mt-2 inline-block">
+          {/* Badge status soal & materi */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {item.status === "tersedia" ? (
               <span
                 className="px-2 py-1 text-xs rounded"
@@ -70,6 +73,36 @@ export default function LectureMaterialList({
                 }}
               >
                 Soal & Materi dalam proses
+              </span>
+            )}
+
+            {/* Progress: Nilai */}
+            {item.gradeResult !== undefined && (
+              <span
+                className="px-2 py-1 text-xs rounded"
+                style={{
+                  backgroundColor:
+                    item.gradeResult >= 70 ? theme.success2 : theme.white3,
+                  color:
+                    item.gradeResult >= 70 ? theme.success1 : theme.warning1,
+                }}
+              >
+                Nilai: {item.gradeResult}
+              </span>
+            )}
+
+            {/* Progress: Kehadiran */}
+            {item.attendanceStatus !== undefined && (
+              <span
+                className="px-2 py-1 text-xs rounded"
+                style={{
+                  backgroundColor:
+                    item.attendanceStatus === 1 ? theme.primary2 : theme.white3,
+                  color:
+                    item.attendanceStatus === 1 ? theme.primary : theme.silver2,
+                }}
+              >
+                {item.attendanceStatus === 1 ? "✅ Hadir" : "❌ Tidak Hadir"}
               </span>
             )}
           </div>

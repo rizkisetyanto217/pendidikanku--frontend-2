@@ -102,6 +102,9 @@ import MasjidExamLecture from "@/pages/linktree/lecture/material/lecture/exams/M
 import MasjidResultExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidResultExamLecture";
 import MasjidMyProfile from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
 import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
+import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
+import MasjidDetailPost from "@/pages/linktree/post/main/MasjidDetailPost";
+import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
 
 export default function AppRoutes() {
   return (
@@ -192,13 +195,14 @@ export default function AppRoutes() {
           />
           <Route path="tema/:id/ringkasan" element={<MasjidSummaryLecture />} />
 
+          <Route path="post" element={<MasjidPost />} />
+          <Route path="post/:postId" element={<MasjidDetailPost />} />
+          <Route path="motivation/:id" element={<MasjidDetailDonation />} />
+
           {/* Activity  */}
           <Route path="aktivitas" element={<MasjidMyActivity />} />
         </Route>
       </Route>
-
-
-      
       {/* ==== Protected Routes - DKM ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
         <Route path="/dkm" element={<DkmLayout />}>
@@ -327,7 +331,6 @@ export default function AppRoutes() {
               element={<DKMDocumentLecture />}
             />
           </Route>
-
 
           <Route path="sertifikat" element={<Sertifikat />} />
           <Route path="keuangan" element={<Keuangan />} />
