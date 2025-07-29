@@ -7,6 +7,7 @@ import { colors } from "@/constants/colorsThema";
 import api from "@/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "./SharePopover";
+import { useIsMobile } from "@/hooks/isMobile";
 
 export default function PublicUserDropdown() {
   const { isDark } = useHtmlDarkMode();
@@ -22,6 +23,8 @@ export default function PublicUserDropdown() {
 
   const userName = user?.user_name || "User";
   const userRole = user?.role || "Publik";
+
+  const isMobile = useIsMobile();
 
   const queryClient = useQueryClient();
 
@@ -108,7 +111,13 @@ export default function PublicUserDropdown() {
             </li>
             <li>
               <button
-                onClick={() => navigate(`${base}/profil-saya`)}
+                onClick={() => {
+                  if (isMobile) {
+                    navigate(`${base}/aktivitas/pengaturan/menu`);
+                  } else {
+                    navigate(`${base}/aktivitas/pengaturan/profil-saya`);
+                  }
+                }}
                 className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
                 style={{ backgroundColor: "transparent" }}
                 onMouseOver={(e) =>
@@ -121,6 +130,7 @@ export default function PublicUserDropdown() {
                 <Settings className="w-4 h-4" /> Pengaturan
               </button>
             </li>
+
             <li>
               <button
                 onClick={() => navigate(`${base}/bantuan`)}

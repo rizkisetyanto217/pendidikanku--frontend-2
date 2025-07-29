@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
 import { colors } from '@/constants/colorsThema'
 
-export default function Partnership() {
+export default function MasjidPartnership() {
   const { isDark } = useHtmlDarkMode()
   const theme = isDark ? colors.dark : colors.light
 

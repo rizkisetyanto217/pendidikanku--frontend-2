@@ -6,6 +6,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
+import CommonActionButton from "@/components/common/main/CommonActionButton";
 
 // ========================
 // Sub-komponen: Card Donasi Masjid
@@ -151,7 +152,7 @@ export default function DonationMasjid() {
       <PublicNavbar masjidName="Donasi Saya" />
 
       {/* Section Donasi */}
-      <section className="pt-20 px-4">
+      <section className="pt-20">
         <div className="max-w-xl mx-auto space-y-4">
           <MasjidDonationCard
             value={formatCurrency(masjidDonation)}
@@ -166,7 +167,7 @@ export default function DonationMasjid() {
       </section>
 
       {/* Tombol Aksi */}
-      <div className="left-0 right-0 z-40 px-4 py-4 flex flex-col items-center space-y-2">
+      <div className="left-0 right-0 z-40 py-4 flex flex-col items-center space-y-2">
         <button
           className="w-full max-w-xl flex justify-between items-center font-medium px-4 py-2 rounded text-sm md:text-base"
           style={{
@@ -178,16 +179,15 @@ export default function DonationMasjid() {
           <span>›</span>
         </button>
 
-        <button
+        <CommonActionButton
+          text="Lanjut"
           onClick={handleSubmit}
-          className="w-full max-w-xl py-3 rounded font-semibold text-sm md:text-base"
+          className="w-full max-w-xl py-3 rounded text-sm md:text-base"
           style={{
             backgroundColor: themeColors.primary,
             color: themeColors.white1,
           }}
-        >
-          Lanjut
-        </button>
+        />
       </div>
 
       <BottomNavbar />

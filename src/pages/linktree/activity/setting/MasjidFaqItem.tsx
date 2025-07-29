@@ -10,7 +10,7 @@ interface FaqItemProps {
   answer: string
 }
 
-export default function FaqItem({ number, question, answer }: FaqItemProps) {
+export default function MasjidFaqItem({ number, question, answer }: FaqItemProps) {
   const [open, setOpen] = useState(false)
   const { isDark } = useHtmlDarkMode()
   const theme = isDark ? colors.dark : colors.light

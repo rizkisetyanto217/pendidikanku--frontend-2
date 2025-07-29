@@ -3,10 +3,14 @@ import PublicNavbar from "@/components/common/public/PublicNavbar";
 import { CalendarDays, MapPin, Circle } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import { useNavigate, useParams } from "react-router-dom";
+import CommonButton from "@/components/common/main/MainButton";
 
 export default function MasjidMyActivity() {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
+  const navigate = useNavigate();
+  const { slug } = useParams();
 
   return (
     <>
@@ -32,7 +36,7 @@ export default function MasjidMyActivity() {
             className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
             style={{
               backgroundColor: themeColors.primary,
-              color: themeColors.black1,
+              color: isDark ? themeColors.black1 : themeColors.white1,
             }}
           >
             Profil Saya
@@ -46,18 +50,14 @@ export default function MasjidMyActivity() {
             desc="Riwayat donasi yang telah diberikan"
             color={themeColors.success1}
             bg={themeColors.success2}
+            onClick={() => navigate(`/masjid/${slug}/aktivitas/donasi-saya`)}
           />
           <CardInfo
             label="Statistik"
             desc="Data perkembangan belajar"
-            color={themeColors.warning1}
-            bg={themeColors.specialColor}
-          />
-          <CardInfo
-            label="Kajian"
-            desc="Riwayat kajian yang telah diikuti"
             color={themeColors.success1}
             bg={themeColors.white3}
+            onClick={() => navigate(`/masjid/${slug}/aktivitas/statistik-saya`)}
           />
         </div>
 
@@ -137,16 +137,15 @@ export default function MasjidMyActivity() {
             </div>
           ))}
 
-          {/* Tombol Selengkapnya */}
-          <button
-            className="w-full py-3 rounded-lg font-semibold text-sm"
+          <CommonButton
+            to={`/masjid/${slug}/aktivitas/kajian-saya`}
+            text="Selengkapnya"
+            className="w-full py-3 rounded-lg text-sm"
             style={{
               backgroundColor: themeColors.primary,
               color: themeColors.white1,
             }}
-          >
-            Selengkapnya
-          </button>
+          />
         </div>
       </div>
 
@@ -160,11 +159,13 @@ function CardInfo({
   desc,
   color,
   bg,
+  onClick,
 }: {
   label: string;
   desc: string;
   color: string;
   bg: string;
+  onClick?: () => void;
 }) {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
@@ -176,10 +177,6 @@ function CardInfo({
       color: themeColors.success1,
     },
     Statistik: {
-      bg: themeColors.specialColor,
-      color: themeColors.warning1,
-    },
-    Kajian: {
       bg: themeColors.white3,
       color: themeColors.primary,
     },
@@ -189,11 +186,12 @@ function CardInfo({
 
   return (
     <div
-      className="p-4 rounded-lg transition-colors duration-300"
+      className="p-4 rounded-lg transition-colors duration-300 cursor-pointer"
       style={{
         backgroundColor: current.bg,
         border: `1px solid ${isDark ? themeColors.silver1 : "transparent"}`,
       }}
+      onClick={onClick} // ← ini penting
     >
       <h4
         className="text-sm font-semibold mb-1"

@@ -20,25 +20,37 @@ export default function MasjidSettingLayout() {
   const base = `/masjid/${slug}`;
 
   const menus: SidebarMenuItem[] = [
-    { name: "Profil", icon: <UserIcon />, to: `${base}/profil-saya` },
-    { name: "Tampilan", icon: <MoonIcon />, to: `${base}/tampilan` },
+    {
+      name: "Profil",
+      icon: <UserIcon />,
+      to: `${base}/aktivitas/pengaturan/profil-saya`,
+    },
+    {
+      name: "Tampilan",
+      icon: <MoonIcon />,
+      to: `${base}/aktivitas/pengaturan/tampilan`,
+    },
     {
       name: "Dukung Kami",
       icon: <HelpingHandIcon />,
-      to: `${base}/dukung-kami`,
+      to: `${base}/aktivitas/pengaturan/dukung-kami`,
     },
-    { name: "Kerjasama", icon: <HandshakeIcon />, to: `${base}/kerjasama` },
+    {
+      name: "Kerjasama",
+      icon: <HandshakeIcon />,
+      to: `${base}/aktivitas/pengaturan/kerjasama`,
+    },
     {
       name: "Tanya Jawab",
       icon: <MessageCircleIcon />,
-      to: `${base}/tanya-jawab`,
+      to: `${base}/aktivitas/pengaturan/tanya-jawab`,
     },
   ];
 
   return (
     <>
       <PageHeaderUser
-        title="Dokumen"
+        title="Pengaturan"
         onBackClick={() => window.history.length > 1 && history.back()}
       />
 

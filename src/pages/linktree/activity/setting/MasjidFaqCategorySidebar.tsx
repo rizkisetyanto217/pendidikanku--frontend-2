@@ -5,7 +5,7 @@ interface FaqCategorySidebarProps {
   onSelect: (value: string) => void
 }
 
-export default function FaqCategorySidebar({
+export default function MasjidFaqCategorySidebar({
   categories,
   selected,
   onSelect,

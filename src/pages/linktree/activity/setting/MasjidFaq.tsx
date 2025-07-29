@@ -25,7 +25,7 @@ const dummyFaqs = [
   },
 ]
 
-export default function Faq() {
+export default function MasjidFaq() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const { isDark } = useHtmlDarkMode()
   const theme = isDark ? colors.dark : colors.light

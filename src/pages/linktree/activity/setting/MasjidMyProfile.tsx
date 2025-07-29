@@ -2,7 +2,7 @@ import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
 import { colors } from '@/constants/colorsThema'
 import UserProfileCard from '@/components/shared/profile/UserProfileCard'
 
-export default function MyProfile() {
+export default function MasjidMyProfile() {
   const { isDark } = useHtmlDarkMode()
   const theme = isDark ? colors.dark : colors.light
 

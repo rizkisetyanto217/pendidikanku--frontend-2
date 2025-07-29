@@ -100,12 +100,20 @@ import MasjidSummaryLecture from "@/pages/linktree/lecture/material/lecture/mate
 import MasjidLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/main/MasjidLectureSessions";
 import MasjidExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidExamLecture";
 import MasjidResultExamLecture from "@/pages/linktree/lecture/material/lecture/exams/MasjidResultExamLecture";
-import MasjidMyProfile from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
+import MasjidMyProfile from "@/pages/linktree/activity/setting/MasjidMyProfile";
 import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActivity";
 import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
 import MasjidDetailPost from "@/pages/linktree/post/main/MasjidDetailPost";
 import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
-import MasjidSettingLayout from "@/layout/MasjidSettingLayout";
+import MasjidSettingLayout from "@/layout/masjid/MasjidSettingLayout";
+import MasjidAppereance from "@/pages/linktree/activity/setting/MasjidAppereance";
+import MasjidSupportUs from "@/pages/linktree/activity/setting/MasjidSupportUs";
+import MasjidPartnership from "@/pages/linktree/activity/setting/MasjidPartnership";
+import MasjidFaq from "@/pages/linktree/activity/setting/MasjidFaq";
+import MasjidSettingMenu from "@/layout/masjid/MasjidSettingMenu";
+import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
+import MyProgressLectureLesson from "@/pages/linktree/lecture/material/my-progress/MyProgressLectureLesson";
+import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
 
 export default function AppRoutes() {
   return (
@@ -203,13 +211,22 @@ export default function AppRoutes() {
           {/* Activity  */}
           <Route path="aktivitas" element={<MasjidMyActivity />} />
 
+          {/* Menu Activity  */}
+          <Route
+            path="aktivitas/kajian-saya"
+            element={<MyProgressLectureLesson />}
+          />
+          <Route path="aktivitas/donasi-saya" element={<MasjidMyDonation />} />
+          <Route path="aktivitas/statistik-saya" element={<MasjidMyStats />} />
+
           {/* Nested setting layout */}
-          <Route element={<MasjidSettingLayout />}>
-            <Route path="profil-saya" element={<ProfilSayaDkm />} />
-            <Route path="tampilan" element={<DKMAppereance />} />
-            <Route path="dukung-kami" element={<SupportUs />} />
-            <Route path="kerjasama" element={<Partnership />} />
-            <Route path="tanya-jawab" element={<DKMFaq />} />
+          <Route path="aktivitas/pengaturan" element={<MasjidSettingLayout />}>
+            <Route path="menu" element={<MasjidSettingMenu />} />
+            <Route path="profil-saya" element={<MasjidMyProfile />} />
+            <Route path="tampilan" element={<MasjidAppereance />} />
+            <Route path="dukung-kami" element={<MasjidSupportUs />} />
+            <Route path="kerjasama" element={<MasjidPartnership />} />
+            <Route path="tanya-jawab" element={<MasjidFaq />} />
           </Route>
         </Route>
       </Route>
