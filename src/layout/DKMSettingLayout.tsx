@@ -9,7 +9,8 @@ import {
   HandshakeIcon,
 } from "lucide-react";
 
-export default function DkmSettingLayout() {
+
+export default function DKMSettingLayout() {
   const location = useLocation();
 
   const menus: SidebarMenuItem[] = [

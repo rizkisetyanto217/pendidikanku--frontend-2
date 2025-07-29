@@ -41,7 +41,7 @@ export default function MasjidDetailLecture() {
     );
 
   return (
-    <div className="pt-4 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       {/* Header */}
       <PageHeaderUser
         title="Detail Kajian ini"

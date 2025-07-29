@@ -21,7 +21,11 @@ export default function UserDropdown() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await api.post("/api/auth/logout"); // Cookie akan dikirim otomatis karena withCredentials: true
+      await api.post("/api/auth/logout", null, {
+        withCredentials: true,
+      });
+
+      withCredentials: true;
       console.log("✅ Logout berhasil");
     } catch (err) {
       console.error("Logout gagal:", err);

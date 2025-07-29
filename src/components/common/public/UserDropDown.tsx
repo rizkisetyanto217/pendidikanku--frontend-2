@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { LogOut, Settings, User, HelpCircle } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import api from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
+import SharePopover from "./SharePopover";
 
 export default function PublicUserDropdown() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { data: user } = useCurrentUser();
   const navigate = useNavigate();
+  const { slug } = useParams();
 
+  const base = `/masjid/${slug}`;
   const [open, setOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -19,20 +23,27 @@ export default function PublicUserDropdown() {
   const userName = user?.user_name || "User";
   const userRole = user?.role || "Publik";
 
+  const queryClient = useQueryClient();
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await api.post("/api/auth/logout"); // logout API
+      await api.post("/api/auth/logout", null, { withCredentials: true });
+
+      queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"], exact: true });
+
+      sessionStorage.clear();
+      localStorage.clear();
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 150);
     } catch (err) {
       console.error("Logout error:", err);
-    } finally {
-      setTimeout(() => {
-        location.href = "/login";
-      }, 400);
     }
   };
 
-  // close on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -43,8 +54,7 @@ export default function PublicUserDropdown() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -83,7 +93,7 @@ export default function PublicUserDropdown() {
           <ul className="py-2 text-sm" style={{ color: theme.black1 }}>
             <li>
               <button
-                onClick={() => navigate("/profil")}
+                onClick={() => navigate(`${base}/profil`)}
                 className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
                 style={{ backgroundColor: "transparent" }}
                 onMouseOver={(e) =>
@@ -98,7 +108,7 @@ export default function PublicUserDropdown() {
             </li>
             <li>
               <button
-                onClick={() => navigate("/dkm/profil-saya")}
+                onClick={() => navigate(`${base}/profil-saya`)}
                 className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
                 style={{ backgroundColor: "transparent" }}
                 onMouseOver={(e) =>
@@ -113,7 +123,7 @@ export default function PublicUserDropdown() {
             </li>
             <li>
               <button
-                onClick={() => navigate("/bantuan")}
+                onClick={() => navigate(`${base}/bantuan`)}
                 className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
                 style={{ backgroundColor: "transparent" }}
                 onMouseOver={(e) =>
@@ -126,6 +136,18 @@ export default function PublicUserDropdown() {
                 <HelpCircle className="w-4 h-4" /> Bantuan
               </button>
             </li>
+
+            {/* Bagikan */}
+            <li>
+              <div className="px-4 py-2">
+                <SharePopover
+                  title={document.title}
+                  url={window.location.href}
+                  forceCustom={true}
+                />
+              </div>
+            </li>
+
             <li>
               <button
                 onClick={handleLogout}

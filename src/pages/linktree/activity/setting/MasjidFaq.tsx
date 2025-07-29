@@ -1,7 +1,7 @@
 // src/pages/dkm/setting/faq/FaqPage.tsx
 import { useState } from 'react'
-import FaqItem from './DKMFaqItem'
-import FaqCategorySidebar from './DKMFaqCategorySidebar'
+import FaqItem from './MasjidFaqItem'
+import FaqCategorySidebar from './MasjidFaqCategorySidebar'
 import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
 import { colors } from '@/constants/colorsThema'
 
@@ -25,7 +25,7 @@ const dummyFaqs = [
   },
 ]
 
-export default function DKMFaq() {
+export default function Faq() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const { isDark } = useHtmlDarkMode()
   const theme = isDark ? colors.dark : colors.light

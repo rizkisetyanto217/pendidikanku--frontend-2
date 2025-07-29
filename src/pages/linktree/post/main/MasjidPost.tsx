@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bookmark, Heart, Share2 } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import axios from "@/lib/axios";
@@ -9,6 +9,80 @@ import PublicNavbar from "@/components/common/public/PublicNavbar";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useQueryClient } from "@tanstack/react-query";
+import SharePopover from "@/components/common/public/SharePopover";
+
+function InlineShare({ title, url }: { title: string; url: string }) {
+  const { isDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
+  const [showShare, setShowShare] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url);
+    alert("Link berhasil disalin!");
+    setShowShare(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // cegah trigger ke parent
+          setShowShare(!showShare);
+        }}
+        className="flex items-center space-x-1 text-sm"
+        style={{ color: themeColors.quaternary }}
+      >
+        <Share2 size={16} />
+        <span>Bagikan</span>
+      </button>
+
+      {showShare && (
+        <div
+          className="absolute z-50 mt-2 p-3 border rounded shadow w-64 right-0"
+          style={{
+            backgroundColor: themeColors.white1,
+            borderColor: themeColors.silver1,
+          }}
+        >
+          <p className="text-xs mb-2" style={{ color: themeColors.black2 }}>
+            Bagikan link:
+          </p>
+          <input
+            type="text"
+            readOnly
+            value={url}
+            className="w-full text-xs p-1 border rounded mb-2"
+            style={{
+              backgroundColor: themeColors.white3,
+              borderColor: themeColors.silver1,
+              color: themeColors.black1,
+            }}
+          />
+          <div className="flex justify-between">
+            <button
+              onClick={handleCopy}
+              className="text-sm font-semibold hover:underline"
+              style={{ color: themeColors.success1 }}
+            >
+              Salin Link
+            </button>
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(
+                `Assalamualaikum! Lihat ini yuk: ${title} — ${url}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold hover:underline"
+              style={{ color: themeColors.success1 }}
+            >
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface Post {
   post_id: string;
@@ -30,6 +104,8 @@ interface Donation {
   donation_name?: string;
   donation_message: string;
   created_at: string;
+  like_count: number;
+  is_liked_by_user: boolean;
 }
 
 export default function MasjidPost() {
@@ -39,6 +115,7 @@ export default function MasjidPost() {
   const { slug = "" } = useParams<{ slug: string }>();
   const { user, isLoggedIn } = useCurrentUser();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: posts = [], isLoading: isLoadingPosts } = useQuery<Post[]>({
     queryKey: ["masjidPosts", slug],
@@ -72,7 +149,7 @@ export default function MasjidPost() {
     (post) => post.post_type === activeTab
   );
 
-  const handleLike = async (postId: string) => {
+  const handlePostLike = async (postId: string) => {
     if (!isLoggedIn) {
       alert("Silakan login untuk menyukai postingan.");
       return;
@@ -85,6 +162,22 @@ export default function MasjidPost() {
       queryClient.invalidateQueries({ queryKey: ["masjidPosts", slug] });
     } catch (err) {
       console.error("Gagal like:", err);
+    }
+  };
+
+  const handleDonationLike = async (donationId: string) => {
+    if (!isLoggedIn) {
+      alert("Silakan login untuk menyukai donasi.");
+      return;
+    }
+
+    try {
+      await axios.post(`/public/donations/likes/${slug}/toggle`, {
+        donation_like_donation_id: donationId,
+      });
+      queryClient.invalidateQueries({ queryKey: ["masjidDonations", slug] });
+    } catch (err) {
+      console.error("Gagal like donasi:", err);
     }
   };
 
@@ -126,7 +219,7 @@ export default function MasjidPost() {
           filteredPosts.map((post) => (
             <div
               key={post.post_id}
-              className="block rounded-xl border overflow-hidden"
+              className="block rounded-xl border"
               style={{
                 borderColor: themeColors.silver1,
                 backgroundColor: isDark
@@ -172,7 +265,7 @@ export default function MasjidPost() {
                   <div className="flex items-center space-x-4">
                     <div
                       className="flex items-center space-x-1 cursor-pointer"
-                      onClick={() => handleLike(post.post_id)}
+                      onClick={() => handlePostLike(post.post_id)}
                     >
                       <Heart
                         size={14}
@@ -188,11 +281,10 @@ export default function MasjidPost() {
                       <span>Dukungan</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-1">
-                    <Share2 size={16} />
-                    <span>Bagikan</span>
-                  </div>
+                  <InlineShare
+                    title={post.post_title}
+                    url={`${window.location.origin}/masjid/${slug}/post/${post.post_id}`}
+                  />
                 </div>
               </div>
             </div>
@@ -227,7 +319,7 @@ export default function MasjidPost() {
                         : themeColors.white1,
                     }}
                     onClick={() =>
-                      window.location.assign(
+                      navigate(
                         `/masjid/${slug}/motivation/${donation.donation_id}`
                       )
                     }
@@ -262,29 +354,30 @@ export default function MasjidPost() {
                       className="flex items-center justify-between pt-2 text-xs"
                       style={{ color: themeColors.silver2 }}
                     >
-                      <div className="flex items-center space-x-1">
-                        <Heart size={14} />
-                        <span>Suka</span>
-                      </div>
                       <div
-                        className="flex items-center space-x-1"
+                        className="flex items-center space-x-1 cursor-pointer"
                         onClick={(e) => {
-                          e.stopPropagation(); // cegah klik ke detail
-                          if (navigator.share) {
-                            navigator.share({
-                              title: donorName,
-                              text: donation.donation_message,
-                              url: shareUrl,
-                            });
-                          } else {
-                            navigator.clipboard.writeText(shareUrl);
-                            alert("Link telah disalin ke clipboard");
-                          }
+                          e.stopPropagation(); // hindari klik ke detail
+                          handleDonationLike(donation.donation_id);
                         }}
                       >
-                        <Share2 size={16} />
-                        <span>Bagikan</span>
+                        <Heart
+                          size={14}
+                          fill={
+                            donation.is_liked_by_user
+                              ? themeColors.primary
+                              : "none"
+                          }
+                          stroke={
+                            donation.is_liked_by_user
+                              ? themeColors.primary
+                              : themeColors.silver2
+                          }
+                        />
+                        <span>{donation.like_count} Suka</span>
                       </div>
+
+                      <InlineShare title={donorName} url={shareUrl} />
                     </div>
                   </div>
                 );

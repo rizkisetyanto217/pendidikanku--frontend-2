@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Layout
 import DkmLayout from "@/layout/DKMLayout";
-import DkmSettingLayout from "@/layout/DKMSettingLayout";
+import DKMSettingParent from "@/layout/DKMSettingLayout";
 
 // Halaman DKM
 import DashboardAdminDkm from "@/pages/dashboard/dkm/home/DKMHome";
@@ -15,10 +15,10 @@ import Postingan from "@/pages/dashboard/dkm/post/DKMPost";
 
 // Halaman Setting DKM
 import ProfilSayaDkm from "@/pages/dashboard/dkm/setting/DKMHomeMyProfile";
-import Appereance from "@/pages/dashboard/dkm/setting/DKMAppereance";
+import DKMAppereance from "@/pages/dashboard/dkm/setting/DKMAppereance";
 import SupportUs from "@/pages/dashboard/dkm/setting/DKMSupportUs";
 import Partnership from "@/pages/dashboard/dkm/setting/DKMPartnership";
-import FaqPage from "@/pages/dashboard/dkm/setting/DKMFaq";
+import DKMFaq from "@/pages/dashboard/dkm/setting/DKMFaq";
 
 // Halaman Penulis
 import AuthorHome from "@/pages/dashboard/author/home/AuthorHome";
@@ -105,6 +105,7 @@ import MasjidMyActivity from "@/pages/linktree/activity/my-activity/MasjidMyActi
 import MasjidPost from "@/pages/linktree/post/main/MasjidPost";
 import MasjidDetailPost from "@/pages/linktree/post/main/MasjidDetailPost";
 import MasjidDetailDonation from "@/pages/linktree/post/main/MasjidDetailMotivation";
+import MasjidSettingLayout from "@/layout/MasjidSettingLayout";
 
 export default function AppRoutes() {
   return (
@@ -201,6 +202,15 @@ export default function AppRoutes() {
 
           {/* Activity  */}
           <Route path="aktivitas" element={<MasjidMyActivity />} />
+
+          {/* Nested setting layout */}
+          <Route element={<MasjidSettingLayout />}>
+            <Route path="profil-saya" element={<ProfilSayaDkm />} />
+            <Route path="tampilan" element={<DKMAppereance />} />
+            <Route path="dukung-kami" element={<SupportUs />} />
+            <Route path="kerjasama" element={<Partnership />} />
+            <Route path="tanya-jawab" element={<DKMFaq />} />
+          </Route>
         </Route>
       </Route>
       {/* ==== Protected Routes - DKM ==== */}
@@ -337,12 +347,12 @@ export default function AppRoutes() {
           <Route path="postingan" element={<Postingan />} />
 
           {/* Nested setting layout */}
-          <Route element={<DkmSettingLayout />}>
+          <Route element={<DKMSettingParent />}>
             <Route path="profil-saya" element={<ProfilSayaDkm />} />
-            <Route path="tampilan" element={<Appereance />} />
+            <Route path="tampilan" element={<DKMAppereance />} />
             <Route path="dukung-kami" element={<SupportUs />} />
             <Route path="kerjasama" element={<Partnership />} />
-            <Route path="tanya-jawab" element={<FaqPage />} />
+            <Route path="tanya-jawab" element={<DKMFaq />} />
           </Route>
         </Route>
       </Route>

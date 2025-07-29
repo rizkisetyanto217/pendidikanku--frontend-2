@@ -33,7 +33,7 @@ const FinancialReportPage = () => {
   const { data: donations, isLoading: isDonasiLoading } = useQuery({
     queryKey: ["masjid-donations", masjidId],
     queryFn: async () => {
-      const res = await api.get(`/public/donations/masjid/${masjidId}`);
+      const res = await api.get(`/public/donations/by-masjid/${slug}`);
       console.log("📦 Data donasi:", res.data);
       return res.data;
     },

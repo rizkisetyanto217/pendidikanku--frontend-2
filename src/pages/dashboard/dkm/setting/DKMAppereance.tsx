@@ -2,7 +2,7 @@ import { MoonIcon } from 'lucide-react'
 import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
 import { colors } from '@/constants/colorsThema'
 
-export default function Appereance() {
+export default function DKMAppereance() {
   const { isDark, setDarkMode } = useHtmlDarkMode()
   const theme = isDark ? colors.dark : colors.light
 

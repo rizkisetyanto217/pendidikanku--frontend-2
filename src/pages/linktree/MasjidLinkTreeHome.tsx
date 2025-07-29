@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BorderLine from "@/components/common/main/Border";
+import SharePopover from "@/components/common/public/SharePopover";
 
 const currentUrl = window.location.href;
 
@@ -358,7 +359,9 @@ export default function PublicLinktree() {
               <div className="grid grid-cols-4 gap-3 pt-4">
                 <LucideMenuItem
                   label="Lokasi"
-                  icon={<LocationEditIcon size={24} color={themeColors.black1} />}
+                  icon={
+                    <LocationEditIcon size={24} color={themeColors.black1} />
+                  }
                   onClick={() => navigate(`/masjid/${slug}/postingan`)}
                 />
                 <LucideMenuItem
@@ -378,8 +381,6 @@ export default function PublicLinktree() {
                 />
               </div>
             </div>
-
-           
 
             {/* Bottom Navigation */}
             <BottomNavbar />
@@ -567,65 +568,11 @@ export default function PublicLinktree() {
                 )}
               </div>
 
-              <div className="relative">
-                <button
-                  onClick={handleShareClick}
-                  className="flex items-center space-x-1 text-sm"
-                  style={{ color: themeColors.quaternary }}
-                >
-                  <Share size={16} />
-                  <span>Bagikan</span>
-                </button>
-
-                {showShareMenu && (
-                  <div
-                    ref={shareMenuRef}
-                    className="absolute z-10 mt-2 p-3 border rounded shadow w-64 right-0"
-                    style={{
-                      backgroundColor: themeColors.white1,
-                      borderColor: themeColors.silver1,
-                    }}
-                  >
-                    <p
-                      className="text-xs mb-2"
-                      style={{ color: themeColors.black2 }}
-                    >
-                      Bagikan link:
-                    </p>
-
-                    <input
-                      type="text"
-                      readOnly
-                      value={currentUrl}
-                      className="w-full text-xs p-1 border rounded mb-2"
-                      style={{
-                        backgroundColor: themeColors.white3,
-                        borderColor: themeColors.silver1,
-                      }}
-                    />
-
-                    <div className="flex justify-between">
-                      <button
-                        onClick={handleCopy}
-                        className="text-sm font-semibold hover:underline"
-                        style={{ color: themeColors.success1 }}
-                      >
-                        Salin Link
-                      </button>
-
-                      <a
-                        href={`https://wa.me/?text=${encodeURIComponent(`Assalamualaikum! Cek profil masjid ${masjidData.masjid_name} di sini: ${currentUrl}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold hover:underline"
-                        style={{ color: themeColors.success1 }}
-                      >
-                        WhatsApp
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SharePopover
+                title={`Profil Masjid ${masjidData.masjid_name}`}
+                url={window.location.href}
+                forceCustom // agar selalu tampil popover versi kamu
+              />
             </div>
 
             <div className="space-y-2">

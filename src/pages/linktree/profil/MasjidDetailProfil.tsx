@@ -40,7 +40,7 @@ export default function MasjidProfileDetail() {
           }}
         />
 
-        <div className="mt-4 p-4" style={{ backgroundColor: themeColors.white1 }}>
+        <div className="p-2">
           <InfoItem label="Tahun Didirikan" content={data.tahun_didirikan} />
           <InfoItem label="Latar Belakang" content={data.latar_belakang} />
           <InfoItem label="Visi" content={data.visi} />

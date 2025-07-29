@@ -4,7 +4,7 @@ import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import ThemeSelect from "@/components/pages/settings/ThemeSelect";
 
-export default function AdminAppereance() {
+export default function MasjidAppereance() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 

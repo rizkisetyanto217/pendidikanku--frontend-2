@@ -24,7 +24,7 @@ export default function MasjidMyActivity() {
           >
             Budi Renaldi
           </h1>
-          <p className="text-sm mt-1" style={{ color: themeColors.silver4 }}>
+          <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
             Bergabung pada 3 November 2025
           </p>
 
@@ -32,7 +32,7 @@ export default function MasjidMyActivity() {
             className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
             style={{
               backgroundColor: themeColors.primary,
-              color: themeColors.white1,
+              color: themeColors.black1,
             }}
           >
             Profil Saya
@@ -155,7 +155,6 @@ export default function MasjidMyActivity() {
   );
 }
 
-// Komponen kartu info seperti Donasi / Statistik
 function CardInfo({
   label,
   desc,
@@ -167,12 +166,49 @@ function CardInfo({
   color: string;
   bg: string;
 }) {
+  const { isDark } = useHtmlDarkMode();
+  const themeColors = isDark ? colors.dark : colors.light;
+
+  // Gunakan override warna berdasarkan label agar tetap konsisten dan nyaman di dark mode
+  const overrideColors: Record<string, { bg: string; color: string }> = {
+    Donasi: {
+      bg: themeColors.success2,
+      color: themeColors.success1,
+    },
+    Statistik: {
+      bg: themeColors.specialColor,
+      color: themeColors.warning1,
+    },
+    Kajian: {
+      bg: themeColors.white3,
+      color: themeColors.primary,
+    },
+  };
+
+  const current = overrideColors[label] ?? { bg, color };
+
   return (
-    <div className="p-4 rounded-lg" style={{ backgroundColor: bg }}>
-      <h4 className="text-sm font-semibold mb-1" style={{ color }}>
+    <div
+      className="p-4 rounded-lg transition-colors duration-300"
+      style={{
+        backgroundColor: current.bg,
+        border: `1px solid ${isDark ? themeColors.silver1 : "transparent"}`,
+      }}
+    >
+      <h4
+        className="text-sm font-semibold mb-1"
+        style={{
+          color: current.color,
+        }}
+      >
         {label}
       </h4>
-      <p className="text-xs leading-snug" style={{ color: "#555" }}>
+      <p
+        className="text-xs leading-snug"
+        style={{
+          color: isDark ? themeColors.black1 : themeColors.black1,
+        }}
+      >
         {desc}
       </p>
     </div>
