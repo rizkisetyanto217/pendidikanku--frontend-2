@@ -66,7 +66,7 @@ import DKMAddLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions
 import DKMAddEditLectureSession from "@/pages/dashboard/dkm/lecture/lecture-sessions/main/DKMAddEditLectureSessions";
 import DKMAddEditLecture from "@/pages/dashboard/dkm/lecture/lecture/main/DKMAddEditLecture";
 import MasjidLinkTree from "@/pages/linktree/MasjidLinkTreeHome";
-import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonationMasjidFinansial";
+import MasjidDonationMasjid from "@/pages/linktree/finansial/donation/MasjidDonation";
 import MasjidLayout from "@/pages/linktree/MasjidLayout";
 import MasjidDonationConfirmDonation from "@/pages/linktree/finansial/donation/MasjidDonationConfirmFinansial";
 import MasjidProfile from "@/pages/linktree/profil/MasjidProfil";

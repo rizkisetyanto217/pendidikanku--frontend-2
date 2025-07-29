@@ -140,7 +140,7 @@ export default function DonationMasjid() {
 
   const handleSubmit = () => {
     navigate(
-      `/masjid/${masjidData?.masjid_slug}/donasi/konfirmasi?masjid_id=${masjidData?.masjid_id}&masjid=${masjidDonation}&masjidku=${masjidkuDonation}`
+      `/masjid/${masjidData?.masjid_slug}/donasi/konfirmasi?masjid=${masjidDonation}&masjidku=${masjidkuDonation}`
     );
   };
 

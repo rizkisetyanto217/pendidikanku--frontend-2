@@ -4,7 +4,7 @@ import { CalendarDays, MapPin, Circle } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useNavigate, useParams } from "react-router-dom";
-import CommonButton from "@/components/common/main/MainButton";
+import CommonButton from "@/components/common/main/CommonButton";
 
 export default function MasjidMyActivity() {
   const { isDark } = useHtmlDarkMode();

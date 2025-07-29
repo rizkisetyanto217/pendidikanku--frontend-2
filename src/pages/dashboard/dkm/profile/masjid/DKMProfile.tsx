@@ -9,7 +9,7 @@ import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import CommonButton from "@/components/common/main/MainButton";
+import CommonButton from "@/components/common/main/CommonButton";
 
 interface TokenPayload {
   masjid_admin_ids: string[];
@@ -63,7 +63,6 @@ export default function ProfilMasjid() {
     location.pathname.includes("edit-profil-masjid") ||
     location.pathname.includes("edit-masjid");
 
-
   const { data: masjid, isLoading: isLoadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", masjidId],
     queryFn: async () => {
@@ -97,8 +96,6 @@ export default function ProfilMasjid() {
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
-
-
       <div className="flex-1">
         <div
           className="p-6 rounded-xl shadow-sm space-y-6"

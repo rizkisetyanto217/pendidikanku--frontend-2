@@ -42,10 +42,9 @@ const FinancialReportPage = () => {
   });
 
   const stats = useMemo(() => {
-    const total = donations?.reduce(
-      (acc: number, curr: any) => acc + curr.donation_amount,
-      0
-    );
+    const total = donations?.reduce((acc: number, curr: any) => {
+      return acc + (curr.donation_amount_masjid || 0);
+    }, 0);
     const count = donations?.length || 0;
     return { total, count };
   }, [donations]);
@@ -75,8 +74,9 @@ const FinancialReportPage = () => {
         </p>
         <div className="text-right text-sm">
           <p style={{ color: themeColors.black1 }}>
-            Rp. {item.donation_amount.toLocaleString("id-ID")}
+            Rp. {(item.donation_amount_masjid || 0).toLocaleString("id-ID")}
           </p>
+
           <p className="text-xs" style={{ color: themeColors.silver2 }}>
             {new Date(item.created_at).toLocaleDateString("id-ID")}
           </p>
@@ -136,60 +136,59 @@ const FinancialReportPage = () => {
 
   return (
     <>
-        <PageHeaderUser
-          title="Laporan Keuangan"
-          onBackClick={() => history.back()}
-        />
+      <PageHeaderUser
+        title="Laporan Keuangan"
+        onBackClick={() => history.back()}
+      />
 
-        <Tabs
-          value={tab}
-          onChange={setTab}
-          tabs={[
-            { label: "Terbaru", value: "recent" },
-            { label: "Informasi", value: "info" },
-          ]}
-        />
+      <Tabs
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { label: "Terbaru", value: "recent" },
+          { label: "Informasi", value: "info" },
+        ]}
+      />
 
-        <TabsContent value="recent" current={tab}>
-          <div className="mt-4 space-y-4">
-            {/* Statistik Dinamis */}
-            <div
-              className="flex items-center justify-between px-4 py-3 rounded"
-              style={{ border: `1px solid ${themeColors.silver1}` }}
-            >
-              <div>
-                <p className="text-sm" style={{ color: themeColors.black1 }}>
-                  Rp. {stats.total?.toLocaleString("id-ID") || 0}
-                </p>
-                <p className="text-xs" style={{ color: themeColors.silver2 }}>
-                  {stats.count} Donatur
-                </p>
-              </div>
-              <div className="text-2xl">📊</div>
+      <TabsContent value="recent" current={tab}>
+        <div className="mt-4 space-y-4">
+          {/* Statistik Dinamis */}
+          <div
+            className="flex items-center justify-between px-4 py-3 rounded"
+            style={{ border: `1px solid ${themeColors.silver1}` }}
+          >
+            <div>
+              <p className="text-sm" style={{ color: themeColors.black1 }}>
+                Rp. {stats.total?.toLocaleString("id-ID") || 0}
+              </p>
+              <p className="text-xs" style={{ color: themeColors.silver2 }}>
+                {stats.count} Donatur
+              </p>
             </div>
-
-            {/* Donasi */}
-            <div className="space-y-2">
-              <h3
-                className="text-sm font-semibold"
-                style={{ color: themeColors.black1 }}
-              >
-                Donasi
-              </h3>
-              {renderDonationList()}
-            </div>
-
-            {/* Motivasi */}
-            {renderMotivationMessages()}
+            <div className="text-2xl">📊</div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="info" current={tab}>
-          <p className="text-sm p-4" style={{ color: themeColors.silver2 }}>
-            [Coming soon]
-          </p>
-        </TabsContent>
+          {/* Donasi */}
+          <div className="space-y-2">
+            <h3
+              className="text-sm font-semibold"
+              style={{ color: themeColors.black1 }}
+            >
+              Donasi
+            </h3>
+            {renderDonationList()}
+          </div>
 
+          {/* Motivasi */}
+          {renderMotivationMessages()}
+        </div>
+      </TabsContent>
+
+      <TabsContent value="info" current={tab}>
+        <p className="text-sm p-4" style={{ color: themeColors.silver2 }}>
+          [Coming soon]
+        </p>
+      </TabsContent>
     </>
   );
 };

@@ -128,25 +128,49 @@ export default function MasjidLectureSessions() {
               {info.tempat}
             </div>
 
-            {/* 🧮 Nilai Akhir */}
-            {data?.user_grade_result !== undefined && (
-              <div>
-                🧮 <strong style={{ color: theme.black1 }}>Nilai Akhir:</strong>{" "}
-                {data.user_grade_result}
+            {/* 🧾 Ringkasan Hasil Belajar */}
+            <div className="flex flex-col gap-3 mt-4">
+              {/* 🟩 Nilai & Soal */}
+              <div
+                className="rounded-md px-3 py-2 text-sm"
+                style={{
+                  backgroundColor:
+                    typeof data?.user_grade_result === "number"
+                      ? "#D1FAE5"
+                      : "#FDE68A",
+                  color:
+                    typeof data?.user_grade_result === "number"
+                      ? "#065F46"
+                      : "#92400E",
+                  border: "1px solid #D1D5DB",
+                }}
+              >
+                <strong>Materi & Soal:</strong>{" "}
+                {typeof data?.user_grade_result === "number"
+                  ? `Sudah dikerjakan ✓ | Nilai: ${data.user_grade_result}`
+                  : "Tanpa Keterangan ✕"}
               </div>
-            )}
-
-            {/* ✅ Kehadiran */}
-            {data?.user_attendance_status !== undefined && (
-              <div>
-                ✅ <strong style={{ color: theme.black1 }}>Kehadiran:</strong>{" "}
-                {data.user_attendance_status === 1
-                  ? "Hadir"
-                  : data.user_attendance_status === 0
-                    ? "Tidak Hadir"
-                    : "Belum Tercatat"}
-              </div>
-            )}
+            </div>
+            {/* 🔸 Kehadiran */}
+            <div
+              className="rounded-md px-3 py-2 text-sm"
+              style={{
+                backgroundColor:
+                  data?.user_attendance_status === 1
+                    ? "#D1FAE5" // hijau muda
+                    : "#FDE68A", // kuning terang
+                color:
+                  data?.user_attendance_status === 1
+                    ? "#065F46" // hijau tua
+                    : "#92400E", // kuning tua
+                border: "1px solid #D1D5DB",
+              }}
+            >
+              <strong>Status Kehadiran:</strong>{" "}
+              {data?.user_attendance_status === 1
+                ? "Hadir Tatap Muka ✓"
+                : "Tanpa Keterangan ✕"}
+            </div>
           </>
         )}
       </div>

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "@/lib/axios";
-import axios, { AxiosError } from "axios";
-import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import axios from "axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import CommonActionButton from "@/components/common/main/CommonActionButton";
 
 declare global {
   interface Window {
@@ -20,6 +20,11 @@ const MasjidDonationConfirmMasjid = () => {
   const masjidkuDonation = Number(searchParams.get("masjidku")) || 0;
   const [donationName, setDonationName] = useState("");
   const [donationMessage, setDonationMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const path = window.location.pathname;
+  const slugMatch = path.match(/\/masjid\/([^\/]+)\//);
+  const slug = slugMatch?.[1];
 
   const fee = 4000;
   const total = masjidDonation + masjidkuDonation + fee;
@@ -42,33 +47,51 @@ const MasjidDonationConfirmMasjid = () => {
   }, []);
 
   const handlePayment = async () => {
-    const masjidIdFromUrl = searchParams.get("masjid_id");
-    if (!masjidIdFromUrl || masjidIdFromUrl.length !== 36) {
-      alert("Masjid ID tidak valid atau tidak ditemukan.");
+    if (!slug) {
+      alert("Slug masjid tidak ditemukan.");
       return;
     }
 
     const donationData = {
-      donation_amount: total,
-      donation_masjid_id: masjidIdFromUrl,
       donation_name: donationName,
       donation_message: donationMessage,
+      donation_amount_masjid: masjidDonation,
+      donation_amount_masjidku: masjidkuDonation,
     };
 
+    setIsLoading(true); // 👈 mulai loading
+
+    // ✅ Log sebelum request
+    console.log("📤 POST to:", `/public/donations/${slug}`);
+    console.log("📤 Payload:", donationData);
+
     try {
-      const response = await api.post("/public/donations", donationData, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
+      const response = await api.post(
+        `/public/donations/${slug}`,
+        donationData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+
+      // ✅ Log response sukses
+      console.log("✅ Response:", response.data);
 
       if (response.status === 200) {
         const snapToken = response.data.snap_token;
 
         if (window.snap) {
           window.snap.pay(snapToken, {
-            onSuccess: () => navigate("/donation-success"),
+            onSuccess: () => {
+              if (slug) {
+                navigate(`/masjid/${slug}`);
+              } else {
+                navigate("/"); // fallback kalau slug tidak ditemukan
+              }
+            },
             onPending: () => alert("Pembayaran sedang diproses..."),
             onError: () => alert("Pembayaran gagal. Silakan coba lagi."),
           });
@@ -77,14 +100,19 @@ const MasjidDonationConfirmMasjid = () => {
         }
       }
     } catch (error) {
+      // ✅ Log error detail
+      console.error("❌ Error during POST donation:", error);
+
       if (axios.isAxiosError(error)) {
         if (error.response) {
+          console.error("❌ Error Response:", error.response.data);
           const message =
             error.response.data?.error ||
             error.response.data?.message ||
             "Server error";
           alert(`❌ Server Error (${error.response.status}): ${message}`);
         } else if (error.request) {
+          console.error("❌ Error Request:", error.request);
           alert("❌ Network Error: Tidak dapat terhubung ke server");
         } else {
           alert(`❌ Request Error: ${error.message}`);
@@ -92,6 +120,8 @@ const MasjidDonationConfirmMasjid = () => {
       } else {
         alert("❌ Unknown Error");
       }
+    } finally {
+      setIsLoading(false); // 👈 selesai loading
     }
   };
 
@@ -212,16 +242,12 @@ const MasjidDonationConfirmMasjid = () => {
         }}
       >
         <div className="max-w-xl mx-auto">
-          <button
+          <CommonActionButton
+            text="Lanjut"
             onClick={handlePayment}
-            className="w-full py-3 rounded font-semibold"
-            style={{
-              backgroundColor: themeColors.primary,
-              color: themeColors.white1,
-            }}
-          >
-            Lanjut
-          </button>
+            className="w-full py-3"
+            disabled={isLoading}
+          />
         </div>
       </div>
     </>
