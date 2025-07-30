@@ -44,12 +44,13 @@ export default function DKMQuizLectureSessions() {
     correctAnswerIndex: 0,
     explanation: "",
   });
+
   const { data, isLoading } = useQuery({
     queryKey: ["quiz-questions", lecture_session_id],
     queryFn: async () => {
       try {
         const res = await axios.get(
-          `/public/lecture-sessions-quiz/by-lecture-sessions/${lecture_session_id}`
+          `/public/lecture-sessions-quiz/${lecture_session_id}/with-questions`
         );
         return res.data.data;
       } catch (err: any) {
@@ -71,8 +72,13 @@ export default function DKMQuizLectureSessions() {
           lecture_sessions_quiz_description: "-",
           lecture_sessions_quiz_lecture_session_id: lecture_session_id,
         })
-        .then(() => {
-          toast.success("Quiz berhasil dibuat.");
+        .then((res) => {
+          const msg = res.data?.message;
+          if (msg === "Quiz sudah ada") {
+            toast("Quiz sudah tersedia.");
+          } else {
+            toast.success("Quiz berhasil dibuat.");
+          }
           queryClient.invalidateQueries({
             queryKey: ["quiz-questions", lecture_session_id],
           });
@@ -128,8 +134,13 @@ export default function DKMQuizLectureSessions() {
     }
 
     const quizId = data?.quiz?.lecture_sessions_quiz_id;
-    if (!quizId)
+    if (!quizId) {
+      console.log(
+        "⚠️ Quiz belum tersedia untuk sesi kajian ini (lecture_session_id):",
+        lecture_session_id
+      );
       return toast.error("Quiz belum tersedia untuk sesi kajian ini.");
+    }
 
     const correctLetter = String.fromCharCode(
       65 + newQuestion.correctAnswerIndex

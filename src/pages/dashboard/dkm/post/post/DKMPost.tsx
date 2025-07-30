@@ -8,6 +8,8 @@ import StatusBadge from "@/components/common/main/MainStatusBadge";
 import FormattedDate from "@/constants/formattedDate";
 import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
+
 
 interface Post {
   post_id: string;
@@ -56,7 +58,8 @@ export default function DKMPost() {
     "Tema",
     "Tanggal",
     "Status",
-    "Like",
+    "Suka",
+    "Aksi", // ✅ Tambahkan kolom aksi
   ];
 
   const rows =
@@ -75,6 +78,17 @@ export default function DKMPost() {
         variant={post.post_is_published ? "success" : "warning"}
       />,
       <span>{post.like_count}</span>,
+      <ActionEditDelete
+        onEdit={() =>
+          navigate(`/dkm/post/tambah-edit`, {
+            state: post,
+          })
+        }
+        onDelete={() => {
+          // implement delete confirmation/modal or handler here
+          console.log("🗑️ Delete post:", post.post_id);
+        }}
+      />,
     ]) ?? [];
 
   return (

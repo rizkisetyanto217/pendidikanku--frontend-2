@@ -24,7 +24,10 @@ export default function ActionEditDelete({
     <div className="flex items-center gap-2">
       {showEdit && (
         <button
-          onClick={onEdit}
+          onClick={(e) => {
+            e.stopPropagation(); // ⛔️ Cegah trigger onRowClick
+            onEdit?.();
+          }}
           title="Edit"
           className="transition"
           style={{ color: theme.primary }}
@@ -35,7 +38,10 @@ export default function ActionEditDelete({
 
       {showDelete && (
         <button
-          onClick={onDelete}
+          onClick={(e) => {
+            e.stopPropagation(); // ⛔️ Cegah trigger onRowClick
+            onDelete?.();
+          }}
           title="Hapus"
           className="transition"
           style={{ color: theme.error1 }}

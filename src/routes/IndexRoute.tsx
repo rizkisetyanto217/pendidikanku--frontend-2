@@ -119,6 +119,8 @@ import DKMPost from "@/pages/dashboard/dkm/post/post/DKMPost";
 import DKMPostParent from "@/pages/dashboard/dkm/post/DKMPostParent";
 import DKMAddEditThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMAddEditThemaPost";
 import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
+import DKMDetailPost from "@/pages/dashboard/dkm/post/post/DKMDetailPost";
+import DKMDetailThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMDetailThemaPost";
 
 export default function AppRoutes() {
   return (
@@ -369,11 +371,14 @@ export default function AppRoutes() {
           <Route path="post" element={<DKMPostParent />}>
             <Route index element={<DKMPost />} />
             <Route path="tambah-edit" element={<DKMAddEditPost />} />
+            <Route path="tambah-edit/:id" element={<DKMAddEditPost />} />
+            <Route path="detail/:id" element={<DKMDetailPost />} />
           </Route>
           <Route path="post-tema" element={<DKMPostParent />}>
             <Route index element={<DKMThemaPost />} />
             <Route path="tambah-edit" element={<DKMAddEditThemaPost />} />
             <Route path="tambah-edit/:id" element={<DKMAddEditThemaPost />} />
+            <Route path="detail/:id" element={<DKMDetailThemaPost />} />
           </Route>
 
           {/* Nested setting layout */}

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
@@ -13,17 +13,37 @@ interface PostTheme {
   post_theme_name: string;
 }
 
+interface Post {
+  post_id: string;
+  post_title: string;
+  post_content: string;
+  post_image_url: string | null;
+  post_theme: {
+    post_theme_id: string;
+    post_theme_name: string;
+  };
+}
+
 export default function DKMAddEditPost() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const post = location.state as Post | undefined;
   const { user } = useCurrentUser();
 
-  const [title, setTitle] = useState("Fiqh Syafi'i 2");
-  const [content, setContent] = useState(
-    "Mari hadiri kajian subuh bersama Ustadz Abdul Wahid di Masjid Al-Huda."
-  );
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [themeId, setThemeId] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Prefill untuk edit
+  useEffect(() => {
+    if (post) {
+      setTitle(post.post_title);
+      setContent(post.post_content);
+      setThemeId(post.post_theme?.post_theme_id || "");
+    }
+  }, [post]);
 
   const { data: themes, isLoading: isLoadingThemes } = useQuery<PostTheme[]>({
     queryKey: ["post-themes"],
@@ -51,18 +71,24 @@ export default function DKMAddEditPost() {
         formData.append("post_image_url", imageFile);
       }
 
-      await axios.post("/api/a/posts", formData, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      if (post?.post_id) {
+        await axios.put(`/api/a/posts/${post.post_id}`, formData, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Post berhasil diperbarui");
+      } else {
+        await axios.post("/api/a/posts", formData, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        toast.success("Post berhasil ditambahkan");
+      }
 
-      toast.success("Post berhasil ditambahkan");
       navigate("/dkm/post");
     } catch (err) {
       console.error(err);
-      toast.error("Gagal menambahkan post");
+      toast.error("Gagal menyimpan post");
     } finally {
       setLoading(false);
     }
@@ -70,7 +96,10 @@ export default function DKMAddEditPost() {
 
   return (
     <>
-      <PageHeader title="Tambah Post" backTo="/dkm/post" />
+      <PageHeader
+        title={post ? "Edit Post" : "Tambah Post"}
+        backTo="/dkm/post"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6 p-4 max-w-xl">
         <InputField
@@ -124,7 +153,13 @@ export default function DKMAddEditPost() {
         </div>
 
         <Button type="submit" disabled={loading || isLoadingThemes}>
-          {loading ? "Menyimpan..." : "Simpan Post"}
+          {loading
+            ? post
+              ? "Menyimpan perubahan..."
+              : "Menyimpan..."
+            : post
+              ? "Simpan Perubahan"
+              : "Simpan Post"}
         </Button>
       </form>
     </>
