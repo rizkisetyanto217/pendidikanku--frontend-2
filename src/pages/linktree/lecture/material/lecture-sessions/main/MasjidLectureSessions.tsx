@@ -11,6 +11,8 @@ import { colors } from "@/constants/colorsThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import AttendanceModal from "./components/AttendanceModal";
+import { useQueryClient } from "@tanstack/react-query";
 
 // =====================
 // ✅ Interface
@@ -38,6 +40,9 @@ export default function MasjidLectureSessions() {
 
   const { data: currentUser } = useCurrentUser();
 
+  const [showModal, setShowModal] = useState(false);
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery<LectureSession>({
     queryKey: ["lectureSessionDetail", id, currentUser?.id],
     queryFn: async () => {
@@ -46,6 +51,7 @@ export default function MasjidLectureSessions() {
       const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`, {
         headers,
       });
+      console.log("📦 Data kajian:", res.data);
       return res.data;
     },
     enabled: !!id, // ✅ tetap dijalankan meskipun user belum login
@@ -153,23 +159,20 @@ export default function MasjidLectureSessions() {
             </div>
             {/* 🔸 Kehadiran */}
             <div
-              className="rounded-md px-3 py-2 text-sm"
+              className="rounded-md px-3 py-2 text-sm cursor-pointer hover:opacity-80"
               style={{
                 backgroundColor:
-                  data?.user_attendance_status === 1
-                    ? "#D1FAE5" // hijau muda
-                    : "#FDE68A", // kuning terang
+                  data?.user_attendance_status === 1 ? "#D1FAE5" : "#FDE68A",
                 color:
-                  data?.user_attendance_status === 1
-                    ? "#065F46" // hijau tua
-                    : "#92400E", // kuning tua
+                  data?.user_attendance_status === 1 ? "#065F46" : "#92400E",
                 border: "1px solid #D1D5DB",
               }}
+              onClick={() => setShowModal(true)}
             >
               <strong>Status Kehadiran:</strong>{" "}
               {data?.user_attendance_status === 1
                 ? "Hadir Tatap Muka ✓"
-                : "Tanpa Keterangan ✕"}
+                : "✕ Catat Kehadiran"}
             </div>
           </>
         )}
@@ -204,6 +207,18 @@ export default function MasjidLectureSessions() {
             </div>
           ))}
         </div>
+        {/* 📋 Modal Kehadiran */}
+        <AttendanceModal
+          show={showModal}
+          onClose={() => setShowModal(false)}
+          sessionId={id}
+          onSuccess={() => {
+            setShowModal(false);
+            queryClient.invalidateQueries({
+              queryKey: ["lectureSessionDetail", id, currentUser?.id],
+            });
+          }}
+        />
       </div>
     </div>
   );

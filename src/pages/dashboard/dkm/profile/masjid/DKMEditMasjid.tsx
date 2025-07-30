@@ -1,11 +1,50 @@
-import React from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode"; // asumsi kamu punya hook ini
+import React, { useState } from "react";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import axios from "@/lib/axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function DKMEditMasjid() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const { user } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0];
+  const navigate = useNavigate();
+
+  const [namaMasjid, setNamaMasjid] = useState("");
+  const [tentang, setTentang] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [linkMaps, setLinkMaps] = useState("");
+  const [gambarFile, setGambarFile] = useState<File | null>(null);
+
+  const handleSubmit = async () => {
+    if (!masjidId) {
+      toast.error("Masjid ID tidak ditemukan");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("masjid_name", namaMasjid);
+    formData.append("masjid_bio_short", tentang);
+    formData.append("masjid_location", alamat);
+    formData.append("masjid_map_url", linkMaps);
+    if (gambarFile) formData.append("image", gambarFile); // pakai key 'image'
+
+    try {
+      await axios.put(`/api/a/masjids/${masjidId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      toast.success("Data masjid berhasil diperbarui");
+      navigate("/dkm/profil-masjid");
+    } catch (err) {
+      console.error("❌ Gagal simpan:", err);
+      toast.error("Gagal menyimpan data masjid");
+    }
+  };
 
   return (
     <div
@@ -15,7 +54,7 @@ export default function DKMEditMasjid() {
         borderColor: theme.silver1,
       }}
     >
-      <PageHeader title="Sosial Media Masjid" backTo="/dkm/profil-masjid" />
+      <PageHeader title="Edit Masjid" backTo="/dkm/profil-masjid" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Nama Masjid */}
@@ -28,6 +67,8 @@ export default function DKMEditMasjid() {
           </label>
           <input
             type="text"
+            value={namaMasjid}
+            onChange={(e) => setNamaMasjid(e.target.value)}
             placeholder="Masukan nama masjid"
             className="w-full rounded-lg border px-4 py-2 text-sm"
             style={{
@@ -47,6 +88,8 @@ export default function DKMEditMasjid() {
             Tentang ( Maksimal 30 kata )
           </label>
           <textarea
+            value={tentang}
+            onChange={(e) => setTentang(e.target.value)}
             placeholder="Masukan tentang masjid"
             rows={4}
             className="w-full rounded-lg border px-4 py-2 text-sm"
@@ -69,16 +112,12 @@ export default function DKMEditMasjid() {
           <p className="text-sm mb-2" style={{ color: theme.silver2 }}>
             File yang diizinkan berbentuk .png dan .jpg
           </p>
-          <div
-            className="w-full h-40 border-2 border-dashed rounded-lg flex items-center justify-center text-center text-sm cursor-pointer"
-            style={{
-              color: theme.silver2,
-              borderColor: theme.silver1,
-              backgroundColor: isDark ? theme.white2 : "#F9FAFB",
-            }}
-          >
-            Click to browse or drag and drop your files
-          </div>
+          <input
+            type="file"
+            accept=".png,.jpg,.jpeg"
+            onChange={(e) => setGambarFile(e.target.files?.[0] || null)}
+            className="text-sm"
+          />
         </div>
 
         {/* Alamat */}
@@ -90,6 +129,8 @@ export default function DKMEditMasjid() {
             Alamat
           </label>
           <textarea
+            value={alamat}
+            onChange={(e) => setAlamat(e.target.value)}
             placeholder="Masukan alamat"
             rows={4}
             className="w-full rounded-lg border px-4 py-2 text-sm"
@@ -111,6 +152,8 @@ export default function DKMEditMasjid() {
           </label>
           <input
             type="text"
+            value={linkMaps}
+            onChange={(e) => setLinkMaps(e.target.value)}
             placeholder="Masukan link maps"
             className="w-full rounded-lg border px-4 py-2 text-sm"
             style={{
@@ -128,11 +171,10 @@ export default function DKMEditMasjid() {
           Butuh dibuatkan Logo, Profil dan Stempel Masjid?
         </p>
         <button
+          type="button"
+          onClick={handleSubmit}
           className="px-6 py-2 text-white rounded-lg text-sm"
-          style={{
-            backgroundColor: theme.primary,
-            color: "#fff",
-          }}
+          style={{ backgroundColor: theme.primary }}
         >
           Simpan Data
         </button>

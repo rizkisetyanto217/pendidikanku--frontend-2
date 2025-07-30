@@ -14,68 +14,65 @@ interface LectureQuizQuestion {
   lecture_sessions_question_correct: string;
   lecture_sessions_question_explanation: string;
 }
+
 export default function MasjidQuizLectureSessions() {
   const { id, slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const startTimeRef = useRef<number>(Date.now());
-  const [isFinishing, setIsFinishing] = useState(false);
 
-  const submitQuizResult = async (grade: number, duration: number) => {
-    try {
-      await axios.post(`/public/user-lecture-sessions-quiz/${slug}`, {
-        user_lecture_sessions_quiz_grade_result: grade,
-        user_lecture_sessions_quiz_quiz_id: data.quiz.lecture_sessions_quiz_id,
-        user_lecture_sessions_quiz_lecture_session_id:
-          data.quiz.lecture_sessions_quiz_lecture_session_id,
-        user_lecture_sessions_quiz_duration_seconds: duration,
-      });
-    } catch (error) {
-      console.error("❌ Gagal menyimpan hasil quiz:", error);
-    }
-  };
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["quiz", id],
-    queryFn: async () => {
-      try {
-        const res = await axios.get(
-          `/public/lecture-sessions-quiz/${id}/with-questions`
-        );
-        console.log("📦 Quiz Data:", res.data.data);
-        return res.data.data;
-      } catch (err: any) {
-        if (err.response?.status === 404) {
-          return null; // secara eksplisit dianggap "data tidak tersedia"
-        }
-        throw err; // error lainnya tetap dilempar
-      }
-    },
-    enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const [wrongQuestions, setWrongQuestions] = useState<LectureQuizQuestion[]>(
-    []
-  );
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [progressCount, setProgressCount] = useState(0);
+  const [wrongQuestions, setWrongQuestions] = useState<LectureQuizQuestion[]>(
+    []
+  );
+  const [isFinishing, setIsFinishing] = useState(false);
 
-  // ⛔️ JANGAN TARUH `question` sebelum data siap
-  const questions: LectureQuizQuestion[] = isRetrying
-    ? wrongQuestions
-    : data?.questions || [];
+  const { data, isLoading } = useQuery({
+    queryKey: ["quiz", id],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/lecture-sessions-quiz/${id}/with-questions`
+      );
+      console.log("📦 Quiz Fetched:", res.data.data);
+      return res.data.data;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const questions = isRetrying ? wrongQuestions : data?.questions || [];
+  const question = questions[index] || null;
+
+  const submitQuizResult = async (grade: number) => {
+    if (!data?.quiz) return;
+    const payload = {
+      user_lecture_sessions_quiz_grade_result: grade,
+      user_lecture_sessions_quiz_quiz_id: data.quiz.lecture_sessions_quiz_id,
+      user_lecture_sessions_quiz_lecture_session_id:
+        data.quiz.lecture_sessions_quiz_lecture_session_id,
+    };
+    console.log("📤 Submit Quiz Result", payload);
+    try {
+      const res = await axios.post(
+        `/public/user-lecture-sessions-quiz/${slug}`,
+        payload
+      );
+      console.log("✅ Quiz result submitted:", res.data);
+    } catch (error: any) {
+      console.error("❌ Failed to submit quiz result:", error);
+    }
+  };
 
   useEffect(() => {
-    const endTime = Date.now();
-    const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
-
     if (isRetrying && wrongQuestions.length === 0) {
+      const endTime = Date.now();
+      const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
       navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {
           correct: progressCount,
@@ -88,55 +85,38 @@ export default function MasjidQuizLectureSessions() {
     }
   }, [isRetrying, wrongQuestions.length]);
 
-  if (isLoading) {
-    return <div className="p-4">Memuat soal...</div>;
-  }
-  if (!data) {
-    return (
-      <div className="p-4 pb-28">
-        <PageHeaderUser title="Latihan Soal" onBackClick={() => navigate(-1)} />
-        <div className="mt-4 text-sm text-center text-gray-500 dark:text-white/70">
-          Belum ada soal tersedia untuk sesi ini.
-        </div>
-      </div>
-    );
-  }
-
-  const question = questions[index];
-
-  if (!question && (!isRetrying || wrongQuestions.length === 0)) {
-    return <div className="p-4">Soal tidak ditemukan.</div>;
-  }
-
   const handleCheck = () => {
-    if (!selected) return;
-
-    const correct = question.lecture_sessions_question_correct;
-    const isRight = selected.startsWith(correct);
+    if (!selected || !question) return;
+    const correct = question.lecture_sessions_question_correct.toUpperCase();
+    const selectedLetter = selected.trim().charAt(0).toUpperCase();
+    const isRight = selectedLetter === correct;
     setIsCorrect(isRight);
     setShowAnswer(true);
 
     if (!isRight) {
-      const updated = [...questions];
-      updated.push(question);
-      if (isRetrying) {
-        setWrongQuestions(updated);
-      } else {
-        setWrongQuestions((prev) => [...prev, question]);
-      }
-      return;
-    }
-
-    setProgressCount((prev) => prev + 1);
-
-    if (isRetrying) {
-      setWrongQuestions((prev) =>
-        prev.filter(
-          (q) =>
-            q.lecture_sessions_question_id !==
-            question.lecture_sessions_question_id
+      setWrongQuestions((prev) => {
+        if (
+          prev.some(
+            (q) =>
+              q.lecture_sessions_question_id ===
+              question.lecture_sessions_question_id
+          )
         )
-      );
+          return prev;
+        return [...prev, question];
+      });
+    } else {
+      if (!isRetrying) {
+        setProgressCount((prev) => prev + 1);
+      } else {
+        setWrongQuestions((prev) =>
+          prev.filter(
+            (q) =>
+              q.lecture_sessions_question_id !==
+              question.lecture_sessions_question_id
+          )
+        );
+      }
     }
   };
 
@@ -144,34 +124,18 @@ export default function MasjidQuizLectureSessions() {
     setShowAnswer(false);
     setSelected(null);
 
-    const isLastQuestion = index + 1 === questions.length;
+    const isLast = index + 1 === questions.length;
     const hasWrong = wrongQuestions.length > 0;
 
-    if (!isLastQuestion) {
-      setIndex(index + 1);
-      return;
-    }
-
-    if (!isRetrying && hasWrong) {
-      setIndex(0);
-      setIsRetrying(true);
-      return;
-    }
-
-    if (isRetrying && hasWrong) {
-      setIndex(0);
-      return;
-    }
-
-    // ✅ Saat semua soal selesai dan tidak ada salah
-    setIsFinishing(true); // tampilkan "menyiapkan hasil"
+    if (!isLast) return setIndex(index + 1);
+    if (!isRetrying && hasWrong) return (setIndex(0), setIsRetrying(true));
+    if (isRetrying && hasWrong) return setIndex(0);
 
     const endTime = Date.now();
     const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
     const finalScore = progressCount;
-
-    await submitQuizResult(finalScore, durationSec);
-
+    setIsFinishing(true);
+    await submitQuizResult(finalScore);
     setTimeout(() => {
       navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {
@@ -182,17 +146,26 @@ export default function MasjidQuizLectureSessions() {
           slug,
         },
       });
-    }, 1000); // kasih delay biar circular loader terlihat
+    }, 1000);
   };
 
-  if (isFinishing) {
+  if (isLoading) return <div className="p-4">Memuat soal...</div>;
+  if (!data || !question)
+    return (
+      <div className="p-4 pb-28">
+        <PageHeaderUser title="Latihan Soal" onBackClick={() => navigate(-1)} />
+        <div className="mt-4 text-sm text-center text-gray-500 dark:text-white/70">
+          Belum ada soal tersedia untuk sesi ini.
+        </div>
+      </div>
+    );
+  if (isFinishing)
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] text-sm text-gray-500 dark:text-white/70">
         <div className="animate-spin w-8 h-8 border-4 border-t-transparent border-gray-400 rounded-full mb-4" />
         Menyiapkan hasil...
       </div>
     );
-  }
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
@@ -216,7 +189,7 @@ export default function MasjidQuizLectureSessions() {
       </p>
 
       <div className="space-y-3 mb-6">
-        {question.lecture_sessions_question_answers.map((opt) => {
+        {question.lecture_sessions_question_answers.map((opt: string) => {
           const isSel = selected === opt;
           const isUserAnswerCorrect = selected?.startsWith(
             question.lecture_sessions_question_correct
@@ -276,27 +249,18 @@ export default function MasjidQuizLectureSessions() {
         </div>
       )}
 
-      {!showAnswer ? (
-        <button
-          className="w-full py-3 rounded-lg text-sm font-semibold transition-all"
-          style={{
-            backgroundColor: selected ? theme.primary : theme.silver2,
-            color: theme.white1,
-          }}
-          onClick={handleCheck}
-          disabled={!selected}
-        >
-          Cek
-        </button>
-      ) : (
-        <button
-          className="w-full py-3 mt-3 rounded-lg text-sm font-semibold transition-all"
-          style={{ backgroundColor: theme.primary, color: theme.white1 }}
-          onClick={handleNext}
-        >
-          Lanjut
-        </button>
-      )}
+      <button
+        className="w-full py-3 mt-3 rounded-lg text-sm font-semibold transition-all"
+        style={{
+          backgroundColor:
+            selected || showAnswer ? theme.primary : theme.silver2,
+          color: theme.white1,
+        }}
+        onClick={showAnswer ? handleNext : handleCheck}
+        disabled={!selected && !showAnswer}
+      >
+        {showAnswer ? "Lanjut" : "Cek"}
+      </button>
     </div>
   );
 }

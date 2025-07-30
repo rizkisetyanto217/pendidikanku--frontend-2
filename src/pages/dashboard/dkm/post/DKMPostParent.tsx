@@ -13,16 +13,15 @@ interface TokenPayload {
   masjid_admin_ids: string[];
 }
 
-export default function DKMLectureParent() {
+export default function DKMPostParent() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const location = useLocation();
 
   const sidebarMenus: SidebarMenuItem[] = [
-    { name: "Terbaru", icon: <BookOpen />, to: "/dkm/kajian" },
-    { name: "Tema", icon: <Star />, to: "/dkm/tema" },
+    { name: "Terbaru", icon: <BookOpen />, to: "/dkm/post" },
+    { name: "Tema", icon: <Star />, to: "/dkm/post-tema" },
   ];
-
 
   return (
     <div className="flex flex-col md:flex-row gap-4">

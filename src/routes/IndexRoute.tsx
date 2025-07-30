@@ -11,7 +11,7 @@ import ProfileDKMPengajar from "@/pages/dashboard/dkm/profile/dkm/DKMProfileDKMT
 import Kajian from "@/pages/dashboard/dkm/lecture/lecture-sessions/main/DKMLectureSessions";
 import Sertifikat from "@/pages/dashboard/dkm/certificate/DKMCertificate";
 import Keuangan from "@/pages/dashboard/dkm/finance/DKMFinance";
-import Postingan from "@/pages/dashboard/dkm/post/DKMPost";
+import Postingan from "@/pages/dashboard/dkm/post/DKMPostParent";
 
 // Halaman Setting DKM
 import ProfilSayaDkm from "@/pages/dashboard/dkm/setting/DKMHomeMyProfile";
@@ -114,6 +114,11 @@ import MasjidSettingMenu from "@/layout/masjid/MasjidSettingMenu";
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
 import MyProgressLectureLesson from "@/pages/linktree/lecture/material/my-progress/MyProgressLectureLesson";
 import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
+import DKMThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMThemaPost";
+import DKMPost from "@/pages/dashboard/dkm/post/post/DKMPost";
+import DKMPostParent from "@/pages/dashboard/dkm/post/DKMPostParent";
+import DKMAddEditThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMAddEditThemaPost";
+import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
 
 export default function AppRoutes() {
   return (
@@ -361,7 +366,15 @@ export default function AppRoutes() {
 
           <Route path="sertifikat" element={<Sertifikat />} />
           <Route path="keuangan" element={<Keuangan />} />
-          <Route path="postingan" element={<Postingan />} />
+          <Route path="post" element={<DKMPostParent />}>
+            <Route index element={<DKMPost />} />
+            <Route path="tambah-edit" element={<DKMAddEditPost />} />
+          </Route>
+          <Route path="post-tema" element={<DKMPostParent />}>
+            <Route index element={<DKMThemaPost />} />
+            <Route path="tambah-edit" element={<DKMAddEditThemaPost />} />
+            <Route path="tambah-edit/:id" element={<DKMAddEditThemaPost />} />
+          </Route>
 
           {/* Nested setting layout */}
           <Route element={<DKMSettingParent />}>

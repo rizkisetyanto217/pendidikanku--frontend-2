@@ -1,5 +1,4 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { jwtDecode } from "jwt-decode";
 import { useDeleteLectureSession } from "./useDeleteDKMLectureSessions";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -8,15 +7,10 @@ import StatusBadge from "@/components/common/main/MainStatusBadge";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import { useNavigate } from "react-router-dom"; // ⬅️ Pastikan sudah di-import
+import { useNavigate } from "react-router-dom";
 import SimpleTable from "@/components/common/main/SimpleTable";
-import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
 import FormattedDate from "@/constants/formattedDate";
-
-interface TokenPayload {
-  masjid_admin_ids: string[];
-}
+import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ tambahkan
 
 interface LectureSession {
   lecture_session_id: string;
@@ -37,10 +31,11 @@ export default function DKMLectureSessions() {
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
 
-  const token = sessionStorage.getItem("token");
-  const masjidId = token
-    ? jwtDecode<TokenPayload>(token).masjid_admin_ids?.[0]
-    : null;
+  const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0]; // ⬅️ ambil dari user cookie
+
+  // console.log("👤 Current user:", user);
+  // console.log("🏢 Masjid ID:", masjidId);
 
   const {
     data = [],
@@ -49,30 +44,22 @@ export default function DKMLectureSessions() {
   } = useQuery<LectureSession[], Error, LectureSession[], [string]>({
     queryKey: ["lecture-sessions"],
     queryFn: async () => {
-      if (!token) throw new Error("Token tidak tersedia");
-
+      if (!masjidId) throw new Error("Masjid ID tidak ditemukan");
       const res = await axios.get("/api/a/lecture-sessions/by-masjid", {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true, // ⬅️ penting untuk kirim cookie
       });
-
       console.log("✅ [fetchLectureSessions] Sukses:", res.data.data);
       return res.data.data as LectureSession[];
     },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
+    enabled: !!masjidId && isLoggedIn && !isUserLoading,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     retry: 1,
-    onError: (err: Error) => {
-      console.error("❌ [fetchLectureSessions] Gagal:", err.message);
-    },
-  } as UseQueryOptions<
-    LectureSession[], // TQueryFnData
-    Error, // TError
-    LectureSession[], // TData
-    [string] // TQueryKey
-  >);
+    
+  });
 
-  if (isLoading) {
+  if (isUserLoading || isLoading) {
     return <p>Loading...</p>;
   }
 
@@ -136,7 +123,7 @@ export default function DKMLectureSessions() {
   return (
     <>
       <PageHeader
-        title="Kajian Terbaru"
+        title="Kajian Terbaru ini"
         actionButton={{
           label: "Tambah Kajian",
           to: "/dkm/kajian/tambah-edit",

@@ -1,6 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Users, Building2 } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import DashboardSidebar, {
@@ -8,15 +7,15 @@ import DashboardSidebar, {
 } from "@/components/common/navigation/SidebarMenu";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-
-interface TokenPayload {
-  masjid_admin_ids: string[];
-}
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function DKMProfilMasjidParent() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const location = useLocation();
+
+  const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0];
 
   const sidebarMenus: SidebarMenuItem[] = [
     {
@@ -27,22 +26,19 @@ export default function DKMProfilMasjidParent() {
     { name: "DKM & Pengajar", icon: <Users />, to: "/dkm/profil-dkm" },
   ];
 
-  const token = sessionStorage.getItem("token");
-  const masjidId = token
-    ? jwtDecode<TokenPayload>(token).masjid_admin_ids?.[0]
-    : null;
-
-  const { isLoading } = useQuery({
+  const { isLoading: isMasjidLoading } = useQuery({
     queryKey: ["masjid", masjidId],
     queryFn: async () => {
-      const res = await axios.get(`/public/masjids/verified/${masjidId}`);
+      const res = await axios.get(`/public/masjids/verified/${masjidId}`, {
+        withCredentials: true, // ⬅️ untuk kirim cookie jika perlu
+      });
       return res.data.data;
     },
-    enabled: !!masjidId,
+    enabled: !!masjidId && isLoggedIn && !isUserLoading,
     staleTime: 0,
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isUserLoading || isMasjidLoading) return <div>Loading...</div>;
 
   return (
     <div className="flex flex-col md:flex-row gap-4">

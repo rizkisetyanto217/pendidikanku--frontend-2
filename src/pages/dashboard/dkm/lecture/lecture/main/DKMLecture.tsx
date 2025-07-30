@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { jwtDecode } from "jwt-decode";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -11,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
 import FormattedDate from "@/constants/formattedDate";
+import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
 
 interface Lecture {
   lecture_id: string;
@@ -40,10 +40,8 @@ export default function DKMLecture() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
-  const token = sessionStorage.getItem("token");
-  const masjidId = token
-    ? jwtDecode<{ masjid_admin_ids: string[] }>(token).masjid_admin_ids?.[0]
-    : null;
+  const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0]; // ⬅️ ambil dari cookie
 
   const {
     data: lectures,
@@ -51,11 +49,11 @@ export default function DKMLecture() {
     isError,
   } = useQuery<Lecture[]>({
     queryKey: ["lectures", masjidId],
-    enabled: !!masjidId,
+    enabled: !!masjidId && isLoggedIn && !isUserLoading,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const res = await axios.get(`/api/a/lectures/by-masjid`, {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true, // ⬅️ kirim cookie
       });
       return res.data.data;
     },
@@ -120,7 +118,7 @@ export default function DKMLecture() {
         actionButton={{ label: "Tambah Kajian", to: "/dkm/tema/tambah-edit" }}
       />
 
-      {isLoading && <p>Loading...</p>}
+      {isUserLoading || isLoading ? <p>Loading...</p> : null}
       {isError && <p className="text-red-500">Gagal memuat data.</p>}
       {!isLoading && !isError && (
         <SimpleTable

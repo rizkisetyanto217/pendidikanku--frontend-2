@@ -73,7 +73,7 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-1 shadow max-w-4xl mx-auto transition-transform duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 shadow max-w-4xl mx-auto transition-transform duration-300 ${
         visible ? "translate-y-0" : "-translate-y-full"
       }`}
       style={{ backgroundColor: themeColors.white1 }}

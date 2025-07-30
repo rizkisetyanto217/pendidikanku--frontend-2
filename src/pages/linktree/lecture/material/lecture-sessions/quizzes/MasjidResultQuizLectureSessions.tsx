@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import { useEffect } from "react";
 
 export default function MasjidResultQuizDetailLectureSessions() {
   const { state } = useLocation();
@@ -15,8 +16,18 @@ export default function MasjidResultQuizDetailLectureSessions() {
     slug = "",
     id = "",
   } = state || {};
+
   const minutes = Math.floor(duration / 60);
   const seconds = duration % 60;
+
+  useEffect(() => {
+    console.log("📊 Hasil Quiz Diterima:");
+    console.log("✅ Benar:", correct);
+    console.log("❓ Total Soal:", total);
+    console.log("⏱️ Durasi:", `${minutes} menit ${seconds} detik`);
+    console.log("🧭 Slug:", slug);
+    console.log("🆔 Session ID:", id);
+  }, [correct, total, duration, slug, id]);
 
   return (
     <div
@@ -39,7 +50,13 @@ export default function MasjidResultQuizDetailLectureSessions() {
         </p>
 
         <button
-          onClick={() => navigate(`/masjid/${slug}/soal-materi/${id}`)}
+          onClick={() => {
+            console.log(
+              "🔙 Navigasi ke halaman soal:",
+              `/masjid/${slug}/soal-materi/${id}`
+            );
+            navigate(`/masjid/${slug}/soal-materi/${id}`);
+          }}
           className="w-full py-3 rounded-lg text-white font-semibold transition-all"
           style={{ backgroundColor: theme.primary }}
         >

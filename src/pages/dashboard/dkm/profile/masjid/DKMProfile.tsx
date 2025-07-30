@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { jwtDecode } from "jwt-decode";
 import axios from "@/lib/axios";
 import { BuildingIcon, UserIcon } from "lucide-react";
 import DashboardSidebar, {
@@ -10,12 +9,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import CommonButton from "@/components/common/main/CommonButton";
-
-interface TokenPayload {
-  masjid_admin_ids: string[];
-  role: string;
-  user_name: string;
-}
+import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
 
 interface Masjid {
   masjid_id: string;
@@ -42,19 +36,7 @@ interface MasjidProfile {
   masjid_profile_ttd_ketua_dkm_url: string;
 }
 
-function getMasjidIdFromToken(): string | null {
-  const token = sessionStorage.getItem("token");
-  if (!token) return null;
-  try {
-    const decoded = jwtDecode<TokenPayload>(token);
-    return decoded.masjid_admin_ids?.[0] || null;
-  } catch {
-    return null;
-  }
-}
-
 export default function ProfilMasjid() {
-  const masjidId = getMasjidIdFromToken();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const location = useLocation();
@@ -63,36 +45,39 @@ export default function ProfilMasjid() {
     location.pathname.includes("edit-profil-masjid") ||
     location.pathname.includes("edit-masjid");
 
+  const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0];
+
   const { data: masjid, isLoading: isLoadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", masjidId],
     queryFn: async () => {
-      console.log("[QUERY] Fetching MASJID:", masjidId);
-      const res = await axios.get(`/public/masjids/verified/${masjidId}`);
-      console.log("[RESPONSE] Masjid:", res.data.data);
+      const res = await axios.get(`/public/masjids/verified/${masjidId}`, {
+        withCredentials: true,
+      });
       return res.data.data;
     },
-    enabled: !!masjidId,
+    enabled: !!masjidId && isLoggedIn && !isUserLoading,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: 0, // 👈 biar dianggap "tidak fresh" dan fetch ulang tiap buka
+    staleTime: 0,
   });
 
   const { data: profile, isLoading: isLoadingProfile } =
     useQuery<MasjidProfile>({
       queryKey: ["masjid-profile", masjidId],
       queryFn: async () => {
-        console.log("[QUERY] Fetching MASJID PROFILE:", masjidId);
-        const res = await axios.get(`/public/masjid-profiles/${masjidId}`);
-        console.log("[RESPONSE] Profile:", res.data.data);
+        const res = await axios.get(`/public/masjid-profiles/${masjidId}`, {
+          withCredentials: true,
+        });
         return res.data.data;
       },
-      enabled: !!masjidId,
+      enabled: !!masjidId && isLoggedIn && !isUserLoading,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: 0,
     });
 
-  if (isLoadingMasjid || !masjid) return <div>Loading...</div>;
+  if (isUserLoading || isLoadingMasjid || !masjid) return <div>Loading...</div>;
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
@@ -106,7 +91,6 @@ export default function ProfilMasjid() {
           ) : (
             <>
               <PageHeader title="Profil Masjid" />
-
               <div className="flex flex-col md:flex-row gap-4">
                 <img
                   src={masjid.masjid_image_url}
@@ -187,7 +171,6 @@ export default function ProfilMasjid() {
                 </div>
               </div>
 
-              {/* Latar Belakang */}
               <section>
                 <h3 className="text-sm font-bold mb-1">Tahun Didirikan</h3>
                 <p
@@ -198,7 +181,6 @@ export default function ProfilMasjid() {
                 </p>
               </section>
 
-              {/* Latar Belakang */}
               <section>
                 <h3 className="text-sm font-bold mb-1">Latar Belakang</h3>
                 <p
@@ -209,7 +191,6 @@ export default function ProfilMasjid() {
                 </p>
               </section>
 
-              {/* Tujuan */}
               <section>
                 <h3 className="text-sm font-bold mb-1">Visi</h3>
                 <p
@@ -219,6 +200,7 @@ export default function ProfilMasjid() {
                   {profile?.masjid_profile_visi || "(Visi belum tersedia)"}
                 </p>
               </section>
+
               <section>
                 <h3 className="text-sm font-bold mb-1">Misi</h3>
                 <p
@@ -228,6 +210,7 @@ export default function ProfilMasjid() {
                   {profile?.masjid_profile_misi || "(Misi belum tersedia)"}
                 </p>
               </section>
+
               <section>
                 <h3 className="text-sm font-bold mb-1">Lainnya</h3>
                 <p
@@ -237,7 +220,7 @@ export default function ProfilMasjid() {
                   {profile?.masjid_profile_other || ""}
                 </p>
               </section>
-              {/* Logo, Stempel, TTD Ketua DKM */}
+
               <section className="mt-6">
                 <div className="flex flex-wrap gap-4">
                   <div className="flex flex-col">
@@ -274,7 +257,6 @@ export default function ProfilMasjid() {
                     />
                   </div>
                 </div>
-                {/* Normal Button Action at bottom of content */}
                 <div
                   className="mt-6 pt-4 flex justify-end gap-4 border-t"
                   style={{ borderColor: theme.silver1 }}

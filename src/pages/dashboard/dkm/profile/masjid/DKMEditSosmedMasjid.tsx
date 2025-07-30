@@ -5,18 +5,12 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import api from "@/lib/axios";
-import { jwtDecode } from "jwt-decode";
+import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ Ambil dari cookie
 
 interface MasjidData {
   masjid_instagram_url: string;
   masjid_whatsapp_url: string;
   masjid_youtube_url: string;
-}
-
-interface TokenPayload {
-  masjid_admin_ids: string[];
-  role: string;
-  user_name: string;
 }
 
 export default function DkmEditSosmedProfile() {
@@ -26,47 +20,47 @@ export default function DkmEditSosmedProfile() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { user, isLoading: isUserLoading } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0];
+
   const [form, setForm] = useState<MasjidData>({
     masjid_instagram_url: "",
     masjid_whatsapp_url: "",
     masjid_youtube_url: "",
   });
 
-  const [masjidId, setMasjidId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      // Ambil ID dari token
-      const token = sessionStorage.getItem("token");
-      if (!token) throw new Error("Token tidak ditemukan");
-      const decoded = jwtDecode<TokenPayload>(token);
-      const id = decoded.masjid_admin_ids?.[0];
-      if (!id) throw new Error("masjid_id tidak ditemukan di token");
-      setMasjidId(id);
+    if (isUserLoading) return;
 
-      // Ambil state dari location
-      const state = location.state as {
-        instagram?: string;
-        whatsapp?: string;
-        youtube?: string;
-      };
-      if (!state) throw new Error("Data sosial media tidak tersedia");
-
-      setForm({
-        masjid_instagram_url: state.instagram || "",
-        masjid_whatsapp_url: state.whatsapp || "",
-        masjid_youtube_url: state.youtube || "",
-      });
-
-      setLoading(false);
-    } catch (err) {
-      console.error("❌ Gagal inisialisasi:", err);
-      alert("Terjadi kesalahan. Silakan coba ulang.");
+    if (!masjidId) {
+      alert("ID masjid tidak ditemukan.");
       navigate("/dkm/profil-masjid");
+      return;
     }
-  }, [location.state, navigate]);
+
+    const state = location.state as {
+      instagram?: string;
+      whatsapp?: string;
+      youtube?: string;
+    };
+
+    if (!state) {
+      alert("Data sosial media tidak tersedia.");
+      navigate("/dkm/profil-masjid");
+      return;
+    }
+
+    setForm({
+      masjid_instagram_url: state.instagram || "",
+      masjid_whatsapp_url: state.whatsapp || "",
+      masjid_youtube_url: state.youtube || "",
+    });
+
+    setLoading(false);
+  }, [isUserLoading, masjidId, location.state, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -81,7 +75,9 @@ export default function DkmEditSosmedProfile() {
 
     setSaving(true);
     try {
-      const res = await api.put(`/api/a/masjids/${masjidId}`, form);
+      const res = await api.put(`/api/a/masjids/${masjidId}`, form, {
+        withCredentials: true,
+      });
       alert(res.data.message || "Data berhasil disimpan.");
       navigate("/dkm/profil-masjid");
     } catch (err) {
@@ -103,7 +99,7 @@ export default function DkmEditSosmedProfile() {
           minHeight: "100%",
         }}
       >
-        {loading ? (
+        {loading || isUserLoading ? (
           <p>Loading...</p>
         ) : (
           <form
