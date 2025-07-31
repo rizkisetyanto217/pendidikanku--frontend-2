@@ -20,6 +20,7 @@ export default function DKMFullTranscriptLectureSessions() {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const { id } = useParams();
 
   // ✅ Ambil data sesi langsung dari backend
   const {
@@ -81,7 +82,10 @@ export default function DKMFullTranscriptLectureSessions() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Materi Lengkap" onBackClick={() => history.back()} />
+      <PageHeader
+        title="Materi Lengkap"
+        onBackClick={() => navigate(`/dkm/kajian/kajian-detail/${id}`)}
+      />
 
       <div
         className="p-6 rounded-2xl shadow-sm"

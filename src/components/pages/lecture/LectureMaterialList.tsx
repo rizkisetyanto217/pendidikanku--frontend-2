@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 interface LectureMaterialItem {
   id: string;
+  imageUrl?: string;
   title: string;
   teacher: string;
   masjidName: string;
@@ -11,7 +12,7 @@ interface LectureMaterialItem {
   time: string;
   status: "tersedia" | "proses";
   gradeResult?: number;
-  attendanceStatus?: number;
+  attendanceStatus?: number; // 1: hadir
 }
 
 export default function LectureMaterialList({
@@ -30,81 +31,96 @@ export default function LectureMaterialList({
         <div
           key={item.id}
           onClick={() => navigate(`/masjid/${slug}/soal-materi/${item.id}`)}
-          className="p-3 rounded-md shadow-sm cursor-pointer transition hover:opacity-90"
+          className="flex gap-3 p-3 rounded-xl shadow-sm cursor-pointer transition hover:opacity-90"
           style={{
             backgroundColor: theme.white1,
             border: `1px solid ${theme.silver1}`,
           }}
         >
-          <p
-            className="font-semibold text-sm mb-2"
-            style={{ color: theme.black1 }}
-          >
-            {item.title}
-          </p>
-          <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
-            {item.teacher}
-          </p>
-          <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
-            {item.masjidName}, {item.location}
-          </p>
-          <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
-            {item.time}
-          </p>
+          {/* Gambar Kajian */}
+          {item.imageUrl && (
+            <div
+              className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-lg border"
+              style={{ borderColor: theme.white3 }}
+            >
+              <img
+                src={decodeURIComponent(item.imageUrl)}
+                alt={item.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
 
-          {/* Badge status soal & materi */}
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {item.status === "tersedia" ? (
-              <span
-                className="px-2 py-1 text-xs rounded"
-                style={{
-                  backgroundColor: theme.success2,
-                  color: theme.success1,
-                }}
+          {/* Konten */}
+          <div className="flex flex-col justify-between flex-1">
+            <div>
+              <p
+                className="text-sm font-semibold mb-1"
+                style={{ color: theme.black1 }}
               >
-                Soal & Materi tersedia
-              </span>
-            ) : (
-              <span
-                className="px-2 py-1 text-xs rounded"
-                style={{
-                  backgroundColor: theme.white3,
-                  color: theme.silver2,
-                }}
-              >
-                Soal & Materi dalam proses
-              </span>
-            )}
+                {item.title}
+              </p>
+              <p className="text-xs" style={{ color: theme.silver2 }}>
+                {item.teacher}
+              </p>
+              <p className="text-xs" style={{ color: theme.silver2 }}>
+                {item.time}
+              </p>
+            </div>
 
-            {/* Progress: Nilai */}
-            {item.gradeResult !== undefined && (
+            {/* Badge Bar */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {/* Kehadiran */}
+              {item.attendanceStatus !== undefined && (
+                <span
+                  className="text-xs px-2 py-1 rounded-full font-medium"
+                  style={{
+                    backgroundColor:
+                      item.attendanceStatus === 1
+                        ? theme.success2
+                        : theme.white3,
+                    color:
+                      item.attendanceStatus === 1
+                        ? theme.success1
+                        : theme.silver2,
+                  }}
+                >
+                  {item.attendanceStatus === 1
+                    ? "Hadir Langsung ✅"
+                    : "Tidak Hadir"}
+                </span>
+              )}
+
+              {/* Materi & Soal */}
               <span
-                className="px-2 py-1 text-xs rounded"
+                className="text-xs px-2 py-1 rounded-full font-medium"
                 style={{
                   backgroundColor:
-                    item.gradeResult >= 70 ? theme.success2 : theme.white3,
+                    item.status === "tersedia" ? theme.warning1 : theme.white3,
                   color:
-                    item.gradeResult >= 70 ? theme.success1 : theme.warning1,
+                    item.status === "tersedia" ? theme.warning1 : theme.silver2,
                 }}
               >
-                Nilai: {item.gradeResult}
+                {item.status === "tersedia"
+                  ? "Materi & Soal Tersedia"
+                  : "Dalam Proses"}
               </span>
-            )}
 
-            {/* Progress: Kehadiran */}
-            {item.attendanceStatus !== undefined && (
-              <span
-                className="px-2 py-1 text-xs rounded"
-                style={{
-                  backgroundColor:
-                    item.attendanceStatus === 1 ? theme.primary2 : theme.white3,
-                  color:
-                    item.attendanceStatus === 1 ? theme.primary : theme.silver2,
-                }}
-              >
-                {item.attendanceStatus === 1 ? "✅ Hadir" : "❌ Tidak Hadir"}
-              </span>
-            )}
+              {/* Nilai */}
+              {item.gradeResult !== undefined && (
+                <span
+                  className="text-xs px-2 py-1 rounded-full font-medium"
+                  style={{
+                    backgroundColor:
+                      item.gradeResult >= 70 ? theme.primary2 : theme.white3,
+                    color:
+                      item.gradeResult >= 70 ? theme.primary : theme.silver2,
+                  }}
+                >
+                  Nilai : {item.gradeResult}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       ))}

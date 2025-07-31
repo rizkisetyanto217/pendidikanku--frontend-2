@@ -138,7 +138,7 @@ export default function MasjidQuizLectureSessions() {
     setIsFinishing(true);
 
     await submitQuizResult(finalScore, durationSec);
-    
+
     setTimeout(() => {
       navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {
@@ -155,10 +155,10 @@ export default function MasjidQuizLectureSessions() {
   if (isLoading) return <div className="p-4">Memuat soal...</div>;
   if (!data || !question)
     return (
-      <div className="p-4 pb-28">
+      <div className="pb-28">
         <PageHeaderUser title="Latihan Soal" onBackClick={() => navigate(-1)} />
         <div className="mt-4 text-sm text-center text-gray-500 dark:text-white/70">
-          Belum ada soal tersedia untuk sesi ini.
+          Belum ada soal tersedia untuk sesi ini. sekarang
         </div>
       </div>
     );
@@ -171,9 +171,9 @@ export default function MasjidQuizLectureSessions() {
     );
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <PageHeaderUser
-        title={data.quiz?.lecture_sessions_quiz_title || "Latihan Soal"}
+        title={data.quiz?.lecture_sessions_quiz_title || "Latihan Soal disini"}
         onBackClick={() => navigate(-1)}
       />
 

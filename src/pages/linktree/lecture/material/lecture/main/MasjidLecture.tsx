@@ -184,7 +184,9 @@ export default function MasjidLectureMaterial() {
                   👤 <strong style={{ color: theme.black1 }}>Pengajar:</strong>{" "}
                   {Array.isArray(lecture?.lecture_teachers) &&
                   lecture.lecture_teachers.length > 0
-                    ? lecture.lecture_teachers.map((t) => t.name).join(", ")
+                    ? [
+                        ...new Set(lecture.lecture_teachers.map((t) => t.name)),
+                      ].join(", ")
                     : "-"}
                 </p>
 

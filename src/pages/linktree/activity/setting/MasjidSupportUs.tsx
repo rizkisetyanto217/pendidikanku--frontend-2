@@ -24,7 +24,7 @@ export default function MasjidSupportUs() {
           description="Sebarkan informasi ini kepada kaum muslimin, pengurus Masjid dan lembaga agar sama-sama berkembang."
           action={<Button variant="secondary">Bagikan</Button>}
         />
-        <SupportCard
+        {/* <SupportCard
           title="⬇️ Unduh Aplikasi Masjidku"
           description={
             <div className="space-y-1 text-sm">
@@ -53,7 +53,7 @@ export default function MasjidSupportUs() {
               ))}
             </div>
           }
-        />
+        /> */}
         <SupportCard
           title="💬 Beri Masukan dan Saran"
           description="Mohon berikan masukan dan saran. Sangat berarti bagi kami dalam meningkatkan layanan kedepannya."

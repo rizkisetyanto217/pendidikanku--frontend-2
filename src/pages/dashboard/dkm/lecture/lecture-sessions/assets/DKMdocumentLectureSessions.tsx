@@ -24,6 +24,7 @@ export default function DKMDocumentLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const {
     data: documents = [],
@@ -62,7 +63,10 @@ export default function DKMDocumentLectureSessions() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Dokumen" onBackClick={() => history.back()} />
+      <PageHeader
+        title="Dokumen"
+        onBackClick={() => navigate(`/dkm/kajian/kajian-detail/${id}`)}
+      />
 
       <div
         className="rounded-2xl shadow-sm p-2"

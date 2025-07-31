@@ -37,6 +37,7 @@ interface LectureMaterialItem {
   masjidName: string;
   location: string;
   time: string;
+  imageUrl?: string; // ⬅️ tambahkan ini
   status: "tersedia" | "proses";
   lectureId: string;
   gradeResult?: number;
@@ -128,7 +129,12 @@ export default function MasjidMaterial() {
     lectureId: item.lecture_session_lecture_id,
     gradeResult: item.user_grade_result,
     attendanceStatus: item.user_attendance_status,
+    imageUrl: item.lecture_session_image_url, // ⬅️ tambahkan ini
   }));
+
+  kajianList.forEach((item) =>
+    console.log("imageUrl:", item.lecture_session_image_url)
+  );
 
   if (!slug) return null;
 

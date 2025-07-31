@@ -101,9 +101,7 @@ export default function DKMDetailLectureSessions() {
     <div className="space-y-6">
       <PageHeader
         title="Kajian Detail sekarang"
-        onBackClick={() =>
-          typeof from === "string" ? navigate(from) : navigate(-1)
-        }
+        onBackClick={() => navigate(`/dkm/kajian`)}
       />
 
       {/* Kartu Kajian */}
@@ -139,12 +137,10 @@ export default function DKMDetailLectureSessions() {
             {lecture_session_teacher_name}
           </p>
 
-          <p
-            className="text-sm mt-1 leading-relaxed"
-            style={{ color: theme.silver2 }}
-          >
-            {lecture_session_description}
-          </p>
+          <div
+            className="text-sm mt-1 leading-relaxed prose prose-sm prose-slate max-w-none dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: lecture_session_description }}
+          />
 
           <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
             <div

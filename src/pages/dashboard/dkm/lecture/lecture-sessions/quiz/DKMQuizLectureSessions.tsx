@@ -34,6 +34,7 @@ export default function DKMQuizLectureSessions() {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { id } = useParams();
 
   const [questions, setQuestions] = useState<TransformedQuestion[]>([]);
   const [isEditingIndex, setIsEditingIndex] = useState<number | null>(null);
@@ -372,10 +373,8 @@ export default function DKMQuizLectureSessions() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Latihan Soal"
-        onBackClick={() =>
-          typeof from === "string" ? navigate(from) : navigate(-1)
-        }
+        title="Latihan Soal disini"
+        onBackClick={() => navigate(`/dkm/kajian/kajian-detail/${id}`)}
         actionButton={{
           label: "Statistik Soal",
           onClick: () =>

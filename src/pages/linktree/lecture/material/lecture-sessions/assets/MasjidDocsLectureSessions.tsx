@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -59,10 +59,11 @@ const getFileExtensionLabelColor = (
 };
 
 export default function MasjidDocsLectureSessions() {
-  const { id } = useParams();
+  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
-
+  
   const {
     data: documents = [],
     isLoading,
@@ -92,7 +93,9 @@ export default function MasjidDocsLectureSessions() {
     <div className="pb-28 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Dokumen"
-        onBackClick={() => window.history.length > 1 && history.back()}
+        onBackClick={() => {
+          navigate(`/masjid/${slug}/soal-materi/${id}`);
+        }}
       />
 
       {isLoading ? (

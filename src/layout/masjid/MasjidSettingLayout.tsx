@@ -64,7 +64,7 @@ export default function MasjidSettingLayout() {
         </div>
 
         <div className="flex-1">
-          <div className="rounded-xl shadow-sm">
+          <div className="">
             <Outlet />
           </div>
         </div>

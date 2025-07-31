@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -24,9 +24,10 @@ export default function MasjidInformationLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const queryClient = useQueryClient();
-  const { id = "" } = useParams<{ id: string }>();
   const { data: currentUser } = useCurrentUser();
   const [showModal, setShowModal] = useState(false);
+  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery<LectureSession>({
     queryKey: ["lectureSessionDetail", id, currentUser?.id],
@@ -59,7 +60,9 @@ export default function MasjidInformationLectureSessions() {
     <div className="pb-24 space-y-4 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Informasi Kajian"
-        onBackClick={() => history.back()}
+        onBackClick={() => {
+          navigate(`/masjid/${slug}/soal-materi/${id}`);
+        }}
       />
 
       {isLoading ? (
@@ -141,7 +144,7 @@ export default function MasjidInformationLectureSessions() {
           <AttendanceModal
             show={showModal}
             onClose={() => setShowModal(false)}
-            sessionId={id}
+            sessionId={id || ""} // ← dijamin string, walau kosong
             onSuccess={() => {
               setShowModal(false);
               queryClient.invalidateQueries({

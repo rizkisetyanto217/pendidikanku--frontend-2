@@ -24,6 +24,7 @@ export default function DKMSummaryLectureSessions() {
   const theme = isDark ? colors.dark : colors.light;
   const { id: lecture_session_id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   // ✅ Ambil data sesi
   const {
@@ -80,7 +81,10 @@ export default function DKMSummaryLectureSessions() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Ringkasan" onBackClick={() => history.back()} />
+      <PageHeader
+        title="Ringkasan"
+        onBackClick={() => navigate(`/dkm/kajian/kajian-detail/${id}`)}
+      />
 
       <div
         className="p-6 rounded-2xl shadow-sm"

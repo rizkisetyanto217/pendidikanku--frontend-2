@@ -10,7 +10,7 @@ export default function MasjidAppereance() {
 
   return (
     <div
-      className="rounded-xl shadow-sm"
+     
     >
       <h1 className="text-2xl font-bold mb-6">Tampilan</h1>
       <ThemeSelect />

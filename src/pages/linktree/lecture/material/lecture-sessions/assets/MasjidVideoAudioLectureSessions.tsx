@@ -14,9 +14,9 @@ export default function MasjidVideoAudioDetailLectureSessions() {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
-  const { id } = useParams();
   const [tab, setTab] = useState("youtube");
   const [activeIndex, setActiveIndex] = useState(0);
+  const { id, slug } = useParams<{ id: string; slug: string }>();
 
   const { data: assets = [] } = useQuery({
     queryKey: ["lecture-session-assets", id],
@@ -49,7 +49,7 @@ export default function MasjidVideoAudioDetailLectureSessions() {
       <PageHeaderUser
         title="Video & Audio"
         onBackClick={() => {
-          if (window.history.length > 1) navigate(-1);
+          navigate(`/masjid/${slug}/soal-materi/${id}`);
         }}
       />
       <Tabs

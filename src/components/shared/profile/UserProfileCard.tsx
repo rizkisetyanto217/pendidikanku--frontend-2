@@ -34,7 +34,7 @@ export default function UserProfileCard({
 
   return (
     <div
-      className="rounded-xl shadow-sm space-y-6"
+      className="space-y-6"
     >
       {/* Header */}
       <h1 className="text-2xl font-bold">Profil Saya</h1>

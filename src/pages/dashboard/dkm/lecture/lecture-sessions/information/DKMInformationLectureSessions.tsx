@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -7,6 +7,7 @@ import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
 export default function DKMInformationLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const { id } = useParams();
 
   const { state: session } = useLocation();
 
@@ -34,7 +35,7 @@ export default function DKMInformationLectureSessions() {
     >
       <PageHeader
         title="Informasi Sesi Kajian"
-        onBackClick={() => navigate(-1)}
+        onBackClick={() => navigate(`/dkm/kajian/kajian-detail/${id}`)}
       />
 
       <div className="space-y-2 text-sm">

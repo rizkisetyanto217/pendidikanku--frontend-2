@@ -1,12 +1,14 @@
 import PageHeader from "@/components/common/home/PageHeaderUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 
 export default function MasjidSummaryLectureSessions() {
+  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { id: lecture_session_id } = useParams();
@@ -51,7 +53,12 @@ export default function MasjidSummaryLectureSessions() {
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
-      <PageHeader title="Ringkasan Kajian" onBackClick={() => history.back()} />
+      <PageHeader
+        title="Ringkasan Kajian"
+        onBackClick={() => {
+          navigate(`/masjid/${slug}/soal-materi/${id}`);
+        }}
+      />
 
       <div
         className="p-4 rounded-xl shadow-sm"

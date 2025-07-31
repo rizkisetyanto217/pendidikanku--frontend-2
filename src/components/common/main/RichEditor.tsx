@@ -252,7 +252,7 @@ export default function RichEditor({
             setRefreshToolbar((v) => v + 1);
           }}
           onBlur={() => setIsFocused(false)}
-          className="w-full min-h-[200px] text-sm rounded border p-2 prose dark:prose-invert"
+          className="w-full min-h-[200px] text-sm rounded border p-2 max-w-none"
           style={{
             backgroundColor: theme.white2,
             color: theme.black1,

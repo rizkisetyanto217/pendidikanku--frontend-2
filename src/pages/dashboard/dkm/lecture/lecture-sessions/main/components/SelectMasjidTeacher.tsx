@@ -25,7 +25,7 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [debouncedSearch] = useDebounce(search, 1000);
-  const isDark = useHtmlDarkMode();
+  const { isDark } = useHtmlDarkMode(); // ✅ ambil isDark-nya
   const theme = isDark ? colors.dark : colors.light;
 
   const {
@@ -75,6 +75,9 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
     }
   };
 
+  console.log("🌙 isDark:", isDark);
+  console.log("🎨 theme.white1:", theme.white1);
+
   return (
     <div className="w-full space-y-1">
       <label
@@ -92,9 +95,12 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
           onChange={(e) => onChange(e.target.value)}
           className="w-full text-sm px-4 py-2.5 pr-10 border rounded-lg appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
           style={{
-            backgroundColor: theme.white2,
+            backgroundColor: theme.white1, // 🔄 Perbaikan di sini
             borderColor: theme.silver1,
             color: theme.black1,
+            WebkitAppearance: "none",
+            MozAppearance: "none",
+            appearance: "none",
           }}
         >
           <option value="">-- Pilih pengajar --</option>
