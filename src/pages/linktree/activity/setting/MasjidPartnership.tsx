@@ -9,11 +9,8 @@ export default function MasjidPartnership() {
 
   return (
     <div
-      className="p-6 rounded-xl shadow-sm space-y-4"
-      style={{
-        backgroundColor: theme.white1,
-        color: theme.black1,
-      }}
+      className="rounded-xl shadow-sm space-y-4"
+
     >
       <p className="text-sm" style={{ color: theme.silver2 }}>
         Masjidku menawarkan kepada seluruh muslimin khususnya Masjid dan Lembaga Islam untuk saling bekerjasama dalam kebaikan dengan Masjidku.

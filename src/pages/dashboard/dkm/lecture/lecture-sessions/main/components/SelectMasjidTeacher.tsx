@@ -24,7 +24,7 @@ type Props = {
 export default function SelectMasjidTeacher({ value, onChange }: Props) {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [debouncedSearch] = useDebounce(search, 1000); // jeda 1000ms
+  const [debouncedSearch] = useDebounce(search, 1000);
   const isDark = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
@@ -36,11 +36,8 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
   } = useQuery({
     queryKey: ["masjid-teachers"],
     queryFn: async () => {
-      console.log("[SelectMasjidTeacher] Fetching daftar pengajar...");
       const res = await axios.get("/api/a/masjid-teachers/by-masjid");
-      const list = res.data.data.teachers as Teacher[];
-      console.log("[SelectMasjidTeacher] Dapat", list.length, "pengajar.");
-      return list;
+      return res.data.data.teachers as Teacher[];
     },
   });
 
@@ -52,17 +49,9 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
     queryKey: ["search-user", debouncedSearch],
     queryFn: async () => {
       if (debouncedSearch.length < 3) return [];
-
-      console.log(
-        "[SelectMasjidTeacher] Mencari user dengan kata kunci:",
-        debouncedSearch
-      );
       const res = await axios.get(`/api/a/users/search?q=${debouncedSearch}`);
-      const list = res.data.data.users as User[];
-      console.log("[SelectMasjidTeacher] Ditemukan", list.length, "user.");
-      return list;
+      return res.data.data.users as User[];
     },
-
     enabled: search.length >= 3 && showSearch,
   });
 
@@ -73,82 +62,64 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
   const handleCreateTeacher = async (u: User) => {
     try {
       const masjid_id = getMasjidIdFromSession();
-      if (!masjid_id) {
-        throw new Error("Masjid ID tidak ditemukan di session token.");
-      }
-
-      console.log(`[SelectMasjidTeacher] Menambahkan pengajar baru: ${u.id}`);
-
-      console.log("Payload yang dikirim:", {
-        masjid_teachers_masjid_id: masjid_id,
-        masjid_teachers_user_id: u.id,
-      });
-
       await axios.post("/api/a/masjid-teachers", {
         masjid_teachers_masjid_id: masjid_id,
         masjid_teachers_user_id: u.id,
       });
-
-      // Refresh data pengajar
       await refetchTeachers();
-
       onChange(u.id);
       setShowSearch(false);
       setSearch("");
-      console.log("[SelectMasjidTeacher] Pengajar berhasil ditambahkan.");
     } catch (err) {
-      console.error("[SelectMasjidTeacher] Gagal menambahkan pengajar:", err);
+      console.error("❌ Gagal tambah pengajar:", err);
     }
   };
 
-  if (teacherError)
-    console.warn(
-      "[SelectMasjidTeacher] Gagal fetch daftar pengajar:",
-      teacherError
-    );
-  if (userError)
-    console.warn(
-      "[SelectMasjidTeacher] Gagal fetch hasil pencarian user:",
-      userError
-    );
-
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium" style={{ color: theme.black1 }}>
+    <div className="w-full space-y-1">
+      <label
+        className="block text-sm font-medium"
+        style={{ color: theme.black2 }}
+      >
         Pilih Pengajar
       </label>
-      <select
-        id="select-teacher"
-        name="teacher_id"
-        value={value}
-        onChange={(e) => {
-          console.log(
-            "[SelectMasjidTeacher] Pengajar dipilih dari select:",
-            e.target.value
-          );
-          onChange(e.target.value);
-        }}
-        className="w-full p-2 rounded border appearance-none bg-white text-black border-gray-300 dark:bg-[#1C1C1C] dark:text-white dark:border-gray-600"
-      >
-        <option value="">-- Pilih pengajar --</option>
-        {teacherData?.map((t) => (
-          <option
-            key={t.masjid_teachers_user_id}
-            value={t.masjid_teachers_user_id}
-          >
-            {t.user_name} ({t.masjid_teachers_user_id})
-          </option>
-        ))}
-      </select>
+
+      <div className="relative">
+        <select
+          id="select-teacher"
+          name="lecture_session_teacher_id"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full text-sm px-4 py-2.5 pr-10 border rounded-lg appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
+          style={{
+            backgroundColor: theme.white2,
+            borderColor: theme.silver1,
+            color: theme.black1,
+          }}
+        >
+          <option value="">-- Pilih pengajar --</option>
+          {teacherData?.map((t) => (
+            <option
+              key={t.masjid_teachers_user_id}
+              value={t.masjid_teachers_user_id}
+            >
+              {t.user_name}
+            </option>
+          ))}
+        </select>
+
+        {/* Icon dropdown */}
+        <div
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+          style={{ color: theme.black2 }}
+        >
+          ^
+        </div>
+      </div>
 
       <button
         type="button"
-        onClick={() => {
-          console.log(
-            `[SelectMasjidTeacher] Toggle form pencarian user: ${!showSearch}`
-          );
-          setShowSearch((v) => !v);
-        }}
+        onClick={() => setShowSearch((v) => !v)}
         className="text-sm mt-1"
         style={{ color: theme.quaternary }}
       >
@@ -156,52 +127,50 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
       </button>
 
       {showSearch && (
-        <div className="mt-2">
+        <div className="mt-2 space-y-1">
           <input
             type="text"
             placeholder="Cari user..."
             value={search}
             onChange={handleSearch}
-            className="w-full p-2 rounded"
+            className="w-full text-sm px-4 py-2.5 border rounded-lg"
             style={{
               backgroundColor: theme.white1,
+              borderColor: theme.silver1,
               color: theme.black1,
-              border: `1px solid ${theme.silver1}`,
             }}
           />
-          <div className="mt-2 space-y-1">
-            {loadingUsers && (
-              <p className="text-sm" style={{ color: theme.silver2 }}>
-                🔄 Memuat hasil pencarian...
-              </p>
-            )}
-            {search.length > 0 && search.length < 3 && (
-              <p className="text-sm" style={{ color: theme.silver2 }}>
-                Ketik minimal 3 huruf untuk mencari.
-              </p>
-            )}
 
-            {!loadingUsers && userData?.length === 0 && (
-              <p className="text-sm" style={{ color: theme.silver2 }}>
-                Tidak ditemukan hasil.
-              </p>
-            )}
-            {!loadingUsers &&
-              userData?.map((u) => (
-                <div
-                  key={u.id}
-                  className="cursor-pointer p-2 rounded border"
-                  style={{
-                    borderColor: theme.silver1,
-                    backgroundColor: theme.white2,
-                    color: theme.black1,
-                  }}
-                  onClick={() => handleCreateTeacher(u)}
-                >
-                  {u.user_name} ({u.id})
-                </div>
-              ))}
-          </div>
+          {loadingUsers && (
+            <p className="text-sm" style={{ color: theme.silver2 }}>
+              🔄 Memuat hasil pencarian...
+            </p>
+          )}
+          {search.length > 0 && search.length < 3 && (
+            <p className="text-sm" style={{ color: theme.silver2 }}>
+              Ketik minimal 3 huruf.
+            </p>
+          )}
+          {!loadingUsers && userData?.length === 0 && (
+            <p className="text-sm" style={{ color: theme.silver2 }}>
+              Tidak ditemukan hasil.
+            </p>
+          )}
+          {!loadingUsers &&
+            userData?.map((u) => (
+              <div
+                key={u.id}
+                className="cursor-pointer px-4 py-2 border rounded text-sm"
+                style={{
+                  borderColor: theme.silver1,
+                  backgroundColor: theme.white2,
+                  color: theme.black1,
+                }}
+                onClick={() => handleCreateTeacher(u)}
+              >
+                {u.user_name}
+              </div>
+            ))}
         </div>
       )}
     </div>

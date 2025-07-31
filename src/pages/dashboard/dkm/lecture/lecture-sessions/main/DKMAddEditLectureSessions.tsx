@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -7,12 +7,12 @@ import toast from "react-hot-toast";
 import InputField from "@/components/common/main/InputField";
 import RichEditor from "@/components/common/main/RichEditor";
 import LectureSelectField from "./components/LectureSelectField";
-import { getMasjidIdFromSession } from "@/utils/auth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import SelectMasjidTeacher from "./components/SelectMasjidTeacher";
 import SubmitActionButtons from "@/components/common/main/SubmitActionButton";
 
 export default function DKMAddEditLectureSession() {
-  const masjidIdFromToken = getMasjidIdFromSession();
+  const { user: currentUser, isLoading: isUserLoading } = useCurrentUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id } = useParams();
@@ -30,6 +30,18 @@ export default function DKMAddEditLectureSession() {
     lecture_session_image_file: null as File | null,
     lecture_session_image_url: "",
   });
+
+  const isFormValid = () => {
+    return (
+      form.lecture_session_title.trim() &&
+      form.lecture_session_description.trim() &&
+      form.lecture_session_teacher_id &&
+      form.lecture_session_start_time &&
+      form.lecture_session_end_time &&
+      form.lecture_session_place &&
+      form.lecture_session_lecture_id
+    );
+  };
 
   useEffect(() => {
     if (isEditMode) {
@@ -51,7 +63,7 @@ export default function DKMAddEditLectureSession() {
         });
       });
     }
-  }, [id]);
+  }, [id, isEditMode]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -166,9 +178,11 @@ export default function DKMAddEditLectureSession() {
           }
         />
 
-        {masjidIdFromToken && (
+        {!currentUser?.masjid_admin_ids?.[0] ? (
+          <p className="text-sm text-gray-500">Memuat informasi masjid...</p>
+        ) : (
           <LectureSelectField
-            masjidId={masjidIdFromToken}
+            masjidId={currentUser.masjid_admin_ids[0]}
             name="lecture_session_lecture_id"
             value={form.lecture_session_lecture_id}
             onChange={handleChange}
@@ -191,6 +205,7 @@ export default function DKMAddEditLectureSession() {
           value={form.lecture_session_start_time}
           type="datetime-local"
           onChange={handleChange}
+          
         />
 
         <InputField
@@ -228,7 +243,11 @@ export default function DKMAddEditLectureSession() {
           )}
         </div>
 
-        <SubmitActionButtons isPending={isPending} isEditMode={isEditMode} />
+        <SubmitActionButtons
+          isPending={isPending}
+          isEditMode={isEditMode}
+          disabled={!isFormValid()}
+        />
       </form>
     </div>
   );

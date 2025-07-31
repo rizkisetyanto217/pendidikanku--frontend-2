@@ -89,7 +89,7 @@ export default function MasjidDocsLectureSessions() {
   };
 
   return (
-    <div className="p-4 pb-28 max-w-2xl mx-auto">
+    <div className="pb-28 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Dokumen"
         onBackClick={() => window.history.length > 1 && history.back()}

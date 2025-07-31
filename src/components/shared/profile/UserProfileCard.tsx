@@ -34,8 +34,7 @@ export default function UserProfileCard({
 
   return (
     <div
-      className="p-6 rounded-xl shadow-sm space-y-6"
-      style={{ backgroundColor: theme.white1, color: theme.black1 }}
+      className="rounded-xl shadow-sm space-y-6"
     >
       {/* Header */}
       <h1 className="text-2xl font-bold">Profil Saya</h1>

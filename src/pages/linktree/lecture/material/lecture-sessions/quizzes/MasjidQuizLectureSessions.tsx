@@ -49,10 +49,11 @@ export default function MasjidQuizLectureSessions() {
   const questions = isRetrying ? wrongQuestions : data?.questions || [];
   const question = questions[index] || null;
 
-  const submitQuizResult = async (grade: number) => {
+  const submitQuizResult = async (grade: number, duration: number) => {
     if (!data?.quiz) return;
     const payload = {
       user_lecture_sessions_quiz_grade_result: grade,
+      user_lecture_sessions_quiz_duration_seconds: duration,
       user_lecture_sessions_quiz_quiz_id: data.quiz.lecture_sessions_quiz_id,
       user_lecture_sessions_quiz_lecture_session_id:
         data.quiz.lecture_sessions_quiz_lecture_session_id,
@@ -135,7 +136,9 @@ export default function MasjidQuizLectureSessions() {
     const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
     const finalScore = progressCount;
     setIsFinishing(true);
-    await submitQuizResult(finalScore);
+
+    await submitQuizResult(finalScore, durationSec);
+    
     setTimeout(() => {
       navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
         state: {

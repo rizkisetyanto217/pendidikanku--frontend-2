@@ -186,8 +186,19 @@ export default function DKMQuizLectureSessions() {
       } else {
         console.log("🆕 Mode tambah soal");
         console.log("📦 Payload untuk POST:", payload);
-        await axios.post("/api/a/lecture-sessions-questions", payload);
-        toast.success("Soal berhasil ditambahkan!");
+
+        console.log("📤 Mengirim soal baru ke backend...");
+        await axios
+          .post("/api/a/lecture-sessions-questions", payload)
+          .then((res) => {
+            console.log("✅ Soal berhasil dikirim:", res.data);
+            toast.success("Soal berhasil ditambahkan!");
+          })
+          .catch((err) => {
+            console.error("❌ Gagal menambahkan soal:", err);
+            console.log("📦 Detail error dari backend:", err.response?.data);
+            toast.error(err.response?.data?.error || "Gagal menambahkan soal.");
+          });
       }
 
       setNewQuestion({

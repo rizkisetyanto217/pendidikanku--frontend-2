@@ -31,7 +31,9 @@ export default function InputField({
   const commonStyle = {
     backgroundColor: theme.white2,
     borderColor: theme.silver1,
-    color: theme.black1,
+    color: theme.black1, // Ini teks utama
+    // Tambahan untuk datetime-local:
+    WebkitTextFillColor: theme.black1, // fix warna teks internal chrome
   };
 
   return (

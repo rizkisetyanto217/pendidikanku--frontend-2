@@ -121,6 +121,7 @@ import DKMAddEditThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMAddEdit
 import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
 import DKMDetailPost from "@/pages/dashboard/dkm/post/post/DKMDetailPost";
 import DKMDetailThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMDetailThemaPost";
+import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/main/MasjidInformationLecture";
 
 export default function AppRoutes() {
   return (
@@ -190,6 +191,10 @@ export default function AppRoutes() {
 
           {/* Tema */}
           <Route path="tema/:id" element={<MasjidLectureMaterial />} />
+          <Route
+            path="tema/:id/informasi"
+            element={<MasjidInformationLecture />}
+          />
           <Route
             path="tema/:id/certificate/:user_exam_id"
             element={<MasjidCertificateLecture />}

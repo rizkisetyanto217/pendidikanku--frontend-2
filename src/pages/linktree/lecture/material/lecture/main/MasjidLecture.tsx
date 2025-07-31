@@ -3,7 +3,7 @@ import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
@@ -43,6 +43,7 @@ export default function MasjidLectureMaterial() {
   const navigate = useNavigate();
   const { id, slug } = useParams<{ id: string; slug: string }>();
   const { data: currentUser } = useCurrentUser();
+  const location = useLocation();
 
   // 🔁 Dapatkan data tema kajian
   const {
@@ -90,7 +91,7 @@ export default function MasjidLectureMaterial() {
       <PageHeaderUser
         title="Tema Kajian Detail"
         onBackClick={() => {
-          if (window.history.length > 1) navigate(-1);
+          navigate(`/masjid/${slug}/soal-materi?tab=tema`);
         }}
       />
 
@@ -181,9 +182,12 @@ export default function MasjidLectureMaterial() {
                 </p>
                 <p>
                   👤 <strong style={{ color: theme.black1 }}>Pengajar:</strong>{" "}
-                  {lecture.lecture_teachers.map((t) => t.name).join(", ") ||
-                    "-"}
+                  {Array.isArray(lecture?.lecture_teachers) &&
+                  lecture.lecture_teachers.length > 0
+                    ? lecture.lecture_teachers.map((t) => t.name).join(", ")
+                    : "-"}
                 </p>
+
                 <p>
                   📅 <strong style={{ color: theme.black1 }}>Jadwal:</strong>{" "}
                   {lecture.lecture_description || "-"}

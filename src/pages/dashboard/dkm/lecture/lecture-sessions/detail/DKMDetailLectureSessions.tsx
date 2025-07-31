@@ -13,6 +13,7 @@ import {
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import NavigationCard from "./components/NavigationCard";
+import FormattedDate from "@/constants/formattedDate";
 
 // ✅ Tipe data sesi kajian
 interface LectureSessionDetail {
@@ -83,18 +84,6 @@ export default function DKMDetailLectureSessions() {
     lecture_session_approved_by_dkm_at,
   } = fetchedSession;
 
-  const formattedTime = new Date(lecture_session_start_time).toLocaleString(
-    "id-ID",
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
-  );
-
   const navigations = [
     { icon: <Home size={36} />, label: "Informasi", to: "informasi" },
     { icon: <Video size={36} />, label: "Video Audio", to: "video-audio" },
@@ -119,7 +108,7 @@ export default function DKMDetailLectureSessions() {
 
       {/* Kartu Kajian */}
       <div
-        className="p-5 rounded-2xl shadow-sm flex flex-col md:flex-row gap-6"
+        className="rounded-2xl shadow-sm flex flex-col md:flex-row gap-6"
         style={{
           backgroundColor: theme.white1,
           color: theme.black1,
@@ -142,7 +131,8 @@ export default function DKMDetailLectureSessions() {
           </h2>
 
           <p className="text-sm font-medium" style={{ color: theme.silver2 }}>
-            {formattedTime} / {lecture_session_place}
+            <FormattedDate value={lecture_session_start_time} fullMonth /> /{" "}
+            {lecture_session_place}
           </p>
 
           <p className="text-sm font-semibold" style={{ color: theme.black1 }}>

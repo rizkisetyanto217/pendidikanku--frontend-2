@@ -1,13 +1,13 @@
 import React from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-
-type ButtonVariant = "submit" | "next";
+type ButtonVariant = "primary" | "next";
 
 type Props = {
   isPending: boolean;
   isEditMode?: boolean;
   onNextClick?: () => void;
+  disabled?: boolean;
 };
 
 type ButtonProps = {
@@ -21,23 +21,19 @@ const Button = ({ variant, children, onClick, disabled }: ButtonProps) => {
   const isDarkMode = useHtmlDarkMode();
   const theme = isDarkMode ? colors.dark : colors.light;
 
-  const background = variant === "submit" ? theme.tertiary : theme.primary;
+  const background = variant === "primary" ? theme.primary : theme.tertiary;
   const backgroundHover =
-    variant === "submit" ? theme.secondary : theme.quaternary;
-  const textColor =
-    variant === "submit"
-      ? isDarkMode
-        ? colors.dark.black1
-        : colors.light.primary
-      : "#FFFFFF";
+    variant === "primary" ? theme.quaternary : theme.secondary;
+  const textColor = variant === "primary" ? "#FFFFFF" : theme.black1;
 
   return (
     <button
-      type={variant === "submit" ? "submit" : "button"}
-      className="px-6 py-2 font-semibold rounded-[8px] transition-colors"
+      type={variant === "primary" ? "submit" : "button"}
+      className="px-6 py-2 font-semibold rounded-[8px] transition-colors disabled:opacity-50"
       style={{
         backgroundColor: background,
         color: textColor,
+        cursor: disabled ? "not-allowed" : "pointer",
       }}
       onClick={onClick}
       onMouseOver={(e) =>
@@ -55,10 +51,11 @@ export default function SubmitActionButtons({
   isPending,
   isEditMode = false,
   onNextClick,
+  disabled,
 }: Props) {
   return (
     <div className="flex justify-end gap-4">
-      <Button variant="submit" disabled={isPending}>
+      <Button variant="primary" disabled={isPending || disabled}>
         {isPending
           ? "Menyimpan..."
           : isEditMode

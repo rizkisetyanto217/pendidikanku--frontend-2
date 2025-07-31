@@ -60,7 +60,7 @@ export default function MasjidProfile() {
 
         {/* Informasi Umum */}
         <div
-          className="p-4 md:p-5 space-y-2"
+          className="py-4 md:p-5 space-y-2"
           style={{ color: themeColors.black1 }}
         >
           <h1 style={{ color: themeColors.primary }}>
@@ -79,7 +79,7 @@ export default function MasjidProfile() {
 
         {/* Profil Lembaga */}
         <div
-          className="border-t-[5px] p-4 md:p-5 space-y-2"
+          className="border-t-[5px] py-4 md:p-5 space-y-2"
           style={{ borderColor: themeColors.white3 }}
         >
           <h2 style={{ color: themeColors.quaternary }}>📘 Profil Lembaga</h2>
@@ -101,7 +101,7 @@ export default function MasjidProfile() {
 
         {/* Pengurus & Pengajar */}
         <div
-          className="border-t-[5px] p-4 md:p-5 space-y-2"
+          className="border-t-[5px] py-4 md:p-5 space-y-2"
           style={{ borderColor: themeColors.white3 }}
         >
           <h2 style={{ color: themeColors.primary }}>📄 Pengurus & Pengajar</h2>
@@ -132,7 +132,7 @@ export default function MasjidProfile() {
 
         {/* Sambutan & Donasi */}
         <div
-          className="border-t-[5px] p-4 md:p-5 space-y-3"
+          className="border-t-[5px] py-4 md:p-5 space-y-3"
           style={{ borderColor: themeColors.white3 }}
         >
           <h2

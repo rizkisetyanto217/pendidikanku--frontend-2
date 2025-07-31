@@ -161,11 +161,6 @@ export default function PublicLinktree() {
     };
   }, [showShareMenu]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(currentUrl);
-    alert("Link berhasil disalin!");
-  };
-
   if (loadingMasjid || loadingKajian || loadingUser || !masjidData)
     return <div>Loading...</div>;
 
@@ -356,28 +351,29 @@ export default function PublicLinktree() {
               >
                 Menu Utama
               </h2>
-              <div className="grid grid-cols-4 gap-3 pt-4">
-                <LucideMenuItem
-                  label="Lokasi"
-                  icon={
-                    <LocationEditIcon size={24} color={themeColors.black1} />
-                  }
-                  onClick={() => navigate(`/masjid/${slug}/postingan`)}
+              <div className="space-y-2">
+                <LinkItem
+                  label="Postingan"
+                  icon="🏛️"
+                  href={`/masjid/${masjidData.masjid_slug}/profil`}
+                  internal
                 />
-                <LucideMenuItem
+                <LinkItem
                   label="Profil Masjid"
-                  icon={<MasjidIcon size={24} color={themeColors.black1} />}
-                  onClick={() => navigate(`/masjid/${slug}/profil`)}
+                  icon="📍"
+                  href={`/masjid/${masjidData.masjid_slug}/profil`}
                 />
-                <LucideMenuItem
+                <LinkItem
                   label="Laporan Keuangan"
-                  icon={<KeuanganIcon size={24} color={themeColors.black1} />}
-                  onClick={() => navigate(`/masjid/${slug}/keuangan`)}
+                  icon="📆"
+                  href={`/masjid/${masjidData.masjid_slug}/keuangan`}
+                  internal
                 />
-                <LucideMenuItem
+                <LinkItem
                   label="Jelajahi"
-                  icon={<JelajahiIcon size={24} color={themeColors.black1} />}
-                  onClick={() => navigate(`/jelajahi`)}
+                  icon="📚"
+                  href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
+                  internal
                 />
               </div>
             </div>

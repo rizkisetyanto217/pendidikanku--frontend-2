@@ -51,11 +51,9 @@ export default function MasjidResultQuizDetailLectureSessions() {
 
         <button
           onClick={() => {
-            console.log(
-              "🔙 Navigasi ke halaman soal:",
-              `/masjid/${slug}/soal-materi/${id}`
-            );
-            navigate(`/masjid/${slug}/soal-materi/${id}`);
+            const targetUrl = `/masjid/${slug}/soal-materi/${id}`;
+            console.log("🔄 Force reload ke:", targetUrl);
+            window.location.href = targetUrl;
           }}
           className="w-full py-3 rounded-lg text-white font-semibold transition-all"
           style={{ backgroundColor: theme.primary }}

@@ -37,8 +37,7 @@ export default function MasjidFaq() {
 
   return (
     <div
-      className="flex flex-col md:flex-row gap-4 p-6 rounded-xl shadow-sm"
-      style={{ backgroundColor: theme.white1, color: theme.black1 }}
+      className="flex flex-col md:flex-row gap-4 rounded-xl shadow-sm"
     >
       <div className="w-full md:w-1/4">
        <FaqCategorySidebar

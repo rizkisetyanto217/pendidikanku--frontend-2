@@ -96,11 +96,7 @@ export default function MasjidLectureSessions() {
       <PageHeaderUser
         title="Kajian Detail"
         onBackClick={() => {
-          if (fromTab && lectureId) {
-            navigate(`/masjid/${slug}/tema/${lectureId}?tab=${fromTab}`);
-          } else {
-            navigate(-1); // fallback
-          }
+          navigate(`/masjid/${slug}/soal-materi?tab=terbaru`);
         }}
       />
 

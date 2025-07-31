@@ -7,7 +7,7 @@ export default function MasjidMyProfile() {
   const theme = isDark ? colors.dark : colors.light
 
   const profileData = {
-    name: 'Ustadz Hariyadi',
+    name: 'Ustadz Hariyadi,',
     role: 'Admin DKM',
     jabatan: 'Ketua Masjid',
     ttdUrl: '/icons/ttd.svg',
@@ -21,7 +21,6 @@ export default function MasjidMyProfile() {
   return (
     <div
       className="space-y-6"
-      style={{ backgroundColor: theme.white1, color: theme.black1 }}
     >
       <UserProfileCard {...profileData} />
     </div>

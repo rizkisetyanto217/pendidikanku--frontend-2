@@ -21,6 +21,10 @@ export default function DKMAddEditLecture() {
     lecture_image_url: "",
   });
 
+  const isFormValid = () => {
+    return form.lecture_title.trim() && form.lecture_description.trim();
+  };
+
   useEffect(() => {
     if (isEditMode) {
       console.log("[EditMode] Ambil data untuk ID:", id);
@@ -151,7 +155,11 @@ export default function DKMAddEditLecture() {
           )}
         </div>
 
-        <SubmitActionButtons isPending={isPending} isEditMode={isEditMode} />
+        <SubmitActionButtons
+          isPending={isPending}
+          isEditMode={isEditMode}
+          disabled={!isFormValid()}
+        />
       </form>
     </div>
   );

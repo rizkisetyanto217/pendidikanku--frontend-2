@@ -11,11 +11,7 @@ export default function MasjidSupportUs() {
 
   return (
     <div
-      className="p-6 rounded-xl shadow-sm"
-      style={{
-        backgroundColor: theme.white1,
-        color: theme.black1,
-      }}
+      className="rounded-xl shadow-sm"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SupportCard
