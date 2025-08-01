@@ -25,7 +25,6 @@ export default function AttendanceModal({
 
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Close on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -73,35 +72,46 @@ export default function AttendanceModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
-        className="rounded-lg p-5 w-full max-w-md"
+        className="w-full max-w-md rounded-lg p-5"
         style={{
           backgroundColor: theme.white1,
           color: theme.black1,
+          border: `1px solid ${theme.silver1}`,
         }}
       >
-        <h2 className="text-lg font-semibold mb-4">Catat Kehadiran</h2>
+        <h2 className="text-base font-semibold mb-4">Catat Kehadiran</h2>
 
-        {/* 🟢 Pilihan Kehadiran */}
+        {/* Pilihan Kehadiran */}
         <div className="space-y-2">
           {[
             { value: "tatap_muka", label: "Hadir Tatap Muka" },
             { value: "online", label: "Hadir Online" },
             { value: "tidak_hadir", label: "Tidak Hadir" },
           ].map((opt) => (
-            <label key={opt.value} className="block text-sm">
-              <input
-                type="radio"
-                value={opt.value}
-                checked={attendanceChoice === opt.value}
-                onChange={(e) => setAttendanceChoice(e.target.value)}
-                className="mr-2"
-              />
-              {opt.label}
-            </label>
+            <div
+              key={opt.value}
+              onClick={() => setAttendanceChoice(opt.value)}
+              className="cursor-pointer flex items-center justify-between p-3 rounded hover:opacity-90 transition-all"
+              style={{
+                backgroundColor: theme.white2,
+                border: `1px solid ${theme.silver1}`,
+              }}
+            >
+              <span className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="attendance"
+                  checked={attendanceChoice === opt.value}
+                  readOnly
+                />
+                <span style={{ color: theme.black1 }}>{opt.label}</span>
+              </span>
+              <span style={{ color: theme.silver4 }}>›</span>
+            </div>
           ))}
         </div>
 
-        {/* 📝 Insight */}
+        {/* Insight */}
         {attendanceChoice !== "tidak_hadir" && attendanceChoice !== null && (
           <div className="mt-4">
             <label className="block text-sm mb-1">
@@ -110,26 +120,24 @@ export default function AttendanceModal({
             <textarea
               value={kajianInsight}
               onChange={(e) => setKajianInsight(e.target.value)}
-              className="w-full p-2 border rounded text-sm"
+              className="w-full p-2 text-sm rounded"
               rows={3}
               placeholder="Tulis insight yang kamu dapatkan..."
               style={{
                 backgroundColor: theme.white2,
                 color: theme.black1,
-                borderColor: theme.silver1,
+                border: `1px solid ${theme.silver1}`,
               }}
             />
           </div>
         )}
 
-        {/* 🔘 Tombol */}
+        {/* Tombol Aksi */}
         <div className="flex justify-end gap-2 mt-6">
           <button
             onClick={onClose}
             className="text-sm px-4 py-1 rounded"
-            style={{
-              color: theme.silver2,
-            }}
+            style={{ color: theme.silver2 }}
             disabled={isSubmitting}
           >
             Batal

@@ -2,7 +2,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useIsMobile } from "@/hooks/isMobile";
-import { LocationEditIcon, Share } from "lucide-react";
+import { LocationEditIcon, MapPin, Share } from "lucide-react";
 import { useState } from "react";
 import { useRef, useEffect } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -20,6 +20,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BorderLine from "@/components/common/main/Border";
 import SharePopover from "@/components/common/public/SharePopover";
+import CartLink from "@/components/common/main/CardLink";
 
 const currentUrl = window.location.href;
 
@@ -286,12 +287,20 @@ export default function PublicLinktree() {
               >
                 Dikelola oleh DKM Masjid untuk ummat muslim
               </p>
-              <p
-                className="text-sm mt-2"
-                style={{ color: themeColors.silver4 }}
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(masjidData.masjid_location || "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm inline-flex flex-col gap-0.5 pb-2"
+                style={{ color: themeColors.silver2 }}
               >
-                {masjidData.masjid_location}
-              </p>
+                <span className="inline-flex items-center gap-0.5">
+                  <span>{masjidData.masjid_location || "-"}</span>
+                  <MapPin size={14} />
+                </span>
+                <span className="underline text-xs mt-0.5">Alamat Masjid</span>
+              </a>
+
               <p
                 className="text-sm italic mt-2"
                 style={{ color: themeColors.silver4 }}
@@ -351,30 +360,40 @@ export default function PublicLinktree() {
               >
                 Menu Utama
               </h2>
-              <div className="space-y-2">
-                <LinkItem
-                  label="Postingan"
-                  icon="🏛️"
-                  href={`/masjid/${masjidData.masjid_slug}/profil`}
-                  internal
-                />
-                <LinkItem
+              <div className="space-y-2 pt-2">
+                <CartLink
                   label="Profil Masjid"
                   icon="📍"
                   href={`/masjid/${masjidData.masjid_slug}/profil`}
                 />
-                <LinkItem
+                <CartLink
+                  label="Jadwal Kajian"
+                  icon="📚"
+                  href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
+                />
+                <CartLink
+                  label="Grup Masjid & Sosial Media"
+                  icon="📚"
+                  href={`/masjid/${masjidData.masjid_slug}/profil`}
+                />
+                <CartLink
+                  label="Hubungi Kami"
+                  icon="🏛️"
+                  href={`/masjid/${masjidData.masjid_slug}/profil`}
+                  internal
+                />
+                {/* <LinkItem
                   label="Laporan Keuangan"
                   icon="📆"
                   href={`/masjid/${masjidData.masjid_slug}/keuangan`}
                   internal
-                />
-                <LinkItem
+                /> */}
+                {/* <LinkItem
                   label="Jelajahi"
                   icon="📚"
                   href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
                   internal
-                />
+                /> */}
               </div>
             </div>
 
@@ -507,12 +526,20 @@ export default function PublicLinktree() {
                 {masjidData.masjid_name}
               </h1>
 
-              <p
-                className="text-sm pb-2"
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(masjidData.masjid_location || "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm inline-flex flex-col gap-0.5 pb-2"
                 style={{ color: themeColors.silver2 }}
               >
-                {masjidData.masjid_location}
-              </p>
+                <span className="inline-flex items-center gap-0.5">
+                  <span>{masjidData.masjid_location || "-"}</span>
+                  <MapPin size={14} />
+                </span>
+                <span className="underline text-xs mt-0.5">Alamat Masjid</span>
+              </a>
+
               <p
                 className="text-xs italic pb-2"
                 style={{ color: themeColors.silver4 }}
@@ -571,33 +598,43 @@ export default function PublicLinktree() {
               />
             </div>
 
-            <div className="space-y-2">
-              <LinkItem
-                label="Postingan"
-                icon="🏛️"
-                href={`/masjid/${masjidData.masjid_slug}/profil`}
-                internal
-              />
-              <LinkItem
+            <div className="space-y-2 pt-2">
+              <CartLink
                 label="Profil Masjid"
                 icon="📍"
                 href={`/masjid/${masjidData.masjid_slug}/profil`}
               />
-              <LinkItem
-                label="Laporan Keuangan"
-                icon="📆"
-                href={`/masjid/${masjidData.masjid_slug}/keuangan`}
-                internal
-              />
-              <LinkItem
-                label="Jelajahi"
+              <CartLink
+                label="Jadwal Kajian"
                 icon="📚"
-                href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
-                internal
+                href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
               />
+              <CartLink
+                label="Grup Masjid & Sosial Media"
+                icon="📚"
+                href={`/masjid/${masjidData.masjid_slug}/profil`}
+              />
+              <CartLink
+                label="Hubungi Kami"
+                icon="📞"
+                href={`https://wa.me/${masjidData.masjid_whatsapp_url}`}
+                internal={false}
+              />
+              {/* <LinkItem
+                  label="Laporan Keuangan"
+                  icon="📆"
+                  href={`/masjid/${masjidData.masjid_slug}/keuangan`}
+                  internal
+                /> */}
+              {/* <LinkItem
+                  label="Jelajahi"
+                  icon="📚"
+                  href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
+                  internal
+                /> */}
             </div>
 
-            <button
+            {/* <button
               onClick={() =>
                 navigate(`/masjid/${masjidData.masjid_slug}/donasi`)
               }
@@ -608,7 +645,7 @@ export default function PublicLinktree() {
               }}
             >
               Donasi
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
@@ -616,82 +653,5 @@ export default function PublicLinktree() {
       {/* Bottom navigation */}
       <BottomNavbar hideOnScroll />
     </>
-  );
-}
-
-function LinkItem({
-  label,
-  icon,
-  href,
-  internal = false,
-}: {
-  label: string;
-  icon: string;
-  href?: string;
-  internal?: boolean;
-}) {
-  const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
-  const handleClick = () => {
-    if (href) {
-      if (internal) {
-        navigate(href);
-      } else {
-        window.open(href, "_blank", "noopener noreferrer");
-      }
-    }
-  };
-
-  return (
-    <div
-      onClick={handleClick}
-      className="cursor-pointer flex items-center justify-between p-3 rounded hover:opacity-90"
-      style={{
-        backgroundColor: themeColors.white2,
-        border: `1px solid ${themeColors.silver1}`,
-      }}
-    >
-      <span className="flex items-center space-x-2">
-        <span>{icon}</span>
-        <span style={{ color: themeColors.black1 }}>{label}</span>
-      </span>
-      <span style={{ color: themeColors.silver4 }}>›</span>
-    </div>
-  );
-}
-
-function LucideMenuItem({
-  label,
-  icon,
-  onClick,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-}) {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
-  return (
-    <div
-      onClick={onClick}
-      className="flex flex-col items-center cursor-pointer space-y-1"
-    >
-      <div
-        className="w-12 h-12 p-2 rounded-xl shadow flex items-center justify-center"
-        style={{ backgroundColor: themeColors.white2 }}
-      >
-        {icon}
-      </div>
-
-      <span
-        className="text-sm text-center pt-2"
-        style={{ color: themeColors.black1 }}
-      >
-        {label}
-      </span>
-    </div>
   );
 }

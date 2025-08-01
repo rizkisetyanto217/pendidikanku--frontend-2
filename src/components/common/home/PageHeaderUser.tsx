@@ -61,7 +61,7 @@ export default function PageHeaderUser({
 
   return (
     <div
-      className="sticky top-0 z-30 px-1 pt-1 pb-4 backdrop-blur-md bg-opacity-80"
+      className="sticky top-0 z-30 px-1 pt-1 pb-2 backdrop-blur-md bg-opacity-80"
     >
       <div className="flex items-center justify-between mb-2">
         {/* Back & Title */}

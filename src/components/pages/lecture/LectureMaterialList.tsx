@@ -26,11 +26,15 @@ export default function LectureMaterialList({
   const { slug = "" } = useParams();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {data.map((item) => (
         <div
           key={item.id}
-          onClick={() => navigate(`/masjid/${slug}/soal-materi/${item.id}`)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate(`/masjid/${slug}/soal-materi/${item.id}`);
+          }}
           className="flex rounded-xl shadow-sm cursor-pointer transition hover:opacity-90"
           style={{
             backgroundColor: theme.white1,

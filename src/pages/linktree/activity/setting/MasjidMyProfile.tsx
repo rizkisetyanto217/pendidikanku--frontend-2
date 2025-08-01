@@ -46,8 +46,8 @@ export default function MasjidMyProfile() {
   ];
 
   return (
-    <div className="px-4 pt-6 pb-24 space-y-4">
-      <h1 className="text-lg font-semibold">Profil</h1>
+    <div className="px-4 pb-24 space-y-4">
+      <h1 className="text-lg font-semibold md:hidden">Profil</h1>
       <p className="text-sm text-muted-foreground">
         Harap diisi profil pengguna untuk kemajuan aplikasi. Data pengguna insya
         Allah akan kami lindungi.
