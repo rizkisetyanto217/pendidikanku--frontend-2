@@ -45,7 +45,7 @@ export default function MasjidVideoAudioDetailLectureSessions() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <PageHeaderUser
         title="Video & Audio"
         onBackClick={() => {
@@ -62,61 +62,65 @@ export default function MasjidVideoAudioDetailLectureSessions() {
       />
 
       <div
-        className="p-5 rounded-2xl shadow-sm"
+        className="rounded-2xl shadow-sm overflow-hidden pt-4"
         style={{ backgroundColor: theme.white1, color: theme.black1 }}
       >
-        <TabsContent value="youtube" current={tab}>
-          {videoAssets.length > 0 && (
-            <div
-              className="aspect-video w-full mb-6 rounded-xl overflow-hidden"
-              style={{ backgroundColor: theme.black1 }}
-            >
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${getYoutubeEmbed(videoAssets[activeIndex]?.lecture_sessions_asset_file_url)}`}
-                title="YouTube Video"
-                allowFullScreen
-              ></iframe>
-            </div>
-          )}
-        </TabsContent>
+        {/* Video YouTube */}
+        {tab === "youtube" && videoAssets.length > 0 && (
+          <div
+            className="aspect-video w-full"
+            style={{ backgroundColor: theme.black1 }}
+          >
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${getYoutubeEmbed(videoAssets[activeIndex]?.lecture_sessions_asset_file_url)}`}
+              title="YouTube Video"
+              allowFullScreen
+            ></iframe>
+          </div>
+        )}
 
-        <TabsContent value="audio" current={tab}>
-          {audioAssets.length > 0 && (
-            <div className="w-full mb-6">
-              <audio
-                controls
-                className="w-full"
-                src={audioAssets[activeIndex]?.lecture_sessions_asset_file_url}
-              />
-            </div>
-          )}
-        </TabsContent>
+        {/* Audio player & list */}
+        <div className="p-5">
+          <TabsContent value="audio" current={tab}>
+            {audioAssets.length > 0 && (
+              <div className="w-full mb-6">
+                <audio
+                  controls
+                  className="w-full"
+                  src={
+                    audioAssets[activeIndex]?.lecture_sessions_asset_file_url
+                  }
+                />
+              </div>
+            )}
+          </TabsContent>
 
-        <ul className="space-y-2">
-          {currentAssets.map((asset, index) => (
-            <li
-              key={asset.lecture_sessions_asset_id}
-              onClick={() => setActiveIndex(index)}
-              className="cursor-pointer rounded-lg border px-4 py-3 flex items-center justify-between transition"
-              style={{
-                backgroundColor:
-                  activeIndex === index ? theme.primary2 : theme.white2,
-                borderColor:
-                  activeIndex === index ? theme.primary : theme.silver1,
-                color: theme.black1,
-                borderWidth: 1,
-              }}
-            >
-              <span className="text-sm font-medium">
-                {asset.lecture_sessions_asset_title}
-              </span>
-              {activeIndex === index && (
-                <Check size={16} style={{ color: theme.primary }} />
-              )}
-            </li>
-          ))}
-        </ul>
+          <ul className="space-y-2">
+            {currentAssets.map((asset, index) => (
+              <li
+                key={asset.lecture_sessions_asset_id}
+                onClick={() => setActiveIndex(index)}
+                className="cursor-pointer rounded-lg border px-4 py-3 flex items-center justify-between transition"
+                style={{
+                  backgroundColor:
+                    activeIndex === index ? theme.primary2 : theme.white2,
+                  borderColor:
+                    activeIndex === index ? theme.primary : theme.silver1,
+                  color: theme.black1,
+                  borderWidth: 1,
+                }}
+              >
+                <span className="text-sm font-medium">
+                  {asset.lecture_sessions_asset_title}
+                </span>
+                {activeIndex === index && (
+                  <Check size={16} style={{ color: theme.primary }} />
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

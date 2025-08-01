@@ -10,6 +10,8 @@ import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "@/components/common/public/SharePopover";
+import FormattedDate from "@/constants/formattedDate";
+import CommonCardList from "@/components/common/main/CommonCardList";
 
 function InlineShare({ title, url }: { title: string; url: string }) {
   const { isDark } = useHtmlDarkMode();
@@ -184,7 +186,7 @@ export default function MasjidPost() {
   return (
     <>
       <PublicNavbar masjidName="Postingan" />
-      <div className="pt-16 space-y-4">
+      <div className="pt-20 space-y-4 pb-20">
         {/* Tabs */}
         <div className="flex items-center justify-start space-x-2">
           {(["masjid", "motivasi"] as const).map((tabKey) => (
@@ -217,27 +219,18 @@ export default function MasjidPost() {
           </p>
         ) : (
           filteredPosts.map((post) => (
-            <div
-              key={post.post_id}
-              className="block rounded-xl border"
-              style={{
-                borderColor: themeColors.silver1,
-                backgroundColor: isDark
-                  ? themeColors.white2
-                  : themeColors.white1,
-              }}
-            >
+            <CommonCardList key={post.post_id}>
               {post.post_image_url && (
                 <Link to={`/masjid/${slug}/post/${post.post_id}`}>
                   <img
                     src={post.post_image_url}
                     alt="Post Gambar"
-                    className="w-full aspect-[4/3] object-cover"
+                    className="w-full aspect-[4/3] object-cover rounded-lg"
                   />
                 </Link>
               )}
 
-              <div className="px-4 py-3 space-y-1">
+              <div className="space-y-1 p-4">
                 <Link to={`/masjid/${slug}/post/${post.post_id}`}>
                   <p
                     className="font-semibold text-sm"
@@ -250,17 +243,12 @@ export default function MasjidPost() {
                   </p>
                 </Link>
 
-                {/* Sisa non-link, bebas klik */}
-                <p
+                <FormattedDate
+                  value={post.post_created_at}
+                  fullMonth
                   className="text-xs pt-1"
-                  style={{ color: themeColors.silver2 }}
-                >
-                  {new Date(post.post_created_at).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
+                />
+
                 <div className="flex items-center justify-between pt-2 text-xs">
                   <div className="flex items-center space-x-4">
                     <div
@@ -287,7 +275,7 @@ export default function MasjidPost() {
                   />
                 </div>
               </div>
-            </div>
+            </CommonCardList>
           ))
         )}
 
@@ -336,19 +324,11 @@ export default function MasjidPost() {
                     >
                       {donation.donation_message}
                     </p>
-                    <p
+                    <FormattedDate
+                      value={donation.created_at}
+                      fullMonth
                       className="text-xs pt-1"
-                      style={{ color: themeColors.silver2 }}
-                    >
-                      {new Date(donation.created_at).toLocaleDateString(
-                        "id-ID",
-                        {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        }
-                      )}
-                    </p>
+                    />
 
                     <div
                       className="flex items-center justify-between pt-2 text-xs"

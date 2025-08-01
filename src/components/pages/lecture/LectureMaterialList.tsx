@@ -31,7 +31,7 @@ export default function LectureMaterialList({
         <div
           key={item.id}
           onClick={() => navigate(`/masjid/${slug}/soal-materi/${item.id}`)}
-          className="flex gap-3 p-3 rounded-xl shadow-sm cursor-pointer transition hover:opacity-90"
+          className="flex rounded-xl shadow-sm cursor-pointer transition hover:opacity-90"
           style={{
             backgroundColor: theme.white1,
             border: `1px solid ${theme.silver1}`,
@@ -40,7 +40,7 @@ export default function LectureMaterialList({
           {/* Gambar Kajian */}
           {item.imageUrl && (
             <div
-              className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-lg border"
+              className="aspect-[4/5] w-[90px] min-h-[112px] flex-shrink-0 overflow-hidden rounded-lg border"
               style={{ borderColor: theme.white3 }}
             >
               <img
@@ -52,7 +52,7 @@ export default function LectureMaterialList({
           )}
 
           {/* Konten */}
-          <div className="flex flex-col justify-between flex-1">
+          <div className="flex flex-col justify-between flex-1 py-3 pr-3 px-4 md:px-3">
             <div>
               <p
                 className="text-sm font-semibold mb-1"
@@ -112,9 +112,9 @@ export default function LectureMaterialList({
                   className="text-xs px-2 py-1 rounded-full font-medium"
                   style={{
                     backgroundColor:
-                      item.gradeResult >= 70 ? theme.primary2 : theme.white3,
+                      item.gradeResult >= 70 ? theme.primary2 : theme.success1,
                     color:
-                      item.gradeResult >= 70 ? theme.primary : theme.silver2,
+                      item.gradeResult >= 70 ? theme.primary : theme.success2,
                   }}
                 >
                   Nilai : {item.gradeResult}

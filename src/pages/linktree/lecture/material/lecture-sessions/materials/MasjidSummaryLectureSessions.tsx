@@ -57,7 +57,7 @@ export default function MasjidSummaryLectureSessions() {
   const summary = materialData?.lecture_sessions_material_summary || "";
 
   return (
-    <div className="space-y-4 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <PageHeaderUser
         title="Ringkasan Kajian"
         onBackClick={() => navigate(backUrl)}

@@ -177,93 +177,98 @@ export default function MasjidQuizLectureSessions() {
         onBackClick={() => navigate(-1)}
       />
 
-      <div className="relative h-2 rounded-full bg-gray-200 dark:bg-white/10 mb-6 mt-2">
-        <div
-          className="absolute top-0 left-0 h-full rounded-full transition-all duration-300"
-          style={{
-            width: `${(progressCount / (data?.questions?.length || 1)) * 100}%`,
-            backgroundColor: theme.primary,
-          }}
-        />
-      </div>
-
-      <p className="text-sm font-medium mb-4" style={{ color: theme.black1 }}>
-        {question.lecture_sessions_question}
-      </p>
-
-      <div className="space-y-3 mb-6">
-        {question.lecture_sessions_question_answers.map((opt: string) => {
-          const isSel = selected === opt;
-          const isUserAnswerCorrect = selected?.startsWith(
-            question.lecture_sessions_question_correct
-          );
-          const isRight = showAnswer && isUserAnswerCorrect && isSel;
-          const isWrong = showAnswer && !isUserAnswerCorrect && isSel;
-
-          return (
-            <button
-              key={opt}
-              onClick={() => setSelected(opt)}
-              disabled={showAnswer}
-              className={clsx(
-                "w-full px-4 py-3 rounded-lg text-sm text-left border transition-all font-medium",
-                isSel && !showAnswer ? "text-white" : ""
-              )}
-              style={{
-                backgroundColor: showAnswer
-                  ? isRight
-                    ? theme.success2
-                    : isWrong
-                      ? theme.error2
-                      : theme.white3
-                  : isSel
-                    ? theme.primary
-                    : theme.white3,
-                color: showAnswer
-                  ? theme.black1
-                  : isSel
-                    ? theme.white1
-                    : theme.black1,
-                borderColor: showAnswer
-                  ? isRight
-                    ? theme.success1
-                    : isWrong
-                      ? theme.error1
-                      : theme.silver1
-                  : isSel
-                    ? theme.primary
-                    : theme.silver1,
-              }}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-
-      {showAnswer && isCorrect && (
-        <div
-          className="text-sm mb-4 p-3 rounded"
-          style={{ backgroundColor: theme.success2, color: theme.success1 }}
-        >
-          <strong>✅ Jawaban Benar</strong>
-          <br />
-          {question.lecture_sessions_question_explanation}
-        </div>
-      )}
-
-      <button
-        className="w-full py-3 mt-3 rounded-lg text-sm font-semibold transition-all"
-        style={{
-          backgroundColor:
-            selected || showAnswer ? theme.primary : theme.silver2,
-          color: theme.white1,
-        }}
-        onClick={showAnswer ? handleNext : handleCheck}
-        disabled={!selected && !showAnswer}
+      <div
+        className="p-4 rounded-lg shadow-sm"
+        style={{ backgroundColor: theme.white1, borderColor: theme.silver1 }}
       >
-        {showAnswer ? "Lanjut" : "Cek"}
-      </button>
+        <div className="relative h-2 rounded-full bg-gray-200 dark:bg-white/10 mb-6 mt-2">
+          <div
+            className="absolute top-0 left-0 h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${(progressCount / (data?.questions?.length || 1)) * 100}%`,
+              backgroundColor: theme.primary,
+            }}
+          />
+        </div>
+
+        <p className="text-sm font-medium mb-4" style={{ color: theme.black1 }}>
+          {question.lecture_sessions_question}
+        </p>
+
+        <div className="space-y-3 mb-6">
+          {question.lecture_sessions_question_answers.map((opt: string) => {
+            const isSel = selected === opt;
+            const isUserAnswerCorrect = selected?.startsWith(
+              question.lecture_sessions_question_correct
+            );
+            const isRight = showAnswer && isUserAnswerCorrect && isSel;
+            const isWrong = showAnswer && !isUserAnswerCorrect && isSel;
+
+            return (
+              <button
+                key={opt}
+                onClick={() => setSelected(opt)}
+                disabled={showAnswer}
+                className={clsx(
+                  "w-full px-4 py-3 rounded-lg text-sm text-left border transition-all font-medium",
+                  isSel && !showAnswer ? "text-white" : ""
+                )}
+                style={{
+                  backgroundColor: showAnswer
+                    ? isRight
+                      ? theme.success2
+                      : isWrong
+                        ? theme.error2
+                        : theme.white3
+                    : isSel
+                      ? theme.primary
+                      : theme.white3,
+                  color: showAnswer
+                    ? theme.black1
+                    : isSel
+                      ? theme.white1
+                      : theme.black1,
+                  borderColor: showAnswer
+                    ? isRight
+                      ? theme.success1
+                      : isWrong
+                        ? theme.error1
+                        : theme.silver1
+                    : isSel
+                      ? theme.primary
+                      : theme.silver1,
+                }}
+              >
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+
+        {showAnswer && isCorrect && (
+          <div
+            className="text-sm mb-4 p-3 rounded"
+            style={{ backgroundColor: theme.success2, color: theme.success1 }}
+          >
+            <strong>✅ Jawaban Benar</strong>
+            <br />
+            {question.lecture_sessions_question_explanation}
+          </div>
+        )}
+
+        <button
+          className="w-full py-3 mt-3 rounded-lg text-sm font-semibold transition-all"
+          style={{
+            backgroundColor:
+              selected || showAnswer ? theme.primary : theme.silver2,
+            color: theme.white1,
+          }}
+          onClick={showAnswer ? handleNext : handleCheck}
+          disabled={!selected && !showAnswer}
+        >
+          {showAnswer ? "Lanjut" : "Cek"}
+        </button>
+      </div>
     </div>
   );
 }

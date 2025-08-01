@@ -141,7 +141,7 @@ export default function MasjidMaterial() {
   return (
     <>
       <PublicNavbar masjidName="Materi Kajian" />
-      <div className="mt-16">
+      <div className="pt-16 pb-20">
         <Tabs
           value={tab}
           onChange={handleTabChange}

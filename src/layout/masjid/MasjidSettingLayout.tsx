@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import MasjidSidebarMenu from "@/components/common/navigation/MasjidSidebarMenu";
 
 export default function MasjidSettingLayout() {
   const location = useLocation();
@@ -55,8 +56,8 @@ export default function MasjidSettingLayout() {
       />
 
       <div className="flex flex-col md:flex-row gap-4">
-        <div className="w-full md:w-64 shrink-0">
-          <DashboardSidebar
+        <div className="md:w-48 shrink-0">
+          <MasjidSidebarMenu
             menus={menus}
             title="Pengaturan"
             currentPath={location.pathname}

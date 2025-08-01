@@ -141,7 +141,6 @@ export default function MasjidDocsLectureSessions() {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <FileText size={16} style={{ color: theme.primary }} />
                   <span
                     className="text-[14px] font-bold px-2 py-1 rounded"
                     style={labelStyle}
