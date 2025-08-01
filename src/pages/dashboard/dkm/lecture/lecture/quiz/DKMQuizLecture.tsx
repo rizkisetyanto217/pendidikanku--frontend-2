@@ -73,7 +73,7 @@ export default function DKMQuizLecture() {
   };
 
   return (
-    <div className="p-4 pb-24">
+    <div className="pb-24">
       <PageHeader title="Daftar Quiz Kajian" onBackClick={() => navigate(-1)} />
 
       {isLoading ? (

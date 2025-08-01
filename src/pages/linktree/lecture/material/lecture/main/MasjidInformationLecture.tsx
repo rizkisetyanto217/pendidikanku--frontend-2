@@ -40,30 +40,41 @@ export default function MasjidInformationLecture() {
     <>
       <PageHeaderUser
         title="Tema Kajian Detail"
-        onBackClick={() => {
-          navigate(`/masjid/${slug}/tema/${id}`);
-        }}
+        onBackClick={() => navigate(`/masjid/${slug}/tema/${id}`)}
       />
-      <div className="pt-4">
+
+      <div className="lg:p-4">
         {isLoading ? (
           <p className="text-sm text-silver-400">Memuat data...</p>
         ) : isError || !lecture ? (
           <p className="text-red-500 text-sm">Gagal memuat data tema kajian.</p>
         ) : (
-          <div className="space-y-4">
+          <div
+            className="rounded-xl overflow-hidden shadow-lg"
+            style={{
+              backgroundColor: theme.white2,
+              borderColor: theme.silver2,
+            }}
+          >
             {lecture.lecture_image_url && (
               <img
                 src={lecture.lecture_image_url}
                 alt="Gambar Materi"
-                className="w-full rounded-lg object-cover h-48"
+                className="w-full object-cover"
+                style={{ aspectRatio: "4 / 5", maxHeight: "540px" }}
               />
             )}
 
-            <h2 className="text-xl font-semibold">{lecture.lecture_title}</h2>
+            <div className="p-4 space-y-4">
+              <h2
+                className="text-xl font-semibold"
+                style={{ color: theme.primary }}
+              >
+                {lecture.lecture_title}
+              </h2>
 
-            {Array.isArray(lecture.lecture_teachers) &&
-              lecture.lecture_teachers.length > 0 && (
-                <p className="text-sm" style={{ color: theme.silver2 }}>
+              {lecture.lecture_teachers?.length > 0 && (
+                <p className="text-sm" style={{ color: theme.black2 }}>
                   <strong>Pengajar:</strong>{" "}
                   {[
                     ...new Set(lecture.lecture_teachers.map((t) => t.name)),
@@ -71,19 +82,20 @@ export default function MasjidInformationLecture() {
                 </p>
               )}
 
-            <p className="text-sm" style={{ color: theme.silver2 }}>
-              <strong>Jadwal:</strong> {lecture.lecture_description || "-"}
-            </p>
-
-            <p className="text-sm" style={{ color: theme.silver2 }}>
-              <strong>Lokasi:</strong> Masjid At-Taqwa, Ciracas
-            </p>
-
-            <div className="text-sm" style={{ color: theme.silver2 }}>
-              <strong>Deskripsi:</strong>
-              <p className="mt-1 whitespace-pre-wrap">
-                {lecture.lecture_description || "-"}
+              <p className="text-sm" style={{ color: theme.black2 }}>
+                <strong>Jadwal:</strong> {lecture.lecture_description || "-"}
               </p>
+
+              <p className="text-sm" style={{ color: theme.black2 }}>
+                <strong>Lokasi:</strong> Masjid At-Taqwa, Ciracas
+              </p>
+
+              <div className="text-sm" style={{ color: theme.black2 }}>
+                <strong>Deskripsi:</strong>
+                <p className="mt-1 whitespace-pre-wrap">
+                  {lecture.lecture_description || "-"}
+                </p>
+              </div>
             </div>
           </div>
         )}

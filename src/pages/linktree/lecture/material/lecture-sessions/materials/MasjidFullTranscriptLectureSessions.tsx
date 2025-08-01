@@ -1,17 +1,19 @@
 import PageHeader from "@/components/common/home/PageHeaderUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 
 export default function MasjidFullTranscriptLectureSessions() {
   const { isDark } = useHtmlDarkMode();
+  const { id, slug } = useParams<{ id: string; slug: string }>();
   const theme = isDark ? colors.dark : colors.light;
   const { id: lecture_session_id } = useParams();
-  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+  const backUrl = location.state?.from || `/masjid/${slug}/soal-materi/${id}`;
 
   // 📥 Fetch detail sesi kajian
   const {
@@ -56,9 +58,7 @@ export default function MasjidFullTranscriptLectureSessions() {
     <div className="space-y-4 max-w-2xl mx-auto">
       <PageHeader
         title="Materi Lengkap"
-        onBackClick={() => {
-          navigate(`/masjid/${slug}/soal-materi/${id}`);
-        }}
+        onBackClick={() => navigate(backUrl)}
       />
 
       <div

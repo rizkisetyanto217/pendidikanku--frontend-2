@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Settings, HelpCircle, LogOut } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublicUserDropdown from "./UserDropDown";
 
-
 interface PublicNavbarProps {
   masjidName: string;
+  hideOnScroll?: boolean; // ⬅️ opsional
 }
 
-export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
+export default function PublicNavbar({
+  masjidName,
+  hideOnScroll = false, // ⬅️ default = false
+}: PublicNavbarProps) {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
@@ -25,10 +27,10 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
   const ticking = useRef(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  
-
-  // Scroll hide navbar
+  // 🔁 Scroll hide logic (aktif hanya jika hideOnScroll)
   useEffect(() => {
+    if (!hideOnScroll) return;
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -47,9 +49,9 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [hideOnScroll]);
 
-  // Click outside to close dropdown
+  // 🔒 Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -74,7 +76,7 @@ export default function PublicNavbar({ masjidName }: PublicNavbarProps) {
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 shadow max-w-4xl mx-auto transition-transform duration-300 ${
-        visible ? "translate-y-0" : "-translate-y-full"
+        hideOnScroll && !visible ? "-translate-y-full" : "translate-y-0"
       }`}
       style={{ backgroundColor: themeColors.white1 }}
     >

@@ -614,7 +614,7 @@ export default function PublicLinktree() {
       </div>
 
       {/* Bottom navigation */}
-      <BottomNavbar />
+      <BottomNavbar hideOnScroll />
     </>
   );
 }

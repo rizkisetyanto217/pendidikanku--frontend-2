@@ -4,7 +4,13 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-export default function BottomNavbar() {
+interface BottomNavbarProps {
+  hideOnScroll?: boolean;
+}
+
+export default function BottomNavbar({
+  hideOnScroll = false,
+}: BottomNavbarProps) {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const location = useLocation();
@@ -41,7 +47,6 @@ export default function BottomNavbar() {
     },
   ];
 
-  // Menentukan tab aktif dari URL saat ini
   const currentPath = location.pathname;
   const activeTab = (() => {
     if (currentPath.includes("/post")) return "post";
@@ -52,6 +57,8 @@ export default function BottomNavbar() {
   })();
 
   useEffect(() => {
+    if (!hideOnScroll) return;
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
@@ -64,18 +71,16 @@ export default function BottomNavbar() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [hideOnScroll]);
 
   return (
     <nav
       className={`fixed bottom-0 left-0 right-0 z-50 border-t w-full max-w-4xl mx-auto flex justify-between sm:justify-center sm:gap-4 transition-transform duration-300 ${
-        visible ? "translate-y-0" : "translate-y-full"
+        hideOnScroll && !visible ? "translate-y-full" : "translate-y-0"
       }`}
       style={{
         backgroundColor: theme.white1,
         borderColor: theme.silver1,
-        paddingTop: "0rem",
-        paddingBottom: "0rem",
         minHeight: "56px",
       }}
     >

@@ -100,7 +100,7 @@ export default function DKMVideoAudioLecture() {
   });
 
   return (
-    <div className="p-4 pb-24 space-y-4">
+    <div className="pb-24 space-y-4">
       <PageHeader
         title="Video & Audio Kajian"
         onBackClick={() => navigate(-1)}

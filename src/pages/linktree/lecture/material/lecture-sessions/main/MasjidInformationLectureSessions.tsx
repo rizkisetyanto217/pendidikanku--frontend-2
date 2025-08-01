@@ -96,9 +96,10 @@ export default function MasjidInformationLectureSessions() {
 
           <div>
             <strong style={{ color: theme.black1 }}>Deskripsi:</strong>
-            <p className="mt-1" style={{ color: theme.black2 }}>
-              {info.deskripsi}
-            </p>
+            <div
+              className="text-sm mt-1 leading-relaxed prose prose-sm prose-slate max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: info.deskripsi }}
+            />
           </div>
 
           {/* 🧾 Ringkasan */}

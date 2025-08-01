@@ -30,7 +30,7 @@ export default function DKMInformationLectureSessions() {
 
   return (
     <div
-      className="p-5 rounded-2xl shadow-sm space-y-3"
+      className="space-y-3"
       style={{ backgroundColor: theme.white1, color: theme.black1 }}
     >
       <PageHeader

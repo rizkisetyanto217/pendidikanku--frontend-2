@@ -20,9 +20,9 @@ interface GroupedAsset {
 }
 
 export default function MasjidVideoAudioLecture() {
-  const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+  const navigate = useNavigate();
   const { id } = useParams(); // lecture_id
 
   const { data: groupedAssets = [], isLoading } = useQuery<GroupedAsset[]>({
@@ -47,7 +47,7 @@ export default function MasjidVideoAudioLecture() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <PageHeaderUser
         title="Video & Audio Kajian"
         onBackClick={() => {
@@ -56,13 +56,16 @@ export default function MasjidVideoAudioLecture() {
       />
 
       {isLoading ? (
-        <div className="text-center text-sm text-silver-500">
+        <div className="text-center text-sm text-silver-500 mt-4">
           Memuat data...
         </div>
       ) : groupedAssets.length === 0 ? (
         <div
-          className="p-5 rounded-2xl shadow-sm"
-          style={{ backgroundColor: theme.white1, color: theme.black1 }}
+          className="rounded-2xl p-4 shadow-sm text-center mt-4"
+          style={{
+            backgroundColor: theme.white1,
+            color: theme.black1,
+          }}
         >
           <p className="text-sm text-silver-400">Belum ada data video/audio.</p>
         </div>
@@ -70,57 +73,64 @@ export default function MasjidVideoAudioLecture() {
         groupedAssets.map((group) => (
           <div
             key={group.lecture_session_id}
-            className="p-4 rounded-2xl shadow-md space-y-4"
-            style={{ backgroundColor: theme.white1, color: theme.black1 }}
+            className="rounded-2xl shadow-md overflow-hidden mb-6"
+            style={{
+              backgroundColor: theme.white1,
+              borderColor: theme.silver2,
+              color: theme.black1,
+            }}
           >
-            <h2 className="text-sm font-semibold">
-              {group.lecture_session_title?.trim() || "Tanpa Judul"}
-            </h2>
+            <div className="p-4 space-y-4">
+              <h2 className="text-sm font-semibold">
+                {group.lecture_session_title?.trim() || "Tanpa Judul"}
+              </h2>
 
-            {group.assets.map((asset) => {
-              const isVideo = asset.lecture_sessions_asset_file_type === 1;
-              const isAudio = asset.lecture_sessions_asset_file_type === 2;
-              const embedId = getYoutubeEmbed(
-                asset.lecture_sessions_asset_file_url
-              );
+              {group.assets.map((asset) => {
+                const isVideo = asset.lecture_sessions_asset_file_type === 1;
+                const isAudio = asset.lecture_sessions_asset_file_type === 2;
+                const embedId = getYoutubeEmbed(
+                  asset.lecture_sessions_asset_file_url
+                );
 
-              return (
-                <div
-                  key={asset.lecture_sessions_asset_id}
-                  className="space-y-2 border-t pt-4"
-                >
-                  <p className="text-sm font-medium">
-                    {asset.lecture_sessions_asset_title || "Tanpa Judul"}
-                  </p>
+                return (
+                  <div
+                    key={asset.lecture_sessions_asset_id}
+                    className="space-y-2 border-t pt-4"
+                    style={{ borderColor: theme.silver2 }}
+                  >
+                    <p className="text-sm font-medium">
+                      {asset.lecture_sessions_asset_title || "Tanpa Judul"}
+                    </p>
 
-                  <p className="text-xs text-silver-500 italic">
-                    {asset.lecture_sessions_asset_file_type_label || ""}
-                  </p>
+                    <p className="text-xs text-silver-500 italic">
+                      {asset.lecture_sessions_asset_file_type_label || ""}
+                    </p>
 
-                  {isVideo && embedId && (
-                    <div
-                      className="aspect-video w-full rounded-xl overflow-hidden"
-                      style={{ backgroundColor: theme.black1 }}
-                    >
-                      <iframe
-                        className="w-full h-full"
-                        src={`https://www.youtube.com/embed/${embedId}`}
-                        title={asset.lecture_sessions_asset_title}
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  )}
+                    {isVideo && embedId && (
+                      <div
+                        className="aspect-video w-full rounded-xl overflow-hidden"
+                        style={{ backgroundColor: theme.black1 }}
+                      >
+                        <iframe
+                          className="w-full h-full"
+                          src={`https://www.youtube.com/embed/${embedId}`}
+                          title={asset.lecture_sessions_asset_title}
+                          allowFullScreen
+                        />
+                      </div>
+                    )}
 
-                  {isAudio && asset.lecture_sessions_asset_file_url && (
-                    <audio
-                      controls
-                      className="w-full"
-                      src={asset.lecture_sessions_asset_file_url}
-                    />
-                  )}
-                </div>
-              );
-            })}
+                    {isAudio && asset.lecture_sessions_asset_file_url && (
+                      <audio
+                        controls
+                        className="w-full"
+                        src={asset.lecture_sessions_asset_file_url}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))
       )}

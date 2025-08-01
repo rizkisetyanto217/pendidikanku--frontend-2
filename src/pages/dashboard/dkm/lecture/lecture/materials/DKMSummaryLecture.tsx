@@ -70,7 +70,7 @@ export default function DKMSummaryLecture() {
     ]) || [];
 
   return (
-    <div className="space-y-6 p-4 pb-24">
+    <div className="space-y-6 pb-24">
       <PageHeader
         title="Ringkasan Kajian"
         backTo={`/dkm/tema/tema-detail/${id}`}

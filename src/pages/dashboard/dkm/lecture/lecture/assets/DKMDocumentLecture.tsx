@@ -71,7 +71,7 @@ export default function DKMDocumentLecture() {
   };
 
   return (
-    <div className="p-4 pb-24">
+    <div className="pb-24">
       <PageHeader title="Dokumen Kajian" onBackClick={() => navigate(-1)} />
 
       {isLoading ? (

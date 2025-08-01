@@ -83,7 +83,7 @@ export default function ProfilMasjid() {
     <div className="flex flex-col md:flex-row gap-4">
       <div className="flex-1">
         <div
-          className="p-6 rounded-xl shadow-sm space-y-6"
+          className="space-y-6"
           style={{ backgroundColor: theme.white1, color: theme.black1 }}
         >
           {isEditing ? (

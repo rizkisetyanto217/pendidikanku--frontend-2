@@ -71,7 +71,7 @@ export default function DKMTranscriptLecture() {
   ]);
 
   return (
-    <div className="space-y-6 p-4 pb-24">
+    <div className="space-y-6 pb-24">
       <PageHeader
         title="Transkrip Kajian"
         backTo={`/dkm/tema/tema-detail/${id}`}
