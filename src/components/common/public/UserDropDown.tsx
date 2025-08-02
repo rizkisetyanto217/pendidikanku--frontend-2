@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LogOut, Settings, User, HelpCircle } from "lucide-react";
+import { LogOut, Settings, User, HelpCircle, MoreVertical } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -9,7 +9,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "./SharePopover";
 import { useIsMobile } from "@/hooks/isMobile";
 
-export default function PublicUserDropdown() {
+interface PublicUserDropdownProps {
+  variant?: "default" | "icon";
+}
+
+export default function PublicUserDropdown({
+  variant = "default",
+}: PublicUserDropdownProps) {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { data: user } = useCurrentUser();
@@ -62,27 +68,40 @@ export default function PublicUserDropdown() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 p-2 rounded-md transition"
-        style={{
-          backgroundColor: open ? theme.white2 : "transparent",
-        }}
-      >
-        <img
-          src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='16' fill='%23CCCCCC' /></svg>"
-          alt="Profile"
-          className="w-8 h-8 rounded-full"
-        />
-        <div className="text-left text-sm hidden sm:block">
-          <div className="font-semibold" style={{ color: theme.black1 }}>
-            {userName}
+      {variant === "icon" ? (
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-2 rounded-md transition"
+          style={{
+            backgroundColor: theme.white3,
+            color: theme.black1,
+          }}
+        >
+          <MoreVertical className="w-5 h-5" />
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-2 p-2 rounded-md transition"
+          style={{
+            backgroundColor: open ? theme.white2 : "transparent",
+          }}
+        >
+          <img
+            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='16' fill='%23CCCCCC' /></svg>"
+            alt="Profile"
+            className="w-8 h-8 rounded-full"
+          />
+          <div className="text-left text-sm hidden sm:block">
+            <div className="font-semibold" style={{ color: theme.black1 }}>
+              {userName}
+            </div>
+            <div className="text-xs" style={{ color: theme.silver2 }}>
+              {userRole}
+            </div>
           </div>
-          <div className="text-xs" style={{ color: theme.silver2 }}>
-            {userRole}
-          </div>
-        </div>
-      </button>
+        </button>
+      )}
 
       {open && (
         <div

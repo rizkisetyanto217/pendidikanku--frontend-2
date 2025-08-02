@@ -6,6 +6,7 @@ import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import api from "@/lib/axios";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import FormattedDate from "@/constants/formattedDate";
 
 const FinancialReportPage = () => {
   const [tab, setTab] = useState("recent");
@@ -77,9 +78,7 @@ const FinancialReportPage = () => {
             Rp. {(item.donation_amount_masjid || 0).toLocaleString("id-ID")}
           </p>
 
-          <p className="text-xs" style={{ color: themeColors.silver2 }}>
-            {new Date(item.created_at).toLocaleDateString("id-ID")}
-          </p>
+          <FormattedDate value={item.created_at} className="text-xs" />
         </div>
       </div>
     ));

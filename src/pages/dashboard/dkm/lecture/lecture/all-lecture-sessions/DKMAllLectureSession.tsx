@@ -6,9 +6,8 @@ import SimpleTable from "@/components/common/main/SimpleTable";
 import { ReactNode } from "react";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
-import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
 import { ExternalLink } from "lucide-react";
+import FormattedDate from "@/constants/formattedDate"; // pastikan path sesuai
 
 export interface LectureSession {
   lecture_session_id: string;
@@ -74,11 +73,7 @@ export default function DKMAllLectureSession() {
       />,
       session.lecture_session_title,
       session.total_kajian || "-",
-      format(
-        new Date(session.lecture_session_start_time),
-        "EEEE, dd MMMM yyyy - HH:mm",
-        { locale: localeID }
-      ),
+      <FormattedDate value={session.lecture_session_start_time} fullMonth />,
       <>
         <StatusBadge
           text={

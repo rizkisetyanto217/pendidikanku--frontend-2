@@ -65,13 +65,6 @@ export default function PublicNavbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).then(
-      () => {
-        window.location.href = "/login";
-      }
-    );
-  };
 
   return (
     <div

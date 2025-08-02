@@ -7,6 +7,7 @@ import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import FormattedDate from "@/constants/formattedDate";
 
 interface Post {
   post_id: string;
@@ -108,13 +109,11 @@ export default function MasjidDetailPost() {
             {post.post_content}
           </p>
 
-          <p className="text-xs" style={{ color: themeColors.silver2 }}>
-            {new Date(post.post_created_at).toLocaleDateString("id-ID", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
+          <FormattedDate
+            value={post.post_created_at}
+            fullMonth
+            className="text-xs"
+          />
 
           <div
             className="flex items-center justify-between pt-2 text-xs"

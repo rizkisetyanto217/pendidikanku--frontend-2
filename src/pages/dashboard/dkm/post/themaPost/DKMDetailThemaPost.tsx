@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pencil } from "lucide-react";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import FormattedDate from "@/constants/formattedDate";
 
 interface PostTheme {
   post_theme_id: string;
@@ -61,7 +61,9 @@ export default function DKMDetailThemaPost() {
           <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
             Tanggal Dibuat
           </h2>
-          <p>{new Date(data.post_theme_created_at).toLocaleString("id-ID")}</p>
+          <p>
+            <FormattedDate value={data.post_theme_created_at} />
+          </p>
         </div>
       </div>
     </>

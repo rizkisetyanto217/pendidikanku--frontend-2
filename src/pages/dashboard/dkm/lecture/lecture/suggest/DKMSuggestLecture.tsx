@@ -5,8 +5,7 @@ import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
+import FormattedDate from "@/constants/formattedDate";
 
 interface Advice {
   advice_id: string;
@@ -39,9 +38,7 @@ export default function DKMSuggestLecture() {
       index + 1,
       "Pengguna", // Bisa diganti jika ada data nama user
       item.advice_description,
-      format(new Date(item.advice_created_at), "EEEE, dd MMM yyyy - HH:mm", {
-        locale: localeID,
-      }),
+      <FormattedDate value={item.advice_created_at} />,
       <div onClick={(e) => e.stopPropagation()}>
         <ActionEditDelete
           onEdit={() => console.log("Edit", item.advice_id)}

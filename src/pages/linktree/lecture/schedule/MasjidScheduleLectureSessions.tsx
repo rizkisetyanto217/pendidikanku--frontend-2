@@ -170,9 +170,9 @@ export default function MasjidScheduleLecture() {
 
   return (
     <>
-      <PublicNavbar masjidName="Jadwal Kajian" />
+      <PageHeaderUser title="Jadwal Kajian" backTo={`/masjid/${slug}`} />
 
-      <div className="pt-20">
+      <div className="">
         <Tabs
           value={tab}
           onChange={setTab}

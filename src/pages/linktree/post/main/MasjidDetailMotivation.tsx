@@ -5,6 +5,7 @@ import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import FormattedDate from "@/constants/formattedDate";
 
 interface Donation {
   donation_id: string;
@@ -64,14 +65,7 @@ export default function MasjidDetailDonation() {
           {donation.donation_message}
         </p>
 
-        <p className="text-sm" style={{ color: themeColors.silver2 }}>
-          Tanggal:{" "}
-          {new Date(donation.created_at).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
+        <FormattedDate value={donation.created_at} fullMonth />
 
         <p className="text-sm" style={{ color: themeColors.silver2 }}>
           Status: {donation.donation_status}

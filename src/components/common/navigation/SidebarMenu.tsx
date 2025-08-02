@@ -15,9 +15,6 @@ type SidebarMenuProps = {
   currentPath?: string;
 };
 
-
-
-
 export default function SidebarMenu({
   menus,
   title = "Beranda",
@@ -30,6 +27,8 @@ export default function SidebarMenu({
     <div
       className="hidden md:block w-64 rounded-xl p-4 shadow-sm transition-colors"
       style={{
+        position: "sticky",
+        top: "1rem", // jarak dari atas saat sticky (misal 16px)
         backgroundColor: theme.white1,
         color: theme.black1,
       }}

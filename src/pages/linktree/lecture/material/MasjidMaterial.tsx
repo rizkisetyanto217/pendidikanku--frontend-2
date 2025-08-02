@@ -15,6 +15,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
+import FormattedDate from "@/constants/formattedDate";
 
 interface LectureSessionAPIItem {
   lecture_session_id: string;
@@ -121,10 +122,10 @@ export default function MasjidMaterial() {
     teacher: item.lecture_session_teacher_name,
     masjidName: "",
     location: item.lecture_session_place,
-    time: new Date(item.lecture_session_start_time).toLocaleString("id-ID", {
-      dateStyle: "long",
-      timeStyle: "short",
-    }),
+    time: (
+      <FormattedDate value={item.lecture_session_start_time} fullMonth />
+    ) as unknown as string, // jika `LectureMaterialList` ekspektasi string
+
     status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
     lectureId: item.lecture_session_lecture_id,
     gradeResult: item.user_grade_result,

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import FormattedDate from "@/constants/formattedDate";
 
 interface Lecture {
   lecture_id: string;
@@ -51,19 +52,13 @@ export default function DKMInformationLecture() {
             <h3 className="text-xl font-bold" style={{ color: theme.primary }}>
               {lecture?.lecture_title}
             </h3>
+
             <p className="text-sm" style={{ color: theme.silver2 }}>
               Dimulai:{" "}
-              {new Date(lecture?.lecture_created_at).toLocaleDateString(
-                "id-ID",
-                {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "short",
-                  year: "2-digit",
-                }
-              )}{" "}
-              - 20.00 WIB
+              <FormattedDate value={lecture?.lecture_created_at} fullMonth /> -
+              20.00 WIB
             </p>
+
             <p className="text-sm font-medium" style={{ color: theme.black2 }}>
               {Array.isArray(lecture.lecture_teachers)
                 ? lecture.lecture_teachers

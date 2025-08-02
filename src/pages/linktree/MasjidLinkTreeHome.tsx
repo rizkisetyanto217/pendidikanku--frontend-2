@@ -21,6 +21,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BorderLine from "@/components/common/main/Border";
 import SharePopover from "@/components/common/public/SharePopover";
 import CartLink from "@/components/common/main/CardLink";
+import FormattedDate from "@/constants/formattedDate";
 
 const currentUrl = window.location.href;
 
@@ -37,6 +38,7 @@ interface Masjid {
   masjid_whatsapp_url?: string;
   masjid_youtube_url?: string;
   masjid_donation_link?: string;
+  masjid_created_at: string;
 }
 
 interface Kajian {
@@ -242,15 +244,13 @@ export default function PublicLinktree() {
                               style={{ color: themeColors.silver2 }}
                             >
                               {kajian.lecture_session_teacher_name} •{" "}
-                              {kajian.lecture_session_start_time
-                                ? new Date(
-                                    kajian.lecture_session_start_time
-                                  ).toLocaleDateString("id-ID", {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                  })
-                                : "-"}
+                              {kajian.lecture_session_start_time ? (
+                                <FormattedDate
+                                  value={kajian.lecture_session_start_time}
+                                />
+                              ) : (
+                                "-"
+                              )}
                             </p>
                             <p
                               className="text-xs"
@@ -308,12 +308,13 @@ export default function PublicLinktree() {
                 <span className="underline text-xs mt-0.5">Alamat Masjid</span>
               </a>
 
-              <p
+              {/* <p
                 className="text-sm italic mt-2"
                 style={{ color: themeColors.silver4 }}
               >
-                Bergabung pada April 2025
-              </p>
+                Bergabung pada{" "}
+                <FormattedDate value={masjidData.masjid_created_at} fullMonth />
+              </p> */}
 
               <div className="flex justify-between items-center mt-4">
                 <div className="flex space-x-3">
@@ -487,15 +488,13 @@ export default function PublicLinktree() {
                             style={{ color: themeColors.silver2 }}
                           >
                             {kajian.lecture_session_teacher_name} •{" "}
-                            {kajian.lecture_session_start_time
-                              ? new Date(
-                                  kajian.lecture_session_start_time
-                                ).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })
-                              : "-"}
+                            {kajian.lecture_session_start_time ? (
+                              <FormattedDate
+                                value={kajian.lecture_session_start_time}
+                              />
+                            ) : (
+                              "-"
+                            )}
                           </p>
                           <p
                             className="text-xs"

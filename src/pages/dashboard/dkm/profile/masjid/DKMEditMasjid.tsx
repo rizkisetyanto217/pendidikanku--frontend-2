@@ -7,6 +7,7 @@ import axios from "@/lib/axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import CommonActionButton from "@/components/common/main/CommonActionButton";
+import ImagePreview from "@/components/common/main/ImageReview";
 
 export default function DKMEditMasjid() {
   const { isDark } = useHtmlDarkMode();
@@ -21,6 +22,7 @@ export default function DKMEditMasjid() {
   const [linkMaps, setLinkMaps] = useState("");
   const [gambarFile, setGambarFile] = useState<File | null>(null);
   const [gambarPreview, setGambarPreview] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchMasjid = async () => {
@@ -50,6 +52,8 @@ export default function DKMEditMasjid() {
       return;
     }
 
+    setIsSubmitting(true);
+
     const formData = new FormData();
     formData.append("masjid_name", namaMasjid);
     formData.append("masjid_bio_short", tentang);
@@ -62,11 +66,17 @@ export default function DKMEditMasjid() {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
+
       toast.success("Data masjid berhasil diperbarui");
-      navigate("/dkm/profil-masjid");
+
+      // ✅ Navigasi dan reload halaman
+      navigate("/dkm/profil-masjid", { replace: true });
+      window.location.reload();
     } catch (err) {
       console.error("❌ Gagal simpan:", err);
       toast.error("Gagal menyimpan data masjid");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -137,13 +147,7 @@ export default function DKMEditMasjid() {
             File yang diizinkan berbentuk .png dan .jpg
           </p>
 
-          {gambarPreview && (
-            <img
-              src={gambarPreview}
-              alt="Gambar Masjid"
-              className="rounded-lg mb-3 border max-w-xs"
-            />
-          )}
+          <ImagePreview label="Masjid" url={gambarPreview} />
 
           <input
             type="file"
@@ -217,6 +221,7 @@ export default function DKMEditMasjid() {
           onClick={handleSubmit}
           type="button"
           className="px-6 py-2 text-sm"
+          disabled={isSubmitting}
         />
       </div>
     </div>

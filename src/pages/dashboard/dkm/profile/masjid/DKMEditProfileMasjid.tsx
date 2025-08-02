@@ -10,6 +10,7 @@ import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
 import FileInputField from "@/components/common/main/FileInputField";
+import ImagePreview from "@/components/common/main/ImageReview";
 
 export default function DKMEditProfilMasjid() {
   const { user } = useCurrentUser();
@@ -64,20 +65,6 @@ export default function DKMEditProfilMasjid() {
       previewSetter(file ? URL.createObjectURL(file) : null);
     };
 
-  const renderImagePreview = (label: string, url?: string | null) =>
-    url ? (
-      <div className="mt-2">
-        <p className="text-xs text-muted-foreground mb-1">
-          Gambar {label} Saat Ini:
-        </p>
-        <img
-          src={url}
-          alt={`Gambar ${label}`}
-          className="rounded-md w-full max-h-40 object-contain border"
-        />
-      </div>
-    ) : null;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -131,7 +118,7 @@ export default function DKMEditProfilMasjid() {
               name="logo_masjid"
               onChange={handleImageChange(setLogoFile, setLogoPreview)}
             />
-            {renderImagePreview("Logo", logoPreview)}
+            <ImagePreview label="Logo" url={logoPreview} />
           </div>
           <div>
             <FileInputField
@@ -139,7 +126,7 @@ export default function DKMEditProfilMasjid() {
               name="ttd_ketua"
               onChange={handleImageChange(setTtdFile, setTtdPreview)}
             />
-            {renderImagePreview("TTD", ttdPreview)}
+            <ImagePreview label="TTD" url={ttdPreview} />
           </div>
           <div>
             <FileInputField
@@ -147,7 +134,7 @@ export default function DKMEditProfilMasjid() {
               name="stempel_masjid"
               onChange={handleImageChange(setStempelFile, setStempelPreview)}
             />
-            {renderImagePreview("Stempel", stempelPreview)}
+            <ImagePreview label="Stempel" url={stempelPreview} />
           </div>
         </div>
         <div className="flex justify-between items-center pt-4">

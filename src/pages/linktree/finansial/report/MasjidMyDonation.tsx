@@ -4,6 +4,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { useParams } from "react-router-dom";
+import FormattedDate from "@/constants/formattedDate";
 
 export default function MasjidMyDonation() {
   const { slug } = useParams();
@@ -45,9 +46,7 @@ export default function MasjidMyDonation() {
                 >
                   {item.donation_name || "Anonim"}
                 </h3>
-                <span className="text-xs" style={{ color: theme.silver2 }}>
-                  {new Date(item.created_at).toLocaleDateString("id-ID")}
-                </span>
+                <FormattedDate value={item.created_at} className="text-xs" />
               </div>
 
               <div className="text-sm space-y-1">
