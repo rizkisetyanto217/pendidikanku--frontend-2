@@ -107,24 +107,6 @@ export default function MasjidLectureSessions() {
       staleTime: 5 * 60 * 1000,
     });
 
-  const handleSubmit = async () => {
-    try {
-      const payload: AttendanceForm = {
-        user_lecture_sessions_attendance_lecture_session_id: id,
-        user_lecture_sessions_attendance_notes: notes,
-      };
-
-      await axios.post("/public/user-lecture-sessions-attendance", payload);
-      queryClient.invalidateQueries({
-        queryKey: ["userAttendance", id, currentUser?.id],
-      });
-      alert("Catatan berhasil disimpan");
-    } catch (err) {
-      console.error("❌ Gagal mencatat kehadiran:", err);
-      alert("Gagal mencatat catatan kehadiran");
-    }
-  };
-
   const info = {
     materi: data?.lecture_session_title || "-",
     ustadz: data?.lecture_session_teacher_name || "-",
@@ -299,9 +281,16 @@ export default function MasjidLectureSessions() {
           sessionId={id}
           onSuccess={() => {
             setShowModal(false);
+
+            // 🔁 Refetch data kehadiran & nilai
+            queryClient.invalidateQueries({
+              queryKey: ["userAttendance", id, currentUser?.id],
+            });
             queryClient.invalidateQueries({
               queryKey: ["lectureSessionDetail", id, currentUser?.id],
             });
+
+            console.log("🔄 Kehadiran & nilai direfresh ulang");
           }}
         />
       </div>

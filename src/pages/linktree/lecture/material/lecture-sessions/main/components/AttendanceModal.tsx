@@ -45,27 +45,39 @@ export default function AttendanceModal({
   }, [show, onClose]);
 
   const handleAttendanceSubmit = async () => {
-    if (!attendanceChoice) return;
+    if (!attendanceChoice) {
+      console.log("❌ Belum memilih jenis kehadiran");
+      return;
+    }
 
     try {
       setIsSubmitting(true);
 
-      let status = 0; // default tidak hadir
+      let status = 0;
       if (attendanceChoice === "tatap_muka") status = 1;
       else if (attendanceChoice === "online") status = 2;
 
-      await axios.post("/public/user-lecture-sessions-attendance", {
+      const payload = {
         user_lecture_sessions_attendance_lecture_session_id: sessionId,
         user_lecture_sessions_attendance_status: status,
         user_lecture_sessions_attendance_notes:
           status !== 0 ? kajianInsight : "",
-      });
+      };
+
+      console.log("📤 Mengirim data kehadiran:", payload);
+
+      const res = await axios.post(
+        "/public/user-lecture-sessions-attendance",
+        payload
+      );
+
+      console.log("✅ Respon backend:", res.data);
 
       alert("✅ Kehadiran berhasil dicatat.");
       onClose();
       onSuccess?.();
     } catch (err) {
-      console.error(err);
+      console.error("❌ Gagal mencatat kehadiran:", err);
       alert("❌ Gagal mencatat kehadiran.");
     } finally {
       setIsSubmitting(false);
