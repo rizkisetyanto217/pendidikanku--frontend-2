@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import { decode } from "html-entities";
+import parse from "html-react-parser";
 
 export default function MasjidSummaryLectureSessions() {
   const { id, slug } = useParams<{ id: string; slug: string }>();
@@ -15,8 +17,7 @@ export default function MasjidSummaryLectureSessions() {
   const { id: lecture_session_id } = useParams();
   const location = useLocation();
 
-  const backUrl =
-    location.state?.from || `/masjid/${slug}/soal-materi/${id}`;
+  const backUrl = location.state?.from || `/masjid/${slug}/soal-materi/${id}`;
 
   // 📥 Fetch detail sesi kajian
   const {
@@ -102,10 +103,12 @@ export default function MasjidSummaryLectureSessions() {
               style={{ color: theme.black1 }}
             >
               {summary ? (
-                <p>{summary}</p>
+                <div className="whitespace-pre-wrap text-sm text-justify leading-relaxed">
+                  {parse(cleanTranscriptHTML(summary))}
+                </div>
               ) : (
                 <p className="italic text-gray-500">
-                  Belum ada ringkasan tersedia.
+                  Belum ada materi lengkap tersedia.
                 </p>
               )}
             </div>
@@ -114,4 +117,58 @@ export default function MasjidSummaryLectureSessions() {
       </div>
     </div>
   );
+}
+
+function cleanTranscriptHTML(html: string): string {
+  if (!html) return "";
+
+  let decoded = decode(html);
+
+  // Hapus atribut data-* dan style
+  decoded = decoded.replace(/(data-start|data-end|style)="[^"]*"/g, "");
+
+  // Ganti <h2>, <h3> → <p>
+  decoded = decoded.replace(/<h2[^>]*>/g, "<p>");
+  decoded = decoded.replace(/<\/h2>/g, "</p>");
+  decoded = decoded.replace(/<h3[^>]*>/g, "<p>");
+  decoded = decoded.replace(/<\/h3>/g, "</p>");
+
+  // Hapus <br />
+  decoded = decoded.replace(/<br\s*\/?>/gi, "");
+
+  // 🔁 Bersihkan <p> dalam <p>
+  while (/<p>\s*<p>(.*?)<\/p>\s*<\/p>/gis.test(decoded)) {
+    decoded = decoded.replace(/<p>\s*<p>(.*?)<\/p>\s*<\/p>/gis, "<p>$1</p>");
+  }
+
+  // 🔁 Bersihkan <li> yang mengandung <p>
+  while (/<li[^>]*>\s*<p[^>]*>(.*?)<\/p>\s*<\/li>/gis.test(decoded)) {
+    decoded = decoded.replace(
+      /<li[^>]*>\s*<p[^>]*>(.*?)<\/p>\s*<\/li>/gis,
+      "<li>$1</li>"
+    );
+  }
+
+  // 🔁 Bersihkan <li> yang mengandung <p><strong>...</strong></p> (opsional tambahan)
+  while (
+    /<li[^>]*>\s*<p[^>]*>(<strong[^>]*>.*?<\/strong>.*?)<\/p>\s*<\/li>/gis.test(
+      decoded
+    )
+  ) {
+    decoded = decoded.replace(
+      /<li[^>]*>\s*<p[^>]*>(<strong[^>]*>.*?<\/strong>.*?)<\/p>\s*<\/li>/gis,
+      "<li>$1</li>"
+    );
+  }
+
+  // <p> bungkus <ul>/<ol>/<li>
+  decoded = decoded.replace(/<p>\s*(<(ul|ol)[^>]*>.*?<\/\2>)\s*<\/p>/gis, "$1");
+  decoded = decoded.replace(/<p>\s*(<li[^>]*>.*?<\/li>)\s*<\/p>/gis, "$1");
+
+  // Hapus tag kosong
+  decoded = decoded.replace(/<p>\s*<\/p>/gi, "");
+  decoded = decoded.replace(/<li>\s*<\/li>/gi, "");
+  decoded = decoded.replace(/<(ul|ol)>\s*<\/\1>/gi, "");
+
+  return decoded.trim();
 }

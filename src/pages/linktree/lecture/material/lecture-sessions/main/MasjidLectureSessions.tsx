@@ -32,7 +32,19 @@ interface LectureSession {
   lecture_session_place: string;
   lecture_session_image_url?: string;
   user_grade_result?: number;
-  user_attendance_status?: number; // 1 = Hadir, 0 = Tidak Hadir, undefined/null = Belum
+}
+
+interface UserAttendance {
+  user_lecture_sessions_attendance_status: number;
+  user_lecture_sessions_attendance_notes: string;
+  user_lecture_sessions_attendance_personal_notes: string;
+}
+
+interface AttendanceForm {
+  user_lecture_sessions_attendance_lecture_session_id: string;
+  user_lecture_sessions_attendance_status?: number;
+  user_lecture_sessions_attendance_notes?: string;
+  user_lecture_sessions_attendance_personal_notes?: string;
 }
 
 export default function MasjidLectureSessions() {
@@ -51,6 +63,7 @@ export default function MasjidLectureSessions() {
 
   const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
+  const [notes, setNotes] = useState("");
 
   const { data, isLoading } = useQuery<LectureSession>({
     queryKey: ["lectureSessionDetail", id, currentUser?.id],
@@ -78,6 +91,39 @@ export default function MasjidLectureSessions() {
       console.log("❌ Cookie 'user_id' tidak ditemukan");
     }
   }, []);
+
+  const { data: attendanceData, isLoading: loadingAttendance } =
+    useQuery<UserAttendance>({
+      queryKey: ["userAttendance", id, currentUser?.id],
+      queryFn: async () => {
+        const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+        const res = await axios.get(
+          `/public/user-lecture-sessions-attendance/${id}`,
+          { headers }
+        );
+        return res.data;
+      },
+      enabled: !!id && !!currentUser?.id, // hanya jalan jika sudah login
+      staleTime: 5 * 60 * 1000,
+    });
+
+  const handleSubmit = async () => {
+    try {
+      const payload: AttendanceForm = {
+        user_lecture_sessions_attendance_lecture_session_id: id,
+        user_lecture_sessions_attendance_notes: notes,
+      };
+
+      await axios.post("/public/user-lecture-sessions-attendance", payload);
+      queryClient.invalidateQueries({
+        queryKey: ["userAttendance", id, currentUser?.id],
+      });
+      alert("Catatan berhasil disimpan");
+    } catch (err) {
+      console.error("❌ Gagal mencatat kehadiran:", err);
+      alert("Gagal mencatat catatan kehadiran");
+    }
+  };
 
   const info = {
     materi: data?.lecture_session_title || "-",
@@ -188,11 +234,13 @@ export default function MasjidLectureSessions() {
                   className="rounded-md px-3 py-2 text-sm cursor-pointer hover:opacity-80"
                   style={{
                     backgroundColor:
-                      data?.user_attendance_status === 1
+                      attendanceData?.user_lecture_sessions_attendance_status ===
+                      1
                         ? "#D1FAE5"
                         : "#FDE68A",
                     color:
-                      data?.user_attendance_status === 1
+                      attendanceData?.user_lecture_sessions_attendance_status ===
+                      1
                         ? "#065F46"
                         : "#92400E",
                     border: "1px solid #D1D5DB",
@@ -200,8 +248,8 @@ export default function MasjidLectureSessions() {
                   onClick={() => setShowModal(true)}
                 >
                   <strong>Status Kehadiran:</strong>{" "}
-                  {data?.user_attendance_status === 1
-                    ? "Hadir Tatap Muka ✓"
+                  {attendanceData?.user_lecture_sessions_attendance_status === 1
+                    ? "Hadir ✓"
                     : "✕ Catat Kehadiran"}
                 </div>
               </div>
@@ -222,12 +270,14 @@ export default function MasjidLectureSessions() {
           {menuItems.map((item) => (
             <div
               key={item.label}
-              onClick={() =>
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 navigate(
                   `/masjid/${slug}/soal-materi/${id}/${item.path}?tab=${tab}`,
                   { state: { fromTab: tab } }
-                )
-              }
+                );
+              }}
               className="flex flex-col items-center text-center text-sm p-3 rounded-md cursor-pointer hover:opacity-90 transition"
               style={{
                 backgroundColor: theme.white3,

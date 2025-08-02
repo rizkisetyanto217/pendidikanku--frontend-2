@@ -49,12 +49,18 @@ export default function AttendanceModal({
 
     try {
       setIsSubmitting(true);
-      await axios.post("/api/a/user-attendance", {
-        lecture_session_id: sessionId,
-        attendance_status: attendanceChoice,
-        kajian_insight:
-          attendanceChoice !== "tidak_hadir" ? kajianInsight : null,
+
+      let status = 0; // default tidak hadir
+      if (attendanceChoice === "tatap_muka") status = 1;
+      else if (attendanceChoice === "online") status = 2;
+
+      await axios.post("/public/user-lecture-sessions-attendance", {
+        user_lecture_sessions_attendance_lecture_session_id: sessionId,
+        user_lecture_sessions_attendance_status: status,
+        user_lecture_sessions_attendance_notes:
+          status !== 0 ? kajianInsight : "",
       });
+
       alert("✅ Kehadiran berhasil dicatat.");
       onClose();
       onSuccess?.();
