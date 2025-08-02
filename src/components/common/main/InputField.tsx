@@ -5,7 +5,7 @@ import React from "react";
 interface InputFieldProps {
   label: string;
   name: string;
-  value?: string; // ✅ bikin optional agar file input tidak error
+  value?: string;
   placeholder?: string;
   type?: string;
   as?: "input" | "textarea";
@@ -31,9 +31,8 @@ export default function InputField({
   const commonStyle = {
     backgroundColor: theme.white2,
     borderColor: theme.silver1,
-    color: theme.black1, // Ini teks utama
-    // Tambahan untuk datetime-local:
-    WebkitTextFillColor: theme.black1, // fix warna teks internal chrome
+    color: theme.black1,
+    WebkitTextFillColor: theme.black1,
   };
 
   return (
@@ -51,7 +50,7 @@ export default function InputField({
           id={name}
           name={name}
           value={value}
-          onChange={onChange}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e)}
           placeholder={placeholder}
           rows={rows}
           className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -62,7 +61,7 @@ export default function InputField({
           id={name}
           name={name}
           type="file"
-          onChange={onChange}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e)}
           placeholder={placeholder}
           className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
           style={commonStyle}
@@ -73,7 +72,7 @@ export default function InputField({
           name={name}
           type={type}
           value={value}
-          onChange={onChange}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e)}
           placeholder={placeholder}
           className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
           style={commonStyle}

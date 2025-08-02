@@ -75,40 +75,53 @@ export default function LectureMaterialList({
             {/* Badge Bar */}
             <div className="flex flex-wrap gap-2 mt-2">
               {/* Kehadiran */}
-              {item.attendanceStatus !== undefined && (
+              {item.attendanceStatus !== undefined &&
+                item.attendanceStatus !== 0 && (
+                  <span
+                    className="text-xs px-2 py-1 rounded-full font-medium"
+                    style={{
+                      backgroundColor:
+                        item.attendanceStatus === 1
+                          ? theme.success2
+                          : item.attendanceStatus === 2
+                            ? theme.black1
+                            : theme.white3,
+                      color:
+                        item.attendanceStatus === 1
+                          ? theme.success1
+                          : item.attendanceStatus === 2
+                            ? theme.black1
+                            : theme.silver2,
+                    }}
+                  >
+                    {item.attendanceStatus === 1
+                      ? "Hadir Tatap Muka ✅"
+                      : item.attendanceStatus === 2
+                        ? "Hadir Online 💻"
+                        : "Tidak Hadir"}
+                  </span>
+                )}
+
+              {/* Materi & Soal */}
+              {item.gradeResult === undefined && (
                 <span
                   className="text-xs px-2 py-1 rounded-full font-medium"
                   style={{
                     backgroundColor:
-                      item.attendanceStatus === 1
-                        ? theme.success2
+                      item.status === "tersedia"
+                        ? theme.warning1
                         : theme.white3,
                     color:
-                      item.attendanceStatus === 1
-                        ? theme.success1
+                      item.status === "tersedia"
+                        ? theme.warning1
                         : theme.silver2,
                   }}
                 >
-                  {item.attendanceStatus === 1
-                    ? "Hadir Langsung ✅"
-                    : "Tidak Hadir"}
+                  {item.status === "tersedia"
+                    ? "Materi & Soal Tersedia"
+                    : "Dalam Proses"}
                 </span>
               )}
-
-              {/* Materi & Soal */}
-              <span
-                className="text-xs px-2 py-1 rounded-full font-medium"
-                style={{
-                  backgroundColor:
-                    item.status === "tersedia" ? theme.warning1 : theme.white3,
-                  color:
-                    item.status === "tersedia" ? theme.warning1 : theme.silver2,
-                }}
-              >
-                {item.status === "tersedia"
-                  ? "Materi & Soal Tersedia"
-                  : "Dalam Proses"}
-              </span>
 
               {/* Nilai */}
               {item.gradeResult !== undefined && (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
@@ -10,6 +10,7 @@ import QRCodeLink from "@/components/common/main/QRCodeLink";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
+import { useSearchParams } from "react-router-dom";
 
 interface Kajian {
   lecture_session_id: string;
@@ -20,12 +21,27 @@ interface Kajian {
   lecture_session_image_url: string;
 }
 
+interface JadwalRutin {
+  lecture_schedules_id: string;
+  lecture_schedules_title: string;
+  lecture_schedules_start_time: string;
+  lecture_schedules_place: string;
+  lecture_schedules_day_of_week: number;
+  lecture_schedules_notes: string;
+  lecture: {
+    lecture_title: string;
+    lecture_image_url?: string;
+  };
+}
+
 export default function MasjidScheduleLecture() {
   const { slug } = useParams<{ slug: string }>();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
-  const [tab, setTab] = useState("mendatang");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") || "mendatang";
+  const [tab, setTab] = useState(tabParam);
 
   const { data: kajianList, isLoading } = useQuery<Kajian[]>({
     queryKey: ["kajianList", slug],
@@ -41,16 +57,77 @@ export default function MasjidScheduleLecture() {
     refetchOnWindowFocus: false,
   });
 
-  const dummyRutin: Kajian[] = [
-    {
-      lecture_session_id: "rutin-1",
-      lecture_session_title: "Kajian Rutin Tafsir Al-Qur'an",
-      lecture_session_start_time: new Date().toISOString(),
-      lecture_session_teacher_name: "Ustadz Dummy",
-      lecture_title: "Tafsir Harian",
-      lecture_session_image_url: "/placeholder.jpg",
+  // update URL when tab changes
+  useEffect(() => {
+    setSearchParams({ tab });
+  }, [tab, setSearchParams]);
+
+  const { data: jadwalRutin = [], isLoading: loadingRutin } = useQuery<
+    JadwalRutin[]
+  >({
+    queryKey: ["jadwalRutin", slug],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/lecture-schedules/by-masjid/${slug}`
+      );
+      return res.data ?? [];
     },
-  ];
+    enabled: !!slug && tab === "rutin",
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const getNamaHari = (day: number) => {
+    const hari = [
+      "Minggu",
+      "Senin",
+      "Selasa",
+      "Rabu",
+      "Kamis",
+      "Jumat",
+      "Sabtu",
+    ];
+    return hari[day] || "-";
+  };
+
+  const renderCardRutin = (item: JadwalRutin) => (
+    <div
+      key={item.lecture_schedules_id}
+      className="border rounded-xl overflow-hidden shadow-sm"
+      style={{
+        borderColor: theme.silver1,
+        backgroundColor: theme.white1,
+      }}
+    >
+      <div className="flex gap-3">
+        <img
+          src={
+            item.lecture?.lecture_image_url ||
+            "https://via.placeholder.com/150x150.png?text=Kajian"
+          }
+          alt={item.lecture_schedules_title}
+          className="w-36 h-36 object-cover rounded-l-xl"
+        />
+        <div className="flex-1 text-sm p-2">
+          <p className="text-xs font-semibold" style={{ color: theme.primary }}>
+            {item.lecture?.lecture_title}
+          </p>
+          <p
+            className="font-semibold line-clamp-2 pt-2"
+            style={{ color: theme.black1 }}
+          >
+            {item.lecture_schedules_title}
+          </p>
+          <p className="text-xs pt-2" style={{ color: theme.silver2 }}>
+            {getNamaHari(item.lecture_schedules_day_of_week)} –{" "}
+            {item.lecture_schedules_start_time?.slice(0, 5)} WIB
+          </p>
+          <p className="text-xs pt-1" style={{ color: theme.silver2 }}>
+            {item.lecture_schedules_place}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderCard = (kajian: Kajian) => (
     <div
@@ -64,26 +141,26 @@ export default function MasjidScheduleLecture() {
         backgroundColor: theme.white1,
       }}
     >
-      <div className="flex gap-3 p-3">
+      <div className="flex gap-3">
         <img
           src={kajian.lecture_session_image_url}
           alt={kajian.lecture_session_title}
-          className="w-36 h-36 object-cover rounded"
+          className="w-36 h-36 object-cover rounded-l-xl"
         />
-        <div className="flex-1 text-sm">
+        <div className="flex-1 text-sm p-2">
           <p className="text-xs font-semibold" style={{ color: theme.primary }}>
             {kajian.lecture_title}
           </p>
           <p
-            className="font-semibold line-clamp-2"
+            className="font-semibold line-clamp-2 pt-2"
             style={{ color: theme.black1 }}
           >
             {kajian.lecture_session_title}
           </p>
-          <p style={{ color: theme.silver2 }}>
+          <p style={{ color: theme.silver2 }} className="pt-2">
             {kajian.lecture_session_teacher_name}
           </p>
-          <p className="text-xs" style={{ color: theme.silver2 }}>
+          <p className="text-xs pt-1" style={{ color: theme.silver2 }}>
             <FormattedDate value={kajian.lecture_session_start_time} />
           </p>
         </div>
@@ -95,7 +172,7 @@ export default function MasjidScheduleLecture() {
     <>
       <PublicNavbar masjidName="Jadwal Kajian" />
 
-      <div className="pt-20 px-4 space-y-4">
+      <div className="pt-20">
         <Tabs
           value={tab}
           onChange={setTab}
@@ -116,7 +193,13 @@ export default function MasjidScheduleLecture() {
         </TabsContent>
 
         <TabsContent value="rutin" current={tab}>
-          <div className="space-y-4">{dummyRutin.map(renderCard)}</div>
+          {loadingRutin ? (
+            <p className="p-4">Memuat jadwal rutin...</p>
+          ) : jadwalRutin && jadwalRutin.length > 0 ? (
+            <div className="space-y-4">{jadwalRutin.map(renderCardRutin)}</div>
+          ) : (
+            <p className="p-4">Belum ada jadwal rutin tersedia.</p>
+          )}
         </TabsContent>
       </div>
 

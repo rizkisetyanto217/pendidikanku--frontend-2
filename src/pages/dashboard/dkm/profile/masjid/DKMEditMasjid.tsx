@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -6,6 +6,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import CommonActionButton from "@/components/common/main/CommonActionButton";
 
 export default function DKMEditMasjid() {
   const { isDark } = useHtmlDarkMode();
@@ -19,6 +20,29 @@ export default function DKMEditMasjid() {
   const [alamat, setAlamat] = useState("");
   const [linkMaps, setLinkMaps] = useState("");
   const [gambarFile, setGambarFile] = useState<File | null>(null);
+  const [gambarPreview, setGambarPreview] = useState<string>("");
+
+  useEffect(() => {
+    const fetchMasjid = async () => {
+      if (!masjidId) return;
+
+      try {
+        const res = await axios.get(`/public/masjids/verified/${masjidId}`);
+        const data = res.data?.data;
+
+        setNamaMasjid(data.masjid_name || "");
+        setTentang(data.masjid_bio_short || "");
+        setAlamat(data.masjid_location || "");
+        setLinkMaps(data.masjid_google_maps_url || "");
+        setGambarPreview(data.masjid_image_url || "");
+      } catch (error) {
+        console.error("Gagal mengambil data masjid:", error);
+        toast.error("Gagal mengambil data masjid");
+      }
+    };
+
+    fetchMasjid();
+  }, [masjidId]);
 
   const handleSubmit = async () => {
     if (!masjidId) {
@@ -31,7 +55,7 @@ export default function DKMEditMasjid() {
     formData.append("masjid_bio_short", tentang);
     formData.append("masjid_location", alamat);
     formData.append("masjid_map_url", linkMaps);
-    if (gambarFile) formData.append("image", gambarFile); // pakai key 'image'
+    if (gambarFile) formData.append("image", gambarFile);
 
     try {
       await axios.put(`/api/a/masjids/${masjidId}`, formData, {
@@ -48,7 +72,7 @@ export default function DKMEditMasjid() {
 
   return (
     <div
-      className="max-w-5xl mx-auto lg:p-6 rounded-2xl"
+      className="max-w-5xl mx-auto rounded-2xl"
       style={{
         backgroundColor: theme.white1,
         borderColor: theme.silver1,
@@ -112,10 +136,28 @@ export default function DKMEditMasjid() {
           <p className="text-sm mb-2" style={{ color: theme.silver2 }}>
             File yang diizinkan berbentuk .png dan .jpg
           </p>
+
+          {gambarPreview && (
+            <img
+              src={gambarPreview}
+              alt="Gambar Masjid"
+              className="rounded-lg mb-3 border max-w-xs"
+            />
+          )}
+
           <input
             type="file"
             accept=".png,.jpg,.jpeg"
-            onChange={(e) => setGambarFile(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setGambarFile(file);
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () =>
+                  setGambarPreview(reader.result as string);
+                reader.readAsDataURL(file);
+              }
+            }}
             className="text-sm"
           />
         </div>
@@ -170,14 +212,12 @@ export default function DKMEditMasjid() {
         <p className="text-sm" style={{ color: theme.silver2 }}>
           Butuh dibuatkan Logo, Profil dan Stempel Masjid?
         </p>
-        <button
-          type="button"
+        <CommonActionButton
+          text="Simpan Data"
           onClick={handleSubmit}
-          className="px-6 py-2 text-white rounded-lg text-sm"
-          style={{ backgroundColor: theme.primary }}
-        >
-          Simpan Data
-        </button>
+          type="button"
+          className="px-6 py-2 text-sm"
+        />
       </div>
     </div>
   );

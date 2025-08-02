@@ -1,30 +1,22 @@
-// src/constants/formattedDate.tsx
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { id as localeID } from "date-fns/locale";
 
 interface FormattedDateProps {
   value: string | Date;
-  withTimezoneOffset?: boolean;
-  fullMonth?: boolean; // ✅ Tambahan untuk nama bulan lengkap
+  fullMonth?: boolean;
   className?: string;
 }
 
 export default function FormattedDate({
   value,
-  withTimezoneOffset = true,
   fullMonth = false,
   className = "",
 }: FormattedDateProps) {
-  const dateObj = new Date(value);
-  const adjusted = withTimezoneOffset
-    ? new Date(dateObj.getTime() + 7 * 60 * 60 * 1000)
-    : dateObj;
-
   const formatPattern = fullMonth
-    ? "EEEE, dd MMMM yyyy - HH:mm" // ✅ Bulan lengkap
-    : "EEEE, dd MMM yyyy - HH:mm"; // ❎ Bulan singkat
+    ? "EEEE, dd MMMM yyyy - HH:mm"
+    : "EEEE, dd MMM yyyy - HH:mm";
 
-  const formatted = format(adjusted, formatPattern, {
+  const formatted = formatInTimeZone(value, "UTC", formatPattern, {
     locale: localeID,
   });
 

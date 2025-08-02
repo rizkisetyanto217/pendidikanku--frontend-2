@@ -21,6 +21,7 @@ import {
   FileText,
   FolderOpen,
 } from "lucide-react";
+import FormattedDate from "@/constants/formattedDate";
 
 // =====================
 // ✅ Interface
@@ -110,12 +111,7 @@ export default function MasjidLectureSessions() {
   const info = {
     materi: data?.lecture_session_title || "-",
     ustadz: data?.lecture_session_teacher_name || "-",
-    jadwal: data?.lecture_session_start_time
-      ? new Date(data.lecture_session_start_time).toLocaleString("id-ID", {
-          dateStyle: "full",
-          timeStyle: "short",
-        })
-      : "-",
+    jadwal: data?.lecture_session_start_time || "-",
     tempat: data?.lecture_session_place || "-",
   };
 
@@ -181,8 +177,13 @@ export default function MasjidLectureSessions() {
               </div>
               <div>
                 📅 <strong style={{ color: theme.black1 }}>Jadwal:</strong>{" "}
-                {info.jadwal}
+                {info.jadwal !== "-" ? (
+                  <FormattedDate value={info.jadwal} fullMonth />
+                ) : (
+                  "-"
+                )}
               </div>
+
               <div>
                 📍 <strong style={{ color: theme.black1 }}>Tempat:</strong>{" "}
                 {info.tempat}

@@ -7,6 +7,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AttendanceModal from "./components/AttendanceModal";
+import FormattedDate from "@/constants/formattedDate";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 // =====================
 interface LectureSession {
@@ -45,12 +47,7 @@ export default function MasjidInformationLectureSessions() {
   const info = {
     materi: data?.lecture_session_title || "-",
     ustadz: data?.lecture_session_teacher_name || "-",
-    jadwal: data?.lecture_session_start_time
-      ? new Date(data.lecture_session_start_time).toLocaleString("id-ID", {
-          dateStyle: "full",
-          timeStyle: "short",
-        })
-      : "-",
+    jadwal: data?.lecture_session_start_time || "-",
     tempat: data?.lecture_session_place || "-",
     deskripsi: data?.lecture_session_description || "-",
     gambar: data?.lecture_session_image_url,
@@ -106,8 +103,12 @@ export default function MasjidInformationLectureSessions() {
               {info.ustadz}
             </div>
             <div>
-              <strong style={{ color: theme.black1 }}>Jadwal:</strong>{" "}
-              {info.jadwal}
+              📅 <strong style={{ color: theme.black1 }}>Jadwal:</strong>{" "}
+              {info.jadwal !== "-" ? (
+                <FormattedDate value={info.jadwal} fullMonth />
+              ) : (
+                "-"
+              )}
             </div>
             <div>
               <strong style={{ color: theme.black1 }}>Tempat:</strong>{" "}
@@ -117,7 +118,9 @@ export default function MasjidInformationLectureSessions() {
               <strong style={{ color: theme.black1 }}>Deskripsi:</strong>
               <div
                 className="text-sm mt-1 leading-relaxed prose prose-sm prose-slate max-w-none dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: info.deskripsi }}
+                dangerouslySetInnerHTML={{
+                  __html: cleanTranscriptHTML(info.deskripsi || ""),
+                }}
               />
             </div>
 

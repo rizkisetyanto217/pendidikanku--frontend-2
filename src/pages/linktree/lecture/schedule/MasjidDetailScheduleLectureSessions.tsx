@@ -44,21 +44,20 @@ export default function MasjidDetailLecture() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <PageHeaderUser
-        title="Detail Kajian ini"
+        title="Detail Kajian"
         onBackClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
       />
 
       <div
-        className="p-4 rounded-md shadow-sm"
+        className="rounded-md shadow-sm"
         style={{
           backgroundColor: themeColors.white1,
           color: themeColors.black1,
         }}
       >
-        {/* Kontainer Responsif */}
         <div className="md:flex md:gap-6">
-          {/* Gambar Kajian */}
-          <div className="w-full md:w-1/2 aspect-[3/4] md:aspect-auto md:h-[420px] rounded-xl overflow-hidden mb-4 md:mb-0">
+          {/* Gambar Kajian - tanpa padding */}
+          <div className="w-full md:w-1/2 aspect-[3/4] md:aspect-auto md:h-[420px] rounded-xl overflow-hidden">
             <img
               src={
                 kajian.lecture_session_image_url ||
@@ -69,8 +68,8 @@ export default function MasjidDetailLecture() {
             />
           </div>
 
-          {/* Informasi & Keterangan */}
-          <div className="w-full md:w-1/2 space-y-4">
+          {/* Informasi & Keterangan - tetap pakai padding */}
+          <div className="w-full md:w-1/2 space-y-4 p-4">
             {/* Informasi Kajian */}
             <div>
               <h2
@@ -102,7 +101,7 @@ export default function MasjidDetailLecture() {
               </ul>
             </div>
 
-            {/* Keterangan Kajian */}
+            {/* Keterangan */}
             <div>
               <h2
                 className="text-base font-semibold"
@@ -121,7 +120,6 @@ export default function MasjidDetailLecture() {
           </div>
         </div>
       </div>
-      
     </div>
   );
 }

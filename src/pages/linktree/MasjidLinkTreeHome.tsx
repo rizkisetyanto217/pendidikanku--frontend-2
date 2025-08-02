@@ -173,8 +173,15 @@ export default function PublicLinktree() {
       <>
         {/* NAVBAR */}
         <PublicNavbar masjidName={masjidData.masjid_name} />
+
         <div className="w-full min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center pt-16">
           <div className="p-4">
+            <h2
+              className="text-base font-semibold mb-4 mt-4"
+              style={{ color: themeColors.black1 }}
+            >
+              Kajian Mendatang
+            </h2>
             {/* Gambar Kajian */}
             <div className="relative">
               {kajianList && kajianList.length > 0 && (
@@ -258,10 +265,10 @@ export default function PublicLinktree() {
                   </div>
 
                   {/* Tambahan teks "Kajian Terbaru Lainnya" */}
-                  <div className="mt-2 pr-4 text-right">
+                  <div className="mt-4 text-right ">
                     <span
                       className="text-sm underline cursor-pointer hover:text-primary transition"
-                      style={{ color: themeColors.primary }}
+                      style={{ color: themeColors.quaternary }}
                       onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
                     >
                       Kajian Terbaru Lainnya
@@ -356,7 +363,7 @@ export default function PublicLinktree() {
             <div>
               <h2
                 className="text-base font-semibold mb-2"
-                style={{ color: themeColors.primary }}
+                style={{ color: themeColors.black1 }}
               >
                 Menu Utama
               </h2>
