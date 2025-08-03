@@ -1,26 +1,67 @@
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
-import { CalendarDays, MapPin, Circle } from "lucide-react";
+import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useNavigate, useParams } from "react-router-dom";
 import CommonButton from "@/components/common/main/CommonButton";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function MasjidMyActivity() {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
   const { slug } = useParams();
+  const { data: currentUser } = useCurrentUser();
+  const {
+    data: lectureSessions = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["kajianListBySlug", slug, currentUser?.id],
+    queryFn: async () => {
+      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+      const res = await axios.get(
+        `/public/lecture-sessions-u/soal-materi/${slug}?attendance_only=true`,
+        { headers }
+      );
+      return res.data?.data ?? [];
+    },
+    enabled: !!slug,
+  });
+
+  const mappedSessions = lectureSessions.map((sesi: any) => ({
+    id: sesi.lecture_session_id,
+    imageUrl: sesi.lecture_session_image_url,
+    title: sesi.lecture_session_title?.trim() || "-",
+    teacher: sesi.lecture_session_teacher_name?.trim() || "-",
+    masjidName: "-",
+    location: sesi.lecture_session_place || "-",
+    time: new Date(sesi.lecture_session_start_time).toLocaleString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    attendanceStatus: sesi.user_attendance_status,
+    gradeResult: sesi.user_grade_result,
+    status: sesi.user_grade_result !== undefined ? "tersedia" : "proses",
+  }));
+
+  const displayedSessions = mappedSessions.slice(0, 5);
 
   return (
     <>
       <PublicNavbar masjidName="Aktivitas Saya" />
 
       <div className="min-h-screen pb-28 bg-cover bg-no-repeat bg-center pt-16">
-        {/* Header User (dengan tema) */}
+        {/* Header User */}
         <div
           className="rounded-xl p-4"
-          style={{ backgroundColor: themeColors.tertiary || "#E6F5F4" }}
+          style={{ backgroundColor: themeColors.tertiary }}
         >
           <h1
             className="text-base font-semibold"
@@ -31,7 +72,6 @@ export default function MasjidMyActivity() {
           <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
             Bergabung pada 3 November 2025
           </p>
-
           <button
             className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
             style={{
@@ -61,7 +101,7 @@ export default function MasjidMyActivity() {
           />
         </div>
 
-        {/* Section Riwayat Kajian */}
+        {/* Riwayat Kajian */}
         <div className="mt-6">
           <h2
             className="text-sm font-semibold mb-3"
@@ -70,72 +110,19 @@ export default function MasjidMyActivity() {
             Riwayat Kajian Saya
           </h2>
 
-          {[1, 2].map((_, i) => (
-            <div
-              key={i}
-              className="rounded-lg border mb-4 p-4 space-y-1"
-              style={{
-                backgroundColor: themeColors.white1,
-                borderColor: themeColors.silver1,
-              }}
-            >
-              <h3
-                className="font-semibold text-sm"
-                style={{ color: themeColors.black1 }}
-              >
-                Rencana Allah yang terbaik
-              </h3>
-              <p className="text-sm" style={{ color: themeColors.silver2 }}>
-                Ustadz Abdullah
-              </p>
-              <p className="text-xs" style={{ color: themeColors.silver2 }}>
-                Masjid Al Hidayah, Senen, Jakarta Pusat
-              </p>
+          {isLoading ? (
+            <p>Memuat data...</p>
+          ) : isError ? (
+            <p className="text-red-500 text-sm">Gagal memuat data kajian.</p>
+          ) : displayedSessions.length === 0 ? (
+            <p className="text-sm italic text-gray-500">
+              Belum ada kajian yang dihadiri.
+            </p>
+          ) : (
+            <LectureMaterialList data={displayedSessions} />
+          )}
 
-              <div
-                className="flex items-center space-x-1 text-xs mt-1"
-                style={{ color: themeColors.silver4 }}
-              >
-                <Circle size={12} />
-                <span>4 Maret 2025, Pukul 10.00 WIB - Selesai</span>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                {i === 0 ? (
-                  <>
-                    <span
-                      className="px-3 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        backgroundColor: themeColors.white3,
-                        color: themeColors.black1,
-                      }}
-                    >
-                      Hadir Online ✓
-                    </span>
-                    <span
-                      className="px-3 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        backgroundColor: themeColors.primary,
-                        color: themeColors.white1,
-                      }}
-                    >
-                      Materi & Soal Tersedia
-                    </span>
-                  </>
-                ) : (
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-medium"
-                    style={{
-                      backgroundColor: themeColors.success1,
-                      color: themeColors.white1,
-                    }}
-                  >
-                    Hadir Langsung ✓
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+          <br />
 
           <CommonButton
             to={`/masjid/${slug}/aktivitas/kajian-saya`}
@@ -170,7 +157,6 @@ function CardInfo({
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  // Gunakan override warna berdasarkan label agar tetap konsisten dan nyaman di dark mode
   const overrideColors: Record<string, { bg: string; color: string }> = {
     Donasi: {
       bg: themeColors.success2,
@@ -191,22 +177,15 @@ function CardInfo({
         backgroundColor: current.bg,
         border: `1px solid ${isDark ? themeColors.silver1 : "transparent"}`,
       }}
-      onClick={onClick} // ← ini penting
+      onClick={onClick}
     >
       <h4
         className="text-sm font-semibold mb-1"
-        style={{
-          color: current.color,
-        }}
+        style={{ color: current.color }}
       >
         {label}
       </h4>
-      <p
-        className="text-xs leading-snug"
-        style={{
-          color: isDark ? themeColors.black1 : themeColors.black1,
-        }}
-      >
+      <p className="text-xs leading-snug" style={{ color: themeColors.black1 }}>
         {desc}
       </p>
     </div>

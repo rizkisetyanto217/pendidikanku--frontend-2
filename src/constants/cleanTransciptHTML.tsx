@@ -1,4 +1,4 @@
-import { decode } from "punycode";
+import { decode } from "html-entities";
 
 export default function cleanTranscriptHTML(html: string): string {
   if (!html) return "";

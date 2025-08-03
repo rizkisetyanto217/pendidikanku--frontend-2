@@ -2,11 +2,12 @@ import { useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 
-type CartLink = {
+type CartLinkProps = {
   label: string;
-  icon: React.ReactNode; // untuk mendukung icon komponen, bukan string biasa
+  icon: React.ReactNode;
   href?: string;
   internal?: boolean;
+  onClick?: () => void;
 };
 
 export default function CartLink({
@@ -14,7 +15,8 @@ export default function CartLink({
   icon,
   href,
   internal = true,
-}: CartLink) {
+  onClick,
+}: CartLinkProps) {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
@@ -22,7 +24,16 @@ export default function CartLink({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // 1. Jika ada onClick, panggil itu
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    // 2. Kalau tidak ada onClick, gunakan href
     if (!href) return;
+
     if (internal) {
       navigate(href);
     } else {

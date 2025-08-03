@@ -22,6 +22,8 @@ import BorderLine from "@/components/common/main/Border";
 import SharePopover from "@/components/common/public/SharePopover";
 import CartLink from "@/components/common/main/CardLink";
 import FormattedDate from "@/constants/formattedDate";
+import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
+import SocialMediaModal from "@/components/pages/home/SocialMediaModal";
 
 const currentUrl = window.location.href;
 
@@ -69,6 +71,7 @@ export default function PublicLinktree() {
 
   const { data: user, isLoading: loadingUser } = useCurrentUser();
   const isLoggedIn = !!user;
+  const [showSocialModal, setShowSocialModal] = useState(false);
 
   const scrollLeft = () => {
     sliderRef.current?.scrollBy({ left: -300, behavior: "smooth" });
@@ -277,9 +280,8 @@ export default function PublicLinktree() {
                 </div>
               )}
             </div>
-
             <BorderLine />
-
+            <SholatScheduleCard location="DKI Jakarta" />{" "}
             {/* --- SECTION: INFO MASJID --- */}
             <div className="mb-4 mt-4">
               <h1
@@ -357,9 +359,7 @@ export default function PublicLinktree() {
                 </button>
               </div>
             </div>
-
             <BorderLine />
-
             {/* --- SECTION: MENU UTAMA --- */}
             <div>
               <h2
@@ -382,7 +382,7 @@ export default function PublicLinktree() {
                 <CartLink
                   label="Grup Masjid & Sosial Media"
                   icon="📚"
-                  href={`/masjid/${masjidData.masjid_slug}/profil`}
+                  onClick={() => setShowSocialModal(true)}
                 />
                 <CartLink
                   label="Hubungi Kami"
@@ -390,6 +390,18 @@ export default function PublicLinktree() {
                   href={`/masjid/${masjidData.masjid_slug}/profil`}
                   internal
                 />
+                <SocialMediaModal
+                  show={showSocialModal}
+                  onClose={() => setShowSocialModal(false)}
+                  data={{
+                    instagram: "masjidbaitussalam",
+                    whatsapp: "6281234567890",
+                    youtube: "https://www.youtube.com/@masjidbaitussalam",
+                    facebook: "masjidbaitussalam.id",
+                    tiktok: "masjidbaitussalam",
+                  }}
+                />
+
                 {/* <LinkItem
                   label="Laporan Keuangan"
                   icon="📆"
@@ -404,7 +416,6 @@ export default function PublicLinktree() {
                 /> */}
               </div>
             </div>
-
             {/* Bottom Navigation */}
             <BottomNavbar />
           </div>
@@ -512,7 +523,7 @@ export default function PublicLinktree() {
                 <div className="mt-2 pr-4 text-right">
                   <span
                     className="text-sm underline cursor-pointer hover:text-primary transition"
-                    style={{ color: themeColors.primary }}
+                    style={{ color: themeColors.tertiary }}
                     onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
                   >
                     Kajian Terbaru Lainnya
@@ -525,13 +536,13 @@ export default function PublicLinktree() {
           {/* Masjid Info */}
           <div className="space-y-4">
             <div>
+              <SholatScheduleCard location="DKI Jakarta" />{" "}
               <h1
-                className="text-2xl font-semibold pb-2 mt-2"
+                className="text-2xl font-semibold pb-2 mt-6"
                 style={{ color: themeColors.black1 }}
               >
                 {masjidData.masjid_name}
               </h1>
-
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(masjidData.masjid_location || "")}`}
                 target="_blank"
@@ -545,7 +556,6 @@ export default function PublicLinktree() {
                 </span>
                 <span className="underline text-xs mt-0.5">Alamat Masjid</span>
               </a>
-
               <p
                 className="text-xs italic pb-2"
                 style={{ color: themeColors.silver4 }}
@@ -618,7 +628,7 @@ export default function PublicLinktree() {
               <CartLink
                 label="Grup Masjid & Sosial Media"
                 icon="📚"
-                href={`/masjid/${masjidData.masjid_slug}/profil`}
+                onClick={() => setShowSocialModal(true)}
               />
               <CartLink
                 label="Hubungi Kami"
@@ -626,6 +636,18 @@ export default function PublicLinktree() {
                 href={`https://wa.me/${masjidData.masjid_whatsapp_url}`}
                 internal={false}
               />
+              <SocialMediaModal
+                show={showSocialModal}
+                onClose={() => setShowSocialModal(false)}
+                data={{
+                  instagram: "masjidbaitussalam",
+                  whatsapp: "6281234567890",
+                  youtube: "https://www.youtube.com/@masjidbaitussalam",
+                  facebook: "masjidbaitussalam.id",
+                  tiktok: "masjidbaitussalam",
+                }}
+              />
+
               {/* <LinkItem
                   label="Laporan Keuangan"
                   icon="📆"

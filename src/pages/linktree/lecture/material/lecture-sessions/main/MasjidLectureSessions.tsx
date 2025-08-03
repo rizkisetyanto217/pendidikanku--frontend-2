@@ -50,21 +50,17 @@ interface AttendanceForm {
 
 export default function MasjidLectureSessions() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
   const { id = "", slug = "" } = useParams<{ id: string; slug: string }>();
   const [searchParams] = useSearchParams();
   const tab = searchParams.get("tab") || "navigasi";
-  const fromTab = location.state?.fromTab;
-  const lectureId = location.state?.lectureId;
 
   const { data: currentUser } = useCurrentUser();
 
   const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
-  const [notes, setNotes] = useState("");
 
   const { data, isLoading } = useQuery<LectureSession>({
     queryKey: ["lectureSessionDetail", id, currentUser?.id],
