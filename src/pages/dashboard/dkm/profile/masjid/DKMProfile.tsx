@@ -10,6 +10,8 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import CommonButton from "@/components/common/main/CommonButton";
 import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
+import ShimmerImage from "@/components/common/main/ShimmerImage";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 interface Masjid {
   masjid_id: string;
@@ -26,10 +28,7 @@ interface Masjid {
 }
 
 interface MasjidProfile {
-  masjid_profile_story: string;
-  masjid_profile_visi: string;
-  masjid_profile_misi: string;
-  masjid_profile_other: string;
+  masjid_profile_description: string;
   masjid_profile_founded_year: number;
   masjid_profile_stamp_url: string;
   masjid_profile_logo_url: string;
@@ -54,6 +53,7 @@ export default function ProfilMasjid() {
       const res = await axios.get(`/public/masjids/verified/${masjidId}`, {
         withCredentials: true,
       });
+      console.log("✅ Masjid:", res.data.data);
       return res.data.data;
     },
     enabled: !!masjidId && isLoggedIn && !isUserLoading,
@@ -69,6 +69,7 @@ export default function ProfilMasjid() {
         const res = await axios.get(`/public/masjid-profiles/${masjidId}`, {
           withCredentials: true,
         });
+        console.log("✅ Masjid Profile:", res.data.data);
         return res.data.data;
       },
       enabled: !!masjidId && isLoggedIn && !isUserLoading,
@@ -92,10 +93,11 @@ export default function ProfilMasjid() {
             <>
               <PageHeader title="Profil Masjid" />
               <div className="flex flex-col md:flex-row gap-4">
-                <img
+                <ShimmerImage
                   src={masjid.masjid_image_url}
                   alt={masjid.masjid_name}
                   className="w-full md:w-60 h-40 object-cover rounded-md"
+                  shimmerClassName="rounded-md"
                 />
                 <div className="flex-1 space-y-1">
                   <h2
@@ -125,28 +127,40 @@ export default function ProfilMasjid() {
                 <div className="flex items-center gap-2">
                   {masjid.masjid_instagram_url && (
                     <a href={masjid.masjid_instagram_url} target="_blank">
-                      <img
+                      <ShimmerImage
                         src="/icons/instagram.svg"
                         alt="Instagram"
                         className="w-8 h-8"
+                        shimmerClassName="rounded"
                       />
                     </a>
                   )}
                   {masjid.masjid_whatsapp_url && (
-                    <a href={masjid.masjid_whatsapp_url} target="_blank">
-                      <img
+                    <a
+                      href={masjid.masjid_whatsapp_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ShimmerImage
                         src="/icons/whatsapp.svg"
                         alt="WhatsApp"
                         className="w-8 h-8"
+                        shimmerClassName="rounded"
                       />
                     </a>
                   )}
+
                   {masjid.masjid_youtube_url && (
-                    <a href={masjid.masjid_youtube_url} target="_blank">
-                      <img
+                    <a
+                      href={masjid.masjid_youtube_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ShimmerImage
                         src="/icons/youtube.svg"
                         alt="Youtube"
                         className="w-8 h-8"
+                        shimmerClassName="rounded"
                       />
                     </a>
                   )}
@@ -182,78 +196,56 @@ export default function ProfilMasjid() {
               </section>
 
               <section>
-                <h3 className="text-sm font-bold mb-1">Latar Belakang</h3>
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: theme.black2 }}
-                >
-                  {profile?.masjid_profile_story || "(Belum tersedia)"}
-                </p>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-bold mb-1">Visi</h3>
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: theme.black2 }}
-                >
-                  {profile?.masjid_profile_visi || "(Visi belum tersedia)"}
-                </p>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-bold mb-1">Misi</h3>
-                <p
-                  className="text-sm leading-relaxed mt-2"
-                  style={{ color: theme.black2 }}
-                >
-                  {profile?.masjid_profile_misi || "(Misi belum tersedia)"}
-                </p>
-              </section>
-
-              <section>
-                <h3 className="text-sm font-bold mb-1">Lainnya</h3>
-                <p
-                  className="text-sm leading-relaxed mt-2"
-                  style={{ color: theme.black2 }}
-                >
-                  {profile?.masjid_profile_other || ""}
-                </p>
+                <h3 className="text-sm font-bold mb-1">Deskripsi</h3>
+                {profile?.masjid_profile_description ? (
+                  <div
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    style={{ color: theme.black2 }}
+                    dangerouslySetInnerHTML={{
+                      __html: cleanTranscriptHTML(
+                        profile.masjid_profile_description
+                      ),
+                    }}
+                  />
+                ) : (
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: theme.black2 }}
+                  >
+                    (Belum tersedia)
+                  </p>
+                )}
               </section>
 
               <section className="mt-6">
                 <div className="flex flex-wrap gap-4">
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold mb-2">Stempel</p>
-                    <img
-                      src={
-                        profile?.masjid_profile_stamp_url || "/placeholder.png"
-                      }
+                    <ShimmerImage
+                      src={profile?.masjid_profile_stamp_url || ""}
                       alt="Stempel"
                       className="w-48 h-32 object-cover rounded-md border"
+                      shimmerClassName="rounded-md"
                     />
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold mb-2">Logo</p>
-                    <img
-                      src={
-                        profile?.masjid_profile_logo_url || "/placeholder.png"
-                      }
+                    <ShimmerImage
+                      src={profile?.masjid_profile_logo_url || ""}
                       alt="Logo"
                       className="w-48 h-32 object-cover rounded-md border"
+                      shimmerClassName="rounded-md"
                     />
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold mb-2">
                       Tanda Tangan Ketua DKM
                     </p>
-                    <img
-                      src={
-                        profile?.masjid_profile_ttd_ketua_dkm_url ||
-                        "/placeholder.png"
-                      }
+                    <ShimmerImage
+                      src={profile?.masjid_profile_ttd_ketua_dkm_url || ""}
                       alt="TTD Ketua DKM"
                       className="w-48 h-32 object-cover rounded-md border"
+                      shimmerClassName="rounded-md"
                     />
                   </div>
                 </div>

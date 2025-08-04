@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import InputField from "@/components/common/main/InputField";
 import RichEditor from "@/components/common/main/RichEditor";
 import SubmitActionButtons from "@/components/common/main/SubmitActionButton";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 export default function DKMAddEditLecture() {
   const navigate = useNavigate();
@@ -147,7 +148,7 @@ export default function DKMAddEditLecture() {
             className="block w-full text-sm text-gray-900 border border-gray-300 rounded"
           />
           {form.lecture_image_url && (
-            <img
+            <ShimmerImage
               src={form.lecture_image_url}
               alt="Preview Gambar"
               className="w-32 h-32 object-cover rounded mt-2"

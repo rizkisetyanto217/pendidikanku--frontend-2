@@ -1,4 +1,4 @@
-import { useIsMobile } from "@/hooks/isMobile";
+import { useResponsive } from "@/hooks/isResponsive";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
@@ -67,7 +67,7 @@ const dummyPengajar = [
 ];
 
 export default function DKMProfileDKMTeacher() {
-  const isMobile = useIsMobile();
+  const { isMobile } = useResponsive();
   const navigate = useNavigate();
   const [selectedDetail, setSelectedDetail] = useState<any>(null);
   const { isDark } = useHtmlDarkMode();

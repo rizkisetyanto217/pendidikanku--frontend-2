@@ -6,6 +6,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 export default function MasjidDetailLecture() {
   const { id, slug } = useParams();
@@ -58,13 +59,15 @@ export default function MasjidDetailLecture() {
         <div className="md:flex md:gap-6">
           {/* Gambar Kajian - tanpa padding */}
           <div className="w-full md:w-1/2 aspect-[3/4] md:aspect-auto md:h-[420px] rounded-xl overflow-hidden">
-            <img
+            <ShimmerImage
               src={
-                kajian.lecture_session_image_url ||
-                "/assets/placeholder/lecture.png"
+                kajian.lecture_session_image_url
+                  ? decodeURIComponent(kajian.lecture_session_image_url)
+                  : undefined
               }
               alt={kajian.lecture_session_title}
               className="w-full h-full object-cover"
+              shimmerClassName="rounded"
             />
           </div>
 

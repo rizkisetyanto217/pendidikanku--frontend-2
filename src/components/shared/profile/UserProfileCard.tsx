@@ -2,6 +2,7 @@ import React from "react";
 import { CheckCircle2 } from "lucide-react";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 export type UserProfileCardProps = {
   name: string;
@@ -43,8 +44,13 @@ export default function UserProfileCard({
         <p className="text-sm" style={{ color: theme.silver2 }}>
           {role}
         </p>
+
         {signatureUrl && (
-          <img src={signatureUrl} alt="TTD" className="w-20 mt-1" />
+          <ShimmerImage
+            src={signatureUrl}
+            alt="TTD"
+            className="w-20 mt-1 object-contain"
+          />
         )}
       </div>
 
@@ -54,13 +60,14 @@ export default function UserProfileCard({
           <h3 className="text-sm font-semibold mb-1">Sosial Media</h3>
           <div className="flex items-center gap-2">
             {socialMedias.map((icon, idx) => (
-              <img
+              <ShimmerImage
                 key={idx}
                 src={icon}
                 alt={`icon-${idx}`}
-                className="w-5 h-5"
+                className="w-5 h-5 object-contain"
               />
             ))}
+
             {onEdit && (
               <button
                 className="ml-2 text-sm px-3 py-1 rounded font-medium transition"

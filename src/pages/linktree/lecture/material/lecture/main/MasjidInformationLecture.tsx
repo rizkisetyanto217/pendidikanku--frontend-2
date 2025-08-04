@@ -4,6 +4,7 @@ import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface Teacher {
   id: string;
@@ -57,11 +58,12 @@ export default function MasjidInformationLecture() {
             }}
           >
             {lecture.lecture_image_url && (
-              <img
+              <ShimmerImage
                 src={lecture.lecture_image_url}
                 alt="Gambar Materi"
                 className="w-full object-cover"
                 style={{ aspectRatio: "4 / 5", maxHeight: "540px" }}
+                shimmerClassName="rounded-md"
               />
             )}
 

@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "@/components/common/public/SharePopover";
 import FormattedDate from "@/constants/formattedDate";
 import CommonCardList from "@/components/common/main/CommonCardList";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 function InlineShare({ title, url }: { title: string; url: string }) {
   const { isDark } = useHtmlDarkMode();
@@ -222,10 +223,11 @@ export default function MasjidPost() {
             <CommonCardList key={post.post_id}>
               {post.post_image_url && (
                 <Link to={`/masjid/${slug}/post/${post.post_id}`}>
-                  <img
+                  <ShimmerImage
                     src={post.post_image_url}
                     alt="Post Gambar"
                     className="w-full aspect-[4/3] object-cover rounded-lg"
+                    shimmerClassName="rounded-lg"
                   />
                 </Link>
               )}

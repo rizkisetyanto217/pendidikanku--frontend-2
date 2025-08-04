@@ -9,6 +9,7 @@ import axios from "@/lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
+
 export default function MasjidMyActivity() {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;

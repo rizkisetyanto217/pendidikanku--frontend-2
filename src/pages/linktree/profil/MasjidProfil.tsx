@@ -5,6 +5,8 @@ import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
+import BottomNavbar from "@/components/common/public/ButtonNavbar";
 
 export default function MasjidProfile() {
   const { slug } = useParams();
@@ -48,14 +50,15 @@ export default function MasjidProfile() {
       />
 
       <div
-        className="rounded-xl overflow-hidden "
+        className="rounded-xl overflow-hidden pb-10 "
         // style={{ backgroundColor: themeColors.white1 }}
       >
         {/* Gambar Masjid */}
-        <img
-          src={masjid.masjid_image_url || "/assets/placeholder/masjid.jpg"}
+        <ShimmerImage
+          src={masjid.masjid_image_url || ""}
           alt={`Foto ${masjid.masjid_name}`}
           className="w-full h-48 md:h-64 object-cover"
+          shimmerClassName="rounded-none"
         />
 
         {/* Informasi Umum */}
@@ -179,7 +182,7 @@ export default function MasjidProfile() {
             <span>›</span>
           </button>
 
-          <button
+          {/* <button
             onClick={() => navigate(`/masjid/${slug}/donasi`)}
             style={{
               backgroundColor: themeColors.primary,
@@ -188,8 +191,10 @@ export default function MasjidProfile() {
             className="w-full py-3 rounded font-semibold hover:opacity-90"
           >
             Donasi
-          </button>
+          </button> */}
         </div>
+        {/* Bottom Navigation */}
+        <BottomNavbar />
       </div>
     </>
   );

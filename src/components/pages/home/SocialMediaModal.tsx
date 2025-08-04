@@ -4,6 +4,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { X } from "lucide-react";
 
+
 interface SocialMediaModalProps {
   show: boolean;
   onClose: () => void;
@@ -26,14 +27,14 @@ export default function SocialMediaModal({
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
         onClose();
       }
-    }
+    };
 
     if (show) {
       document.addEventListener("mousedown", handleClickOutside);
@@ -55,26 +56,29 @@ export default function SocialMediaModal({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
-        className="w-full max-w-sm rounded-xl p-5 relative"
+        className="w-full max-w-xl rounded-lg p-6 relative"
         style={{
           backgroundColor: theme.white1,
           color: theme.black1,
           border: `1px solid ${theme.silver1}`,
         }}
       >
+        {/* Tombol Tutup */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3"
+          className="absolute top-4 right-4"
           style={{ color: theme.silver2 }}
         >
-          <X size={20} />
+          <X size={22} />
         </button>
 
-        <h2 className="text-lg font-semibold mb-4">Sosial Media Masjid</h2>
+        {/* Judul */}
+        <h2 className="text-lg font-semibold mb-5">Sosial Media Masjid</h2>
 
+        {/* Daftar Link Sosmed */}
         <div className="space-y-3">
           {items.map((item) => {
             const value = data[item.key as keyof typeof data];
@@ -89,10 +93,10 @@ export default function SocialMediaModal({
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-3 py-2 rounded border text-sm font-medium transition-all"
+                className="block px-5 py-3 rounded text-base font-medium text-center transition-all"
                 style={{
                   backgroundColor: theme.white2,
-                  color: theme.primary,
+                  color: theme.black1,
                   border: `1px solid ${theme.silver1}`,
                 }}
               >
@@ -100,6 +104,17 @@ export default function SocialMediaModal({
               </a>
             );
           })}
+        </div>
+
+        {/* Tombol Tutup Bawah */}
+        <div className="flex justify-end mt-8">
+          <button
+            onClick={onClose}
+            className="text-base px-5 py-2 rounded"
+            style={{ color: theme.silver2 }}
+          >
+            Tutup
+          </button>
         </div>
       </div>
     </div>

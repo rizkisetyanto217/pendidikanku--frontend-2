@@ -8,6 +8,7 @@ import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
 import { ExternalLink } from "lucide-react";
 import FormattedDate from "@/constants/formattedDate"; // pastikan path sesuai
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 export interface LectureSession {
   lecture_session_id: string;
@@ -66,7 +67,7 @@ export default function DKMAllLectureSession() {
   const rows: ReactNode[][] = useMemo(() => {
     return sessions.map((session, index) => [
       index + 1,
-      <img
+      <ShimmerImage
         src={session.lecture_session_image_url}
         alt="gambar"
         className="w-10 h-10 rounded object-cover"

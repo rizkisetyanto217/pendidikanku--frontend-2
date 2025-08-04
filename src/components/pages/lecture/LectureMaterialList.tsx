@@ -1,3 +1,4 @@
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { useNavigate, useParams } from "react-router-dom";
@@ -47,7 +48,7 @@ export default function LectureMaterialList({
               className="aspect-[4/5] w-[90px] min-h-[112px] flex-shrink-0 overflow-hidden rounded-lg border"
               style={{ borderColor: theme.white3 }}
             >
-              <img
+              <ShimmerImage
                 src={decodeURIComponent(item.imageUrl)}
                 alt={item.title}
                 className="w-full h-full object-cover"

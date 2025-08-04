@@ -9,7 +9,7 @@ import FormattedDate from "@/constants/formattedDate";
 import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
-
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface Post {
   post_id: string;
@@ -65,10 +65,11 @@ export default function DKMPost() {
   const rows =
     posts?.map((post, i) => [
       i + 1,
-      <img
+      <ShimmerImage
         src={post.post_image_url ?? "/mock/kajian.jpg"}
         alt="Post"
         className="w-12 h-12 object-cover rounded"
+        shimmerClassName="rounded"
       />,
       <span className="font-medium">{post.post_title}</span>,
       post.post_theme?.post_theme_name || "-",

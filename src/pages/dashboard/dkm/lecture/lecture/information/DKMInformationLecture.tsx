@@ -3,6 +3,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import FormattedDate from "@/constants/formattedDate";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface Lecture {
   lecture_id: string;
@@ -41,10 +42,10 @@ export default function DKMInformationLecture() {
       >
         <div className="flex flex-col md:flex-row gap-4">
           {/* Gambar Kajian */}
-          <img
-            src={lecture?.lecture_image_url ?? "/mock/kajian.jpg"}
+          <ShimmerImage
+            src={lecture.lecture_image_url || ""}
             alt="Poster Kajian"
-            className="w-full md:w-48 h-48 object-cover rounded-md"
+            className="w-full lg:w-40 h-40 object-cover rounded-md"
           />
 
           {/* Info */}

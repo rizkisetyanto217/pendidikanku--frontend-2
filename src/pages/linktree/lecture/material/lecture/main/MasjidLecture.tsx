@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import BottomNavbar from "@/components/common/public/ButtonNavbar";
 
 // =====================
 // ✅ Interface lokal
@@ -313,6 +314,8 @@ export default function MasjidLectureMaterial() {
           </div>
         </div>
       </TabsContent>
+      {/* Bottom Navigation */}
+      <BottomNavbar />
     </>
   );
 }

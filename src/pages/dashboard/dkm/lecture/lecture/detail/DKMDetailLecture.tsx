@@ -13,6 +13,7 @@ import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface Lecture {
   lecture_id: string;
@@ -119,8 +120,8 @@ export default function DKMDetailLecture() {
         className="p-2 rounded-xl flex flex-col lg:flex-row gap-4"
         style={{ backgroundColor: theme.white1 }}
       >
-        <img
-          src={lecture.lecture_image_url ?? "/mock/kajian.jpg"}
+        <ShimmerImage
+          src={lecture.lecture_image_url || ""}
           alt="Poster Kajian"
           className="w-full lg:w-40 h-40 object-cover rounded-md"
         />

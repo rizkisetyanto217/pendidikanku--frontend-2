@@ -112,7 +112,7 @@ import MasjidPartnership from "@/pages/linktree/activity/setting/MasjidPartnersh
 import MasjidFaq from "@/pages/linktree/activity/setting/MasjidFaq";
 import MasjidSettingMenu from "@/layout/masjid/MasjidSettingMenu";
 import MasjidMyDonation from "@/pages/linktree/finansial/report/MasjidMyDonation";
-import MyProgressLectureLesson from "@/pages/linktree/lecture/material/my-progress/MyProgressLectureLesson";
+
 import MasjidMyStats from "@/pages/linktree/activity/my-activity/MasjidMyStats";
 import DKMThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMThemaPost";
 import DKMPost from "@/pages/dashboard/dkm/post/post/DKMPost";
@@ -122,6 +122,8 @@ import DKMAddEditPost from "@/pages/dashboard/dkm/post/post/DKMAddEditPost";
 import DKMDetailPost from "@/pages/dashboard/dkm/post/post/DKMDetailPost";
 import DKMDetailThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMDetailThemaPost";
 import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/main/MasjidInformationLecture";
+import MasjidSholat from "@/pages/linktree/home/sholat/MasjidSholat";
+import MasjidAllMyLecture from "@/pages/linktree/activity/my-activity/MasjidAllMyLecture";
 
 export default function AppRoutes() {
   return (
@@ -141,6 +143,8 @@ export default function AppRoutes() {
             <Route path="sambutan" element={<MasjidDetailSpeech />} />
             <Route path="detail" element={<MasjidProfileDetail />} />
           </Route>
+          {/* Home  */}
+          <Route path="sholat" element={<MasjidSholat />} />
 
           {/* Donasi */}
           <Route path="donasi" element={<MasjidDonationMasjid />} />
@@ -226,7 +230,7 @@ export default function AppRoutes() {
           {/* Menu Activity  */}
           <Route
             path="aktivitas/kajian-saya"
-            element={<MyProgressLectureLesson />}
+            element={<MasjidAllMyLecture />}
           />
           <Route path="aktivitas/donasi-saya" element={<MasjidMyDonation />} />
           <Route path="aktivitas/statistik-saya" element={<MasjidMyStats />} />

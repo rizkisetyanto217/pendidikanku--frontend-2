@@ -6,6 +6,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import FormattedDate from "@/constants/formattedDate";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML"; // sesuaikan path jika perlu
 
 interface LectureSession {
   lecture_session_id: string;
@@ -125,7 +126,11 @@ export default function DKMFullTranscriptLectureSessions() {
           ) : isErrorTranscript ? (
             <p className="text-red-500">Gagal memuat data materi lengkap.</p>
           ) : transcript ? (
-            <p>{transcript}</p>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: cleanTranscriptHTML(transcript),
+              }}
+            />
           ) : (
             <p className="italic text-gray-500">
               Belum ada materi lengkap tersedia.

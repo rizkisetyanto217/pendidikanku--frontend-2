@@ -22,6 +22,8 @@ import {
   FolderOpen,
 } from "lucide-react";
 import FormattedDate from "@/constants/formattedDate";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
+import BottomNavbar from "@/components/common/public/ButtonNavbar";
 
 // =====================
 // ✅ Interface
@@ -146,14 +148,15 @@ export default function MasjidLectureSessions() {
             borderRight: `1px solid ${theme.silver1}`,
           }}
         >
-          <img
+          <ShimmerImage
             src={
               data?.lecture_session_image_url
                 ? decodeURIComponent(data.lecture_session_image_url)
-                : "https://via.placeholder.com/600x750.png?text=Gambar+Kajian"
+                : undefined
             }
             alt={data?.lecture_session_title || "Gambar Kajian"}
             className="w-full h-full object-cover"
+            shimmerClassName="rounded"
           />
         </div>
 
@@ -270,6 +273,8 @@ export default function MasjidLectureSessions() {
             </div>
           ))}
         </div>
+        {/* Bottom Navigation */}
+        <BottomNavbar />
 
         {/* 📋 Modal Kehadiran */}
         <AttendanceModal

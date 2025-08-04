@@ -27,7 +27,7 @@ export default function NavigationCard({
       style={{
         backgroundColor: theme.white1,
         borderColor: theme.primary2,
-        color: theme.primary,
+        color: theme.black1,
       }}
     >
       <div>{icon}</div>

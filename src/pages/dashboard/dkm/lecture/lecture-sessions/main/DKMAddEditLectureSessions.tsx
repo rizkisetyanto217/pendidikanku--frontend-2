@@ -10,6 +10,7 @@ import LectureSelectField from "./components/LectureSelectField";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import SelectMasjidTeacher from "./components/SelectMasjidTeacher";
 import SubmitActionButtons from "@/components/common/main/SubmitActionButton";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 export default function DKMAddEditLectureSession() {
   const { user: currentUser, isLoading: isUserLoading } = useCurrentUser();
@@ -205,7 +206,6 @@ export default function DKMAddEditLectureSession() {
           value={form.lecture_session_start_time}
           type="datetime-local"
           onChange={handleChange}
-          
         />
 
         <InputField
@@ -235,10 +235,11 @@ export default function DKMAddEditLectureSession() {
             className="block w-full text-sm text-gray-900 border border-gray-300 rounded"
           />
           {form.lecture_session_image_url && (
-            <img
+            <ShimmerImage
               src={form.lecture_session_image_url}
               alt="Preview Gambar"
               className="w-32 h-32 object-cover rounded mt-2"
+              shimmerClassName="rounded"
             />
           )}
         </div>

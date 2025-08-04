@@ -1,13 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LogOut, Settings, User, HelpCircle, MoreVertical } from "lucide-react";
+import {
+  LogOut,
+  Settings,
+  HelpCircle,
+  MoreVertical,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import api from "@/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "./SharePopover";
-import { useIsMobile } from "@/hooks/isMobile";
+import { useResponsive } from "@/hooks/isResponsive";
 
 interface PublicUserDropdownProps {
   variant?: "default" | "icon";
@@ -16,7 +23,7 @@ interface PublicUserDropdownProps {
 export default function PublicUserDropdown({
   variant = "default",
 }: PublicUserDropdownProps) {
-  const { isDark } = useHtmlDarkMode();
+  const { isDark, setDarkMode } = useHtmlDarkMode(); // updated
   const theme = isDark ? colors.dark : colors.light;
   const { data: user } = useCurrentUser();
   const navigate = useNavigate();
@@ -30,8 +37,7 @@ export default function PublicUserDropdown({
   const userName = user?.user_name || "User";
   const userRole = user?.role || "Publik";
 
-  const isMobile = useIsMobile();
-
+  const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
 
   const handleLogout = async () => {
@@ -115,21 +121,6 @@ export default function PublicUserDropdown({
           <ul className="py-2 text-sm" style={{ color: theme.black1 }}>
             <li>
               <button
-                onClick={() => navigate(`${base}/profil`)}
-                className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
-                style={{ backgroundColor: "transparent" }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = theme.white2)
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                <User className="w-4 h-4" /> Profil
-              </button>
-            </li>
-            <li>
-              <button
                 onClick={() => {
                   if (isMobile) {
                     navigate(`${base}/aktivitas/pengaturan/menu`);
@@ -166,7 +157,35 @@ export default function PublicUserDropdown({
               </button>
             </li>
 
-            {/* Bagikan */}
+            <li>
+              <button
+                onClick={() => {
+                  setDarkMode(!isDark);
+                  setOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
+                style={{
+                  backgroundColor: "transparent",
+                }}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = theme.white2)
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
+              >
+                {isDark ? (
+                  <>
+                    <Sun className="w-4 h-4" /> Mode Terang
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4" /> Mode Gelap
+                  </>
+                )}
+              </button>
+            </li>
+
             <li>
               <div className="px-4 py-2">
                 <SharePopover

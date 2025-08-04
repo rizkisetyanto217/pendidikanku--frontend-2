@@ -11,6 +11,7 @@ import SimpleTable from "@/components/common/main/SimpleTable";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
 import FormattedDate from "@/constants/formattedDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface Lecture {
   lecture_id: string;
@@ -72,10 +73,11 @@ export default function DKMLecture() {
   const rows =
     lectures?.map((lecture, i) => [
       i + 1,
-      <img
-        src={lecture.lecture_image_url ?? "/mock/kajian.jpg"}
+      <ShimmerImage
+        src={lecture.lecture_image_url ?? ""}
         alt="Gambar Kajian"
         className="w-12 h-12 object-cover rounded"
+        shimmerClassName="rounded"
       />,
       <span className="font-medium">{lecture.lecture_title}</span>,
       lecture.total_lecture_sessions,

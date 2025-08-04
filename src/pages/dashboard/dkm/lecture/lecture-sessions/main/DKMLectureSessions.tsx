@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import FormattedDate from "@/constants/formattedDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ tambahkan
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface LectureSession {
   lecture_session_id: string;
@@ -56,7 +57,6 @@ export default function DKMLectureSessions() {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     retry: 1,
-    
   });
 
   if (isUserLoading || isLoading) {
@@ -79,10 +79,11 @@ export default function DKMLectureSessions() {
 
   const rows = data.map((session, i) => [
     i + 1,
-    <img
-      src={session.lecture_session_image_url ?? "/mock/kajian.jpg"}
+    <ShimmerImage
+      src={session.lecture_session_image_url ?? ""}
       alt="Kajian"
       className="w-12 h-12 object-cover rounded"
+      shimmerClassName="rounded"
     />,
     <span className="font-medium">{session.lecture_session_title}</span>,
     session.lecture_title,

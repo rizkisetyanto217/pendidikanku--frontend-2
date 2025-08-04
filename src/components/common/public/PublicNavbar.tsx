@@ -68,10 +68,10 @@ export default function PublicNavbar({
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 shadow max-w-4xl mx-auto transition-transform duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 shadow max-w-2xl mx-auto transition-transform duration-300 ${
         hideOnScroll && !visible ? "-translate-y-full" : "translate-y-0"
       }`}
-      style={{ backgroundColor: themeColors.white1 }}
+      style={{ backgroundColor: themeColors.white1, color: themeColors.black1 }}
     >
       <h2
         className="text-lg font-semibold"

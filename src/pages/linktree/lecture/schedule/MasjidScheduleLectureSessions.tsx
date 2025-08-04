@@ -11,6 +11,7 @@ import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { useSearchParams } from "react-router-dom";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface Kajian {
   lecture_session_id: string;
@@ -99,13 +100,15 @@ export default function MasjidScheduleLecture() {
       }}
     >
       <div className="flex gap-3">
-        <img
+        <ShimmerImage
           src={
-            item.lecture?.lecture_image_url ||
-            "https://via.placeholder.com/150x150.png?text=Kajian"
+            item.lecture?.lecture_image_url
+              ? decodeURIComponent(item.lecture.lecture_image_url)
+              : undefined
           }
           alt={item.lecture_schedules_title}
           className="w-36 h-36 object-cover rounded-l-xl"
+          shimmerClassName="rounded-l-xl"
         />
         <div className="flex-1 text-sm p-2">
           <p className="text-xs font-semibold" style={{ color: theme.primary }}>
@@ -142,10 +145,11 @@ export default function MasjidScheduleLecture() {
       }}
     >
       <div className="flex gap-3">
-        <img
-          src={kajian.lecture_session_image_url}
+        <ShimmerImage
+          src={kajian.lecture_session_image_url || undefined}
           alt={kajian.lecture_session_title}
           className="w-36 h-36 object-cover rounded-l-xl"
+          shimmerClassName="rounded-l-xl"
         />
         <div className="flex-1 text-sm p-2">
           <p className="text-xs font-semibold" style={{ color: theme.primary }}>

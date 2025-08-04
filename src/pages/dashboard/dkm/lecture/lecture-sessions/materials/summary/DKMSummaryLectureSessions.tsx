@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 interface LectureSession {
   lecture_session_id: string;
@@ -118,7 +119,11 @@ export default function DKMSummaryLectureSessions() {
           ) : isErrorSummary ? (
             <p className="text-red-500">Gagal memuat data ringkasan.</p>
           ) : summary ? (
-            <p>{summary}</p>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: cleanTranscriptHTML(summary),
+              }}
+            />
           ) : (
             <p className="italic text-gray-500">
               Belum ada ringkasan tersedia.

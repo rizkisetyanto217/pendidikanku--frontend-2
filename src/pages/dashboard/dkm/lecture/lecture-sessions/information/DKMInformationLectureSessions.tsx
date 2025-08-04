@@ -3,6 +3,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML"; // atau sesuaikan path-nya
 
 export default function DKMInformationLectureSessions() {
   const { isDark } = useHtmlDarkMode();
@@ -78,9 +79,13 @@ export default function DKMInformationLectureSessions() {
           <span className="font-medium text-gray-500 dark:text-gray-300 block mb-1">
             Deskripsi:
           </span>
-          <p style={{ color: theme.silver2 }}>
-            {lecture_session_description || "Tidak ada deskripsi."}
-          </p>
+          <div
+            className="prose prose-sm max-w-none dark:prose-invert"
+            style={{ color: theme.silver2 }}
+            dangerouslySetInnerHTML={{
+              __html: cleanTranscriptHTML(lecture_session_description || ""),
+            }}
+          />
         </div>
       </div>
     </div>

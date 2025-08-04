@@ -14,6 +14,8 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import NavigationCard from "./components/NavigationCard";
 import FormattedDate from "@/constants/formattedDate";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML"; // atau sesuaikan path-nya
 
 // ✅ Tipe data sesi kajian
 interface LectureSessionDetail {
@@ -113,10 +115,11 @@ export default function DKMDetailLectureSessions() {
         }}
       >
         <div className="flex-shrink-0 w-full md:w-48">
-          <img
-            src={lecture_session_image_url ?? "/mock/kajian.jpg"}
+          <ShimmerImage
+            src={lecture_session_image_url ?? ""}
             alt="Poster Kajian"
             className="rounded-xl w-full h-auto object-cover aspect-[3/4]"
+            shimmerClassName="rounded-xl"
           />
         </div>
 
@@ -139,7 +142,9 @@ export default function DKMDetailLectureSessions() {
 
           <div
             className="text-sm mt-1 leading-relaxed prose prose-sm prose-slate max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: lecture_session_description }}
+            dangerouslySetInnerHTML={{
+              __html: cleanTranscriptHTML(lecture_session_description),
+            }}
           />
 
           <div className="flex justify-between items-center mt-4 flex-wrap gap-2">

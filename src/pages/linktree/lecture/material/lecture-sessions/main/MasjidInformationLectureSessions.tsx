@@ -9,6 +9,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AttendanceModal from "./components/AttendanceModal";
 import FormattedDate from "@/constants/formattedDate";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 // =====================
 interface LectureSession {
@@ -81,14 +82,11 @@ export default function MasjidInformationLectureSessions() {
               borderRight: `1px solid ${theme.silver1}`,
             }}
           >
-            <img
-              src={
-                info.gambar
-                  ? decodeURIComponent(info.gambar)
-                  : "https://via.placeholder.com/600x750.png?text=Gambar+Kajian"
-              }
+            <ShimmerImage
+              src={info.gambar ? decodeURIComponent(info.gambar) : undefined}
               alt="Gambar Kajian"
               className="w-full h-full object-cover"
+              shimmerClassName="rounded"
             />
           </div>
 

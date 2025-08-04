@@ -3,6 +3,7 @@ import FormattedDate from "@/constants/formattedDate";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { Button } from "@/components/ui/button";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 interface PostDetail {
   post_id: string;
@@ -41,10 +42,11 @@ export default function DKMDetailPost() {
       />
 
       {post.post_image_url && (
-        <img
+        <ShimmerImage
           src={post.post_image_url}
           alt={post.post_title}
           className="w-full h-auto rounded shadow"
+          shimmerClassName="rounded"
         />
       )}
 

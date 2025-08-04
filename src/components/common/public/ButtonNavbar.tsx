@@ -75,7 +75,7 @@ export default function BottomNavbar({
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 border-t w-full max-w-4xl mx-auto flex justify-between sm:justify-center sm:gap-4 transition-transform duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 z-50 border-t w-full max-w-2xl mx-auto flex justify-between sm:justify-center sm:gap-0 transition-transform duration-300 ${
         hideOnScroll && !visible ? "translate-y-full" : "translate-y-0"
       }`}
       style={{
@@ -92,7 +92,7 @@ export default function BottomNavbar({
           <button
             key={tab.key}
             onClick={() => navigate(tab.path)}
-            className="flex flex-col sm:flex-row items-center justify-center flex-1 sm:flex-initial sm:px-6 py-2 sm:py-4 transition"
+            className="flex flex-col sm:flex-row items-center justify-center flex-1 sm:flex-initial sm:px-5 py-2 sm:py-4 transition"
             style={{
               backgroundColor: isActive ? theme.primary2 : "transparent",
             }}

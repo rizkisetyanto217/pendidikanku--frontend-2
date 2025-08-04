@@ -25,8 +25,26 @@ export default function RichEditor({
   const [, setRefreshToolbar] = useState(0);
 
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value || "";
+    if (editorRef.current) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = value || "";
+
+      const current = editorRef.current.innerHTML.trim();
+      const incoming = tempDiv.innerHTML.trim();
+
+      if (current !== incoming) {
+        editorRef.current.innerHTML = value || "";
+
+        // Optional: Pindahkan kursor ke akhir konten
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false);
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
     }
   }, [value]);
 
@@ -252,7 +270,7 @@ export default function RichEditor({
             setRefreshToolbar((v) => v + 1);
           }}
           onBlur={() => setIsFocused(false)}
-          className="w-full min-h-[200px] text-sm rounded border p-2 max-w-none"
+          className="w-full min-h-[200px] text-sm rounded border p-2 max-w-none prose prose-sm dark:prose-invert"
           style={{
             backgroundColor: theme.white2,
             color: theme.black1,
