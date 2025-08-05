@@ -95,7 +95,7 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
           onChange={(e) => onChange(e.target.value)}
           className="w-full text-sm px-4 py-2.5 pr-10 border rounded-lg appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
           style={{
-            backgroundColor: theme.white1, // 🔄 Perbaikan di sini
+            backgroundColor: theme.white2, // 🔄 Perbaikan di sini
             borderColor: theme.silver1,
             color: theme.black1,
             WebkitAppearance: "none",

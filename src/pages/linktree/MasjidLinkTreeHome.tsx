@@ -228,14 +228,14 @@ export default function PublicLinktree() {
                         />
                         <div className="p-3">
                           <h2
-                            className="font-semibold text-sm truncate"
+                            className="font-semibold text-base truncate"
                             style={{ color: themeColors.black1 }}
                           >
                             {kajian.lecture_session_title}
                           </h2>
                           <p
-                            className="text-xs"
-                            style={{ color: themeColors.silver2 }}
+                            className="text-base"
+                            style={{ color: themeColors.black2 }}
                           >
                             {kajian.lecture_session_teacher_name} •{" "}
                             {kajian.lecture_session_start_time ? (
@@ -247,8 +247,8 @@ export default function PublicLinktree() {
                             )}
                           </p>
                           <p
-                            className="text-xs"
-                            style={{ color: themeColors.silver4 }}
+                            className="text-base"
+                            style={{ color: themeColors.black2 }}
                           >
                             {kajian.lecture_session_place}
                           </p>
@@ -283,7 +283,7 @@ export default function PublicLinktree() {
             </h1>
             <p
               className="text-base mt-2"
-              style={{ color: themeColors.silver2 }}
+              style={{ color: themeColors.black2 }}
             >
               Dikelola oleh DKM Masjid untuk ummat muslim
             </p>
@@ -291,13 +291,13 @@ export default function PublicLinktree() {
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(masjidData.masjid_location || "")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm inline-flex flex-col gap-0.5 pb-2"
-              style={{ color: themeColors.silver2 }}
+              className="text-base inline-flex flex-col gap-0.5 pb-2 pt-2"
+              style={{ color: themeColors.black2 }}
             >
               <span className="inline-flex items-center gap-0.5">
                 <span>{masjidData.masjid_location || "-"}</span>
               </span>
-              <span className="underline text-xs mt-0.5">Alamat Masjid</span>
+              <span className="underline text-sm mt-0.5">Alamat Masjid</span>
             </a>
 
             {/* <p

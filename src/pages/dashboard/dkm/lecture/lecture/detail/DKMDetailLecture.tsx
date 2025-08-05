@@ -14,6 +14,7 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 interface Lecture {
   lecture_id: string;
@@ -113,7 +114,7 @@ export default function DKMDetailLecture() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Kajian Detail" backTo="/dkm/kajian" />
+      <PageHeader title="Tema Detail" backTo="/dkm/tema" />
 
       {/* Kartu Kajian */}
       <div
@@ -141,9 +142,14 @@ export default function DKMDetailLecture() {
           >
             {teacherName}
           </p>
-          <p className="text-sm mt-1" style={{ color: theme.silver2 }}>
-            {lecture.lecture_description}
-          </p>
+          <div
+            className="text-sm mt-1 leading-relaxed"
+            style={{ color: theme.silver2 }}
+            dangerouslySetInnerHTML={{
+              __html: cleanTranscriptHTML(lecture.lecture_description),
+            }}
+          />
+
           <div className="flex justify-between items-center mt-3">
             <span
               className="text-xs font-semibold px-2 py-0.5 rounded"
@@ -169,7 +175,7 @@ export default function DKMDetailLecture() {
         >
           Navigasi Utama
         </h4>
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {navItems.map((item) => (
             <button
               key={item.label}

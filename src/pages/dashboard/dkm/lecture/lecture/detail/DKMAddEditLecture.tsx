@@ -8,12 +8,16 @@ import InputField from "@/components/common/main/InputField";
 import RichEditor from "@/components/common/main/RichEditor";
 import SubmitActionButtons from "@/components/common/main/SubmitActionButton";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 
 export default function DKMAddEditLecture() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const isEditMode = !!id;
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
 
   const [form, setForm] = useState({
     lecture_title: "",
@@ -138,20 +142,29 @@ export default function DKMAddEditLecture() {
         />
 
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
+          <label
+            className="text-sm font-medium"
+            style={{ color: theme.black1 }}
+          >
             Upload Gambar Tema
           </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-900 border border-gray-300 rounded"
+            className="block w-full text-sm rounded px-3 py-2"
+            style={{
+              backgroundColor: theme.white2,
+              color: theme.black1,
+              border: `1px solid ${theme.silver1}`,
+            }}
           />
           {form.lecture_image_url && (
             <ShimmerImage
               src={form.lecture_image_url}
               alt="Preview Gambar"
               className="w-32 h-32 object-cover rounded mt-2"
+              shimmerClassName="rounded"
             />
           )}
         </div>

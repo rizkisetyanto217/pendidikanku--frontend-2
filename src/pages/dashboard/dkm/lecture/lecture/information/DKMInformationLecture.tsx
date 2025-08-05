@@ -4,6 +4,7 @@ import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import FormattedDate from "@/constants/formattedDate";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML"; // pastikan path-nya sesuai
 
 interface Lecture {
   lecture_id: string;
@@ -30,17 +31,13 @@ export default function DKMInformationLecture() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Informasi Tema"
-        onBackClick={() => history.back()} // atau navigate(-1)
-      />
+      <PageHeader title="Informasi Tema" onBackClick={() => history.back()} />
 
-      {/* Konten */}
       <div
         className="bg-white dark:bg-gray-800 p-2"
         style={{ backgroundColor: theme.white1 }}
       >
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col lg:flex-row gap-4">
           {/* Gambar Kajian */}
           <ShimmerImage
             src={lecture.lecture_image_url || ""}
@@ -72,9 +69,13 @@ export default function DKMInformationLecture() {
                     "Pengajar belum ditentukan")}
             </p>
 
-            <p className="text-sm" style={{ color: theme.silver2 }}>
-              {lecture?.lecture_description}
-            </p>
+            <div
+              className="text-sm prose dark:prose-invert max-w-none"
+              style={{ color: theme.silver2 }}
+              dangerouslySetInnerHTML={{
+                __html: cleanTranscriptHTML(lecture?.lecture_description || ""),
+              }}
+            />
 
             <div className="flex gap-3 mt-2">
               <span

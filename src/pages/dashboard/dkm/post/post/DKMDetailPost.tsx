@@ -30,7 +30,7 @@ export default function DKMDetailPost() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <PageHeader
         title="Detail Post"
         backTo="/dkm/post"
@@ -41,41 +41,41 @@ export default function DKMDetailPost() {
         }}
       />
 
-      {post.post_image_url && (
-        <ShimmerImage
-          src={post.post_image_url}
-          alt={post.post_title}
-          className="w-full h-auto rounded shadow"
-          shimmerClassName="rounded"
-        />
-      )}
-
-      <div>
-        <h2 className="text-2xl font-bold">{post.post_title}</h2>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          <FormattedDate value={post.post_created_at} /> •{" "}
-          {post.post_theme?.post_theme_name || "Tanpa Tema"}
-        </div>
-        <div className="mt-2">
-          <StatusBadge
-            text={post.post_is_published ? "Dipublikasikan" : "Draft"}
-            variant={post.post_is_published ? "success" : "warning"}
+      {/* Gambar dan Deskripsi */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Gambar di kiri */}
+        {post.post_image_url && (
+          <ShimmerImage
+            src={post.post_image_url}
+            alt={post.post_title}
+            className="w-full lg:w-72 h-auto rounded shadow"
+            shimmerClassName="rounded"
           />
+        )}
+
+        {/* Konten di kanan */}
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold">{post.post_title}</h2>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            <FormattedDate value={post.post_created_at} /> •{" "}
+            {post.post_theme?.post_theme_name || "Tanpa Tema"}
+          </div>
+
+          <div className="mt-2">
+            <StatusBadge
+              text={post.post_is_published ? "Aktif" : "Draft"}
+              variant={post.post_is_published ? "success" : "warning"}
+            />
+          </div>
+
+          <div className="whitespace-pre-line text-base leading-relaxed mt-4">
+            {post.post_content}
+          </div>
+
+          <div className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+            <span className="font-semibold">Disukai:</span> {post.like_count} Jamaah
+          </div>
         </div>
-      </div>
-
-      <div className="whitespace-pre-line text-base leading-relaxed">
-        {post.post_content}
-      </div>
-
-      <div className="text-sm text-gray-600 dark:text-gray-400">
-        <span className="font-semibold">Disukai:</span> {post.like_count}
-      </div>
-
-      <div className="pt-4">
-        <Button variant="outline" onClick={() => navigate("/dkm/post")}>
-          Kembali ke Daftar Post
-        </Button>
       </div>
     </div>
   );

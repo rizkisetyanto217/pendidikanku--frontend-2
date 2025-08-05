@@ -6,11 +6,13 @@ import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import toast from "react-hot-toast";
 import InputField from "@/components/common/main/InputField";
 import RichEditor from "@/components/common/main/RichEditor";
-import LectureSelectField from "./components/LectureSelectField";
+import LectureSelectField from "../components/LectureSelectField";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import SelectMasjidTeacher from "./components/SelectMasjidTeacher";
+import SelectMasjidTeacher from "../components/SelectMasjidTeacher";
 import SubmitActionButtons from "@/components/common/main/SubmitActionButton";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 
 export default function DKMAddEditLectureSession() {
   const { user: currentUser, isLoading: isUserLoading } = useCurrentUser();
@@ -18,6 +20,8 @@ export default function DKMAddEditLectureSession() {
   const queryClient = useQueryClient();
   const { id } = useParams();
   const isEditMode = !!id;
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
 
   const [form, setForm] = useState({
     lecture_session_title: "",
@@ -225,14 +229,22 @@ export default function DKMAddEditLectureSession() {
         />
 
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
+          <label
+            className="text-sm font-medium"
+            style={{ color: theme.black1 }}
+          >
             Upload Gambar Kajian
           </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-900 border border-gray-300 rounded"
+            className="block w-full text-sm rounded px-3 py-2"
+            style={{
+              backgroundColor: theme.white2,
+              color: theme.black1,
+              border: `1px solid ${theme.silver1}`,
+            }}
           />
           {form.lecture_session_image_url && (
             <ShimmerImage

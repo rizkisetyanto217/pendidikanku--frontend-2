@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { useDeleteLectureSession } from "./useDeleteDKMLectureSessions";
+import { useDeleteLectureSession } from "./detail/add-edit/useDeleteDKMLectureSessions";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";

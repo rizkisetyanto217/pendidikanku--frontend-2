@@ -85,13 +85,13 @@ export default function LectureMaterialList({
                         item.attendanceStatus === 1
                           ? theme.success2
                           : item.attendanceStatus === 2
-                            ? theme.black1
+                            ? theme.warning1
                             : theme.white3,
                       color:
                         item.attendanceStatus === 1
                           ? theme.success1
                           : item.attendanceStatus === 2
-                            ? theme.black1
+                            ? theme.white1
                             : theme.silver2,
                     }}
                   >

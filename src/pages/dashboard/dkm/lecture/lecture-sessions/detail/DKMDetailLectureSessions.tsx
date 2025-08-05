@@ -102,7 +102,7 @@ export default function DKMDetailLectureSessions() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Kajian Detail sekarang"
+        title="Kajian Detail"
         onBackClick={() => navigate(`/dkm/kajian`)}
       />
 

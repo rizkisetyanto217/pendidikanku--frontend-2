@@ -28,8 +28,8 @@ export default function GenericAdminLayout({
 
   return (
     <div
-      className="min-h-screen h-screen flex overflow-hidden relative"
-      style={{ backgroundColor: theme.white2 }}
+      className="min-h-screen flex relative"
+      style={{ backgroundColor: theme.white2, overflow: "visible" }}
     >
       {/* Desktop Sidebar */}
       <div className="hidden md:flex md:h-screen">

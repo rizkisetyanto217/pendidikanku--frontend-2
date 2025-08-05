@@ -7,6 +7,8 @@ import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import InputField from "@/components/common/main/InputField";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { colors } from "@/constants/colorsThema";
 
 interface PostTheme {
   post_theme_id: string;
@@ -29,14 +31,15 @@ export default function DKMAddEditPost() {
   const location = useLocation();
   const post = location.state as Post | undefined;
   const { user } = useCurrentUser();
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [themeId, setThemeId] = useState<string>("");
+  const [themeId, setThemeId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Prefill untuk edit
   useEffect(() => {
     if (post) {
       setTitle(post.post_title);
@@ -45,7 +48,9 @@ export default function DKMAddEditPost() {
     }
   }, [post]);
 
-  const { data: themes, isLoading: isLoadingThemes } = useQuery<PostTheme[]>({
+  const { data: themes = [], isLoading: isLoadingThemes } = useQuery<
+    PostTheme[]
+  >({
     queryKey: ["post-themes"],
     queryFn: async () => {
       const res = await axios.get("/api/a/post-themes/by-masjid", {
@@ -53,7 +58,7 @@ export default function DKMAddEditPost() {
       });
       return res.data.data;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 5 * 60 * 1000,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +72,7 @@ export default function DKMAddEditPost() {
       formData.append("post_content", content);
       formData.append("post_theme_id", themeId);
       formData.append("post_is_published", "true");
+
       if (imageFile) {
         formData.append("post_image_url", imageFile);
       }
@@ -101,7 +107,11 @@ export default function DKMAddEditPost() {
         backTo="/dkm/post"
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6 p-4 max-w-xl">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 p-4 max-w-xl"
+        encType="multipart/form-data"
+      >
         <InputField
           label="Judul Post"
           name="post_title"
@@ -120,18 +130,31 @@ export default function DKMAddEditPost() {
           placeholder="Isi konten post"
         />
 
+        {/* Tema Post */}
         <div>
-          <label className="block mb-1 font-medium text-sm">
+          <label
+            className="block mb-1 font-medium text-sm"
+            style={{ color: theme.black1 }}
+          >
             Pilih Tema Post
           </label>
           <select
             value={themeId}
             onChange={(e) => setThemeId(e.target.value)}
-            className="w-full border rounded p-2"
+            className="w-full px-3 py-2 rounded text-sm focus:outline-none"
+            style={{
+              backgroundColor: theme.white2,
+              color: theme.black1,
+              border: `1px solid ${theme.silver1}`,
+            }}
+            disabled={isLoadingThemes}
             required
           >
             <option value="">-- Pilih Tema --</option>
-            {themes?.map((theme) => (
+            {themes.length === 0 && (
+              <option disabled>(Belum ada tema tersedia)</option>
+            )}
+            {themes.map((theme) => (
               <option key={theme.post_theme_id} value={theme.post_theme_id}>
                 {theme.post_theme_name}
               </option>
@@ -139,8 +162,12 @@ export default function DKMAddEditPost() {
           </select>
         </div>
 
-        <div>
-          <label className="block mb-1 font-medium text-sm">
+        {/* Upload Gambar */}
+        <div className="space-y-1">
+          <label
+            className="text-sm font-medium"
+            style={{ color: theme.black1 }}
+          >
             Upload Gambar (opsional)
           </label>
           <input
@@ -149,6 +176,12 @@ export default function DKMAddEditPost() {
             onChange={(e) =>
               setImageFile(e.target.files ? e.target.files[0] : null)
             }
+            className="block w-full text-sm rounded px-3 py-2"
+            style={{
+              backgroundColor: theme.white2,
+              color: theme.black1,
+              border: `1px solid ${theme.silver1}`,
+            }}
           />
         </div>
 

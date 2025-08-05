@@ -102,7 +102,7 @@ export default function MasjidSholat({
         onBackClick={() => navigate(`/masjid/${slug}`)}
       />
       <div
-        className="w-full max-w-xl mx-auto p-4 space-y-6"
+        className="w-full max-w-xl mx-auto space-y-6"
         style={{ color: theme.white1 }}
       >
         {/* Waktu Sholat Berikutnya */}
