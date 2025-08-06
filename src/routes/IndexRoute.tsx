@@ -124,6 +124,7 @@ import DKMDetailThemaPost from "@/pages/dashboard/dkm/post/themaPost/DKMDetailTh
 import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/main/MasjidInformationLecture";
 import MasjidSholat from "@/pages/linktree/home/sholat/MasjidSholat";
 import MasjidAllMyLecture from "@/pages/linktree/activity/my-activity/MasjidAllMyLecture";
+import MasjidMyNotesLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/arsip/MasjidMyNotesLectureSessions";
 
 export default function AppRoutes() {
   return (
@@ -163,38 +164,48 @@ export default function AppRoutes() {
 
           {/* Soal & Materi Kajian */}
           <Route path="soal-materi" element={<MasjidMaterial />} />
-          <Route path="soal-materi/:id" element={<MasjidLectureSessions />} />
           <Route
-            path="soal-materi/:id/informasi"
+            path="soal-materi/:lecture_session_slug"
+            element={<MasjidLectureSessions />}
+          />
+          <Route
+            path="soal-materi/:lecture_session_slug/informasi"
             element={<MasjidInformationLectureSessions />}
           />
           <Route
-            path="soal-materi/:id/latihan-soal"
+            path="soal-materi/:lecture_session_slug/latihan-soal"
             element={<MasjidQuizLectureSessions />}
           />
           <Route
-            path="soal-materi/:id/latihan-soal/hasil"
+            path="soal-materi/:lecture_session_slug/latihan-soal/hasil"
             element={<MasjidResultQuizLectureSessions />}
           />
           <Route
-            path="soal-materi/:id/video-audio"
+            path="soal-materi/:lecture_session_slug/video-audio"
             element={<MasjidVideoAudioLectureSessions />}
           />
           <Route
-            path="soal-materi/:id/materi-lengkap"
+            path="soal-materi/:lecture_session_slug/materi-lengkap"
             element={<MasjidFullTranscriptLectureSessions />}
           />
           <Route
-            path="soal-materi/:id/ringkasan"
+            path="soal-materi/:lecture_session_slug/ringkasan"
             element={<MasjidSummaryLectureSessions />}
           />
           <Route
-            path="soal-materi/:id/dokumen"
+            path="soal-materi/:lecture_session_slug/catatanku"
+            element={<MasjidMyNotesLectureSessions />}
+          />
+          <Route
+            path="soal-materi/:lecture_session_slug/dokumen"
             element={<MasjidDocsLectureSessions />}
           />
 
           {/* Tema */}
-          <Route path="tema/:id" element={<MasjidLectureMaterial />} />
+          <Route
+            path="tema/:lecture_slug"
+            element={<MasjidLectureMaterial />}
+          />
           <Route
             path="tema/:id/informasi"
             element={<MasjidInformationLecture />}

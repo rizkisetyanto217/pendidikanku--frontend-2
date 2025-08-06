@@ -1,4 +1,3 @@
-// File ini cocok digunakan ulang untuk halaman user dan halaman Linktree publik
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +5,6 @@ import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
-import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { Check } from "lucide-react";
 
@@ -16,17 +14,24 @@ export default function MasjidVideoAudioDetailLectureSessions() {
   const theme = isDark ? colors.dark : colors.light;
   const [tab, setTab] = useState("youtube");
   const [activeIndex, setActiveIndex] = useState(0);
-  const { id, slug } = useParams<{ id: string; slug: string }>();
+
+  const { lecture_session_slug, slug } = useParams<{
+    lecture_session_slug: string;
+    slug: string;
+  }>();
 
   const { data: assets = [] } = useQuery({
-    queryKey: ["lecture-session-assets", id],
+    queryKey: ["lecture-session-assets", lecture_session_slug],
     queryFn: async () => {
-      const res = await axios.get("/public/lecture-sessions-assets/filter", {
-        params: { lecture_session_id: id, file_type: "1,2" },
+      const res = await axios.get("/public/lecture-sessions-assets/filter-slug", {
+        params: {
+          lecture_session_slug,
+          file_type: "1,2", // 1 = video, 2 = audio
+        },
       });
       return Array.isArray(res.data) ? res.data : [];
     },
-    enabled: !!id,
+    enabled: !!lecture_session_slug,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
@@ -49,7 +54,7 @@ export default function MasjidVideoAudioDetailLectureSessions() {
       <PageHeaderUser
         title="Video & Audio"
         onBackClick={() => {
-          navigate(`/masjid/${slug}/soal-materi/${id}`);
+          navigate(`/masjid/${slug}/soal-materi/${lecture_session_slug}`);
         }}
       />
       <Tabs

@@ -1,24 +1,26 @@
-import PageHeader from "@/components/common/home/PageHeaderUser";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
-import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { decode } from "html-entities";
 import parse from "html-react-parser";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 export default function MasjidSummaryLectureSessions() {
-  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const { lecture_session_slug, slug } = useParams<{
+    lecture_session_slug: string;
+    slug: string;
+  }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
-  const { id: lecture_session_id } = useParams();
-  const location = useLocation();
 
-  const backUrl = location.state?.from || `/masjid/${slug}/soal-materi/${id}`;
+  const backUrl =
+    location.state?.from ||
+    `/masjid/${slug}/soal-materi/${lecture_session_slug}`;
 
   // 📥 Fetch detail sesi kajian
   const {
@@ -26,15 +28,15 @@ export default function MasjidSummaryLectureSessions() {
     isLoading: isLoadingSession,
     isError: isErrorSession,
   } = useQuery({
-    queryKey: ["lecture-session-detail", lecture_session_id],
+    queryKey: ["lecture-session-detail", lecture_session_slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-u/by-id/${lecture_session_id}`
+        `/public/lecture-sessions-u/by-slug/${lecture_session_slug}`
       );
-      console.log("📦 Data sesi kajian:", res.data);
+      console.log("📦 Detail sesi kajian:", res.data);
       return res.data;
     },
-    enabled: !!lecture_session_id,
+    enabled: !!lecture_session_slug,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -44,15 +46,15 @@ export default function MasjidSummaryLectureSessions() {
     isLoading: isLoadingSummary,
     isError: isErrorSummary,
   } = useQuery({
-    queryKey: ["public-lecture-session-summary", lecture_session_id],
+    queryKey: ["public-lecture-session-summary", lecture_session_slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-materials/filter?lecture_session_id=${lecture_session_id}&type=summary`
+        `/public/lecture-sessions-materials/filter-slug?lecture_session_slug=${lecture_session_slug}&type=summary`
       );
-      console.log("📘 Data ringkasan:", res.data);
+      console.log("📦 Ringkasan materi:", res?.data?.data?.[0]);
       return res?.data?.data?.[0] ?? null;
     },
-    enabled: !!lecture_session_id,
+    enabled: !!lecture_session_slug,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -61,7 +63,7 @@ export default function MasjidSummaryLectureSessions() {
   return (
     <div className="max-w-2xl mx-auto">
       <PageHeaderUser
-        title="Ringkasan Kajian"
+        title="Materi Kajian"
         onBackClick={() => navigate(backUrl)}
       />
 
@@ -109,7 +111,7 @@ export default function MasjidSummaryLectureSessions() {
                 </div>
               ) : (
                 <p className="italic text-gray-500">
-                  Belum ada materi lengkap tersedia.
+                  Belum ada materi ringkasan tersedia.
                 </p>
               )}
             </div>

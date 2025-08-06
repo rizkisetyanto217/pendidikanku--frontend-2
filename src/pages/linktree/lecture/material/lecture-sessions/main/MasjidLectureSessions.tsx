@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from "react";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import {
-  useNavigate,
-  useParams,
-  useSearchParams,
-  useLocation,
-} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AttendanceModal from "./components/AttendanceModal";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Home,
   Video,
@@ -24,16 +18,19 @@ import {
 import FormattedDate from "@/constants/formattedDate";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
+import LoginPromptModal from "./components/LoginModal";
 
 // =====================
 // ✅ Interface
 // =====================
 interface LectureSession {
+  lecture_session_id: string;
   lecture_session_title: string;
   lecture_session_teacher_name: string;
   lecture_session_start_time: string;
   lecture_session_place: string;
   lecture_session_image_url?: string;
+  lecture_session_slug: string;
   user_grade_result?: number;
 }
 
@@ -43,68 +40,53 @@ interface UserAttendance {
   user_lecture_sessions_attendance_personal_notes: string;
 }
 
-interface AttendanceForm {
-  user_lecture_sessions_attendance_lecture_session_id: string;
-  user_lecture_sessions_attendance_status?: number;
-  user_lecture_sessions_attendance_notes?: string;
-  user_lecture_sessions_attendance_personal_notes?: string;
-}
-
 export default function MasjidLectureSessions() {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
-  const { id = "", slug = "" } = useParams<{ id: string; slug: string }>();
+  const { lecture_session_slug = "", slug = "" } = useParams<{
+    slug: string;
+    lecture_session_slug: string;
+  }>();
+
   const [searchParams] = useSearchParams();
   const tab = searchParams.get("tab") || "navigasi";
 
   const { data: currentUser } = useCurrentUser();
-
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
 
+  // ✅ Ambil data sesi berdasarkan slug
   const { data, isLoading } = useQuery<LectureSession>({
-    queryKey: ["lectureSessionDetail", id, currentUser?.id],
+    queryKey: ["lectureSessionDetail", lecture_session_slug, currentUser?.id],
     queryFn: async () => {
       const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
-
-      const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`, {
-        headers,
-      });
-      console.log("📦 Data kajian:", res.data);
+      const res = await axios.get(
+        `/public/lecture-sessions-u/by-slug/${lecture_session_slug}`,
+        { headers }
+      );
       return res.data;
     },
-    enabled: !!id, // ✅ tetap dijalankan meskipun user belum login
+    enabled: !!lecture_session_slug,
     staleTime: 5 * 60 * 1000,
   });
 
-  useEffect(() => {
-    const cookies = document.cookie;
-    console.log("🍪 Semua cookie:", cookies);
-
-    const hasUserId = cookies.includes("user_id=");
-    if (hasUserId) {
-      console.log("✅ Cookie 'user_id' ditemukan");
-    } else {
-      console.log("❌ Cookie 'user_id' tidak ditemukan");
-    }
-  }, []);
-
-  const { data: attendanceData, isLoading: loadingAttendance } =
-    useQuery<UserAttendance>({
-      queryKey: ["userAttendance", id, currentUser?.id],
-      queryFn: async () => {
-        const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
-        const res = await axios.get(
-          `/public/user-lecture-sessions-attendance/${id}`,
-          { headers }
-        );
-        return res.data;
-      },
-      enabled: !!id && !!currentUser?.id, // hanya jalan jika sudah login
-      staleTime: 5 * 60 * 1000,
-    });
+  // ✅ Ambil data kehadiran berdasarkan session_id dari data
+  const { data: attendanceData } = useQuery<UserAttendance>({
+    queryKey: ["userAttendance", data?.lecture_session_id, currentUser?.id],
+    queryFn: async () => {
+      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+      const res = await axios.get(
+        `/public/user-lecture-sessions-attendance/${data?.lecture_session_id}`,
+        { headers }
+      );
+      return res.data;
+    },
+    enabled: !!data?.lecture_session_id && !!currentUser?.id,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const info = {
     materi: data?.lecture_session_title || "-",
@@ -117,9 +99,10 @@ export default function MasjidLectureSessions() {
     { label: "Informasi", icon: Home, path: "informasi" },
     { label: "Video-Audio", icon: Video, path: "video-audio" },
     { label: "Latihan Soal", icon: BookOpen, path: "latihan-soal" },
-    { label: "Materi Lengkap", icon: Book, path: "materi-lengkap" },
-    { label: "Ringkasan", icon: FileText, path: "ringkasan" },
+    // { label: "Materi Lengkap", icon: Book, path: "materi-lengkap" },
+    { label: "Materi", icon: FileText, path: "ringkasan" },
     { label: "Dokumen", icon: FolderOpen, path: "dokumen" },
+    { label: "Catatanku", icon: FolderOpen, path: "catatanku" },
   ];
 
   return (
@@ -131,7 +114,7 @@ export default function MasjidLectureSessions() {
         }}
       />
 
-      {/* 📷 Gambar + 📘 Info Kajian dalam 1 card horizontal */}
+      {/* 📷 Gambar + Info */}
       <div
         className="rounded-xl overflow-hidden border flex flex-col md:flex-row"
         style={{
@@ -140,7 +123,6 @@ export default function MasjidLectureSessions() {
           color: theme.black1,
         }}
       >
-        {/* Gambar Kajian */}
         <div
           className="w-full md:w-1/3 aspect-[4/5] md:aspect-auto md:h-auto overflow-hidden"
           style={{
@@ -160,37 +142,31 @@ export default function MasjidLectureSessions() {
           />
         </div>
 
-        {/* Informasi Kajian */}
         <div className="flex-1 p-4 space-y-2 text-sm">
           {isLoading ? (
             <p style={{ color: theme.silver2 }}>Memuat data...</p>
           ) : (
             <>
               <div>
-                📘 <strong style={{ color: theme.black1 }}>Materi:</strong>{" "}
-                {info.materi}
+                📘 <strong>Materi:</strong> {info.materi}
               </div>
               <div>
-                👤 <strong style={{ color: theme.black1 }}>Pengajar:</strong>{" "}
-                {info.ustadz}
+                👤 <strong>Pengajar:</strong> {info.ustadz}
               </div>
               <div>
-                📅 <strong style={{ color: theme.black1 }}>Jadwal:</strong>{" "}
+                📅 <strong>Jadwal:</strong>{" "}
                 {info.jadwal !== "-" ? (
                   <FormattedDate value={info.jadwal} fullMonth />
                 ) : (
                   "-"
                 )}
               </div>
-
               <div>
-                📍 <strong style={{ color: theme.black1 }}>Tempat:</strong>{" "}
-                {info.tempat}
+                📍 <strong>Tempat:</strong> {info.tempat}
               </div>
 
-              {/* 🧾 Ringkasan Hasil Belajar */}
+              {/* Hasil */}
               <div className="flex flex-col gap-3 mt-4">
-                {/* Nilai & Soal */}
                 <div
                   className="rounded-md px-3 py-2 text-sm"
                   style={{
@@ -252,13 +228,15 @@ export default function MasjidLectureSessions() {
           {menuItems.map((item) => (
             <div
               key={item.label}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigate(
-                  `/masjid/${slug}/soal-materi/${id}/${item.path}?tab=${tab}`,
-                  { state: { fromTab: tab } }
-                );
+              onClick={() => {
+                if (item.path === "latihan-soal" && !currentUser) {
+                  setShowLoginPrompt(true); // ❗️ Tampilkan modal dulu
+                } else {
+                  navigate(
+                    `/masjid/${slug}/soal-materi/${lecture_session_slug}/${item.path}`,
+                    { state: { fromTab: tab } }
+                  );
+                }
               }}
               className="flex flex-col items-center text-center text-sm p-3 rounded-md cursor-pointer hover:opacity-90 transition"
               style={{
@@ -273,27 +251,62 @@ export default function MasjidLectureSessions() {
             </div>
           ))}
         </div>
-        {/* Bottom Navigation */}
+
+        {/* ⬇ Bottom bar */}
         <BottomNavbar />
 
         {/* 📋 Modal Kehadiran */}
-        <AttendanceModal
-          show={showModal}
-          onClose={() => setShowModal(false)}
-          sessionId={id}
-          onSuccess={() => {
-            setShowModal(false);
+        {showModal &&
+          (currentUser ? (
+            <AttendanceModal
+              show={showModal}
+              onClose={() => setShowModal(false)}
+              sessionId={data?.lecture_session_id || ""}
+              onSuccess={() => {
+                setShowModal(false);
+                queryClient.invalidateQueries({
+                  queryKey: [
+                    "userAttendance",
+                    data?.lecture_session_id,
+                    currentUser?.id,
+                  ],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: [
+                    "lectureSessionDetail",
+                    lecture_session_slug,
+                    currentUser?.id,
+                  ],
+                });
+                console.log("🔄 Kehadiran & nilai direfresh ulang");
+              }}
+            />
+          ) : (
+            <LoginPromptModal
+              show={true}
+              onClose={() => setShowModal(false)}
+              onLogin={() => (window.location.href = "/login")}
+              showContinueButton={false} // tidak ada lanjut tanpa login saat mencatat kehadiran
+              title="Login untuk Mencatat Kehadiran"
+              message="Silakan login terlebih dahulu agar dapat mencatat kehadiran pada kajian ini."
+            />
+          ))}
 
-            // 🔁 Refetch data kehadiran & nilai
-            queryClient.invalidateQueries({
-              queryKey: ["userAttendance", id, currentUser?.id],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["lectureSessionDetail", id, currentUser?.id],
-            });
-
-            console.log("🔄 Kehadiran & nilai direfresh ulang");
+        <LoginPromptModal
+          show={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+          onLogin={() => (window.location.href = "/login")}
+          showContinueButton={true}
+          continueLabel="Lanjutkan Tanpa Login"
+          onContinue={() => {
+            setShowLoginPrompt(false);
+            navigate(
+              `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal`,
+              { state: { fromTab: tab } }
+            );
           }}
+          title="Login untuk Menyimpan Progres"
+          message="Silakan login terlebih dahulu jika ingin progres latihan soal Anda tersimpan."
         />
       </div>
     </div>

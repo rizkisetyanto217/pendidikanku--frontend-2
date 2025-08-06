@@ -13,6 +13,7 @@ import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 // =====================
 interface LectureSession {
+  lecture_session_id: string;
   lecture_session_title: string;
   lecture_session_description: string;
   lecture_session_teacher_name: string;
@@ -29,19 +30,23 @@ export default function MasjidInformationLectureSessions() {
   const queryClient = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const [showModal, setShowModal] = useState(false);
-  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const { lecture_session_slug, slug } = useParams<{
+    slug: string;
+    lecture_session_slug: string;
+  }>();
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery<LectureSession>({
-    queryKey: ["lectureSessionDetail", id, currentUser?.id],
+    queryKey: ["lectureSessionDetail", lecture_session_slug, currentUser?.id],
     queryFn: async () => {
       const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
-      const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`, {
-        headers,
-      });
+      const res = await axios.get(
+        `/public/lecture-sessions-u/by-slug/${lecture_session_slug}`,
+        { headers }
+      );
       return res.data;
     },
-    enabled: !!id,
+    enabled: !!lecture_session_slug,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -59,7 +64,7 @@ export default function MasjidInformationLectureSessions() {
       <PageHeaderUser
         title="Informasi Kajian"
         onBackClick={() => {
-          navigate(`/masjid/${slug}/soal-materi/${id}`);
+          navigate(`/masjid/${slug}/soal-materi/${lecture_session_slug}`);
         }}
       />
 
@@ -165,11 +170,15 @@ export default function MasjidInformationLectureSessions() {
             <AttendanceModal
               show={showModal}
               onClose={() => setShowModal(false)}
-              sessionId={id || ""}
+              sessionId={data?.lecture_session_id || ""}
               onSuccess={() => {
                 setShowModal(false);
                 queryClient.invalidateQueries({
-                  queryKey: ["lectureSessionDetail", id, currentUser?.id],
+                  queryKey: [
+                    "lectureSessionDetail",
+                    lecture_session_slug,
+                    currentUser?.id,
+                  ],
                 });
               }}
             />

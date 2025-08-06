@@ -5,18 +5,22 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
-import { decode } from "html-entities";
 import parse from "html-react-parser";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 export default function MasjidFullTranscriptLectureSessions() {
   const { isDark } = useHtmlDarkMode();
-  const { id, slug } = useParams<{ id: string; slug: string }>();
   const theme = isDark ? colors.dark : colors.light;
-  const { id: lecture_session_id } = useParams();
+  const { lecture_session_slug, slug } = useParams<{
+    lecture_session_slug: string;
+    slug: string;
+  }>();
+
   const location = useLocation();
   const navigate = useNavigate();
-  const backUrl = location.state?.from || `/masjid/${slug}/soal-materi/${id}`;
+  const backUrl =
+    location.state?.from ||
+    `/masjid/${slug}/soal-materi/${lecture_session_slug}`;
 
   // 📥 Fetch detail sesi kajian
   const {
@@ -24,15 +28,15 @@ export default function MasjidFullTranscriptLectureSessions() {
     isLoading: isLoadingSession,
     isError: isErrorSession,
   } = useQuery({
-    queryKey: ["lecture-session-detail", lecture_session_id],
+    queryKey: ["lecture-session-detail", lecture_session_slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-u/by-id/${lecture_session_id}`
+        `/public/lecture-sessions-u/by-slug/${lecture_session_slug}`
       );
-      console.log("📦 Data sesi kajian:", res.data);
-      return res.data; // ✅ ini yang benar
+      console.log("📦 Detail sesi kajian:", res.data);
+      return res.data;
     },
-    enabled: !!lecture_session_id,
+    enabled: !!lecture_session_slug,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -42,29 +46,25 @@ export default function MasjidFullTranscriptLectureSessions() {
     isLoading: isLoadingTranscript,
     isError: isErrorTranscript,
   } = useQuery({
-    queryKey: ["public-lecture-session-transcript", lecture_session_id],
+    queryKey: ["public-lecture-session-transcript", lecture_session_slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-materials/filter?lecture_session_id=${lecture_session_id}&type=transcript`
+        `/public/lecture-sessions-materials/filter-slug?lecture_session_slug=${lecture_session_slug}&type=transcript`
       );
-      console.log("Data transcript didapatkan ", res.data);
+      console.log("📘 Data transkrip materi sesi kajian:", res?.data?.data);
       return res?.data?.data?.[0] ?? null;
     },
-    enabled: !!lecture_session_id,
+    enabled: !!lecture_session_slug,
     staleTime: 1000 * 60 * 5,
   });
 
   const transcript =
     materialData?.lecture_sessions_material_transcript_full || "";
 
-  // ✅ Log di luar return
-  console.log("✅ transcript asli:", transcript);
-  console.log("✅ transcript cleaned:", cleanTranscriptHTML(transcript));
-
   return (
     <div className="max-w-2xl mx-auto">
       <PageHeader
-        title="Materi Lengkap ini"
+        title="Materi Lengkap"
         onBackClick={() => navigate(backUrl)}
       />
 
@@ -122,4 +122,3 @@ export default function MasjidFullTranscriptLectureSessions() {
     </div>
   );
 }
-

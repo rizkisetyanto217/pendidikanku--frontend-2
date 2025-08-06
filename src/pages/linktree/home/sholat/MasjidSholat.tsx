@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useEffect, useState } from "react";
+
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { useNavigate, useParams } from "react-router-dom";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 
 export default function MasjidSholat({
@@ -16,7 +18,44 @@ export default function MasjidSholat({
   const navigate = useNavigate();
   const { slug } = useParams();
 
-  // Hijriah
+  const [now, setNow] = useState(new Date());
+  const [nextPrayerData, setNextPrayerData] = useState<{
+    name: string;
+    time: Date;
+  } | null>(null);
+  const [showingCurrentPrayer, setShowingCurrentPrayer] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // ==========================
+  // ⏱️ Hitung Mundur Waktu Sholat
+  // ==========================
+  const getCountdown = () => {
+    if (!nextPrayerData) return null;
+
+    const target = showingCurrentPrayer
+      ? new Date(nextPrayerData.time.getTime() + 15 * 60 * 1000)
+      : nextPrayerData.time;
+
+    const diff = target.getTime() - now.getTime();
+    if (diff <= 0) return "00:00";
+
+    const totalMinutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return hours > 0
+      ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+      : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+
+  // ==========================
+  // 📅 Ambil Tanggal Hijriyah
+  // ==========================
   const getHijriDate = async () => {
     const today = new Date().toISOString().split("T")[0];
     const res = await axios.get(
@@ -26,116 +65,166 @@ export default function MasjidSholat({
     return `${day}, ${hijri}`;
   };
 
-  // Next prayer
-  const getNextPrayerTime = async () => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const res = await axios.get(
-      `https://api.myquran.com/v2/sholat/jadwal/${kotaId}/${todayStr}`
-    );
-    const jadwal = res.data.data.jadwal;
-
-    const times = {
-      Subuh: jadwal.subuh,
-      Dzuhur: jadwal.dzuhur,
-      Ashar: jadwal.ashar,
-      Maghrib: jadwal.maghrib,
-      Isya: jadwal.isya,
-    };
-
-    const now = new Date();
-    const next = Object.entries(times).find(([_, t]) => {
-      const [h, m] = t.split(":").map(Number);
-      const time = new Date(now);
-      time.setHours(h, m, 0, 0);
-      return time > now;
-    });
-
-    return next || ["Subuh", jadwal.subuh];
-  };
-
-  // Jadwal hari ini
+  // ==========================
+  // 🕌 Ambil Jadwal Sholat Hari Ini
+  // ==========================
   const getTodaySchedule = async () => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const today = new Date();
+    const todayFixed = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const todayStr = todayFixed.toISOString().split("T")[0];
+
     const res = await axios.get(
       `https://api.myquran.com/v2/sholat/jadwal/${kotaId}/${todayStr}`
     );
+
     return res.data.data;
   };
 
+  // ==========================
+  // 🔁 Queries
+  // ==========================
   const { data: hijriDate, isLoading: loadingHijri } = useQuery({
     queryKey: ["hijri-date"],
     queryFn: getHijriDate,
     staleTime: 1000 * 60 * 60 * 3,
   });
 
-  const { data: prayerData, isLoading: loadingPrayer } = useQuery({
-    queryKey: ["next-prayer", kotaId],
-    queryFn: getNextPrayerTime,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const { data: scheduleData, isLoading: loadingSchedule } = useQuery({
+  const {
+    data: scheduleData,
+    isLoading: loadingSchedule,
+    error: errorSchedule,
+  } = useQuery({
     queryKey: ["jadwal-hari-ini", kotaId],
     queryFn: getTodaySchedule,
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 15,
   });
 
-  const prayerName = prayerData?.[0];
-  const prayerTime = prayerData?.[1];
-  const jadwal = scheduleData?.jadwal;
+  useEffect(() => {
+    if (!scheduleData?.jadwal) return;
 
+    const today = new Date();
+    const todayFixed = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+    const toDate = (time: string) => {
+      const [h, m] = time.split(":").map(Number);
+      const d = new Date(todayFixed);
+      d.setHours(h, m, 0, 0);
+      return d;
+    };
+
+    const scheduleToday = [
+      { name: "Subuh", time: toDate(scheduleData.jadwal.subuh) },
+      { name: "Dzuhur", time: toDate(scheduleData.jadwal.dzuhur) },
+      { name: "Ashar", time: toDate(scheduleData.jadwal.ashar) },
+      { name: "Maghrib", time: toDate(scheduleData.jadwal.maghrib) },
+      { name: "Isya", time: toDate(scheduleData.jadwal.isya) },
+    ];
+
+    const updatedPrayer = scheduleToday.find((item) => {
+      const start = item.time;
+      const end = new Date(start.getTime() + 15 * 60 * 1000);
+
+      if (now >= start && now < end) {
+        setShowingCurrentPrayer(true);
+        return true;
+      }
+
+      if (now < start) {
+        setShowingCurrentPrayer(false);
+        return true;
+      }
+
+      return false;
+    });
+
+    if (updatedPrayer) {
+      setNextPrayerData(updatedPrayer);
+    } else {
+      setNextPrayerData(null);
+    }
+  }, [now, scheduleData]);
+
+  useEffect(() => {
+    if (errorSchedule)
+      console.error("❌ Gagal mengambil jadwal:", errorSchedule);
+    console.log("🕐 Sekarang:", now.toLocaleTimeString());
+    console.log("🕌 Jadwal:", scheduleData?.jadwal);
+    console.log("➡️ Selanjutnya:", nextPrayerData);
+  }, [now, scheduleData, nextPrayerData, errorSchedule]);
+
+  const jadwal = scheduleData?.jadwal;
   const jadwalList = [
-    { label: "Imsak", time: jadwal?.imsak },
+    // { label: "Imsak", time: jadwal?.imsak },
     { label: "Subuh", time: jadwal?.subuh },
     { label: "Terbit", time: jadwal?.terbit },
-    { label: "Dhuha", time: jadwal?.dhuha },
+    // { label: "Dhuha", time: jadwal?.dhuha },
     { label: "Dzuhur", time: jadwal?.dzuhur },
     { label: "Ashar", time: jadwal?.ashar },
     { label: "Maghrib", time: jadwal?.maghrib },
     { label: "Isya", time: jadwal?.isya },
   ];
 
+  // ==========================
+  // 📦 UI
+  // ==========================
   return (
     <>
       <PageHeaderUser
         title="Profil DKM & Pengajar"
         onBackClick={() => navigate(`/masjid/${slug}`)}
       />
+
       <div
-        className="w-full max-w-xl mx-auto space-y-6"
+        className="w-full max-w-2xl mx-auto pb-28 space-y-6"
         style={{ color: theme.white1 }}
       >
-        {/* Waktu Sholat Berikutnya */}
         <div
-          className="rounded-xl p-4 flex justify-between items-center shadow-md"
+          className="rounded-2xl p-5 shadow-lg"
           style={{ backgroundColor: theme.secondary }}
         >
           <div
-            className="text-left pr-3 border-r"
-            style={{ borderColor: `${theme.white1}80` }}
+            className="rounded-xl px-4 py-3 mb-4 space-y-2 text-center"
+            style={{
+              backgroundColor: `${theme.specialColor}10`,
+              borderColor: `${theme.white1}30`,
+              borderWidth: 1,
+            }}
           >
-            <p className="text-sm font-semibold">
-              {loadingPrayer ? "..." : prayerName}
+            <p className="text-xs tracking-wide text-white/60">
+              {loadingHijri ? "..." : hijriDate} • {location}
             </p>
-            <p className="text-2xl font-bold leading-tight">
-              {loadingPrayer ? "--:--" : prayerTime}
-            </p>
-          </div>
-          <div className="flex-1 pl-3">
-            <p className="text-sm font-semibold">
-              {loadingHijri ? "..." : hijriDate}
-            </p>
-            <p className="text-xs">{location}</p>
-          </div>
-        </div>
 
-        {/* Jadwal Lengkap Hari Ini */}
-        <div
-          className="rounded-xl p-4 shadow-md"
-          style={{ backgroundColor: theme.secondary }}
-        >
-          <h3 className="text-lg font-semibold mb-3">Jadwal Sholat Hari Ini</h3>
-          <table className="w-full text-sm">
+            <p className="text-5xl font-bold text-primary">
+              {loadingSchedule || !nextPrayerData
+                ? "--:--"
+                : nextPrayerData.time.toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+            </p>
+
+            <p className="text-sm font-medium text-primary">
+              {showingCurrentPrayer ? "Sedang Berlangsung" : "Menuju"}{" "}
+              <span className="font-bold text-primary">
+                {nextPrayerData?.name}
+              </span>{" "}
+              • {getCountdown()}
+            </p>
+          </div>
+
+          <h3 className="text-lg font-semibold mb-3">
+            🕌 Jadwal Sholat Hari Ini
+          </h3>
+          <table className="w-full text-sm table-auto">
             <tbody>
               {loadingSchedule ? (
                 <tr>
@@ -144,10 +233,15 @@ export default function MasjidSholat({
                   </td>
                 </tr>
               ) : (
-                jadwalList.map((item) => (
-                  <tr key={item.label} className="border-t border-white/20">
-                    <td className="py-1">{item.label}</td>
-                    <td className="py-1 text-right font-semibold">
+                jadwalList.map((item, index) => (
+                  <tr
+                    key={item.label}
+                    className={`border-t border-white/10 ${
+                      index % 2 === 1 ? "bg-white/5" : ""
+                    }`}
+                  >
+                    <td className="py-2 px-1">{item.label}</td>
+                    <td className="py-2 px-1 text-right font-semibold">
                       {item.time}
                     </td>
                   </tr>
@@ -155,13 +249,14 @@ export default function MasjidSholat({
               )}
             </tbody>
           </table>
-          <p className="text-xs mt-3 opacity-80">
+
+          <p className="text-xs mt-4 opacity-80 text-right">
             Lokasi: {scheduleData?.lokasi || "-"} • Tanggal:{" "}
             {jadwal?.tanggal || "-"}
           </p>
         </div>
       </div>
-      {/* Bottom Navigation */}
+
       <BottomNavbar />
     </>
   );

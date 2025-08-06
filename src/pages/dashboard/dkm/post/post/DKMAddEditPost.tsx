@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import ShimmerImage from "@/components/common/main/ShimmerImage";
+import RichEditor from "@/components/common/main/RichEditor";
 
 interface PostTheme {
   post_theme_id: string;
@@ -39,12 +41,14 @@ export default function DKMAddEditPost() {
   const [themeId, setThemeId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (post) {
       setTitle(post.post_title);
       setContent(post.post_content);
       setThemeId(post.post_theme?.post_theme_id || "");
+      setImagePreviewUrl(post.post_image_url); // ← tampilkan gambar lama
     }
   }, [post]);
 
@@ -109,91 +113,108 @@ export default function DKMAddEditPost() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 p-4 max-w-xl"
+        className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6 p-4 max-w-5xl"
         encType="multipart/form-data"
       >
-        <InputField
-          label="Judul Post"
-          name="post_title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Contoh: Fiqh Syafi'i 2"
-        />
-
-        <InputField
-          label="Isi Konten"
-          name="post_content"
-          type="textarea"
-          rows={4}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Isi konten post"
-        />
-
-        {/* Tema Post */}
-        <div>
-          <label
-            className="block mb-1 font-medium text-sm"
-            style={{ color: theme.black1 }}
-          >
-            Pilih Tema Post
-          </label>
-          <select
-            value={themeId}
-            onChange={(e) => setThemeId(e.target.value)}
-            className="w-full px-3 py-2 rounded text-sm focus:outline-none"
-            style={{
-              backgroundColor: theme.white2,
-              color: theme.black1,
-              border: `1px solid ${theme.silver1}`,
-            }}
-            disabled={isLoadingThemes}
-            required
-          >
-            <option value="">-- Pilih Tema --</option>
-            {themes.length === 0 && (
-              <option disabled>(Belum ada tema tersedia)</option>
-            )}
-            {themes.map((theme) => (
-              <option key={theme.post_theme_id} value={theme.post_theme_id}>
-                {theme.post_theme_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Upload Gambar */}
-        <div className="space-y-1">
-          <label
-            className="text-sm font-medium"
-            style={{ color: theme.black1 }}
-          >
-            Upload Gambar (opsional)
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) =>
-              setImageFile(e.target.files ? e.target.files[0] : null)
-            }
-            className="block w-full text-sm rounded px-3 py-2"
-            style={{
-              backgroundColor: theme.white2,
-              color: theme.black1,
-              border: `1px solid ${theme.silver1}`,
-            }}
+        {/* KIRI: Input Judul, Konten, Tema */}
+        <div className="space-y-6">
+          <InputField
+            label="Judul Post"
+            name="post_title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Contoh: Fiqh Syafi'i 2"
           />
+
+          <RichEditor
+            label="Isi Konten"
+            value={content}
+            onChange={setContent}
+            placeholder="Isi konten post"
+          />
+
+          {/* Tema Post */}
+          <div>
+            <label
+              className="block mb-1 font-medium text-sm"
+              style={{ color: theme.black1 }}
+            >
+              Pilih Tema Post
+            </label>
+            <select
+              value={themeId}
+              onChange={(e) => setThemeId(e.target.value)}
+              className="w-full px-3 py-2 rounded text-sm focus:outline-none"
+              style={{
+                backgroundColor: theme.white2,
+                color: theme.black1,
+                border: `1px solid ${theme.silver1}`,
+              }}
+              disabled={isLoadingThemes}
+              required
+            >
+              <option value="">-- Pilih Tema --</option>
+              {themes.length === 0 && (
+                <option disabled>(Belum ada tema tersedia)</option>
+              )}
+              {themes.map((theme) => (
+                <option key={theme.post_theme_id} value={theme.post_theme_id}>
+                  {theme.post_theme_name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <Button type="submit" disabled={loading || isLoadingThemes}>
-          {loading
-            ? post
-              ? "Menyimpan perubahan..."
-              : "Menyimpan..."
-            : post
-              ? "Simpan Perubahan"
-              : "Simpan Post"}
-        </Button>
+        {/* KANAN: Upload Gambar + Preview + Tombol */}
+        <div className="space-y-6">
+          {/* Upload Gambar */}
+          <div className="space-y-1">
+            <label
+              className="text-sm font-medium"
+              style={{ color: theme.black1 }}
+            >
+              Upload Gambar Post
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                if (file) {
+                  setImageFile(file);
+                  setImagePreviewUrl(URL.createObjectURL(file));
+                }
+              }}
+              className="block w-full text-sm rounded px-3 py-2"
+              style={{
+                backgroundColor: theme.white2,
+                color: theme.black1,
+                border: `1px solid ${theme.silver1}`,
+              }}
+            />
+
+            {imagePreviewUrl && (
+              <ShimmerImage
+                src={imagePreviewUrl}
+                alt="Preview Gambar"
+                className="w-full max-w-xs object-cover rounded mt-2"
+                shimmerClassName="rounded"
+              />
+            )}
+          </div>
+
+          {/* Tombol Simpan */}
+          <Button type="submit" disabled={loading || isLoadingThemes}>
+            {loading
+              ? post
+                ? "Menyimpan perubahan..."
+                : "Menyimpan..."
+              : post
+                ? "Simpan Perubahan"
+                : "Simpan Post"}
+          </Button>
+        </div>
       </form>
     </>
   );

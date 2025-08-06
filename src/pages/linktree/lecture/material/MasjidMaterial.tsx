@@ -16,10 +16,12 @@ import { colors } from "@/constants/colorsThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
+import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
 
 interface LectureSessionAPIItem {
   lecture_session_id: string;
   lecture_session_title: string;
+  lecture_session_slug: string;
   lecture_session_teacher_name: string;
   lecture_session_start_time: string;
   lecture_session_place: string;
@@ -31,22 +33,9 @@ interface LectureSessionAPIItem {
   user_attendance_status?: number;
 }
 
-interface LectureMaterialItem {
-  id: string;
-  title: string;
-  teacher: string;
-  masjidName: string;
-  location: string;
-  time: string;
-  imageUrl?: string; // ⬅️ tambahkan ini
-  status: "tersedia" | "proses";
-  lectureId: string;
-  gradeResult?: number;
-  attendanceStatus?: number;
-}
 
 interface LectureTheme {
-  lecture_id: string;
+  lecture_slug: string;
   lecture_title: string;
   lecture_total_sessions: number;
 }
@@ -106,7 +95,7 @@ export default function MasjidMaterial() {
   >({
     queryKey: ["lectureThemesBySlug", slug],
     queryFn: async () => {
-      const res = await axios.get(`/public/lectures/slug/${slug}`);
+      const res = await axios.get(`/public/lectures/by-masjid-slug/${slug}`);
       console.log("📦 Data tema kajian:", res.data);
       return res.data?.data ?? [];
     },
@@ -125,7 +114,7 @@ export default function MasjidMaterial() {
     time: (
       <FormattedDate value={item.lecture_session_start_time} fullMonth />
     ) as unknown as string, // jika `LectureMaterialList` ekspektasi string
-
+    lecture_session_slug: item.lecture_session_slug, // ✅ tambahkan properti ini
     status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
     lectureId: item.lecture_session_lecture_id,
     gradeResult: item.user_grade_result,
@@ -195,10 +184,10 @@ export default function MasjidMaterial() {
             ) : (
               lectureThemes.map((themeItem) => (
                 <div
-                  key={themeItem.lecture_id}
+                  key={themeItem.lecture_slug}
                   onClick={() => {
-                    console.log("➡️ Navigasi ke tema:", themeItem.lecture_id);
-                    navigate(`/masjid/${slug}/tema/${themeItem.lecture_id}`, {
+                    // console.log("➡️ Navigasi ke tema:", themeItem.lecture_id);
+                    navigate(`/masjid/${slug}/tema/${themeItem.lecture_slug}`, {
                       state: {
                         from: {
                           slug,

@@ -20,12 +20,15 @@ interface PublicUserDropdownProps {
   variant?: "default" | "icon";
 }
 
+// ...import tetap sama
+
 export default function PublicUserDropdown({
   variant = "default",
 }: PublicUserDropdownProps) {
-  const { isDark, setDarkMode } = useHtmlDarkMode(); // updated
+  const { isDark, setDarkMode } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const { data: user } = useCurrentUser();
+  const isLoggedIn = !!user;
   const navigate = useNavigate();
   const { slug } = useParams();
 
@@ -33,10 +36,6 @@ export default function PublicUserDropdown({
   const [open, setOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const userName = user?.user_name || "User";
-  const userRole = user?.role || "Publik";
-
   const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
 
@@ -44,13 +43,9 @@ export default function PublicUserDropdown({
     setIsLoggingOut(true);
     try {
       await api.post("/api/auth/logout", null, { withCredentials: true });
-
       queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
-      queryClient.invalidateQueries({ queryKey: ["currentUser"], exact: true });
-
       sessionStorage.clear();
       localStorage.clear();
-
       setTimeout(() => {
         navigate("/login");
       }, 150);
@@ -72,43 +67,28 @@ export default function PublicUserDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const menuItemClass =
+    "w-full flex items-center gap-2 px-4 py-2 text-left transition";
+
+  const hoverStyle = (e: React.MouseEvent<HTMLButtonElement>) =>
+    (e.currentTarget.style.backgroundColor = theme.white2);
+  const outStyle = (e: React.MouseEvent<HTMLButtonElement>) =>
+    (e.currentTarget.style.backgroundColor = "transparent");
+
   return (
     <div className="relative" ref={dropdownRef}>
-      {variant === "icon" ? (
-        <button
-          onClick={() => setOpen(!open)}
-          className="p-2 rounded-md transition"
-          style={{
-            backgroundColor: theme.white3,
-            color: theme.black1,
-          }}
-        >
-          <MoreVertical className="w-5 h-5" />
-        </button>
-      ) : (
-        <button
-          onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 p-2 rounded-md transition"
-          style={{
-            backgroundColor: open ? theme.white2 : "transparent",
-          }}
-        >
-          <img
-            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='16' fill='%23CCCCCC' /></svg>"
-            alt="Profile"
-            className="w-8 h-8 rounded-full"
-          />
-          <div className="text-left text-sm hidden sm:block">
-            <div className="font-semibold" style={{ color: theme.black1 }}>
-              {userName}
-            </div>
-            <div className="text-xs" style={{ color: theme.silver2 }}>
-              {userRole}
-            </div>
-          </div>
-        </button>
-      )}
+      {/* Tombol trigger */}
+      <button
+        onClick={() => setOpen(!open)}
+        className={`p-2 rounded-md transition ${
+          variant === "default" ? "flex items-center gap-2" : ""
+        }`}
+        style={{ backgroundColor: theme.white3, color: theme.black1 }}
+      >
+        <MoreVertical className="w-5 h-5" />
+      </button>
 
+      {/* Dropdown */}
       {open && (
         <div
           className="absolute right-0 mt-2 w-48 rounded-lg border z-50"
@@ -119,60 +99,68 @@ export default function PublicUserDropdown({
           }}
         >
           <ul className="py-2 text-sm" style={{ color: theme.black1 }}>
+            {/* Login (hanya jika belum login) */}
+            {!isLoggedIn && (
+              <li>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    navigate("/login");
+                  }}
+                  className={menuItemClass}
+                  onMouseOver={hoverStyle}
+                  onMouseOut={outStyle}
+                >
+                  <LogOut className="w-4 h-4" /> Login
+                </button>
+              </li>
+            )}
+
+            {/* Pengaturan (hanya jika sudah login) */}
+            {isLoggedIn && (
+              <li>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    const url = isMobile
+                      ? `${base}/aktivitas/pengaturan/menu`
+                      : `${base}/aktivitas/pengaturan/profil-saya`;
+                    navigate(url);
+                  }}
+                  className={menuItemClass}
+                  onMouseOver={hoverStyle}
+                  onMouseOut={outStyle}
+                >
+                  <Settings className="w-4 h-4" /> Pengaturan
+                </button>
+              </li>
+            )}
+
+            {/* Bantuan */}
             <li>
               <button
                 onClick={() => {
-                  if (isMobile) {
-                    navigate(`${base}/aktivitas/pengaturan/menu`);
-                  } else {
-                    navigate(`${base}/aktivitas/pengaturan/profil-saya`);
-                  }
+                  setOpen(false);
+                  navigate(`${base}/bantuan`);
                 }}
-                className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
-                style={{ backgroundColor: "transparent" }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = theme.white2)
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                <Settings className="w-4 h-4" /> Pengaturan
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={() => navigate(`${base}/bantuan`)}
-                className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
-                style={{ backgroundColor: "transparent" }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = theme.white2)
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
+                className={menuItemClass}
+                onMouseOver={hoverStyle}
+                onMouseOut={outStyle}
               >
                 <HelpCircle className="w-4 h-4" /> Bantuan
               </button>
             </li>
 
+            {/* Dark Mode */}
             <li>
               <button
                 onClick={() => {
                   setDarkMode(!isDark);
                   setOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-4 py-2 text-left transition"
-                style={{
-                  backgroundColor: "transparent",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = theme.white2)
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
+                className={menuItemClass}
+                onMouseOver={hoverStyle}
+                onMouseOut={outStyle}
               >
                 {isDark ? (
                   <>
@@ -186,6 +174,7 @@ export default function PublicUserDropdown({
               </button>
             </li>
 
+            {/* Share */}
             <li>
               <div className="px-4 py-2">
                 <SharePopover
@@ -196,53 +185,51 @@ export default function PublicUserDropdown({
               </div>
             </li>
 
-            <li>
-              <button
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                className="w-full flex items-center gap-2 px-4 py-2 text-left transition disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  color: theme.error1,
-                  backgroundColor: "transparent",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = theme.error2)
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                {isLoggingOut ? (
-                  <>
-                    <svg
-                      className="animate-spin h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      style={{ color: theme.error1 }}
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 11-8 8z"
-                      />
-                    </svg>
-                    <span>Keluar...</span>
-                  </>
-                ) : (
-                  <>
-                    <LogOut className="w-4 h-4" /> Keluar
-                  </>
-                )}
-              </button>
-            </li>
+            {/* Logout (hanya jika sudah login) */}
+            {isLoggedIn && (
+              <li>
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className={`${menuItemClass} disabled:opacity-60 disabled:cursor-not-allowed`}
+                  style={{ color: theme.error1 }}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.backgroundColor = theme.error2)
+                  }
+                  onMouseOut={outStyle}
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        style={{ color: theme.error1 }}
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 11-8 8z"
+                        />
+                      </svg>
+                      <span>Keluar...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-4 h-4" /> Keluar
+                    </>
+                  )}
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}

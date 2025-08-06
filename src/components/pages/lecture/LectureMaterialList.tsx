@@ -2,19 +2,7 @@ import ShimmerImage from "@/components/common/main/ShimmerImage";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { useNavigate, useParams } from "react-router-dom";
-
-interface LectureMaterialItem {
-  id: string;
-  imageUrl?: string;
-  title: string;
-  teacher: string;
-  masjidName: string;
-  location: string;
-  time: string;
-  status: "tersedia" | "proses";
-  gradeResult?: number;
-  attendanceStatus?: number; // 1: hadir
-}
+import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
 
 export default function LectureMaterialList({
   data,
@@ -34,7 +22,18 @@ export default function LectureMaterialList({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            navigate(`/masjid/${slug}/soal-materi/${item.id}`);
+
+            console.log("🧭 Navigasi klik item:");
+            console.log("   👉 ID:", item.id);
+            console.log("   🔗 Slug:", item.lecture_session_slug);
+            console.log(
+              "   📍 Target URL:",
+              `/masjid/${slug}/soal-materi/${item.lecture_session_slug}`
+            );
+
+            navigate(
+              `/masjid/${slug}/soal-materi/${item.lecture_session_slug}`
+            );
           }}
           className="flex rounded-xl shadow-sm cursor-pointer transition hover:opacity-90"
           style={{
@@ -120,7 +119,7 @@ export default function LectureMaterialList({
                 >
                   {item.status === "tersedia"
                     ? "Materi & Soal Tersedia"
-                    : "Dalam Proses"}
+                    : "Materi & Soal Dalam Proses"}
                 </span>
               )}
 

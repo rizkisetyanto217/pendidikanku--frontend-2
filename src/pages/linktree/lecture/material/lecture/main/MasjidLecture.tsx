@@ -20,6 +20,7 @@ interface Teacher {
 
 interface Lecture {
   lecture_id: string;
+  lecture_slug: string;
   lecture_title: string;
   lecture_description: string;
   lecture_image_url: string;
@@ -30,8 +31,10 @@ interface Lecture {
 interface LectureSession {
   lecture_session_id: string;
   lecture_session_title: string;
+  lecture_session_slug: string;
   lecture_session_description: string;
   lecture_session_image_url: string;
+
   lecture_session_start_time: string;
   lecture_session_place: string;
   UserName: string;
@@ -42,10 +45,14 @@ export default function MasjidLectureMaterial() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
-  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const { lecture_slug, slug } = useParams<{
+    lecture_slug: string;
+    slug: string;
+  }>();
   const { data: currentUser } = useCurrentUser();
   const location = useLocation();
 
+  // 🔁 Dapatkan data tema kajian
   // 🔁 Dapatkan data tema kajian
   const {
     data: lectureData,
@@ -58,32 +65,35 @@ export default function MasjidLectureMaterial() {
       total_completed_sessions?: number;
     } | null;
   }>({
-    queryKey: ["lecture-theme", id, currentUser?.id],
+    queryKey: ["lecture-theme", lecture_slug, currentUser?.id],
     queryFn: async () => {
       const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
-      const res = await axios.get(`/public/lectures/${id}`, { headers });
+      const res = await axios.get(`/public/lectures/by-slug/${lecture_slug}`, {
+        headers,
+      });
       console.log("📦 Data tema kajian:", res.data);
-      return res.data?.data; // ✅ isinya { lecture, user_progress }
+      return res.data?.data;
     },
-    enabled: !!id,
+    enabled: !!lecture_slug,
     staleTime: 5 * 60 * 1000,
   });
 
   const lecture = lectureData?.lecture;
   const userProgress = lectureData?.user_progress;
 
-  // 🔁 Dapatkan daftar sesi kajian
   const {
     data: sessions,
     isLoading: loadingSessions,
     isError: errorSessions,
   } = useQuery<LectureSession[]>({
-    queryKey: ["lecture-sessions", id],
+    queryKey: ["lecture-sessions", lecture_slug],
     queryFn: async () => {
-      const res = await axios.get(`/public/lectures/${id}/lecture-sessions`);
+      const res = await axios.get(
+        `/public/lectures/${lecture_slug}/lecture-sessions-by-slug`
+      );
       return res.data?.data ?? [];
     },
-    enabled: !!id,
+    enabled: !!lecture_slug,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -120,9 +130,9 @@ export default function MasjidLectureMaterial() {
                 key={sesi.lecture_session_id}
                 onClick={() =>
                   navigate(
-                    `/masjid/${slug}/soal-materi/${sesi.lecture_session_id}`,
+                    `/masjid/${slug}/soal-materi/${sesi.lecture_session_slug}`,
                     {
-                      state: { fromTab: tab, lectureId: id },
+                      state: { fromTab: tab, lectureSlug: lecture_slug },
                     }
                   )
                 }
@@ -272,7 +282,9 @@ export default function MasjidLectureMaterial() {
                 <div
                   key={item.label}
                   onClick={() =>
-                    navigate(`/masjid/${slug}/tema/${id}/${item.path}`)
+                    navigate(
+                      `/masjid/${slug}/tema/${lecture_slug}/${item.path}`
+                    )
                   }
                   className="flex items-center justify-between p-3 rounded-md border cursor-pointer hover:bg-opacity-90 transition"
                   style={{

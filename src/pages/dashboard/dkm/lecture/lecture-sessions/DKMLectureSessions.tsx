@@ -79,12 +79,16 @@ export default function DKMLectureSessions() {
 
   const rows = data.map((session, i) => [
     i + 1,
-    <ShimmerImage
-      src={session.lecture_session_image_url ?? ""}
-      alt="Kajian"
-      className="w-12 h-12 object-cover rounded"
-      shimmerClassName="rounded"
-    />,
+    session.lecture_session_image_url ? (
+      <ShimmerImage
+        src={session.lecture_session_image_url}
+        alt="Kajian"
+        className="w-12 h-12 object-cover rounded"
+        shimmerClassName="rounded"
+      />
+    ) : (
+      <div className="w-12 h-12" />
+    ),
     <span className="font-medium">{session.lecture_session_title}</span>,
     session.lecture_title,
     <FormattedDate value={session.lecture_session_start_time} />,

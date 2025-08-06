@@ -4,11 +4,11 @@ import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList"
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import CommonButton from "@/components/common/main/CommonButton";
+import CommonActionButton from "@/components/common/main/CommonActionButton";
 import { useQuery } from "@tanstack/react-query";
-import axios from "@/lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
+import axios from "@/lib/axios";
 
 export default function MasjidMyActivity() {
   const { isDark } = useHtmlDarkMode();
@@ -16,6 +16,8 @@ export default function MasjidMyActivity() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { data: currentUser } = useCurrentUser();
+
+  // Tetap panggil hook, meskipun tidak fetch data kalau belum login
   const {
     data: lectureSessions = [],
     isLoading,
@@ -30,7 +32,7 @@ export default function MasjidMyActivity() {
       );
       return res.data?.data ?? [];
     },
-    enabled: !!slug,
+    enabled: !!slug && !!currentUser?.id,
   });
 
   const mappedSessions = lectureSessions.map((sesi: any) => ({
@@ -58,137 +60,138 @@ export default function MasjidMyActivity() {
     <>
       <PublicNavbar masjidName="Aktivitas Saya" />
 
-      <div className="min-h-screen pb-28 bg-cover bg-no-repeat bg-center pt-16">
-        {/* Header User */}
-        <div
-          className="rounded-xl p-4"
-          style={{ backgroundColor: themeColors.tertiary }}
-        >
-          <h1
-            className="text-base font-semibold"
-            style={{ color: themeColors.black1 }}
-          >
-            Budi Renaldi
-          </h1>
-          <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
-            Bergabung pada 3 November 2025
-          </p>
-          <button
-            className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
-            style={{
-              backgroundColor: themeColors.primary,
-              color: isDark ? themeColors.black1 : themeColors.white1,
-            }}
-          >
-            Profil Saya
-          </button>
-        </div>
-
-        {/* Kartu 2 kolom */}
-        <div className="grid grid-cols-2 gap-3 mt-5">
-          <CardInfo
-            label="Donasi"
-            desc="Riwayat donasi yang telah diberikan"
-            color={themeColors.success1}
-            bg={themeColors.success2}
-            onClick={() => navigate(`/masjid/${slug}/aktivitas/donasi-saya`)}
-          />
-          <CardInfo
-            label="Statistik"
-            desc="Data perkembangan belajar"
-            color={themeColors.success1}
-            bg={themeColors.white3}
-            onClick={() => navigate(`/masjid/${slug}/aktivitas/statistik-saya`)}
-          />
-        </div>
-
-        {/* Riwayat Kajian */}
-        <div className="mt-6">
-          <h2
-            className="text-sm font-semibold mb-3"
-            style={{ color: themeColors.primary }}
-          >
-            Riwayat Kajian Saya
-          </h2>
-
-          {isLoading ? (
-            <p>Memuat data...</p>
-          ) : isError ? (
-            <p className="text-red-500 text-sm">Gagal memuat data kajian.</p>
-          ) : displayedSessions.length === 0 ? (
-            <p className="text-sm italic text-gray-500">
-              Belum ada kajian yang dihadiri.
-            </p>
-          ) : (
-            <LectureMaterialList data={displayedSessions} />
-          )}
-
-          <br />
-
-          <CommonButton
-            to={`/masjid/${slug}/aktivitas/kajian-saya`}
-            text="Selengkapnya"
-            className="w-full py-3 rounded-lg text-sm"
-            style={{
-              backgroundColor: themeColors.primary,
-              color: themeColors.white1,
-            }}
-          />
-        </div>
-      </div>
+      {!currentUser ? (
+        <GuestView
+          themeColors={themeColors}
+          onLogin={() => navigate("/login")}
+        />
+      ) : (
+        <UserActivityView
+          user={currentUser}
+          themeColors={themeColors}
+          isDark={isDark}
+          slug={slug || ""}
+          sessions={displayedSessions}
+          isLoading={isLoading}
+          isError={isError}
+        />
+      )}
 
       <BottomNavbar />
     </>
   );
 }
 
-function CardInfo({
-  label,
-  desc,
-  color,
-  bg,
-  onClick,
+function GuestView({
+  themeColors,
+  onLogin,
 }: {
-  label: string;
-  desc: string;
-  color: string;
-  bg: string;
-  onClick?: () => void;
+  themeColors: typeof colors.light;
+  onLogin: () => void;
 }) {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
-  const overrideColors: Record<string, { bg: string; color: string }> = {
-    Donasi: {
-      bg: themeColors.success2,
-      color: themeColors.success1,
-    },
-    Statistik: {
-      bg: themeColors.white3,
-      color: themeColors.primary,
-    },
-  };
-
-  const current = overrideColors[label] ?? { bg, color };
-
   return (
-    <div
-      className="p-4 rounded-lg transition-colors duration-300 cursor-pointer"
-      style={{
-        backgroundColor: current.bg,
-        border: `1px solid ${isDark ? themeColors.silver1 : "transparent"}`,
-      }}
-      onClick={onClick}
-    >
-      <h4
-        className="text-sm font-semibold mb-1"
-        style={{ color: current.color }}
+    <div className="min-h-screen flex items-center justify-center text-center px-4">
+      <div>
+        <p className="text-sm mb-4" style={{ color: themeColors.black1 }}>
+          Silakan login terlebih dahulu untuk mulai melihat aktivitas belajar
+          Anda.
+        </p>
+        <CommonActionButton
+          text="Login"
+          onClick={onLogin}
+          className="px-4 py-2 text-sm rounded-md"
+          style={{
+            backgroundColor: themeColors.primary,
+            color: themeColors.white1,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function UserActivityView({
+  user,
+  themeColors,
+  isDark,
+  slug,
+  sessions,
+  isLoading,
+  isError,
+}: {
+  user: { name: string; created_at: string };
+  themeColors: typeof colors.light;
+  isDark: boolean;
+  slug: string;
+  sessions: any[];
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  return (
+    <div className="min-h-screen pb-28 bg-cover bg-no-repeat bg-center pt-16">
+      {/* Header Profil */}
+      <div
+        className="rounded-xl p-4"
+        style={{ backgroundColor: themeColors.tertiary }}
       >
-        {label}
-      </h4>
-      <p className="text-xs leading-snug" style={{ color: themeColors.black1 }}>
-        {desc}
-      </p>
+        <h1
+          className="text-base font-semibold"
+          style={{ color: themeColors.black1 }}
+        >
+          {user.name}
+        </h1>
+        <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
+          Bergabung pada{" "}
+          {new Date(user.created_at).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+        <button
+          className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
+          style={{
+            backgroundColor: themeColors.primary,
+            color: isDark ? themeColors.black1 : themeColors.white1,
+          }}
+        >
+          Profil Saya
+        </button>
+      </div>
+
+      {/* Riwayat Kajian */}
+      <div className="mt-6">
+        <h2
+          className="text-sm font-semibold mb-3"
+          style={{ color: themeColors.primary }}
+        >
+          Riwayat Kajian Saya
+        </h2>
+
+        {isLoading ? (
+          <p>Memuat data...</p>
+        ) : isError ? (
+          <p className="text-red-500 text-sm">Gagal memuat data kajian.</p>
+        ) : sessions.length === 0 ? (
+          <p className="text-sm italic text-gray-500">
+            Belum ada kajian yang dihadiri.
+          </p>
+        ) : (
+          <LectureMaterialList data={sessions} />
+        )}
+
+        <br />
+
+        <CommonButton
+          to={`/masjid/${slug}/aktivitas/kajian-saya`}
+          text="Selengkapnya"
+          className="w-full py-3 rounded-lg text-sm"
+          style={{
+            backgroundColor: themeColors.primary,
+            color: themeColors.white1,
+          }}
+        />
+      </div>
     </div>
   );
 }

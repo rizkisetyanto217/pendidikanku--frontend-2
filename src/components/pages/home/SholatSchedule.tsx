@@ -161,7 +161,7 @@ export default function SholatScheduleCard({
           backgroundColor: theme.secondary,
           color: theme.white1,
           maxWidth: "100%",
-          gridTemplateColumns: "0.9fr 1.1fr 1.5fr", // Grid 1 lebih kecil
+          gridTemplateColumns: "0.5fr 1.5fr 1.5fr", // Grid 1 lebih kecil
         }}
       >
         {/* Grid 1: Waktu Sholat */}
@@ -194,14 +194,15 @@ export default function SholatScheduleCard({
           <p className="text-xs">{location}</p>
         </div>
 
-        {/* Grid 3: Hitung Mundur */}
-        <div className="text-left pl-3">
+        {/* Grid 3: Hitung Mundur + CTA */}
+        <div className="text-left pl-3 space-y-1">
           {nextPrayer && (
-            <p className="text-sm">
+            <p className="text-sm leading-tight">
               {showingCurrentPrayer ? "Waktu Sholat Berlangsung" : "Menuju"}{" "}
               {nextPrayer.name}: {getCountdown()}
             </p>
           )}
+          <p className="text-xs underline opacity-80">Lihat Jadwal Lengkap</p>
         </div>
       </div>
     </Link>

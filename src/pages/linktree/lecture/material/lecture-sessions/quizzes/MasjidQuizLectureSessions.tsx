@@ -16,7 +16,8 @@ interface LectureQuizQuestion {
 }
 
 export default function MasjidQuizLectureSessions() {
-  const { id, slug } = useParams();
+  // const { id, slug } = useParams();
+  const { lecture_session_slug, slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -33,16 +34,17 @@ export default function MasjidQuizLectureSessions() {
   );
   const [isFinishing, setIsFinishing] = useState(false);
 
+  // ✅ Ambil quiz berdasarkan slug sesi kajian
   const { data, isLoading } = useQuery({
-    queryKey: ["quiz", id],
+    queryKey: ["quiz", lecture_session_slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-quiz/${id}/with-questions`
+        `/public/lecture-sessions-quiz/${lecture_session_slug}/with-questions-by-slug`
       );
       console.log("📦 Quiz Fetched:", res.data.data);
       return res.data.data;
     },
-    enabled: !!id,
+    enabled: !!lecture_session_slug,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -61,7 +63,7 @@ export default function MasjidQuizLectureSessions() {
     console.log("📤 Submit Quiz Result", payload);
     try {
       const res = await axios.post(
-        `/public/user-lecture-sessions-quiz/${slug}`,
+        `/public/user-lecture-sessions-quiz/${lecture_session_slug}`,
         payload
       );
       console.log("✅ Quiz result submitted:", res.data);
@@ -70,19 +72,23 @@ export default function MasjidQuizLectureSessions() {
     }
   };
 
+  // ✅ Saat semua soal salah selesai dijawab ulang
   useEffect(() => {
     if (isRetrying && wrongQuestions.length === 0) {
       const endTime = Date.now();
       const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
-      navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
-        state: {
-          correct: progressCount,
-          total: data?.questions?.length || 1,
-          duration: durationSec,
-          id,
-          slug,
-        },
-      });
+      navigate(
+        `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal/hasil`,
+        {
+          state: {
+            correct: progressCount,
+            total: data?.questions?.length || 1,
+            duration: durationSec,
+            slug,
+            lecture_session_slug,
+          },
+        }
+      );
     }
   }, [isRetrying, wrongQuestions.length]);
 
@@ -140,15 +146,18 @@ export default function MasjidQuizLectureSessions() {
     await submitQuizResult(finalScore, durationSec);
 
     setTimeout(() => {
-      navigate(`/masjid/${slug}/soal-materi/${id}/latihan-soal/hasil`, {
-        state: {
-          correct: finalScore,
-          total: data?.questions?.length || 1,
-          duration: durationSec,
-          id,
-          slug,
-        },
-      });
+      navigate(
+        `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal/hasil`,
+        {
+          state: {
+            correct: finalScore,
+            total: data?.questions?.length || 1,
+            duration: durationSec,
+            slug,
+            lecture_session_slug,
+          },
+        }
+      );
     }, 1000);
   };
 

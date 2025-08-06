@@ -4,15 +4,16 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublicUserDropdown from "./UserDropDown";
+import { MoreVertical } from "lucide-react";
 
 interface PublicNavbarProps {
   masjidName: string;
-  hideOnScroll?: boolean; // ⬅️ opsional
+  hideOnScroll?: boolean;
 }
 
 export default function PublicNavbar({
   masjidName,
-  hideOnScroll = false, // ⬅️ default = false
+  hideOnScroll = false,
 }: PublicNavbarProps) {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
@@ -27,13 +28,12 @@ export default function PublicNavbar({
   const ticking = useRef(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 🔁 Scroll hide logic (aktif hanya jika hideOnScroll)
+  // ⬇️ Sembunyikan navbar saat scroll (jika aktif)
   useEffect(() => {
     if (!hideOnScroll) return;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
           setVisible(
@@ -42,7 +42,6 @@ export default function PublicNavbar({
           lastScrollY.current = currentScrollY;
           ticking.current = false;
         });
-
         ticking.current = true;
       }
     };
@@ -51,7 +50,7 @@ export default function PublicNavbar({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hideOnScroll]);
 
-  // 🔒 Close dropdown on click outside
+  // ⬇️ Tutup dropdown jika klik di luar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -65,7 +64,6 @@ export default function PublicNavbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 shadow max-w-2xl mx-auto transition-transform duration-300 ${
@@ -73,24 +71,33 @@ export default function PublicNavbar({
       }`}
       style={{ backgroundColor: themeColors.white1, color: themeColors.black1 }}
     >
-      <h2
-        className="text-lg font-semibold"
-        style={{ color: themeColors.black1 }}
-      >
-        {masjidName}
-      </h2>
+      <h2 className="text-lg font-semibold">{masjidName}</h2>
 
-      {!isLoading && isLoggedIn ? (
-        <PublicUserDropdown />
-      ) : (
-        <button
-          onClick={() => navigate("/login")}
-          className="text-sm font-semibold hover:underline"
-          style={{ color: themeColors.primary }}
-        >
-          Login
-        </button>
-      )}
+      <div className="flex items-center gap-2">
+        {/* 🔒 Tampilkan tombol Login jika belum login */}
+        {!isLoading && isLoggedIn ? (
+          <PublicUserDropdown />
+        ) : (
+          <div className="flex items-center gap-2">
+            {/* ⬅️ Tampilkan Login langsung */}
+            <button
+              onClick={() => navigate("/login")}
+              className="text-sm font-semibold px-4 py-2 rounded-md shadow-sm hover:opacity-90 transition"
+              style={{
+                backgroundColor: themeColors.primary,
+                color: themeColors.white1,
+              }}
+            >
+              Login
+            </button>
+
+            {/* Tetap tampilkan dropdown titik tiga (MoreVertical) */}
+            <PublicUserDropdown variant="icon" />
+          </div>
+        )}
+
+     
+      </div>
     </div>
   );
 }

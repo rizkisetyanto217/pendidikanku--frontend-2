@@ -59,24 +59,27 @@ const getFileExtensionLabelColor = (
 };
 
 export default function MasjidDocsLectureSessions() {
-  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const { lecture_session_slug, slug } = useParams<{
+    lecture_session_slug: string;
+    slug: string;
+  }>();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
-  
+
   const {
     data: documents = [],
     isLoading,
     isError,
   } = useQuery<LectureSessionsAsset[]>({
-    queryKey: ["lecture-sessions-documents", id],
+    queryKey: ["lecture-sessions-documents", lecture_session_slug],
     queryFn: async () => {
       const res = await axios.get(
-        `/public/lecture-sessions-assets/filter?lecture_session_id=${id}&file_type=3,4,5,6`
+        `/public/lecture-sessions-assets/filter?lecture_session_slug=${lecture_session_slug}&file_type=3,4,5,6`
       );
       return Array.isArray(res.data) ? res.data : [];
     },
-    enabled: !!id,
+    enabled: !!lecture_session_slug,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -94,7 +97,7 @@ export default function MasjidDocsLectureSessions() {
       <PageHeaderUser
         title="Dokumen"
         onBackClick={() => {
-          navigate(`/masjid/${slug}/soal-materi/${id}`);
+          navigate(`/masjid/${slug}/soal-materi/${lecture_session_slug}`);
         }}
       />
 
