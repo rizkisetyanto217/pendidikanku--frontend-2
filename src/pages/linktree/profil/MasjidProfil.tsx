@@ -50,7 +50,7 @@ export default function MasjidProfile() {
       />
 
       <div
-        className="rounded-xl overflow-hidden pb-10 "
+        className="rounded-xl overflow-hidden pb-20 "
         // style={{ backgroundColor: themeColors.white1 }}
       >
         {/* Gambar Masjid */}

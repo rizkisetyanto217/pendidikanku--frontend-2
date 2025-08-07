@@ -13,6 +13,7 @@ import SharePopover from "@/components/common/public/SharePopover";
 import FormattedDate from "@/constants/formattedDate";
 import CommonCardList from "@/components/common/main/CommonCardList";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import LoginPromptModal from "@/components/common/home/LoginPromptModal";
 
 function InlineShare({ title, url }: { title: string; url: string }) {
   const { isDark } = useHtmlDarkMode();
@@ -110,6 +111,10 @@ export default function MasjidPost() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showHeartId, setShowHeartId] = useState<string | null>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [loginPromptSource, setLoginPromptSource] = useState<
+    "like" | "bookmark" | null
+  >(null);
 
   const { data: posts = [], isLoading: isLoadingPosts } = useQuery<Post[]>({
     queryKey: ["masjidPosts", slug],
@@ -131,16 +136,24 @@ export default function MasjidPost() {
     (post) => post.post_type === activeTab
   );
 
-  const handlePostLike = async (postId: string) => {
+  const handlePostLike = async (postId: string, isAlreadyLiked: boolean) => {
     if (!isLoggedIn) {
-      alert("Silakan login untuk menyukai postingan.");
+      setLoginPromptSource("like");
+      setShowLoginPrompt(true);
       return;
     }
 
     try {
+      // ✅ Tampilkan animasi ❤️ hanya kalau BELUM di-like
+      if (!isAlreadyLiked) {
+        setShowHeartId(postId);
+        setTimeout(() => setShowHeartId(null), 800);
+      }
+
       await axios.post(`/public/post-likes/${slug}/toggle`, {
         post_id: postId,
       });
+
       queryClient.invalidateQueries({ queryKey: ["masjidPosts", slug] });
     } catch (err) {
       console.error("Gagal like:", err);
@@ -149,18 +162,17 @@ export default function MasjidPost() {
 
   const handleDoubleClickLike = async (post: Post) => {
     if (!isLoggedIn) {
-      alert("Silakan login untuk menyukai postingan.");
+      setLoginPromptSource("like");
+      setShowLoginPrompt(true);
       return;
     }
 
-    if (post.is_liked_by_user) return; // tidak bisa unlike
+    if (post.is_liked_by_user) return;
 
     try {
-      // Tampilkan ❤️
       setShowHeartId(post.post_id);
-      setTimeout(() => setShowHeartId(null), 800); // sembunyikan setelah 800ms
+      setTimeout(() => setShowHeartId(null), 800);
 
-      // Like post
       await axios.post(`/public/post-likes/${slug}/toggle`, {
         post_id: post.post_id,
       });
@@ -234,7 +246,9 @@ export default function MasjidPost() {
                   <div className="flex items-center space-x-4">
                     <div
                       className="flex items-center space-x-1 cursor-pointer"
-                      onClick={() => handlePostLike(post.post_id)}
+                      onClick={() =>
+                        handlePostLike(post.post_id, post.is_liked_by_user)
+                      }
                     >
                       <Heart
                         size={20}
@@ -251,10 +265,10 @@ export default function MasjidPost() {
                       <span>{post.like_count} Suka</span>
                     </div>
 
-                    <div className="flex items-center space-x-1">
+                    {/* <div className="flex items-center space-x-1">
                       <Bookmark size={14} />
                       <span>Dukungan</span>
-                    </div>
+                    </div> */}
                   </div>
                   <InlineShare
                     title={post.post_title}
@@ -266,6 +280,25 @@ export default function MasjidPost() {
           ))
         )}
         <BottomNavbar />
+        <LoginPromptModal
+          show={showLoginPrompt}
+          onClose={() => {
+            setShowLoginPrompt(false);
+            setLoginPromptSource(null);
+          }}
+          onLogin={() => (window.location.href = "/login")}
+          showContinueButton={false}
+          title={
+            loginPromptSource === "like"
+              ? "Login untuk Menyukai Postingan"
+              : "Login untuk Mendukung Postingan"
+          }
+          message={
+            loginPromptSource === "like"
+              ? "Silakan login untuk memberi like pada postingan ini."
+              : "Silakan login untuk mendukung atau menyimpan postingan ini."
+          }
+        />
       </div>
     </>
   );

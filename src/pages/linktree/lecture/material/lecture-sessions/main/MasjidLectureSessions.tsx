@@ -18,7 +18,7 @@ import {
 import FormattedDate from "@/constants/formattedDate";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
-import LoginPromptModal from "./components/LoginModal";
+import LoginPromptModal from "@/components/common/home/LoginPromptModal";
 
 // =====================
 // ✅ Interface
@@ -55,8 +55,13 @@ export default function MasjidLectureSessions() {
 
   const { data: currentUser } = useCurrentUser();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
+
+  const [showAttendanceModal, setShowAttendanceModal] = useState(false);
+  const [showCatatanModal, setShowCatatanModal] = useState(false);
+  const [loginPromptSource, setLoginPromptSource] = useState<
+    "quiz" | "attendance" | null
+  >(null);
 
   // ✅ Ambil data sesi berdasarkan slug
   const { data, isLoading } = useQuery<LectureSession>({
@@ -203,7 +208,14 @@ export default function MasjidLectureSessions() {
                         : "#92400E",
                     border: "1px solid #D1D5DB",
                   }}
-                  onClick={() => setShowModal(true)}
+                  onClick={() => {
+                    if (!currentUser) {
+                      setLoginPromptSource("attendance");
+                      setShowLoginPrompt(true);
+                    } else {
+                      setShowAttendanceModal(true);
+                    }
+                  }}
                 >
                   <strong>Status Kehadiran:</strong>{" "}
                   {attendanceData?.user_lecture_sessions_attendance_status === 1
@@ -229,8 +241,11 @@ export default function MasjidLectureSessions() {
             <div
               key={item.label}
               onClick={() => {
-                if (item.path === "latihan-soal" && !currentUser) {
-                  setShowLoginPrompt(true); // ❗️ Tampilkan modal dulu
+                if (item.path === "catatanku" && !currentUser) {
+                  setShowCatatanModal(true); // Ganti jadi state khusus catatan
+                } else if (item.path === "latihan-soal" && !currentUser) {
+                  setLoginPromptSource("quiz"); // tambahkan ini untuk identifikasi
+                  setShowLoginPrompt(true);
                 } else {
                   navigate(
                     `/masjid/${slug}/soal-materi/${lecture_session_slug}/${item.path}`,
@@ -256,57 +271,73 @@ export default function MasjidLectureSessions() {
         <BottomNavbar />
 
         {/* 📋 Modal Kehadiran */}
-        {showModal &&
-          (currentUser ? (
-            <AttendanceModal
-              show={showModal}
-              onClose={() => setShowModal(false)}
-              sessionId={data?.lecture_session_id || ""}
-              onSuccess={() => {
-                setShowModal(false);
-                queryClient.invalidateQueries({
-                  queryKey: [
-                    "userAttendance",
-                    data?.lecture_session_id,
-                    currentUser?.id,
-                  ],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: [
-                    "lectureSessionDetail",
-                    lecture_session_slug,
-                    currentUser?.id,
-                  ],
-                });
-                console.log("🔄 Kehadiran & nilai direfresh ulang");
-              }}
-            />
-          ) : (
-            <LoginPromptModal
-              show={true}
-              onClose={() => setShowModal(false)}
-              onLogin={() => (window.location.href = "/login")}
-              showContinueButton={false} // tidak ada lanjut tanpa login saat mencatat kehadiran
-              title="Login untuk Mencatat Kehadiran"
-              message="Silakan login terlebih dahulu agar dapat mencatat kehadiran pada kajian ini."
-            />
-          ))}
+        {showAttendanceModal && currentUser && (
+          <AttendanceModal
+            show={true}
+            onClose={() => setShowAttendanceModal(false)}
+            sessionId={data?.lecture_session_id || ""}
+            onSuccess={() => {
+              setShowAttendanceModal(false);
+              queryClient.invalidateQueries({
+                queryKey: [
+                  "userAttendance",
+                  data?.lecture_session_id,
+                  currentUser?.id,
+                ],
+              });
+              queryClient.invalidateQueries({
+                queryKey: [
+                  "lectureSessionDetail",
+                  lecture_session_slug,
+                  currentUser?.id,
+                ],
+              });
+            }}
+          />
+        )}
 
+        {/* 🛑 Modal login wajib untuk Catatanku */}
+        {showCatatanModal && !currentUser && (
+          <LoginPromptModal
+            show={true}
+            onClose={() => setShowCatatanModal(false)}
+            onLogin={() => (window.location.href = "/login")}
+            showContinueButton={false}
+            title="Login untuk Akses Catatan"
+            message="Silakan login terlebih dahulu agar dapat melihat dan menyimpan catatan pribadi Anda."
+          />
+        )}
+
+        {/* 🟡 Modal login opsional untuk latihan soal */}
         <LoginPromptModal
           show={showLoginPrompt}
-          onClose={() => setShowLoginPrompt(false)}
+          onClose={() => {
+            setShowLoginPrompt(false);
+            setLoginPromptSource(null);
+          }}
           onLogin={() => (window.location.href = "/login")}
-          showContinueButton={true}
+          showContinueButton={loginPromptSource === "quiz"} // ⬅️ hanya quiz yg boleh lanjut
           continueLabel="Lanjutkan Tanpa Login"
           onContinue={() => {
             setShowLoginPrompt(false);
-            navigate(
-              `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal`,
-              { state: { fromTab: tab } }
-            );
+            setLoginPromptSource(null);
+            if (loginPromptSource === "quiz") {
+              navigate(
+                `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal`,
+                { state: { fromTab: tab } }
+              );
+            }
           }}
-          title="Login untuk Menyimpan Progres"
-          message="Silakan login terlebih dahulu jika ingin progres latihan soal Anda tersimpan."
+          title={
+            loginPromptSource === "quiz"
+              ? "Login untuk Menyimpan Progres"
+              : "Login untuk Mencatat Kehadiran"
+          }
+          message={
+            loginPromptSource === "quiz"
+              ? "Silakan login terlebih dahulu jika ingin progres latihan soal Anda tersimpan."
+              : "Silakan login terlebih dahulu untuk mencatat kehadiran Anda dalam kajian ini."
+          }
         />
       </div>
     </div>

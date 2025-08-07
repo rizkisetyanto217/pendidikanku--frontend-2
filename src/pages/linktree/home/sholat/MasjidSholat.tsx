@@ -198,7 +198,7 @@ export default function MasjidSholat({
               borderWidth: 1,
             }}
           >
-            <p className="text-xs tracking-wide text-white/60">
+            <p className="text-base tracking-wide text-primary">
               {loadingHijri ? "..." : hijriDate} • {location}
             </p>
 

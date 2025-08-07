@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   useLocation,
   useNavigate,
@@ -17,6 +17,9 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import LectureThemeCard from "@/components/pages/lecture/LectureTheme";
 
 interface LectureSessionAPIItem {
   lecture_session_id: string;
@@ -32,7 +35,6 @@ interface LectureSessionAPIItem {
   user_grade_result?: number;
   user_attendance_status?: number;
 }
-
 
 interface LectureTheme {
   lecture_slug: string;
@@ -62,6 +64,7 @@ export default function MasjidMaterial() {
 
   const [tab, setTab] = useState<string>(defaultTab);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const swiperRef = useRef<any>(null);
 
   useEffect(() => {
     console.log("📍 Tab aktif:", tab);
@@ -131,88 +134,130 @@ export default function MasjidMaterial() {
   return (
     <>
       <PublicNavbar masjidName="Materi Kajian" />
-      <div className="pt-16 pb-20">
-        <Tabs
-          value={tab}
-          onChange={handleTabChange}
-          tabs={[
-            { label: "Terbaru", value: "terbaru" },
-            { label: "Tema", value: "tema" },
-            { label: "Tanggal", value: "tanggal" },
-          ]}
-        />
-
-        {/* 📘 Tab Terbaru */}
-        <TabsContent value="terbaru" current={tab}>
-          {loadingKajian ? (
-            <p>Memuat data...</p>
-          ) : (
-            <LectureMaterialList data={mappedMaterial} />
-          )}
-        </TabsContent>
-
-        {/* 📅 Tab Tanggal */}
-        <TabsContent value="tanggal" current={tab}>
-          {selectedMonth ? (
-            <div className="space-y-3">
-              <button
-                onClick={() => setSelectedMonth(null)}
-                className="text-sm font-medium"
-                style={{ color: theme.primary }}
-              >
-                ← Kembali ke daftar bulan
-              </button>
-              <h2 className="text-base font-medium">Bulan {selectedMonth}</h2>
-              <LectureMaterialList data={mappedMaterial} />
-            </div>
-          ) : (
-            <LectureMaterialMonthList
-              data={monthData}
-              onSelectMonth={(month) => {
-                console.log("📆 Bulan dipilih:", month);
-                setSelectedMonth(month);
+      <div className="sticky top-16 z-40 bg-white dark:bg-zinc-900">
+        <div
+          className="flex justify-around border-b"
+          style={{ borderColor: theme.silver1 }}
+        >
+          {["terbaru", "tema", "tanggal"].map((val) => (
+            <button
+              key={val}
+              onClick={() => {
+                setTab(val);
+                setSearchParams({ tab: val });
+                const tabValues = ["terbaru", "tema", "tanggal"];
+                const newIndex = tabValues.indexOf(val);
+                if (swiperRef.current && newIndex !== -1) {
+                  swiperRef.current.slideTo(newIndex);
+                }
               }}
-            />
-          )}
-        </TabsContent>
+              className={`py-3 text-sm font-medium ${
+                tab === val ? "border-b-2" : ""
+              }`}
+              style={{
+                color: tab === val ? theme.primary : theme.silver2,
+                borderColor: theme.primary,
+              }}
+            >
+              {val.charAt(0).toUpperCase() + val.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* 🧭 Tab Tema */}
-        <TabsContent value="tema" current={tab}>
-          <div className="space-y-3">
-            {loadingThemes ? (
-              <p>Memuat tema kajian...</p>
-            ) : (
-              lectureThemes.map((themeItem) => (
-                <div
-                  key={themeItem.lecture_slug}
-                  onClick={() => {
-                    // console.log("➡️ Navigasi ke tema:", themeItem.lecture_id);
-                    navigate(`/masjid/${slug}/tema/${themeItem.lecture_slug}`, {
-                      state: {
-                        from: {
-                          slug,
-                          tab,
-                        },
-                      },
-                    });
-                  }}
-                  className="p-4 rounded-lg cursor-pointer hover:opacity-90"
-                  style={{
-                    backgroundColor: theme.white1,
-                    border: `1px solid ${theme.silver1}`,
-                  }}
-                >
-                  <h3 className="text-base font-medium">
-                    {themeItem.lecture_title}
-                  </h3>
-                  <p className="text-sm" style={{ color: theme.silver2 }}>
-                    Total {themeItem.lecture_total_sessions} kajian
-                  </p>
+      <div className="pt-16 pb-20">
+        <Swiper
+          className="!h-auto"
+          spaceBetween={10}
+          slidesPerView={1}
+          onSlideChange={(swiper) => {
+            const tabValues = ["terbaru", "tema", "tanggal"];
+            const newTab = tabValues[swiper.activeIndex] || "terbaru";
+            setTab(newTab);
+            setSearchParams({ tab: newTab });
+            if (newTab === "tanggal") setSelectedMonth(null);
+          }}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+            const tabValues = ["terbaru", "tema", "tanggal"];
+            const startIndex = tabValues.indexOf(tab);
+            if (startIndex !== -1) swiper.slideTo(startIndex, 0);
+          }}
+        >
+          <SwiperSlide>
+            <div
+              className="px-4"
+              style={{
+                maxHeight: "calc(100vh - 200px)", // sesuaikan dgn tinggi real header/footer
+                overflowY: "auto",
+              }}
+            >
+              {loadingKajian ? (
+                <p className="p-4">Memuat data...</p>
+              ) : (
+                <LectureMaterialList data={mappedMaterial} />
+              )}
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              className="space-y-3 px-4"
+              style={{
+                maxHeight: "calc(100vh - 200px)",
+                overflowY: "auto",
+              }}
+            >
+              {loadingThemes ? (
+                <p>Memuat tema kajian...</p>
+              ) : (
+                lectureThemes.map((themeItem) => (
+                  <LectureThemeCard
+                    key={themeItem.lecture_slug}
+                    slug={slug}
+                    lecture_slug={themeItem.lecture_slug}
+                    lecture_title={themeItem.lecture_title}
+                    total_sessions={themeItem.lecture_total_sessions}
+                  />
+                ))
+              )}
+            </div>
+          </SwiperSlide>
+
+          <SwiperSlide>
+            <div
+              className="px-4"
+              style={{
+                maxHeight: "calc(100vh - 200px)",
+                overflowY: "auto",
+              }}
+            >
+              {selectedMonth ? (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setSelectedMonth(null)}
+                    className="text-sm font-medium"
+                    style={{ color: theme.primary }}
+                  >
+                    ← Kembali ke daftar bulan
+                  </button>
+                  <h2 className="text-base font-medium">
+                    Bulan {selectedMonth}
+                  </h2>
+                  <LectureMaterialList data={mappedMaterial} />
                 </div>
-              ))
-            )}
-          </div>
-        </TabsContent>
+              ) : (
+                <LectureMaterialMonthList
+                  data={monthData}
+                  onSelectMonth={(month) => {
+                    console.log("📆 Bulan dipilih:", month);
+                    setSelectedMonth(month);
+                  }}
+                />
+              )}
+            </div>
+          </SwiperSlide>
+        </Swiper>
 
         <BottomNavbar />
       </div>

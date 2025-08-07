@@ -1,23 +1,25 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import InputField from "@/components/common/main/InputField";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import api from "@/lib/axios";
-import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ Ambil dari cookie
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface MasjidData {
   masjid_instagram_url: string;
   masjid_whatsapp_url: string;
   masjid_youtube_url: string;
+  masjid_facebook_url: string;
+  masjid_tiktok_url: string;
+  masjid_whatsapp_group_ikhwan_url: string;
+  masjid_whatsapp_group_akhwat_url: string;
 }
 
 export default function DkmEditSosmedProfile() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
-
-  const location = useLocation();
   const navigate = useNavigate();
 
   const { user, isLoading: isUserLoading } = useCurrentUser();
@@ -27,6 +29,10 @@ export default function DkmEditSosmedProfile() {
     masjid_instagram_url: "",
     masjid_whatsapp_url: "",
     masjid_youtube_url: "",
+    masjid_facebook_url: "",
+    masjid_tiktok_url: "",
+    masjid_whatsapp_group_ikhwan_url: "",
+    masjid_whatsapp_group_akhwat_url: "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -41,26 +47,41 @@ export default function DkmEditSosmedProfile() {
       return;
     }
 
-    const state = location.state as {
-      instagram?: string;
-      whatsapp?: string;
-      youtube?: string;
+    const fetchMasjidData = async () => {
+      try {
+        const res = await api.get(`/public/masjids/verified/${masjidId}`, {
+          withCredentials: true,
+        });
+        const data = res.data?.data;
+
+        if (!data) {
+          alert("Data masjid tidak ditemukan.");
+          navigate("/dkm/profil-masjid");
+          return;
+        }
+
+        setForm({
+          masjid_instagram_url: data.masjid_instagram_url || "",
+          masjid_whatsapp_url: data.masjid_whatsapp_url || "",
+          masjid_youtube_url: data.masjid_youtube_url || "",
+          masjid_facebook_url: data.masjid_facebook_url || "",
+          masjid_tiktok_url: data.masjid_tiktok_url || "",
+          masjid_whatsapp_group_ikhwan_url:
+            data.masjid_whatsapp_group_ikhwan_url || "",
+          masjid_whatsapp_group_akhwat_url:
+            data.masjid_whatsapp_group_akhwat_url || "",
+        });
+
+        setLoading(false);
+      } catch (error) {
+        console.error("❌ Gagal ambil data masjid:", error);
+        alert("Gagal mengambil data masjid.");
+        navigate("/dkm/profil-masjid");
+      }
     };
 
-    if (!state) {
-      alert("Data sosial media tidak tersedia.");
-      navigate("/dkm/profil-masjid");
-      return;
-    }
-
-    setForm({
-      masjid_instagram_url: state.instagram || "",
-      masjid_whatsapp_url: state.whatsapp || "",
-      masjid_youtube_url: state.youtube || "",
-    });
-
-    setLoading(false);
-  }, [isUserLoading, masjidId, location.state, navigate]);
+    fetchMasjidData();
+  }, [isUserLoading, masjidId, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -104,7 +125,7 @@ export default function DkmEditSosmedProfile() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6"
           >
             <InputField
               label="Instagram"
@@ -120,17 +141,43 @@ export default function DkmEditSosmedProfile() {
               onChange={handleChange}
               placeholder="Masukkan link"
             />
-            <div className="md:col-span-2">
-              <InputField
-                label="Youtube"
-                name="masjid_youtube_url"
-                value={form.masjid_youtube_url}
-                onChange={handleChange}
-                placeholder="Masukkan link"
-              />
-            </div>
+            <InputField
+              label="Youtube"
+              name="masjid_youtube_url"
+              value={form.masjid_youtube_url}
+              onChange={handleChange}
+              placeholder="Masukkan link"
+            />
+            <InputField
+              label="Facebook"
+              name="masjid_facebook_url"
+              value={form.masjid_facebook_url}
+              onChange={handleChange}
+              placeholder="Masukkan link"
+            />
+            <InputField
+              label="Tiktok"
+              name="masjid_tiktok_url"
+              value={form.masjid_tiktok_url}
+              onChange={handleChange}
+              placeholder="Masukkan link"
+            />
+            <InputField
+              label="Grup WhatsApp Ikhwan"
+              name="masjid_whatsapp_group_ikhwan_url"
+              value={form.masjid_whatsapp_group_ikhwan_url}
+              onChange={handleChange}
+              placeholder="Link grup ikhwan"
+            />
+            <InputField
+              label="Grup WhatsApp Akhwat"
+              name="masjid_whatsapp_group_akhwat_url"
+              value={form.masjid_whatsapp_group_akhwat_url}
+              onChange={handleChange}
+              placeholder="Link grup akhwat"
+            />
 
-            <div className="md:col-span-2 flex justify-end">
+            <div className="md:col-span-1 flex justify-end">
               <button
                 type="submit"
                 disabled={saving}

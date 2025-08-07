@@ -119,7 +119,7 @@ function UserActivityView({
   isLoading,
   isError,
 }: {
-  user: { name: string; created_at: string };
+  user: { user_name: string; created_at: string; role?: string };
   themeColors: typeof colors.light;
   isDark: boolean;
   slug: string;
@@ -129,35 +129,7 @@ function UserActivityView({
 }) {
   return (
     <div className="min-h-screen pb-28 bg-cover bg-no-repeat bg-center pt-16">
-      {/* Header Profil */}
-      <div
-        className="rounded-xl p-4"
-        style={{ backgroundColor: themeColors.tertiary }}
-      >
-        <h1
-          className="text-base font-semibold"
-          style={{ color: themeColors.black1 }}
-        >
-          {user.name}
-        </h1>
-        <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
-          Bergabung pada{" "}
-          {new Date(user.created_at).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
-        <button
-          className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
-          style={{
-            backgroundColor: themeColors.primary,
-            color: isDark ? themeColors.black1 : themeColors.white1,
-          }}
-        >
-          Profil Saya
-        </button>
-      </div>
+      <UserProfileCard user={user} themeColors={themeColors} isDark={isDark} />
 
       {/* Riwayat Kajian */}
       <div className="mt-6">
@@ -192,6 +164,60 @@ function UserActivityView({
           }}
         />
       </div>
+    </div>
+  );
+}
+
+function UserProfileCard({
+  user,
+  themeColors,
+  isDark,
+}: {
+  user: { user_name: string; created_at: string; role?: string };
+  themeColors: typeof colors.light;
+  isDark: boolean;
+}) {
+  const joinDate = new Date(user.created_at);
+  const isValidDate = !isNaN(joinDate.getTime());
+
+  return (
+    <div
+      className="rounded-xl p-4"
+      style={{ backgroundColor: themeColors.primary2 }}
+    >
+      <h1
+        className="text-base font-semibold"
+        style={{ color: themeColors.black1 }}
+      >
+        {user.user_name || "Nama tidak tersedia"}
+      </h1>
+
+      {user.role && (
+        <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
+          Role: {user.role}
+        </p>
+      )}
+
+      <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
+        Bergabung pada{" "}
+        {isValidDate
+          ? joinDate.toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          : "-"}
+      </p>
+
+      <button
+        className="mt-4 px-4 py-2 text-sm font-medium rounded-full"
+        style={{
+          backgroundColor: themeColors.primary,
+          color: isDark ? themeColors.black1 : themeColors.white1,
+        }}
+      >
+        Profil Saya
+      </button>
     </div>
   );
 }
