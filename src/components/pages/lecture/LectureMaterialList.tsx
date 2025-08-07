@@ -109,11 +109,11 @@ export default function LectureMaterialList({
                   style={{
                     backgroundColor:
                       item.status === "tersedia"
-                        ? theme.warning1
+                        ? theme.success1
                         : theme.white3,
                     color:
                       item.status === "tersedia"
-                        ? theme.warning1
+                        ? theme.white1
                         : theme.silver2,
                   }}
                 >

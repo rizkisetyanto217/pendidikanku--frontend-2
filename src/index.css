@@ -7,3 +7,11 @@ html,
 body {
   @apply min-h-screen bg-white text-black dark:bg-[#121212] dark:text-white overscroll-none;
 }
+
+blockquote {
+  padding-left: 1rem;
+  margin-left: 0;
+  border-left: 4px solid #ccc;
+  font-style: italic;
+  color: #555;
+}

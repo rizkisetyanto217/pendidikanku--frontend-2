@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import FormattedDate from "@/constants/formattedDate";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
+import parse from "html-react-parser";
 
 interface LectureSession {
   lecture_session_id: string;
@@ -83,8 +84,12 @@ export default function DKMSummaryLectureSessions() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Ringkasan"
+        title="Materi"
         onBackClick={() => navigate(`/dkm/kajian/kajian-detail/${id}`)}
+        actionButton={{
+          label: materialId ? "Edit Ringkasan" : "Tambah Ringkasan",
+          onClick: handleEditClick,
+        }}
       />
 
       <div
@@ -119,11 +124,9 @@ export default function DKMSummaryLectureSessions() {
           ) : isErrorSummary ? (
             <p className="text-red-500">Gagal memuat data ringkasan.</p>
           ) : summary ? (
-            <div
-              dangerouslySetInnerHTML={{
-                __html: cleanTranscriptHTML(summary),
-              }}
-            />
+            <div className="whitespace-pre-wrap text-sm text-justify leading-relaxed">
+              {parse(cleanTranscriptHTML(summary))}
+            </div>
           ) : (
             <p className="italic text-gray-500">
               Belum ada ringkasan tersedia.
@@ -132,7 +135,7 @@ export default function DKMSummaryLectureSessions() {
         </div>
 
         {/* Tombol Tambah/Edit */}
-        <div className="mt-6 text-right">
+        {/* <div className="mt-6 text-right">
           <button
             className="px-5 py-2 rounded-lg font-semibold"
             style={{ backgroundColor: theme.primary, color: theme.white1 }}
@@ -140,7 +143,7 @@ export default function DKMSummaryLectureSessions() {
           >
             {materialId ? "Edit Ringkasan" : "Tambah Ringkasan"}
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -90,12 +90,12 @@ export default function DKMDetailLectureSessions() {
     { icon: <Home size={36} />, label: "Informasi", to: "informasi" },
     { icon: <Video size={36} />, label: "Video Audio", to: "video-audio" },
     { icon: <BookOpen size={36} />, label: "Latihan Soal", to: "latihan-soal" },
-    {
-      icon: <FileText size={36} />,
-      label: "Materi Lengkap",
-      to: "materi-lengkap",
-    },
-    { icon: <StickyNote size={36} />, label: "Ringkasan", to: "ringkasan" },
+    // {
+    //   icon: <FileText size={36} />,
+    //   label: "Materi",
+    //   to: "materi-lengkap",
+    // },
+    { icon: <StickyNote size={36} />, label: "Materi", to: "ringkasan" },
     { icon: <PlayCircle size={36} />, label: "Dokumen", to: "dokumen" },
   ];
 
