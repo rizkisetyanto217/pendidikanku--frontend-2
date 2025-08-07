@@ -63,7 +63,7 @@ export default function MasjidQuizLectureSessions() {
     console.log("📤 Submit Quiz Result", payload);
     try {
       const res = await axios.post(
-        `/public/user-lecture-sessions-quiz/${lecture_session_slug}`,
+        `/public/user-lecture-sessions-quiz/by-session/${lecture_session_slug}`,
         payload
       );
       console.log("✅ Quiz result submitted:", res.data);
@@ -140,7 +140,8 @@ export default function MasjidQuizLectureSessions() {
 
     const endTime = Date.now();
     const durationSec = Math.floor((endTime - startTimeRef.current) / 1000);
-    const finalScore = progressCount;
+    const totalQuestions = data?.questions?.length || 1;
+    const finalScore = Math.round((progressCount / totalQuestions) * 100);
     setIsFinishing(true);
 
     await submitQuizResult(finalScore, durationSec);
@@ -150,7 +151,7 @@ export default function MasjidQuizLectureSessions() {
         `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal/hasil`,
         {
           state: {
-            correct: finalScore,
+            correct: progressCount,
             total: data?.questions?.length || 1,
             duration: durationSec,
             slug,

@@ -72,6 +72,7 @@ export default function MasjidLectureSessions() {
         `/public/lecture-sessions-u/by-slug/${lecture_session_slug}`,
         { headers }
       );
+      console.log("📦 Data sesi kajian:", res.data);
       return res.data;
     },
     enabled: !!lecture_session_slug,
