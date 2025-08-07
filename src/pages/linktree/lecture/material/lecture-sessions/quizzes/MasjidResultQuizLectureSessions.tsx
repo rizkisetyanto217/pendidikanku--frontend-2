@@ -15,6 +15,7 @@ export default function MasjidResultQuizDetailLectureSessions() {
     duration = 0,
     slug = "",
     id = "",
+    lecture_session_slug = "", // ✅ gunakan ini
   } = state || {};
 
   const minutes = Math.floor(duration / 60);
@@ -84,7 +85,7 @@ export default function MasjidResultQuizDetailLectureSessions() {
 
           <button
             onClick={() => {
-              const targetUrl = `/masjid/${slug}/soal-materi/${id}`;
+              const targetUrl = `/masjid/${slug}/soal-materi/${lecture_session_slug}`;
               window.location.href = targetUrl;
             }}
             className="w-full py-3 rounded-lg text-white font-semibold"
