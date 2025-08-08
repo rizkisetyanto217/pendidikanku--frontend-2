@@ -96,7 +96,7 @@ export default function DkmEditSosmedProfile() {
 
     setSaving(true);
     try {
-      const res = await api.put(`/api/a/masjids/${masjidId}`, form, {
+      const res = await api.put(`/api/a/masjids`, form, {
         withCredentials: true,
       });
       alert(res.data.message || "Data berhasil disimpan.");

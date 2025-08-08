@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import InputField from "@/components/common/main/InputField";
@@ -18,14 +19,15 @@ export default function DKMAddEditThemaPost() {
   const location = useLocation();
   const editData = location.state as PostTheme | undefined;
 
-  const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
+  const queryClient = useQueryClient();
+  const { user, isLoading: isUserLoading } = useCurrentUser();
   const masjidId = user?.masjid_admin_ids?.[0];
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Prefill jika edit
+  // Prefill jika mode edit
   useEffect(() => {
     if (editData) {
       setName(editData.post_theme_name);
@@ -33,46 +35,56 @@ export default function DKMAddEditThemaPost() {
     }
   }, [editData]);
 
+  const handleCreate = async () => {
+    await axios.post(
+      "/api/a/post-themes",
+      {
+        post_theme_name: name,
+        post_theme_description: description,
+        post_theme_masjid_id: masjidId,
+      },
+      { withCredentials: true }
+    );
+    toast.success("Tema berhasil ditambahkan");
+  };
+
+  const handleUpdate = async () => {
+    await axios.put(
+      `/api/a/post-themes/${editData?.post_theme_id}`,
+      {
+        post_theme_name: name,
+        post_theme_description: description,
+        post_theme_masjid_id: masjidId,
+      },
+      { withCredentials: true }
+    );
+    toast.success("Tema berhasil diperbarui");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!name || !description) {
       toast.error("Nama dan deskripsi wajib diisi.");
       return;
     }
 
+    if (!masjidId) {
+      toast.error("Masjid ID tidak ditemukan.");
+      return;
+    }
+
     try {
       setLoading(true);
+      editData ? await handleUpdate() : await handleCreate();
 
-      if (editData) {
-        // UPDATE
-        await axios.put(
-          `/api/a/post-themes/${editData.post_theme_id}`,
-          {
-            post_theme_name: name,
-            post_theme_description: description,
-            post_theme_masjid_id: masjidId,
-          },
-          { withCredentials: true }
-        );
-        toast.success("Tema berhasil diperbarui");
-      } else {
-        // CREATE
-        await axios.post(
-          "/api/a/post-themes",
-          {
-            post_theme_name: name,
-            post_theme_description: description,
-            post_theme_masjid_id: masjidId,
-          },
-          { withCredentials: true }
-        );
-        toast.success("Tema berhasil ditambahkan");
-      }
+      // Invalidate agar list tema dimuat ulang
+      queryClient.invalidateQueries({ queryKey: ["post-themes", masjidId] });
 
       navigate("/dkm/post-tema");
     } catch (err) {
       console.error(err);
-      toast.error("Gagal menyimpan tema");
+      toast.error("Gagal menyimpan tema.");
     } finally {
       setLoading(false);
     }

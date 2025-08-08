@@ -127,10 +127,12 @@ export default function MasjidPost() {
   });
 
   // Normalisasi post_type agar "image", "video", dll dianggap "masjid"
-  const normalizedPosts = posts.map((post) => ({
-    ...post,
-    post_type: post.post_type === "motivasi" ? "motivasi" : "masjid",
-  }));
+  const normalizedPosts = Array.isArray(posts)
+    ? posts.map((post) => ({
+        ...post,
+        post_type: post.post_type === "motivasi" ? "motivasi" : "masjid",
+      }))
+    : [];
 
   const filteredPosts = normalizedPosts.filter(
     (post) => post.post_type === activeTab
@@ -195,6 +197,13 @@ export default function MasjidPost() {
           >
             Memuat postingan...
           </p>
+        ) : filteredPosts.length === 0 ? (
+          <div
+            className="text-center text-sm pt-10"
+            style={{ color: themeColors.silver2 }}
+          >
+            Belum ada postingan.
+          </div>
         ) : (
           filteredPosts.map((post) => (
             <CommonCardList key={post.post_id}>

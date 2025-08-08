@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import InputField from "@/components/common/main/InputField";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import RichEditor from "@/components/common/main/RichEditor";
@@ -22,17 +22,18 @@ interface Post {
   post_title: string;
   post_content: string;
   post_image_url: string | null;
-  post_theme: {
-    post_theme_id: string;
-    post_theme_name: string;
-  };
+  post_theme: PostTheme;
 }
 
 export default function DKMAddEditPost() {
   const navigate = useNavigate();
   const location = useLocation();
-  const post = location.state as Post | undefined;
+  const queryClient = useQueryClient();
   const { user } = useCurrentUser();
+  const masjidId = user?.masjid_admin_ids?.[0];
+
+  const post = location.state as Post | undefined;
+
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
@@ -40,15 +41,15 @@ export default function DKMAddEditPost() {
   const [content, setContent] = useState("");
   const [themeId, setThemeId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (post) {
       setTitle(post.post_title);
       setContent(post.post_content);
       setThemeId(post.post_theme?.post_theme_id || "");
-      setImagePreviewUrl(post.post_image_url); // ← tampilkan gambar lama
+      setImagePreviewUrl(post.post_image_url || null);
     }
   }, [post]);
 
@@ -67,19 +68,19 @@ export default function DKMAddEditPost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!themeId) return toast.error("Silakan pilih tema terlebih dahulu");
+    if (!masjidId) return toast.error("Masjid ID tidak ditemukan");
+
+    const formData = new FormData();
+    formData.append("post_title", title);
+    formData.append("post_content", content);
+    formData.append("post_theme_id", themeId);
+    formData.append("post_is_published", "true");
+    if (imageFile) formData.append("post_image_url", imageFile);
 
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append("post_title", title);
-      formData.append("post_content", content);
-      formData.append("post_theme_id", themeId);
-      formData.append("post_is_published", "true");
-
-      if (imageFile) {
-        formData.append("post_image_url", imageFile);
-      }
 
       if (post?.post_id) {
         await axios.put(`/api/a/posts/${post.post_id}`, formData, {
@@ -95,9 +96,10 @@ export default function DKMAddEditPost() {
         toast.success("Post berhasil ditambahkan");
       }
 
+      queryClient.invalidateQueries({ queryKey: ["posts", masjidId] });
       navigate("/dkm/post");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       toast.error("Gagal menyimpan post");
     } finally {
       setLoading(false);
@@ -113,10 +115,10 @@ export default function DKMAddEditPost() {
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6 p-4 max-w-5xl"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-6 p-4 max-w-5xl"
         encType="multipart/form-data"
       >
-        {/* KIRI: Input Judul, Konten, Tema */}
+        {/* Form Kiri */}
         <div className="space-y-6">
           <InputField
             label="Judul Post"
@@ -133,7 +135,6 @@ export default function DKMAddEditPost() {
             placeholder="Isi konten post"
           />
 
-          {/* Tema Post */}
           <div>
             <label
               className="block mb-1 font-medium text-sm"
@@ -150,13 +151,10 @@ export default function DKMAddEditPost() {
                 color: theme.black1,
                 border: `1px solid ${theme.silver1}`,
               }}
-              disabled={isLoadingThemes}
               required
+              disabled={isLoadingThemes}
             >
               <option value="">-- Pilih Tema --</option>
-              {themes.length === 0 && (
-                <option disabled>(Belum ada tema tersedia)</option>
-              )}
               {themes.map((theme) => (
                 <option key={theme.post_theme_id} value={theme.post_theme_id}>
                   {theme.post_theme_name}
@@ -166,9 +164,8 @@ export default function DKMAddEditPost() {
           </div>
         </div>
 
-        {/* KANAN: Upload Gambar + Preview + Tombol */}
+        {/* Form Kanan */}
         <div className="space-y-6">
-          {/* Upload Gambar */}
           <div className="space-y-1">
             <label
               className="text-sm font-medium"
@@ -204,7 +201,6 @@ export default function DKMAddEditPost() {
             )}
           </div>
 
-          {/* Tombol Simpan */}
           <Button type="submit" disabled={loading || isLoadingThemes}>
             {loading
               ? post

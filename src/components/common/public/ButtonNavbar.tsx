@@ -27,12 +27,12 @@ export default function BottomNavbar({
       icon: BookOpen,
       path: `/masjid/${slug}/soal-materi`,
     },
-    {
-      key: "donasi",
-      label: "Donasi",
-      icon: MapPin,
-      path: `/masjid/${slug}/donasi`,
-    },
+    // {
+    //   key: "donasi",
+    //   label: "Donasi",
+    //   icon: MapPin,
+    //   path: `/masjid/${slug}/donasi`,
+    // },
     {
       key: "post",
       label: "Postingan",
@@ -50,7 +50,7 @@ export default function BottomNavbar({
   const currentPath = location.pathname;
   const activeTab = (() => {
     if (currentPath.includes("/post")) return "post";
-    if (currentPath.includes("/donasi")) return "donasi";
+    // if (currentPath.includes("/donasi")) return "donasi";
     if (currentPath.includes("/soal-materi")) return "materi";
     if (currentPath.includes("/aktivitas")) return "aktivitas";
     return "beranda";

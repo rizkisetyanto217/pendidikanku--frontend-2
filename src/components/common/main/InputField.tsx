@@ -1,4 +1,3 @@
-import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import React from "react";
 
@@ -26,21 +25,20 @@ export default function InputField({
   onChange,
 }: InputFieldProps) {
   const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
 
-  const commonStyle = {
-    backgroundColor: theme.white2,
-    borderColor: theme.silver1,
-    color: theme.black1,
-    WebkitTextFillColor: theme.black1,
-  };
+  const baseInputClass = `w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+    isDark
+      ? "text-white placeholder-zinc-500 bg-zinc-800 border-zinc-700"
+      : "text-black placeholder-gray-400 bg-white border-gray-300"
+  }`;
 
   return (
     <div className="w-full space-y-1">
       <label
         htmlFor={name}
-        className="block text-sm font-medium"
-        style={{ color: theme.black2 }}
+        className={`block text-sm font-medium ${
+          isDark ? "text-zinc-300" : "text-gray-700"
+        }`}
       >
         {label}
       </label>
@@ -49,22 +47,19 @@ export default function InputField({
         <textarea
           id={name}
           name={name}
-          value={value}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e)}
-          placeholder={placeholder}
           rows={rows}
-          className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
-          style={commonStyle}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={baseInputClass}
         />
       ) : type === "file" ? (
         <input
           id={name}
           name={name}
           type="file"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e)}
-          placeholder={placeholder}
-          className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
-          style={commonStyle}
+          onChange={onChange}
+          className={baseInputClass}
         />
       ) : (
         <input
@@ -72,10 +67,9 @@ export default function InputField({
           name={name}
           type={type}
           value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e)}
+          onChange={onChange}
           placeholder={placeholder}
-          className="w-full text-sm px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
-          style={commonStyle}
+          className={baseInputClass}
         />
       )}
     </div>

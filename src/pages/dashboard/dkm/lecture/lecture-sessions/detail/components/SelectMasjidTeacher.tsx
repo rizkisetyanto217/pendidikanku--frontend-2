@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { getMasjidIdFromSession } from "@/utils/auth";
 import { useDebounce } from "use-debounce";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import toast from "react-hot-toast";
 
 type Teacher = {
   masjid_teachers_user_id: string;
@@ -25,13 +26,16 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [debouncedSearch] = useDebounce(search, 1000);
-  const { isDark } = useHtmlDarkMode(); // ✅ ambil isDark-nya
+
+  const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
+
+  const { user } = useCurrentUser();
+  const masjid_id = user?.masjid_admin_ids?.[0]; // ✅ ambil dari hook
 
   const {
     data: teacherData,
     isLoading: loadingTeachers,
-    error: teacherError,
     refetch: refetchTeachers,
   } = useQuery({
     queryKey: ["masjid-teachers"],
@@ -41,11 +45,7 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
     },
   });
 
-  const {
-    data: userData,
-    isLoading: loadingUsers,
-    error: userError,
-  } = useQuery({
+  const { data: userData, isLoading: loadingUsers } = useQuery({
     queryKey: ["search-user", debouncedSearch],
     queryFn: async () => {
       if (debouncedSearch.length < 3) return [];
@@ -61,22 +61,26 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
 
   const handleCreateTeacher = async (u: User) => {
     try {
-      const masjid_id = getMasjidIdFromSession();
+      if (!masjid_id) {
+        toast.error("Masjid ID tidak ditemukan.");
+        return;
+      }
+
       await axios.post("/api/a/masjid-teachers", {
         masjid_teachers_masjid_id: masjid_id,
         masjid_teachers_user_id: u.id,
       });
+
       await refetchTeachers();
       onChange(u.id);
       setShowSearch(false);
       setSearch("");
-    } catch (err) {
-      console.error("❌ Gagal tambah pengajar:", err);
+      toast.success("Pengajar berhasil ditambahkan.");
+    } catch (err: any) {
+      console.error("❌ Gagal tambah pengajar:", err.response?.data || err);
+      toast.error(err.response?.data?.error || "Gagal menambahkan pengajar.");
     }
   };
-
-  console.log("🌙 isDark:", isDark);
-  console.log("🎨 theme.white1:", theme.white1);
 
   return (
     <div className="w-full space-y-1">
@@ -95,7 +99,7 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
           onChange={(e) => onChange(e.target.value)}
           className="w-full text-sm px-4 py-2.5 pr-10 border rounded-lg appearance-none transition-all focus:outline-none focus:ring-2 focus:ring-teal-500"
           style={{
-            backgroundColor: theme.white2, // 🔄 Perbaikan di sini
+            backgroundColor: theme.white2,
             borderColor: theme.silver1,
             color: theme.black1,
             WebkitAppearance: "none",
@@ -114,7 +118,6 @@ export default function SelectMasjidTeacher({ value, onChange }: Props) {
           ))}
         </select>
 
-        {/* Icon dropdown */}
         <div
           className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
           style={{ color: theme.black2 }}

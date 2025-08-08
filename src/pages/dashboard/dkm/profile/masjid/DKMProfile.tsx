@@ -1,9 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { BuildingIcon, UserIcon } from "lucide-react";
-import DashboardSidebar, {
-  SidebarMenuItem,
-} from "@/components/common/navigation/SidebarMenu";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { Link, Outlet, useLocation } from "react-router-dom";
@@ -25,6 +21,8 @@ interface Masjid {
   masjid_instagram_url: string;
   masjid_whatsapp_url: string;
   masjid_youtube_url: string;
+  masjid_facebook_url: string;
+  masjid_tiktok_url: string;
 }
 
 interface MasjidProfile {
@@ -115,10 +113,10 @@ export default function ProfilMasjid() {
                   >
                     {masjid.masjid_location}
                   </p>
-                  <div className="flex gap-4 text-sm mt-2">
+                  {/* <div className="flex gap-4 text-sm mt-2">
                     <span className="font-medium">300 Postingan</span>
                     <span className="font-medium">300 Pengikut</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -164,6 +162,37 @@ export default function ProfilMasjid() {
                       />
                     </a>
                   )}
+
+                  {masjid.masjid_facebook_url && (
+                    <a
+                      href={masjid.masjid_facebook_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ShimmerImage
+                        src="/icons/facebook.svg"
+                        alt="Facebook"
+                        className="w-8 h-8"
+                        shimmerClassName="rounded"
+                      />
+                    </a>
+                  )}
+
+                  {masjid.masjid_tiktok_url && (
+                    <a
+                      href={masjid.masjid_tiktok_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ShimmerImage
+                        src="/icons/tiktok.svg"
+                        alt="Tiktok"
+                        className="w-8 h-8"
+                        shimmerClassName="rounded"
+                      />
+                    </a>
+                  )}
+
                   <Link
                     to="edit-sosmed"
                     state={{
@@ -221,34 +250,55 @@ export default function ProfilMasjid() {
                 <div className="flex flex-wrap gap-4">
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold mb-2">Stempel</p>
-                    <ShimmerImage
-                      src={profile?.masjid_profile_stamp_url || ""}
-                      alt="Stempel"
-                      className="w-48 h-32 object-cover rounded-md border"
-                      shimmerClassName="rounded-md"
-                    />
+                    {profile?.masjid_profile_stamp_url ? (
+                      <ShimmerImage
+                        src={profile.masjid_profile_stamp_url}
+                        alt="Stempel"
+                        className="w-48 h-32 object-cover rounded-md border"
+                        shimmerClassName="rounded-md"
+                      />
+                    ) : (
+                      <div className="w-48 h-32 flex items-center justify-center rounded-md border text-xs text-gray-500 dark:text-gray-400">
+                        Gambar tidak ada
+                      </div>
+                    )}
                   </div>
+
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold mb-2">Logo</p>
-                    <ShimmerImage
-                      src={profile?.masjid_profile_logo_url || ""}
-                      alt="Logo"
-                      className="w-48 h-32 object-cover rounded-md border"
-                      shimmerClassName="rounded-md"
-                    />
+                    {profile?.masjid_profile_logo_url ? (
+                      <ShimmerImage
+                        src={profile.masjid_profile_logo_url}
+                        alt="Logo"
+                        className="w-48 h-32 object-cover rounded-md border"
+                        shimmerClassName="rounded-md"
+                      />
+                    ) : (
+                      <div className="w-48 h-32 flex items-center justify-center rounded-md border text-xs text-gray-500 dark:text-gray-400">
+                        Gambar tidak ada
+                      </div>
+                    )}
                   </div>
+
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold mb-2">
                       Tanda Tangan Ketua DKM
                     </p>
-                    <ShimmerImage
-                      src={profile?.masjid_profile_ttd_ketua_dkm_url || ""}
-                      alt="TTD Ketua DKM"
-                      className="w-48 h-32 object-cover rounded-md border"
-                      shimmerClassName="rounded-md"
-                    />
+                    {profile?.masjid_profile_ttd_ketua_dkm_url ? (
+                      <ShimmerImage
+                        src={profile.masjid_profile_ttd_ketua_dkm_url}
+                        alt="TTD Ketua DKM"
+                        className="w-48 h-32 object-cover rounded-md border"
+                        shimmerClassName="rounded-md"
+                      />
+                    ) : (
+                      <div className="w-48 h-32 flex items-center justify-center rounded-md border text-xs text-gray-500 dark:text-gray-400">
+                        Gambar tidak ada
+                      </div>
+                    )}
                   </div>
                 </div>
+
                 <div
                   className="mt-6 pt-4 flex justify-end gap-4 border-t"
                   style={{ borderColor: theme.silver1 }}

@@ -7,6 +7,8 @@ import SimpleTable from "@/components/common/main/SimpleTable";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import ConfirmModal from "@/components/common/home/ConfirmModal"; // pastikan path sesuai strukturmu
+import { useState } from "react";
 
 interface PostTheme {
   post_theme_id: string;
@@ -21,6 +23,10 @@ export default function DKMThemaPost() {
   const queryClient = useQueryClient();
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
   const masjidId = user?.masjid_admin_ids?.[0];
+
+  const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     data: themes,
@@ -38,21 +44,24 @@ export default function DKMThemaPost() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const handleDelete = async (id: string) => {
-    const confirm = window.confirm(
-      "Apakah Anda yakin ingin menghapus tema ini?"
-    );
-    if (!confirm) return;
+  const handleDelete = async () => {
+    if (!selectedDeleteId) return;
 
     try {
-      await axios.delete(`/api/a/post-themes/${id}`, {
+      setIsDeleting(true);
+      await axios.delete(`/api/a/post-themes/${selectedDeleteId}`, {
         withCredentials: true,
       });
+
       toast.success("Tema berhasil dihapus");
       queryClient.invalidateQueries({ queryKey: ["post-themes", masjidId] });
+      setShowConfirm(false);
+      setSelectedDeleteId(null);
     } catch (err) {
       console.error(err);
       toast.error("Gagal menghapus tema");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -70,7 +79,10 @@ export default function DKMThemaPost() {
             state: item,
           })
         }
-        onDelete={() => handleDelete(item.post_theme_id)}
+        onDelete={() => {
+          setSelectedDeleteId(item.post_theme_id);
+          setShowConfirm(true);
+        }}
       />,
     ]) ?? [];
 
@@ -97,6 +109,21 @@ export default function DKMThemaPost() {
           }
         />
       )}
+
+      {/* 🔽 Modal konfirmasi hapus */}
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => {
+          setShowConfirm(false);
+          setSelectedDeleteId(null);
+        }}
+        onConfirm={handleDelete}
+        title="Hapus Tema"
+        message="Apakah Anda yakin ingin menghapus tema ini?"
+        confirmText="Hapus"
+        cancelText="Batal"
+        isLoading={isDeleting}
+      />
     </>
   );
 }

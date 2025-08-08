@@ -1,0 +1,276 @@
+[
+  {
+    "lecture_sessions_question": "Apa hukum asal melihat sesama laki-laki menurut pembahasan?",
+    "lecture_sessions_question_answers": [
+      "A. Haram mutlak",
+      "B. Makruh",
+      "C. Jaiz (boleh)",
+      "D. Wajib"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Melihat sesama laki-laki hukumnya jaiz (boleh) kecuali pada bagian antara pusar dan lutut yang termasuk aurat.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Bagian tubuh mana yang termasuk aurat saat laki-laki melihat laki-laki?",
+    "lecture_sessions_question_answers": [
+      "A. Lutut sampai mata kaki",
+      "B. Pusar sampai lutut",
+      "C. Dada sampai perut",
+      "D. Leher sampai dada"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Aurat laki-laki terhadap laki-laki lain adalah antara pusar (surrah) dan lutut (rukbah).",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa ketentuan melihat sesama laki-laki ketika aman dari fitnah dan syahwat?",
+    "lecture_sessions_question_answers": [
+      "A. Tetap haram",
+      "B. Makruh",
+      "C. Boleh selain aurat",
+      "D. Wajib menundukkan pandangan setiap saat"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Jika aman dari fitnah, melihat selain aurat sesama laki-laki boleh (tidak haram).",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa hukum melihat sesama laki-laki jika dikhawatirkan timbul fitnah atau rangsangan syahwat?",
+    "lecture_sessions_question_answers": [
+      "A. Tetap boleh",
+      "B. Mubah jika sebentar",
+      "C. Makruh",
+      "D. Haram"
+    ],
+    "lecture_sessions_question_correct": "D",
+    "lecture_sessions_question_explanation": "Jika ada kekhawatiran fitnah atau syahwat, melihat sesama laki-laki menjadi haram meskipun di luar batas aurat.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa yang dimaksud dengan 'amrad' dalam fikih?",
+    "lecture_sessions_question_answers": [
+      "A. Laki-laki bertubuh kekar",
+      "B. Laki-laki muda yang sangat tampan",
+      "C. Laki-laki lanjut usia",
+      "D. Laki-laki yang sakit"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Amrad adalah laki-laki muda yang sangat tampan/menyerupai perempuan, berpotensi menimbulkan fitnah.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Bagaimana hukum melihat amrad jika menimbulkan syahwat?",
+    "lecture_sessions_question_answers": [
+      "A. Boleh selama di tempat umum",
+      "B. Makruh",
+      "C. Haram secara mutlak",
+      "D. Mubah jika tidak sengaja"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Melihat amrad dengan syahwat hukumnya haram secara mutlak karena kuatnya potensi fitnah.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Menurut Imam Rafi’i, kapan melihat amrad tidak haram?",
+    "lecture_sessions_question_answers": [
+      "A. Jika tanpa syahwat dan aman dari fitnah",
+      "B. Jika di majelis ilmu",
+      "C. Jika di masjid",
+      "D. Jika bersama mahram"
+    ],
+    "lecture_sessions_question_correct": "A",
+    "lecture_sessions_question_explanation": "Pendapat Imam Rafi’i: jika tidak ada syahwat dan tidak dikhawatirkan fitnah, maka tidak haram.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa pendapat mayoritas ulama (qoul asahh) bila tidak ada syahwat namun dikhawatirkan fitnah saat melihat amrad?",
+    "lecture_sessions_question_answers": [
+      "A. Boleh karena tanpa syahwat",
+      "B. Makruh saja",
+      "C. Tetap haram",
+      "D. Mubah dengan syarat menunduk"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Mayoritas ulama menilai tetap haram jika ada kekhawatiran fitnah meski tanpa syahwat.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa penegasan Imam Nawawi terkait melihat amrad pada area pusar–lutut?",
+    "lecture_sessions_question_answers": [
+      "A. Boleh tanpa syahwat",
+      "B. Boleh jika ada keperluan",
+      "C. Makruh jika lama",
+      "D. Haram secara mutlak"
+    ],
+    "lecture_sessions_question_correct": "D",
+    "lecture_sessions_question_explanation": "Imam Nawawi menegaskan keharaman secara mutlak melihat amrad pada bagian antara pusar dan lutut, karena rawan fitnah, baik dengan syahwat maupun tidak.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Contoh penerapan menjaga aurat saat berolahraga yang disebutkan dalam materi adalah:",
+    "lecture_sessions_question_answers": [
+      "A. Memakai celana di atas lutut agar leluasa",
+      "B. Memakai kaos tanpa lengan",
+      "C. Menutup bagian antara pusar dan lutut, misalnya dengan celana tidak terlalu pendek",
+      "D. Membuka aurat agar tidak gerah"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Disebutkan contoh praktiknya: menutup bagian aurat ketika berolahraga, seperti tidak memakai celana terlalu pendek.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Contoh penerapan menjaga aurat saat berolahraga yang disebutkan dalam materi adalah:",
+    "lecture_sessions_question_answers": [
+      "A. Memakai celana di atas lutut agar leluasa",
+      "B. Memakai kaos tanpa lengan",
+      "C. Menutup bagian antara pusar dan lutut, misalnya dengan celana tidak terlalu pendek",
+      "D. Membuka aurat agar tidak gerah"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Disebutkan contoh praktiknya: menutup bagian aurat ketika berolahraga, seperti tidak memakai celana terlalu pendek.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa yang dimaksud dengan istilah 'amrad' dalam pembahasan fikih?",
+    "lecture_sessions_question_answers": [
+      "A. Anak laki-laki yang berkulit gelap",
+      "B. Anak laki-laki yang sangat tampan dan berbeda dari kebanyakan orang",
+      "C. Anak perempuan yang menyerupai laki-laki",
+      "D. Pemuda yang rajin beribadah"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Amrad adalah anak laki-laki yang sangat tampan, bahkan berbeda dari kebanyakan orang, sehingga dikhawatirkan menimbulkan fitnah.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Bagian tubuh manakah yang tidak boleh dilihat dari sesama laki-laki menurut fikih?",
+    "lecture_sessions_question_answers": [
+      "A. Kepala hingga lutut",
+      "B. Pusar hingga lutut",
+      "C. Dada hingga kaki",
+      "D. Leher hingga pusar"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Bagian tubuh antara pusar hingga lutut dihukumi aurat dan tidak boleh dilihat oleh sesama laki-laki.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Mengapa kaidah fikih umum seperti 'idza faqadal syarthu faqadal masyruth' tidak berlaku pada kasus amrad?",
+    "lecture_sessions_question_answers": [
+      "A. Karena aurat amrad berbeda ukurannya",
+      "B. Karena larangan melihat amrad disebabkan faktor nafsu",
+      "C. Karena amrad termasuk anak kecil",
+      "D. Karena amrad tidak wajib menutup aurat"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Larangan berlaku karena adanya faktor nafsu, sehingga kaidah umum tidak bisa diterapkan.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa arti istilah 'muzhannatul fitnah' yang digunakan dalam pembahasan amrad?",
+    "lecture_sessions_question_answers": [
+      "A. Tidak menimbulkan fitnah",
+      "B. Berpotensi menimbulkan fitnah",
+      "C. Bebas dari fitnah",
+      "D. Menjadi korban fitnah"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Muzhannatul fitnah berarti sesuatu yang berpotensi menimbulkan fitnah.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Dalam pembahasan safar, berapa minimal jarak yang membolehkan shalat qasar?",
+    "lecture_sessions_question_answers": [
+      "A. 40 km",
+      "B. 60 km",
+      "C. 80 km",
+      "D. 120 km"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Shalat qasar dibolehkan jika bepergian minimal sekitar 83 km (dibulatkan menjadi 80 km).",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa hukum perempuan Muslim melihat perempuan Muslim lainnya menurut fikih?",
+    "lecture_sessions_question_answers": [
+      "A. Boleh melihat seluruh tubuh",
+      "B. Tidak boleh melihat antara pusar dan lutut",
+      "C. Hanya boleh melihat wajah dan telapak tangan",
+      "D. Boleh melihat bagian aurat jika saling percaya"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Sesama perempuan Muslim tidak boleh melihat bagian antara pusar dan lutut, karena dihukumi aurat.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Menurut Imam Bagawi, bagaimana hukum perempuan Muslimah memperlihatkan aurat kepada perempuan non-Muslim (Zimiyah)?",
+    "lecture_sessions_question_answers": [
+      "A. Boleh tanpa batas",
+      "B. Boleh asal sesama perempuan",
+      "C. Tidak boleh memperlihatkan aurat antara pusar dan lutut",
+      "D. Wajib menutup seluruh tubuh kecuali wajah"
+    ],
+    "lecture_sessions_question_correct": "C",
+    "lecture_sessions_question_explanation": "Imam Bagawi berpendapat bahwa perempuan Muslimah tidak boleh memperlihatkan aurat antara pusar dan lutut kepada perempuan non-Muslim.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Siapa yang dimaksud dengan 'Zimiyah' dalam pembahasan fikih?",
+    "lecture_sessions_question_answers": [
+      "A. Perempuan Muslimah yang tinggal di desa",
+      "B. Perempuan non-Muslim yang hidup damai dan baik kepada umat Islam",
+      "C. Perempuan yang berpindah agama",
+      "D. Perempuan Muslimah yang menikah dengan non-Muslim"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Zimiyah adalah perempuan non-Muslim yang tinggal di wilayah Islam dan bersikap baik kepada umat Islam.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Menurut pendapat Imam Syafi‘i, bagaimana hukum memandang amrad pada bagian antara pusar dan lutut?",
+    "lecture_sessions_question_answers": [
+      "A. Makruh",
+      "B. Mubah",
+      "C. Sunnah",
+      "D. Haram secara mutlak"
+    ],
+    "lecture_sessions_question_correct": "D",
+    "lecture_sessions_question_explanation": "Menurut Imam Syafi‘i, haram secara mutlak memandang bagian aurat amrad (antara pusar dan lutut) karena dikhawatirkan menimbulkan fitnah.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  },
+  {
+    "lecture_sessions_question": "Apa hikmah utama larangan melihat amrad menurut pembahasan kitab?",
+    "lecture_sessions_question_answers": [
+      "A. Karena perbedaan nasab",
+      "B. Karena faktor syahwat dan potensi fitnah",
+      "C. Karena aurat amrad berbeda dengan orang biasa",
+      "D. Karena amrad masih anak-anak"
+    ],
+    "lecture_sessions_question_correct": "B",
+    "lecture_sessions_question_explanation": "Hikmah utama larangan adalah faktor syahwat dan potensi fitnah yang dapat timbul saat melihat amrad.",
+    "lecture_sessions_question_lecture_session_id": "aa02f97b-ad14-40ca-9e1b-6bfbdd4888c3",
+    "lecture_sessions_question_quiz_id": "e08ebf35-e341-4b98-a8b8-84bff4dedb88"
+  }
+
+]

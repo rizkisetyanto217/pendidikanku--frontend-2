@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import ConfirmModal from "@/components/common/home/ConfirmModal"; // 🆕 import
 
 interface Post {
   post_id: string;
@@ -28,28 +30,47 @@ interface Post {
 
 export default function DKMPost() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
-  const masjidId = user?.masjid_admin_ids?.[0]; // ✅ fix ini
+  const masjidId = user?.masjid_admin_ids?.[0];
+
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     data: posts,
     isLoading,
     isError,
   } = useQuery<Post[]>({
-    queryKey: ["posts", masjidId], // ✅ ganti dari masjidSlug ke masjidId
+    queryKey: ["posts", masjidId],
     enabled: !!masjidId && isLoggedIn && !isUserLoading,
     queryFn: async () => {
       const res = await axios.get(`/api/a/posts/by-masjid`, {
         withCredentials: true,
       });
-      console.log("✅ DKM Post", res.data.data);
       return res.data.data;
     },
     staleTime: 1000 * 60 * 5,
   });
+
+  const handleDelete = async () => {
+    if (!postToDelete) return;
+    try {
+      setIsDeleting(true);
+      await axios.delete(`/api/a/posts/${postToDelete.post_id}`, {
+        withCredentials: true,
+      });
+      queryClient.invalidateQueries({ queryKey: ["posts", masjidId] });
+    } catch (err) {
+      console.error("❌ Delete failed", err);
+    } finally {
+      setIsDeleting(false);
+      setPostToDelete(null);
+    }
+  };
 
   const columns = [
     "No",
@@ -59,7 +80,7 @@ export default function DKMPost() {
     "Tanggal",
     "Status",
     "Suka",
-    "Aksi", // ✅ Tambahkan kolom aksi
+    "Aksi",
   ];
 
   const rows =
@@ -80,15 +101,8 @@ export default function DKMPost() {
       />,
       <span>{post.like_count}</span>,
       <ActionEditDelete
-        onEdit={() =>
-          navigate(`/dkm/post/tambah-edit`, {
-            state: post,
-          })
-        }
-        onDelete={() => {
-          // implement delete confirmation/modal or handler here
-          console.log("🗑️ Delete post:", post.post_id);
-        }}
+        onEdit={() => navigate(`/dkm/post/tambah-edit`, { state: post })}
+        onDelete={() => setPostToDelete(post)} // ✅ trigger modal
       />,
     ]) ?? [];
 
@@ -101,6 +115,7 @@ export default function DKMPost() {
 
       {isUserLoading || isLoading ? <p>Loading...</p> : null}
       {isError && <p className="text-red-500">Gagal memuat data.</p>}
+
       {!isLoading && !isError && (
         <SimpleTable
           columns={columns}
@@ -112,6 +127,17 @@ export default function DKMPost() {
           }
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!postToDelete}
+        title="Hapus Post?"
+        message={`Apakah kamu yakin ingin menghapus post "${postToDelete?.post_title}"? Tindakan ini tidak bisa dibatalkan.`}
+        onClose={() => setPostToDelete(null)}
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        confirmText="Hapus"
+        cancelText="Batal"
+      />
     </>
   );
 }

@@ -20,14 +20,14 @@ export const DKMMobileDataSidebar: SidebarItem[] = [
       { text: "Profil DKM", to: "/dkm/profil-dkm" },
     ],
   },
-  { text: "Notifikasi", icon: <BellIcon />, to: "/dkm/notifikasi" },
+  // { text: "Notifikasi", icon: <BellIcon />, to: "/dkm/notifikasi" },
   { text: "Kajian", icon: <CalendarIcon />,
     children: [
       { text: "Kajian", to: "/dkm/kajian" },
       { text: "Tema", to: "/dkm/tema" },
     ]
   },
-  { text: "Sertifikat", icon: <FileIcon />, to: "/dkm/sertifikat" },
-  { text: "Keuangan", icon: <PieChartIcon />, to: "/dkm/keuangan" },
+  // { text: "Sertifikat", icon: <FileIcon />, to: "/dkm/sertifikat" },
+  // { text: "Keuangan", icon: <PieChartIcon />, to: "/dkm/keuangan" },
   { text: "Postingan", icon: <UsersIcon />, to: "/dkm/post" },
 ];

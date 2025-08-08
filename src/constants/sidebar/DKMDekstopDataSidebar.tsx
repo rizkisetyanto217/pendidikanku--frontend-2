@@ -25,7 +25,7 @@ export const DKMDesktopDataSidebar: SidebarItem[] = [
     activeBasePath: ["/dkm/kajian", "/dkm/tema", "/dkm/kajian-detail"],
   },
 
-  { text: "Sertifikat", icon: <FileIcon />, to: "/dkm/sertifikat" },
-  { text: "Keuangan", icon: <PieChartIcon />, to: "/dkm/keuangan" },
+  // { text: "Sertifikat", icon: <FileIcon />, to: "/dkm/sertifikat" },
+  // { text: "Keuangan", icon: <PieChartIcon />, to: "/dkm/keuangan" },
   { text: "Postingan", icon: <UsersIcon />, to: "/dkm/post" },
 ];

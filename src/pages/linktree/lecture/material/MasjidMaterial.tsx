@@ -134,7 +134,10 @@ export default function MasjidMaterial() {
   return (
     <>
       <PublicNavbar masjidName="Materi Kajian" />
-      <div className="sticky top-16 z-40 bg-white dark:bg-zinc-900">
+      <div
+        className="sticky top-16 z-40"
+        style={{ backgroundColor: theme.white1 }}
+      >
         <div
           className="flex justify-around border-b"
           style={{ borderColor: theme.silver1 }}
@@ -151,12 +154,11 @@ export default function MasjidMaterial() {
                   swiperRef.current.slideTo(newIndex);
                 }
               }}
-              className={`py-3 text-sm font-medium ${
-                tab === val ? "border-b-2" : ""
-              }`}
+              className="py-3 text-sm font-medium"
               style={{
                 color: tab === val ? theme.primary : theme.silver2,
-                borderColor: theme.primary,
+                borderBottom:
+                  tab === val ? `2px solid ${theme.primary}` : "none",
               }}
             >
               {val.charAt(0).toUpperCase() + val.slice(1)}

@@ -8,6 +8,7 @@ import { colors } from "@/constants/colorsThema";
 import { Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import CommonActionButton from "@/components/common/main/CommonActionButton";
 
 interface APIQuestion {
   lecture_sessions_question_id: string;
@@ -35,6 +36,8 @@ export default function DKMQuizLectureSessions() {
   const formRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const { id } = useParams();
+  const [bulkInput, setBulkInput] = useState<string>("");
+  const [showBulkUpload, setShowBulkUpload] = useState<boolean>(false);
 
   const [questions, setQuestions] = useState<TransformedQuestion[]>([]);
   const [isEditingIndex, setIsEditingIndex] = useState<number | null>(null);
@@ -46,22 +49,31 @@ export default function DKMQuizLectureSessions() {
     explanation: "",
   });
 
+  const [pendingDelete, setPendingDelete] = useState<{
+    index: number;
+    timeoutId: NodeJS.Timeout;
+  } | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["quiz-questions", lecture_session_id],
     queryFn: async () => {
       try {
+        console.log("📥 Mengambil data quiz dan soal dari backend...");
         const res = await axios.get(
           `/public/lecture-sessions-quiz/${lecture_session_id}/with-questions`
         );
+        console.log("✅ Data quiz berhasil diambil:", res.data);
         return res.data.data;
       } catch (err: any) {
+        console.error("❌ Gagal mengambil data quiz:", err);
         if (err.response?.status === 404) {
-          // jika belum ada quiz, anggap sebagai data kosong
+          console.warn("⚠️ Quiz belum tersedia (404)");
           return null;
         }
         throw err;
       }
     },
+
     enabled: !!lecture_session_id,
   });
 
@@ -111,20 +123,135 @@ export default function DKMQuizLectureSessions() {
     }
   }, [data]);
 
-  const handleDelete = async (index: number) => {
-    const target = questions[index];
-    if (!target?.id) return;
-    if (!confirm("Yakin ingin menghapus soal ini?")) return;
+  const handleBulkUpload = async () => {
     try {
-      await axios.delete(`/api/a/lecture-sessions-questions/${target.id}`);
-      toast.success("Soal berhasil dihapus!");
+      const quizId = data?.quiz?.lecture_sessions_quiz_id;
+      if (!quizId || !lecture_session_id) {
+        toast.error("Quiz atau sesi tidak tersedia.");
+        return;
+      }
+
+      const parsed = JSON.parse(bulkInput);
+      if (!Array.isArray(parsed)) {
+        toast.error("Format JSON harus berupa array.");
+        return;
+      }
+
+      const payloads = parsed.map((item: any, index: number) => {
+        // validasi minimal field penting
+        if (
+          typeof item.lecture_sessions_question !== "string" ||
+          !Array.isArray(item.lecture_sessions_question_answers) ||
+          typeof item.lecture_sessions_question_correct !== "string"
+        ) {
+          throw new Error(`Format soal ke-${index + 1} tidak valid`);
+        }
+
+        return {
+          lecture_sessions_question: item.lecture_sessions_question,
+          lecture_sessions_question_answers:
+            item.lecture_sessions_question_answers.map(
+              (opt: string, i: number) => {
+                const clean = opt.replace(/^[a-zA-Z]\.\s*/, "").trim();
+                return `${String.fromCharCode(65 + i)}. ${clean}`;
+              }
+            ),
+          lecture_sessions_question_correct:
+            item.lecture_sessions_question_correct.trim().toUpperCase(),
+          lecture_sessions_question_explanation:
+            item.lecture_sessions_question_explanation || "-",
+          lecture_sessions_question_lecture_session_id: lecture_session_id,
+          lecture_sessions_question_quiz_id: quizId,
+        };
+      });
+
+      const results = await Promise.all(
+        payloads.map((p) =>
+          axios.post("/api/a/lecture-sessions-questions", p).catch((err) => err)
+        )
+      );
+
+      const successCount = results.filter(
+        (res) => !(res instanceof Error)
+      ).length;
+      const failCount = results.length - successCount;
+
+      if (successCount > 0) {
+        toast.success(`✅ ${successCount} soal berhasil ditambahkan.`);
+      }
+      if (failCount > 0) {
+        toast.error(`❌ ${failCount} soal gagal ditambahkan.`);
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["quiz-questions", lecture_session_id],
       });
-    } catch (err) {
-      console.error("❌ Gagal menghapus soal:", err);
-      toast.error("Gagal menghapus soal.");
+
+      setBulkInput("");
+      setShowBulkUpload(false);
+    } catch (err: any) {
+      console.error("❌ Gagal parsing JSON:", err);
+      toast.error("Format JSON tidak valid.");
     }
+  };
+
+  const handleDelete = async (index: number) => {
+    const target = questions[index];
+    if (!target?.id) return;
+
+    // Soft-delete: sembunyikan dari tampilan
+    const updatedQuestions = [...questions];
+    updatedQuestions.splice(index, 1);
+    setQuestions(updatedQuestions);
+
+    // Tampilkan toast dengan Undo
+    const toastId = toast(
+      (t) => (
+        <div className="flex items-center justify-between gap-4">
+          <span>🗑 Soal dihapus.</span>
+          <button
+            className="underline text-sm"
+            onClick={() => {
+              // Batalkan penghapusan
+              setQuestions((prev) => {
+                const restored = [...prev];
+                restored.splice(index, 0, target); // kembalikan ke posisi semula
+                return restored;
+              });
+              clearTimeout(timeoutId);
+              setPendingDelete(null);
+              toast.dismiss(t.id);
+              toast.success("Soal dipulihkan.");
+            }}
+          >
+            Undo
+          </button>
+        </div>
+      ),
+      {
+        duration: 4000,
+      }
+    );
+
+    // Set timer untuk delete permanen
+    const timeoutId = setTimeout(async () => {
+      try {
+        await axios.delete(`/api/a/lecture-sessions-questions/${target.id}`);
+        toast.success("Soal dihapus permanen.");
+      } catch (err) {
+        console.error("❌ Gagal hapus permanen:", err);
+        toast.error("Gagal menghapus soal.");
+        // Jika gagal, restore soal ke list
+        setQuestions((prev) => {
+          const restored = [...prev];
+          restored.splice(index, 0, target);
+          return restored;
+        });
+      }
+      setPendingDelete(null);
+    }, 4000);
+
+    setPendingDelete({ index, timeoutId });
   };
 
   const handleSave = async () => {
@@ -458,15 +585,53 @@ export default function DKMQuizLectureSessions() {
           </div>
 
           {/* Tombol tambah soal */}
-          <div className="flex justify-end gap-2 pt-6 border-t mt-10">
-            <button
+          <div className="flex justify-end items-center gap-2 pt-6 mt-10">
+            <CommonActionButton
+              text={
+                showBulkUpload
+                  ? "Tutup Upload JSON"
+                  : "📦 Upload JSON Banyak Soal"
+              }
+              onClick={() => setShowBulkUpload(!showBulkUpload)}
+              variant="outline"
+              className="text-sm"
+            />
+
+            <CommonActionButton
+              text="+ Tambah Soal"
               onClick={handleAddClick}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ backgroundColor: theme.primary, color: theme.white1 }}
-            >
-              + Tambah Soal
-            </button>
+              className="text-sm font-medium"
+            />
           </div>
+
+          {showBulkUpload && (
+            <div className="mt-4 space-y-2">
+              <textarea
+                value={bulkInput}
+                onChange={(e) => setBulkInput(e.target.value)}
+                rows={10}
+                placeholder={`Contoh format:\n[\n  {\n    "question": "Apa hukum wudhu?",\n    "options": ["A. Wajib", "B. Sunnah", "C. Haram", "D. Makruh"],\n    "correct": "A",\n    "explanation": "Wudhu adalah wajib sebelum sholat."\n  },\n  ...\n]`}
+                className="w-full p-3 border rounded-md font-mono text-sm"
+                style={{
+                  backgroundColor: theme.white2,
+                  color: theme.black1,
+                  borderColor: theme.silver1,
+                }}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={handleBulkUpload}
+                  className="px-4 py-2 rounded font-medium"
+                  style={{
+                    backgroundColor: theme.success1,
+                    color: theme.white1,
+                  }}
+                >
+                  🚀 Upload Soal JSON
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

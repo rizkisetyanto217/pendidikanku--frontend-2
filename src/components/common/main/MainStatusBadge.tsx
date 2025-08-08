@@ -1,10 +1,9 @@
-// src/components/common/StatusBadge.tsx
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 
 interface StatusBadgeProps {
   text: string;
-  variant: "info" | "success" | "error" | "warning" | "default";
+  variant: "info" | "success" | "error" | "warning" | "default" | "secondary";
 }
 
 export default function StatusBadge({ text, variant }: StatusBadgeProps) {
@@ -27,6 +26,10 @@ export default function StatusBadge({ text, variant }: StatusBadgeProps) {
     warning: {
       bg: theme.warning1 + "33", // transparan
       text: theme.warning1,
+    },
+    secondary: {
+      bg: theme.silver1,
+      text: theme.silver2,
     },
     default: {
       bg: theme.silver1,

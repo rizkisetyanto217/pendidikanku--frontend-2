@@ -12,6 +12,8 @@ import StatusBadge from "@/components/common/main/MainStatusBadge";
 import FormattedDate from "@/constants/formattedDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import { useState } from "react";
+import ConfirmModal from "@/components/common/home/ConfirmModal";
 
 interface Lecture {
   lecture_id: string;
@@ -43,6 +45,13 @@ export default function DKMLecture() {
 
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
   const masjidId = user?.masjid_admin_ids?.[0]; // ⬅️ ambil dari cookie
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState<{
+    isOpen: boolean;
+    data: Lecture | null;
+  }>({
+    isOpen: false,
+    data: null,
+  });
 
   const {
     data: lectures,
@@ -102,12 +111,7 @@ export default function DKMLecture() {
         <ActionEditDelete
           onEdit={() => navigate(`/dkm/tema/tambah-edit/${lecture.lecture_id}`)}
           onDelete={() => {
-            if (confirm("Yakin ingin menghapus kajian ini?")) {
-              deleteLecture(lecture.lecture_id, {
-                onSuccess: () => toast.success("Berhasil menghapus kajian"),
-                onError: () => toast.error("Gagal menghapus kajian"),
-              });
-            }
+            setConfirmDeleteModal({ isOpen: true, data: lecture });
           }}
         />
       </div>,
@@ -131,6 +135,27 @@ export default function DKMLecture() {
               state: lectures![i],
             })
           }
+        />
+      )}
+      {confirmDeleteModal.data && (
+        <ConfirmModal
+          isOpen={confirmDeleteModal.isOpen}
+          title="Hapus Tema Kajian"
+          message={`Apakah Anda yakin ingin menghapus kajian "${confirmDeleteModal.data.lecture_title}"?`}
+          confirmText="Hapus"
+          cancelText="Batal"
+          onClose={() => setConfirmDeleteModal({ isOpen: false, data: null })}
+          onConfirm={() => {
+            if (!confirmDeleteModal.data) return;
+            deleteLecture(confirmDeleteModal.data.lecture_id, {
+              onSuccess: () => {
+                toast.success("Berhasil menghapus kajian");
+              },
+              onError: () => toast.error("Gagal menghapus kajian"),
+              onSettled: () =>
+                setConfirmDeleteModal({ isOpen: false, data: null }),
+            });
+          }}
         />
       )}
     </>
