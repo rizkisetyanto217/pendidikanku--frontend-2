@@ -14,11 +14,18 @@ import {
   Book,
   FileText,
   FolderOpen,
+  User,
+  CalendarDays,
+  MapPin,
+  ClipboardCheck,
+  FileWarning,
 } from "lucide-react";
+
 import FormattedDate from "@/constants/formattedDate";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import LoginPromptModal from "@/components/common/home/LoginPromptModal";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
 
 // =====================
 // ✅ Interface
@@ -62,6 +69,7 @@ export default function MasjidLectureSessions() {
   const [loginPromptSource, setLoginPromptSource] = useState<
     "quiz" | "attendance" | null
   >(null);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // ✅ Ambil data sesi berdasarkan slug
   const { data, isLoading } = useQuery<LectureSession>({
@@ -143,8 +151,9 @@ export default function MasjidLectureSessions() {
                 : undefined
             }
             alt={data?.lecture_session_title || "Gambar Kajian"}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover cursor-pointer"
             shimmerClassName="rounded"
+            onClick={() => setShowImageModal(true)} // ⬅️ ini bagian penting
           />
         </div>
 
@@ -153,28 +162,44 @@ export default function MasjidLectureSessions() {
             <p style={{ color: theme.silver2 }}>Memuat data...</p>
           ) : (
             <>
-              <div>
-                📘 <strong>Materi:</strong> {info.materi}
-              </div>
-              <div>
-                👤 <strong>Pengajar:</strong> {info.ustadz}
-              </div>
-              <div>
-                📅 <strong>Jadwal:</strong>{" "}
-                {info.jadwal !== "-" ? (
-                  <FormattedDate value={info.jadwal} fullMonth />
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div>
-                📍 <strong>Tempat:</strong> {info.tempat}
+              {/* Informasi Umum */}
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <BookOpen size={16} style={{ marginTop: 2 }} />
+                  <p>
+                    <strong>Materi:</strong> {info.materi}
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <User size={16} style={{ marginTop: 2 }} />
+                  <p>
+                    <strong>Pengajar:</strong> {info.ustadz}
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CalendarDays size={16} style={{ marginTop: 2 }} />
+                  <p>
+                    <strong>Jadwal:</strong>{" "}
+                    {info.jadwal !== "-" ? (
+                      <FormattedDate value={info.jadwal} fullMonth />
+                    ) : (
+                      "-"
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPin size={16} style={{ marginTop: 2 }} />
+                  <p>
+                    <strong>Tempat:</strong> {info.tempat}
+                  </p>
+                </div>
               </div>
 
-              {/* Hasil */}
+              {/* Hasil dan Kehadiran */}
               <div className="flex flex-col gap-3 mt-4">
+                {/* Materi & Soal */}
                 <div
-                  className="rounded-md px-3 py-2 text-sm"
+                  className="rounded-md px-3 py-2 text-sm flex items-start gap-2"
                   style={{
                     backgroundColor:
                       typeof data?.user_grade_result === "number"
@@ -187,15 +212,22 @@ export default function MasjidLectureSessions() {
                     border: "1px solid #D1D5DB",
                   }}
                 >
-                  <strong>Materi & Soal:</strong>{" "}
-                  {typeof data?.user_grade_result === "number"
-                    ? `Sudah dikerjakan ✓ | Nilai: ${data.user_grade_result}`
-                    : "Tanpa Keterangan ✕"}
+                  {typeof data?.user_grade_result === "number" ? (
+                    <ClipboardCheck size={16} />
+                  ) : (
+                    <FileWarning size={16} />
+                  )}
+                  <p>
+                    <strong>Materi & Soal:</strong>{" "}
+                    {typeof data?.user_grade_result === "number"
+                      ? `Sudah dikerjakan ✓ | Nilai: ${data.user_grade_result}`
+                      : "Tanpa Keterangan ✕"}
+                  </p>
                 </div>
 
-                {/* Kehadiran */}
+                {/* Status Kehadiran */}
                 <div
-                  className="rounded-md px-3 py-2 text-sm cursor-pointer hover:opacity-80"
+                  className="rounded-md px-3 py-2 text-sm flex items-start gap-2 cursor-pointer hover:opacity-80"
                   style={{
                     backgroundColor:
                       attendanceData?.user_lecture_sessions_attendance_status ===
@@ -218,10 +250,19 @@ export default function MasjidLectureSessions() {
                     }
                   }}
                 >
-                  <strong>Status Kehadiran:</strong>{" "}
-                  {attendanceData?.user_lecture_sessions_attendance_status === 1
-                    ? "Hadir ✓"
-                    : "✕ Catat Kehadiran"}
+                  {attendanceData?.user_lecture_sessions_attendance_status ===
+                  1 ? (
+                    <ClipboardCheck size={16} />
+                  ) : (
+                    <FileWarning size={16} />
+                  )}
+                  <p>
+                    <strong>Status Kehadiran:</strong>{" "}
+                    {attendanceData?.user_lecture_sessions_attendance_status ===
+                    1
+                      ? "Hadir ✓"
+                      : "✕ Catat Kehadiran"}
+                  </p>
                 </div>
               </div>
             </>
@@ -340,6 +381,12 @@ export default function MasjidLectureSessions() {
               : "Silakan login terlebih dahulu untuk mencatat kehadiran Anda dalam kajian ini."
           }
         />
+        {showImageModal && data?.lecture_session_image_url && (
+          <ShowImageFull
+            url={data.lecture_session_image_url}
+            onClose={() => setShowImageModal(false)}
+          />
+        )}
       </div>
     </div>
   );

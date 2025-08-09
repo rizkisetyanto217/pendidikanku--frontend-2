@@ -10,8 +10,8 @@ import AttendanceModal from "./components/AttendanceModal";
 import FormattedDate from "@/constants/formattedDate";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
 
-// =====================
 interface LectureSession {
   lecture_session_id: string;
   lecture_session_title: string;
@@ -30,6 +30,7 @@ export default function MasjidInformationLectureSessions() {
   const queryClient = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const [showModal, setShowModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const { lecture_session_slug, slug } = useParams<{
     slug: string;
     lecture_session_slug: string;
@@ -63,9 +64,9 @@ export default function MasjidInformationLectureSessions() {
     <div className="pb-24 max-w-2xl mx-auto">
       <PageHeaderUser
         title="Informasi Kajian"
-        onBackClick={() => {
-          navigate(`/masjid/${slug}/soal-materi/${lecture_session_slug}`);
-        }}
+        onBackClick={() =>
+          navigate(`/masjid/${slug}/soal-materi/${lecture_session_slug}`)
+        }
       />
 
       {isLoading ? (
@@ -79,7 +80,6 @@ export default function MasjidInformationLectureSessions() {
             color: theme.black1,
           }}
         >
-          {/* Gambar Kajian */}
           <div
             className="w-full md:w-1/3 aspect-[4/5] md:aspect-auto md:h-auto overflow-hidden"
             style={{
@@ -90,12 +90,12 @@ export default function MasjidInformationLectureSessions() {
             <ShimmerImage
               src={info.gambar ? decodeURIComponent(info.gambar) : undefined}
               alt="Gambar Kajian"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
               shimmerClassName="rounded"
+              onClick={() => setShowImageModal(true)}
             />
           </div>
 
-          {/* Informasi Kajian */}
           <div className="flex-1 p-4 space-y-2 text-sm">
             <div>
               <strong style={{ color: theme.black1 }}>Materi:</strong>{" "}
@@ -127,7 +127,6 @@ export default function MasjidInformationLectureSessions() {
               />
             </div>
 
-            {/* 🧾 Ringkasan */}
             <div className="flex flex-col gap-3 mt-4">
               <div
                 className="rounded-md px-3 py-2 text-sm"
@@ -184,6 +183,13 @@ export default function MasjidInformationLectureSessions() {
             />
           </div>
         </div>
+      )}
+
+      {showImageModal && info.gambar && (
+        <ShowImageFull
+          url={info.gambar}
+          onClose={() => setShowImageModal(false)}
+        />
       )}
     </div>
   );

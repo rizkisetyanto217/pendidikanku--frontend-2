@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 export const DKMMobileDataSidebar: SidebarItem[] = [
-  { text: "Beranda", icon: <BeakerIcon />, to: "/dkm" },
+  // { text: "Beranda", icon: <BeakerIcon />, to: "/dkm" },
   {
     text: "Profil",
     icon: <LayoutDashboardIcon />,

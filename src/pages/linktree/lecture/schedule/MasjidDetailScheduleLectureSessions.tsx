@@ -1,18 +1,20 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { ArrowLeft } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import FormattedDate from "@/constants/formattedDate"; // ✅ Import komponen
+import FormattedDate from "@/constants/formattedDate";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
+import { useState } from "react";
 
 export default function MasjidDetailLecture() {
   const { id, slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const {
     data: kajian,
@@ -22,15 +24,13 @@ export default function MasjidDetailLecture() {
   } = useQuery({
     queryKey: ["detail-agenda", id],
     queryFn: async () => {
-      console.log("[🔁 FETCH] Meminta detail kajian dari API");
       const res = await axios.get(`/public/lecture-sessions-u/by-id/${id}`);
-      console.log("[🔁 RESPONSE] Detail kajian:", res.data);
       return res.data;
     },
     enabled: !!id,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000, // cache 5 menit
+    staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) return <p className="p-4">Memuat data...</p>;
@@ -43,7 +43,6 @@ export default function MasjidDetailLecture() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Header */}
       <PageHeaderUser
         title="Detail Kajian"
         onBackClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
@@ -57,7 +56,7 @@ export default function MasjidDetailLecture() {
         }}
       >
         <div className="md:flex md:gap-6">
-          {/* Gambar Kajian - tanpa padding */}
+          {/* Gambar Kajian */}
           <div className="w-full md:w-1/2 aspect-[3/4] md:aspect-auto md:h-[420px] rounded-xl overflow-hidden">
             <ShimmerImage
               src={
@@ -66,14 +65,14 @@ export default function MasjidDetailLecture() {
                   : undefined
               }
               alt={kajian.lecture_session_title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
               shimmerClassName="rounded"
+              onClick={() => setShowImageModal(true)}
             />
           </div>
 
-          {/* Informasi & Keterangan - tetap pakai padding */}
+          {/* Info */}
           <div className="w-full md:w-1/2 space-y-4 p-4">
-            {/* Informasi Kajian */}
             <div>
               <h2
                 className="text-base font-semibold"
@@ -104,7 +103,6 @@ export default function MasjidDetailLecture() {
               </ul>
             </div>
 
-            {/* Keterangan */}
             <div>
               <h2
                 className="text-base font-semibold"
@@ -123,6 +121,14 @@ export default function MasjidDetailLecture() {
           </div>
         </div>
       </div>
+
+      {/* Full Image Modal */}
+      {showImageModal && kajian.lecture_session_image_url && (
+        <ShowImageFull
+          url={kajian.lecture_session_image_url}
+          onClose={() => setShowImageModal(false)}
+        />
+      )}
     </div>
   );
 }

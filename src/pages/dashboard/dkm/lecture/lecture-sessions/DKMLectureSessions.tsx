@@ -18,6 +18,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ tambahkan
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import { useState } from "react";
 import ConfirmModal from "@/components/common/home/ConfirmModal";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
 
 interface LectureSession {
   lecture_session_id: string;
@@ -49,6 +50,7 @@ export default function DKMLectureSessions() {
     isOpen: false,
     data: null,
   });
+  const [showImageModal, setShowImageModal] = useState<string | null>(null);
 
   // console.log("👤 Current user:", user);
   // console.log("🏢 Masjid ID:", masjidId);
@@ -104,12 +106,17 @@ export default function DKMLectureSessions() {
         <ShimmerImage
           src={session.lecture_session_image_url}
           alt="Kajian"
-          className="w-12 h-12 object-cover rounded"
+          className="w-12 h-12 object-cover rounded cursor-pointer"
           shimmerClassName="rounded"
+          onClick={(e) => {
+            e.stopPropagation(); // ⛔️ stop bubbling ke row
+            setShowImageModal(session.lecture_session_image_url!);
+          }}
         />
       ) : (
         <div className="w-12 h-12" />
       ),
+
       <span className="font-medium">{session.lecture_session_title}</span>,
       session.lecture_title,
       <FormattedDate value={session.lecture_session_start_time} />,
@@ -196,6 +203,12 @@ export default function DKMLectureSessions() {
                 setConfirmDeleteModal({ isOpen: false, data: null }),
             });
           }}
+        />
+      )}
+      {showImageModal && (
+        <ShowImageFull
+          url={showImageModal}
+          onClose={() => setShowImageModal(null)}
         />
       )}
     </>

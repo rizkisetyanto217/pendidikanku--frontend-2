@@ -1,12 +1,14 @@
 import { SidebarLink } from "./SidebarLink";
 import clsx from "clsx";
+import { colors } from "@/constants/colorsThema";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 
 export interface SidebarItem {
   text: string;
   icon?: React.ReactNode;
   to?: string;
-  children?: SidebarItem[]; // untuk submenu
-  activeBasePath?: string | string[]; // ✅ support array
+  children?: SidebarItem[];
+  activeBasePath?: string | string[];
 }
 
 interface SidebarProps {
@@ -22,27 +24,31 @@ export default function Sidebar({
   isOpen,
   onClose,
 }: SidebarProps) {
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+
   if (isMobile && !isOpen) return null;
 
   const sidebarContent = (
     <aside
       className={clsx(
         "py-8 flex flex-col items-center space-y-6",
-        isMobile ? "w-64 h-full animate-slide-in-left" : "w-28",
-        "bg-teal-100 dark:bg-teal-900"
+        isMobile ? "w-64 h-full animate-slide-in-left" : "w-28"
       )}
-      onClick={(e) => isMobile && e.stopPropagation()} // cegah close saat klik sidebar
+      style={{ backgroundColor: theme.primary2 }}
+      onClick={(e) => isMobile && e.stopPropagation()}
     >
-      <h1 className="text-xs font-bold text-blue-900 dark:text-blue-200">
-        MasjidKu
+      <h1 className="text-xl font-bold" style={{ color: theme.quaternary }}>
+        Masjid
       </h1>
+
       {items.map((item) => (
         <SidebarLink
           key={item.to}
           text={item.text}
           icon={item.icon}
           to={item.to!}
-          activeBasePath={item.activeBasePath} // ✅ pass prop
+          activeBasePath={item.activeBasePath}
         />
       ))}
     </aside>

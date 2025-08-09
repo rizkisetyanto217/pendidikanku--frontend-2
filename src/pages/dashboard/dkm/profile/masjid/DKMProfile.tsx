@@ -8,6 +8,8 @@ import CommonButton from "@/components/common/main/CommonButton";
 import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
+import { useState } from "react";
 
 interface Masjid {
   masjid_id: string;
@@ -44,6 +46,7 @@ export default function ProfilMasjid() {
 
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
   const masjidId = user?.masjid_admin_ids?.[0];
+  const [showImageModal, setShowImageModal] = useState<string | null>(null);
 
   const { data: masjid, isLoading: isLoadingMasjid } = useQuery<Masjid>({
     queryKey: ["masjid", masjidId],
@@ -96,6 +99,7 @@ export default function ProfilMasjid() {
                   alt={masjid.masjid_name}
                   className="w-full md:w-60 h-40 object-cover rounded-md"
                   shimmerClassName="rounded-md"
+                  onClick={() => setShowImageModal(masjid.masjid_image_url)}
                 />
                 <div className="flex-1 space-y-1">
                   <h2
@@ -256,6 +260,9 @@ export default function ProfilMasjid() {
                         alt="Stempel"
                         className="w-48 h-32 object-cover rounded-md border"
                         shimmerClassName="rounded-md"
+                        onClick={() =>
+                          setShowImageModal(profile.masjid_profile_stamp_url)
+                        }
                       />
                     ) : (
                       <div className="w-48 h-32 flex items-center justify-center rounded-md border text-xs text-gray-500 dark:text-gray-400">
@@ -272,6 +279,9 @@ export default function ProfilMasjid() {
                         alt="Logo"
                         className="w-48 h-32 object-cover rounded-md border"
                         shimmerClassName="rounded-md"
+                        onClick={() =>
+                          setShowImageModal(profile.masjid_profile_logo_url)
+                        }
                       />
                     ) : (
                       <div className="w-48 h-32 flex items-center justify-center rounded-md border text-xs text-gray-500 dark:text-gray-400">
@@ -290,6 +300,11 @@ export default function ProfilMasjid() {
                         alt="TTD Ketua DKM"
                         className="w-48 h-32 object-cover rounded-md border"
                         shimmerClassName="rounded-md"
+                        onClick={() =>
+                          setShowImageModal(
+                            profile.masjid_profile_ttd_ketua_dkm_url
+                          )
+                        }
                       />
                     ) : (
                       <div className="w-48 h-32 flex items-center justify-center rounded-md border text-xs text-gray-500 dark:text-gray-400">
@@ -316,6 +331,12 @@ export default function ProfilMasjid() {
                 </div>
               </section>
             </>
+          )}
+          {showImageModal && (
+            <ShowImageFull
+              url={showImageModal}
+              onClose={() => setShowImageModal(null)}
+            />
           )}
         </div>
       </div>

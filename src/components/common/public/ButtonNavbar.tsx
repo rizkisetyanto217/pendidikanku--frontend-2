@@ -51,7 +51,8 @@ export default function BottomNavbar({
   const activeTab = (() => {
     if (currentPath.includes("/post")) return "post";
     // if (currentPath.includes("/donasi")) return "donasi";
-    if (currentPath.includes("/soal-materi")) return "materi";
+    if (currentPath.includes("/soal-materi") || currentPath.includes("/tema"))
+      return "materi";
     if (currentPath.includes("/aktivitas")) return "aktivitas";
     return "beranda";
   })();

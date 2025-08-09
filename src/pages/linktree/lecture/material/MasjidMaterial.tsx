@@ -39,14 +39,13 @@ interface LectureSessionAPIItem {
 interface LectureTheme {
   lecture_slug: string;
   lecture_title: string;
-  lecture_total_sessions: number;
+  total_lecture_sessions: number;
 }
 
-const monthData = [
-  { month: "Januari", total: 12 },
-  { month: "Februari", total: 12 },
-  { month: "Maret", total: 12 },
-];
+type MonthSummary = {
+  month: string;
+  total: number; // bukan _total
+};
 
 export default function MasjidMaterial() {
   const { slug } = useParams();
@@ -57,7 +56,6 @@ export default function MasjidMaterial() {
   const theme = isDark ? colors.dark : colors.light;
   const { data: currentUser } = useCurrentUser();
 
-  // ✅ Ambil tab dari URL atau state, default: 'terbaru'
   const urlTab = searchParams.get("tab");
   const stateTab = location.state?.from?.tab;
   const defaultTab = urlTab || stateTab || "terbaru";
@@ -65,17 +63,6 @@ export default function MasjidMaterial() {
   const [tab, setTab] = useState<string>(defaultTab);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const swiperRef = useRef<any>(null);
-
-  useEffect(() => {
-    console.log("📍 Tab aktif:", tab);
-  }, [tab]);
-
-  const handleTabChange = (val: string) => {
-    console.log("🔄 Tab diubah ke:", val);
-    setTab(val);
-    setSearchParams({ tab: val });
-    if (val === "tanggal") setSelectedMonth(null);
-  };
 
   const { data: kajianList = [], isLoading: loadingKajian } = useQuery<
     LectureSessionAPIItem[]
@@ -87,7 +74,6 @@ export default function MasjidMaterial() {
         `/public/lecture-sessions-u/soal-materi/${slug}`,
         { headers }
       );
-      console.log("📦 Data kajian:", res.data);
       return res.data?.data ?? [];
     },
     enabled: !!slug,
@@ -99,13 +85,32 @@ export default function MasjidMaterial() {
     queryKey: ["lectureThemesBySlug", slug],
     queryFn: async () => {
       const res = await axios.get(`/public/lectures/by-masjid-slug/${slug}`);
-      console.log("📦 Data tema kajian:", res.data);
       return res.data?.data ?? [];
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+  });
+
+  const { data: monthData = [] } = useQuery<MonthSummary[]>({
+    queryKey: ["lectureMonthData", slug],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/lecture-sessions-u/by-masjid-slug/${slug}/group-by-month`
+      );
+      const rawData = res.data?.data ?? {};
+      return Object.entries(rawData).map(([month, sessions]) => {
+        const m = month as string;
+        const s = sessions as any[];
+
+        return {
+          month: m,
+          total: s.length, // ✅ ini akan cocok dengan tipe `MonthSummary` di komponen `LectureMaterialMonthList`
+        };
+      });
+    },
+    enabled: !!slug && tab === "tanggal",
   });
 
   const mappedMaterial: LectureMaterialItem[] = kajianList.map((item) => ({
@@ -116,18 +121,14 @@ export default function MasjidMaterial() {
     location: item.lecture_session_place,
     time: (
       <FormattedDate value={item.lecture_session_start_time} fullMonth />
-    ) as unknown as string, // jika `LectureMaterialList` ekspektasi string
-    lecture_session_slug: item.lecture_session_slug, // ✅ tambahkan properti ini
+    ) as unknown as string,
+    lecture_session_slug: item.lecture_session_slug,
     status: item.lecture_session_approved_by_dkm_at ? "tersedia" : "proses",
     lectureId: item.lecture_session_lecture_id,
     gradeResult: item.user_grade_result,
     attendanceStatus: item.user_attendance_status,
-    imageUrl: item.lecture_session_image_url, // ⬅️ tambahkan ini
+    imageUrl: item.lecture_session_image_url,
   }));
-
-  kajianList.forEach((item) =>
-    console.log("imageUrl:", item.lecture_session_image_url)
-  );
 
   if (!slug) return null;
 
@@ -188,11 +189,7 @@ export default function MasjidMaterial() {
         >
           <SwiperSlide>
             <div
-              className="px-4"
-              style={{
-                maxHeight: "calc(100vh - 200px)", // sesuaikan dgn tinggi real header/footer
-                overflowY: "auto",
-              }}
+              style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
             >
               {loadingKajian ? (
                 <p className="p-4">Memuat data...</p>
@@ -204,11 +201,8 @@ export default function MasjidMaterial() {
 
           <SwiperSlide>
             <div
-              className="space-y-3 px-4"
-              style={{
-                maxHeight: "calc(100vh - 200px)",
-                overflowY: "auto",
-              }}
+              className="space-y-3"
+              style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
             >
               {loadingThemes ? (
                 <p>Memuat tema kajian...</p>
@@ -219,7 +213,7 @@ export default function MasjidMaterial() {
                     slug={slug}
                     lecture_slug={themeItem.lecture_slug}
                     lecture_title={themeItem.lecture_title}
-                    total_sessions={themeItem.lecture_total_sessions}
+                    total_lecture_sessions={themeItem.total_lecture_sessions}
                   />
                 ))
               )}
@@ -228,11 +222,7 @@ export default function MasjidMaterial() {
 
           <SwiperSlide>
             <div
-              className="px-4"
-              style={{
-                maxHeight: "calc(100vh - 200px)",
-                overflowY: "auto",
-              }}
+              style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
             >
               {selectedMonth ? (
                 <div className="space-y-3">
@@ -251,10 +241,9 @@ export default function MasjidMaterial() {
               ) : (
                 <LectureMaterialMonthList
                   data={monthData}
-                  onSelectMonth={(month) => {
-                    console.log("📆 Bulan dipilih:", month);
-                    setSelectedMonth(month);
-                  }}
+                  onSelectMonth={(month) =>
+                    navigate(`/masjid/${slug}/materi-bulan/${month}`)
+                  }
                 />
               )}
             </div>

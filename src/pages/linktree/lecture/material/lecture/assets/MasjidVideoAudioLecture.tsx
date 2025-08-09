@@ -9,7 +9,7 @@ interface Asset {
   lecture_sessions_asset_id: string;
   lecture_sessions_asset_title: string;
   lecture_sessions_asset_file_url: string;
-  lecture_sessions_asset_file_type: number;
+  lecture_sessions_asset_file_type: number; // 1=Video, 2=Audio
   lecture_sessions_asset_file_type_label: string;
 }
 
@@ -23,25 +23,28 @@ export default function MasjidVideoAudioLecture() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
-  const { id } = useParams(); // lecture_id
+
+  // ✅ ambil lecture_slug dari route
+  const { lecture_slug } = useParams<{ lecture_slug: string }>();
 
   const { data: groupedAssets = [], isLoading } = useQuery<GroupedAsset[]>({
-    queryKey: ["lecture-assets", id],
+    queryKey: ["lecture-assets-by-slug", lecture_slug, "1,2"],
     queryFn: async () => {
       const res = await axios.get(
-        "/public/lecture-sessions-assets/filter-by-lecture-id",
+        "/public/lecture-sessions-assets/filter-by-lecture-slug",
         {
-          params: { lecture_id: id, file_type: "1,2" },
+          params: { lecture_slug, file_type: "1,2" },
         }
       );
       return res.data?.data || [];
     },
-    enabled: !!id,
+    enabled: !!lecture_slug,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 
   const getYoutubeEmbed = (url: string) => {
+    // dukung: ?v=, /embed/, youtu.be/, tangani &t=
     const match = url?.match(/(?:v=|\/embed\/|\.be\/)([a-zA-Z0-9_-]{11})/);
     return match?.[1] || "";
   };

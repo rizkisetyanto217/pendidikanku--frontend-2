@@ -6,6 +6,7 @@ import { colors } from "@/constants/colorsThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import api from "@/lib/axios";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import toast from "react-hot-toast";
 
 interface MasjidData {
   masjid_instagram_url: string;
@@ -54,6 +55,8 @@ export default function DkmEditSosmedProfile() {
         });
         const data = res.data?.data;
 
+        console.log("✅ Data sosial media masjid berhasil diambil:", data);
+
         if (!data) {
           alert("Data masjid tidak ditemukan.");
           navigate("/dkm/profil-masjid");
@@ -92,18 +95,46 @@ export default function DkmEditSosmedProfile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!masjidId) return alert("ID masjid tidak ditemukan.");
+    if (!masjidId) return toast.error("ID masjid tidak ditemukan.");
 
     setSaving(true);
     try {
+      console.log("📤 Data yang akan dikirim:", form);
+
       const res = await api.put(`/api/a/masjids`, form, {
         withCredentials: true,
       });
-      alert(res.data.message || "Data berhasil disimpan.");
+
+      toast.success(
+        res.data?.message || "Data sosial media berhasil disimpan."
+      );
+
+      // 🔄 Refresh data masjid
+      const refresh = await api.get(`/public/masjids/verified/${masjidId}`);
+      const data = refresh.data?.data;
+
+      setForm({
+        masjid_instagram_url: data.masjid_instagram_url || "",
+        masjid_whatsapp_url: data.masjid_whatsapp_url || "",
+        masjid_youtube_url: data.masjid_youtube_url || "",
+        masjid_facebook_url: data.masjid_facebook_url || "",
+        masjid_tiktok_url: data.masjid_tiktok_url || "",
+        masjid_whatsapp_group_ikhwan_url:
+          data.masjid_whatsapp_group_ikhwan_url || "",
+        masjid_whatsapp_group_akhwat_url:
+          data.masjid_whatsapp_group_akhwat_url || "",
+      });
+
+      // Navigasi balik jika kamu ingin langsung ke halaman profil
       navigate("/dkm/profil-masjid");
-    } catch (err) {
-      console.error("❌ Gagal simpan:", err);
-      alert("Terjadi kesalahan saat menyimpan data.");
+    } catch (err: any) {
+      console.error(
+        "❌ Gagal menyimpan sosial media:",
+        err.response?.data || err
+      );
+      toast.error(
+        err.response?.data?.message || "Terjadi kesalahan saat menyimpan data."
+      );
     } finally {
       setSaving(false);
     }

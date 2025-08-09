@@ -9,7 +9,7 @@ interface Asset {
   lecture_sessions_asset_id: string;
   lecture_sessions_asset_title: string;
   lecture_sessions_asset_file_url: string;
-  lecture_sessions_asset_file_type: number;
+  lecture_sessions_asset_file_type: number; // 3,4,5,6 = dokumen
   lecture_sessions_asset_file_type_label: string;
 }
 
@@ -23,20 +23,20 @@ export default function MasjidDocsLecture() {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
-  const { id } = useParams(); // lecture_id
+
+  // ✅ ambil slug dari route
+  const { lecture_slug } = useParams<{ lecture_slug: string }>();
 
   const { data: groupedAssets = [], isLoading } = useQuery<GroupedAsset[]>({
-    queryKey: ["lecture-docs", id],
+    queryKey: ["lecture-docs-by-slug", lecture_slug, "3,4,5,6"],
     queryFn: async () => {
       const res = await axios.get(
-        "/public/lecture-sessions-assets/filter-by-lecture-id",
-        {
-          params: { lecture_id: id, file_type: "3,4,5,6" },
-        }
+        "/public/lecture-sessions-assets/filter-by-lecture-slug",
+        { params: { lecture_slug, file_type: "3,4,5,6" } }
       );
       return res.data?.data || [];
     },
-    enabled: !!id,
+    enabled: !!lecture_slug,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
@@ -78,6 +78,7 @@ export default function MasjidDocsLecture() {
               <div
                 key={asset.lecture_sessions_asset_id}
                 className="space-y-2 border-t pt-4"
+                style={{ borderColor: theme.silver2 }}
               >
                 <p className="text-sm font-medium">
                   {asset.lecture_sessions_asset_title || "Tanpa Judul"}

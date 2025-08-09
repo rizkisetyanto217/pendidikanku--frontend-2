@@ -4,90 +4,53 @@ import { useState } from "react";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
 
-const dummyPengurus = [
-  {
-    id: 1,
-    type: "pengurus",
-    role: "Ketua DKM",
-    name: "Bapak Hardi",
-    jabatan: "Ketua DKM",
-    sambutan:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-    aktivitas: "Menjadi pengajar tetap di Masjid daerah jabodetabek.",
-    lainnya: "Sudah menjadi ketua DKM sejak 2020.",
-  },
-  {
-    id: 2,
-    type: "pengurus",
-    role: "Bendahara",
-    name: "Ustadz Muhammad Yassir",
-    jabatan: "Bendahara",
-    sambutan: "Sambutan dari bendahara.",
-    aktivitas: "Mengelola keuangan masjid.",
-    lainnya: "Sudah menjadi bendahara sejak 2021.",
-  },
-  {
-    id: 3,
-    type: "pengurus",
-    role: "Sekretaris",
-    name: "Ustadz Taufiq",
-    jabatan: "Sekretaris",
-    sambutan: "Sambutan dari sekretaris.",
-    aktivitas: "Membantu pencatatan dan administrasi.",
-    lainnya: "Sudah menjadi sekretaris sejak 2022.",
-  },
-];
-
-const dummyPengajar = [
-  {
-    id: 1,
-    type: "pengajar",
-    title: "Kajian Tematik",
-    name: "Ustadz Firza, Lc",
-    bidang: "Ushul Fiqh",
-    sambutan:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-    pendidikan: [
-      "S1 Universitas Islam Madinah jurusan Hadist",
-      "S2 Universitas Islam Madinah jurusan Hadist",
-    ],
-    aktivitas: "Menjadi pengajar tetap di Masjid daerah jabodetabek.",
-  },
-  {
-    id: 2,
-    type: "pengajar",
-    title: "Kajian Aqidah",
-    name: "Ustadz Taufiq",
-    bidang: "Aqidah",
-    sambutan: "Contoh sambutan dari ustadz Taufiq.",
-    pendidikan: ["S1 UIN Jakarta", "S2 Universitas Al-Azhar"],
-    aktivitas: "Aktif sebagai pembina pengajian remaja masjid.",
-  },
-];
+interface Profile {
+  masjid_profile_teacher_dkm_id: string;
+  masjid_profile_teacher_dkm_name: string;
+  masjid_profile_teacher_dkm_role: string;
+  masjid_profile_teacher_dkm_description: string;
+  masjid_profile_teacher_dkm_message: string;
+  masjid_profile_teacher_dkm_image_url: string;
+  masjid_profile_teacher_dkm_created_at: string;
+}
 
 export default function DKMProfileDKMTeacher() {
   const { isMobile } = useResponsive();
   const navigate = useNavigate();
-  const [selectedDetail, setSelectedDetail] = useState<any>(null);
+  const [selectedDetail, setSelectedDetail] = useState<Profile | null>(null);
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  const handleSelect = (person: any) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["masjid-profile-teacher-dkm"],
+    queryFn: async () => {
+      const res = await axios.get(
+        "/api/a/masjid-profile-teacher-dkm/by-masjid-id"
+      );
+      console.log("📦 Data pengajar:", res.data.data);
+      return res.data.data as Profile[];
+    },
+  });
+
+  const handleSelect = (person: Profile) => {
     if (isMobile) {
-      navigate("/dkm/pengajar/edit/" + person.id);
+      navigate("/dkm/pengajar/edit/" + person.masjid_profile_teacher_dkm_id);
     } else {
       setSelectedDetail(person);
     }
   };
 
-  const renderPersonCard = (item: any, label?: string) => {
+  const renderPersonCard = (item: Profile) => {
     const isActive =
-      selectedDetail?.id === item.id && selectedDetail?.type === item.type;
+      selectedDetail?.masjid_profile_teacher_dkm_id ===
+      item.masjid_profile_teacher_dkm_id;
 
     return (
       <button
-        key={`${item.type}-${item.id}`}
+        key={item.masjid_profile_teacher_dkm_id}
         onClick={() => handleSelect(item)}
         className="w-full flex justify-between items-center p-3 rounded border mt-2"
         style={{
@@ -107,15 +70,29 @@ export default function DKMProfileDKMTeacher() {
         }}
       >
         <span className="flex flex-col items-start text-left">
-          <span className="font-medium">{label || item.title}</span>
+          <span className="font-medium">
+            {item.masjid_profile_teacher_dkm_role}
+          </span>
           <span className="text-sm" style={{ color: themeColors.silver2 }}>
-            {item.name}
+            {item.masjid_profile_teacher_dkm_name}
           </span>
         </span>
         <span className="text-lg">›</span>
       </button>
     );
   };
+
+  const pengurus = data?.filter((p) =>
+    ["ketua", "sekretaris", "bendahara", "dkm"].includes(
+      p.masjid_profile_teacher_dkm_role.toLowerCase()
+    )
+  );
+
+  const pengajar = data?.filter((p) =>
+    ["teacher", "pengajar", "ustadz"].includes(
+      p.masjid_profile_teacher_dkm_role.toLowerCase()
+    )
+  );
 
   return (
     <>
@@ -131,11 +108,11 @@ export default function DKMProfileDKMTeacher() {
           <div>
             <h2
               className="font-semibold text-lg"
-              style={{ color: themeColors.black1 }}
+              style={{ color: themeColors.primary }}
             >
               DKM Masjid
             </h2>
-            {dummyPengurus.map((item) => renderPersonCard(item, item.role))}
+            {pengurus?.map(renderPersonCard)}
           </div>
 
           <div className="pt-4">
@@ -145,7 +122,7 @@ export default function DKMProfileDKMTeacher() {
             >
               Pengajar
             </h3>
-            {dummyPengajar.map((item) => renderPersonCard(item))}
+            {pengajar?.map(renderPersonCard)}
           </div>
         </div>
 
@@ -160,56 +137,29 @@ export default function DKMProfileDKMTeacher() {
                   className="text-lg font-semibold"
                   style={{ color: themeColors.quaternary }}
                 >
-                  {selectedDetail.name}
+                  {selectedDetail.masjid_profile_teacher_dkm_name}
                 </h3>
 
                 <div
                   className="space-y-2 text-sm"
                   style={{ color: themeColors.black2 }}
                 >
-                  {selectedDetail.jabatan && (
-                    <div>
-                      <p className="font-semibold">Jabatan</p>
-                      <p>{selectedDetail.jabatan}</p>
-                    </div>
-                  )}
-
-                  {selectedDetail.bidang && (
-                    <div>
-                      <p className="font-semibold">Bidang Pengajaran</p>
-                      <p>{selectedDetail.bidang}</p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="font-semibold">Jabatan / Peran</p>
+                    <p>{selectedDetail.masjid_profile_teacher_dkm_role}</p>
+                  </div>
 
                   <div>
                     <p className="font-semibold">Sambutan</p>
-                    <p>{selectedDetail.sambutan}</p>
+                    <p>{selectedDetail.masjid_profile_teacher_dkm_message}</p>
                   </div>
-
-                  {selectedDetail.pendidikan?.length > 0 && (
-                    <div>
-                      <p className="font-semibold">Latar Belakang Pendidikan</p>
-                      <ul className="list-disc list-inside">
-                        {selectedDetail.pendidikan.map(
-                          (item: string, idx: number) => (
-                            <li key={idx}>{item}</li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  )}
 
                   <div>
-                    <p className="font-semibold">Aktivitas</p>
-                    <p>{selectedDetail.aktivitas}</p>
+                    <p className="font-semibold">Deskripsi</p>
+                    <p>
+                      {selectedDetail.masjid_profile_teacher_dkm_description}
+                    </p>
                   </div>
-
-                  {selectedDetail.lainnya && (
-                    <div>
-                      <p className="font-semibold">Lainnya</p>
-                      <p>{selectedDetail.lainnya}</p>
-                    </div>
-                  )}
                 </div>
               </>
             ) : (

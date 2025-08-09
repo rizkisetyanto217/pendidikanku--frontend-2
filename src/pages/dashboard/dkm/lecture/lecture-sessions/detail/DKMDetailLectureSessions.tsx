@@ -12,6 +12,7 @@ import ShimmerImage from "@/components/common/main/ShimmerImage";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 import ConfirmModal from "@/components/common/home/ConfirmModal";
 import { useState } from "react";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
 
 interface LectureSessionDetail {
   lecture_session_id: string;
@@ -36,6 +37,7 @@ export default function DKMDetailLectureSessions() {
   const location = useLocation();
   const navigate = useNavigate();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState<string | null>(null);
 
   const {
     data: session,
@@ -94,6 +96,7 @@ export default function DKMDetailLectureSessions() {
             alt="Poster Kajian"
             className="rounded-xl w-full h-auto object-cover aspect-[3/4]"
             shimmerClassName="rounded-xl"
+            onClick={() => setShowImageModal(session.lecture_session_image_url)}
           />
         </div>
 
@@ -192,6 +195,12 @@ export default function DKMDetailLectureSessions() {
           ))}
         </div>
       </div>
+      {showImageModal && (
+        <ShowImageFull
+          url={showImageModal}
+          onClose={() => setShowImageModal(null)}
+        />
+      )}
     </div>
   );
 }

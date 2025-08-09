@@ -6,31 +6,38 @@ interface ShimmerImageProps {
   className?: string;
   style?: React.CSSProperties;
   shimmerClassName?: string;
-  onDoubleClick?: (e: React.MouseEvent | React.TouchEvent) => void; // ✅ dukung keduanya
+  onClick?: (e: React.MouseEvent | React.TouchEvent) => void;
+  onDoubleClick?: (e: React.MouseEvent | React.TouchEvent) => void;
 }
 
 export default function ShimmerImage({
   src,
   alt = "image",
-  className,
-  style,
-  shimmerClassName,
+  className = "",
+  style = {},
+  shimmerClassName = "",
+  onClick,
   onDoubleClick,
 }: ShimmerImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const lastTapRef = useRef<number | null>(null);
-  const doubleTapDelay = 300; // ms
+  const doubleTapDelay = 300; // milliseconds
 
+  // Handler double tap untuk mobile
   const handleTouchEnd = (e: React.TouchEvent<HTMLImageElement>) => {
     const now = Date.now();
     if (lastTapRef.current && now - lastTapRef.current < doubleTapDelay) {
       e.preventDefault();
-      onDoubleClick?.(e); // ✅ trigger
+      onDoubleClick?.(e);
       lastTapRef.current = null;
     } else {
       lastTapRef.current = now;
     }
+  };
+
+  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+    onClick?.(e);
   };
 
   return (
@@ -49,14 +56,16 @@ export default function ShimmerImage({
           alt={alt}
           onLoad={() => setLoaded(true)}
           onError={() => setError(true)}
+          onClick={handleClick}
           onDoubleClick={(e) => {
             e.preventDefault();
             onDoubleClick?.(e);
           }}
-          onTouchEnd={handleTouchEnd} // ✅ mobile double tap
+          onTouchEnd={handleTouchEnd}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
+          style={{ cursor: onClick || onDoubleClick ? "pointer" : "default" }}
         />
       )}
     </div>

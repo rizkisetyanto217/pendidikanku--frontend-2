@@ -14,6 +14,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser"; // ⬅️ pakai cookie
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import { useState } from "react";
 import ConfirmModal from "@/components/common/home/ConfirmModal";
+import ShowImageFull from "@/components/pages/home/ShowImageFull";
 
 interface Lecture {
   lecture_id: string;
@@ -44,14 +45,16 @@ export default function DKMLecture() {
   const theme = isDark ? colors.dark : colors.light;
 
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
-  const masjidId = user?.masjid_admin_ids?.[0]; // ⬅️ ambil dari cookie
-  const [confirmDeleteModal, setConfirmDeleteModal] = useState<{
-    isOpen: boolean;
-    data: Lecture | null;
-  }>({
+  const masjidId = user?.masjid_admin_ids?.[0];
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState({
     isOpen: false,
-    data: null,
+    data: null as Lecture | null,
   });
+
+  const [showImageModal, setShowImageModal] = useState<{
+    url: string;
+    isOpen: boolean;
+  }>({ url: "", isOpen: false });
 
   const {
     data: lectures,
@@ -63,7 +66,7 @@ export default function DKMLecture() {
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const res = await axios.get(`/api/a/lectures/by-masjid`, {
-        withCredentials: true, // ⬅️ kirim cookie
+        withCredentials: true,
       });
       return res.data.data;
     },
@@ -82,12 +85,24 @@ export default function DKMLecture() {
   const rows =
     lectures?.map((lecture, i) => [
       i + 1,
-      <ShimmerImage
-        src={lecture.lecture_image_url ?? ""}
-        alt="Gambar Kajian"
-        className="w-12 h-12 object-cover rounded"
-        shimmerClassName="rounded"
-      />,
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          if (lecture.lecture_image_url) {
+            setShowImageModal({
+              url: decodeURIComponent(lecture.lecture_image_url),
+              isOpen: true,
+            });
+          }
+        }}
+      >
+        <ShimmerImage
+          src={lecture.lecture_image_url ?? ""}
+          alt="Gambar Kajian"
+          className="w-12 h-12 object-cover rounded cursor-pointer"
+          shimmerClassName="rounded"
+        />
+      </div>,
       <span className="font-medium">{lecture.lecture_title}</span>,
       lecture.total_lecture_sessions,
       <FormattedDate value={lecture.lecture_created_at} />,
@@ -137,6 +152,16 @@ export default function DKMLecture() {
           }
         />
       )}
+
+      {/* Modal Gambar */}
+      {showImageModal.isOpen && (
+        <ShowImageFull
+          url={showImageModal.url}
+          onClose={() => setShowImageModal({ url: "", isOpen: false })}
+        />
+      )}
+
+      {/* Modal Konfirmasi Hapus */}
       {confirmDeleteModal.data && (
         <ConfirmModal
           isOpen={confirmDeleteModal.isOpen}
@@ -148,9 +173,7 @@ export default function DKMLecture() {
           onConfirm={() => {
             if (!confirmDeleteModal.data) return;
             deleteLecture(confirmDeleteModal.data.lecture_id, {
-              onSuccess: () => {
-                toast.success("Berhasil menghapus kajian");
-              },
+              onSuccess: () => toast.success("Berhasil menghapus kajian"),
               onError: () => toast.error("Gagal menghapus kajian"),
               onSettled: () =>
                 setConfirmDeleteModal({ isOpen: false, data: null }),

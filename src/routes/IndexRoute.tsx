@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Layout
 import DkmLayout from "@/layout/DKMLayout";
@@ -125,6 +125,10 @@ import MasjidInformationLecture from "@/pages/linktree/lecture/material/lecture/
 import MasjidSholat from "@/pages/linktree/home/sholat/MasjidSholat";
 import MasjidAllMyLecture from "@/pages/linktree/activity/my-activity/MasjidAllMyLecture";
 import MasjidMyNotesLectureSessions from "@/pages/linktree/lecture/material/lecture-sessions/arsip/MasjidMyNotesLectureSessions";
+import DKMEditProfileDKMTeacher from "@/pages/dashboard/dkm/profile/dkm/DKMEditProfileDKMTeacher";
+import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
+import MasjidMaterialByMonth from "@/pages/linktree/lecture/material/lecture-sessions-by-month/MasjidLectureSessionsByMonth";
+import MasjidDetailSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidDetailSummaryLecture";
 
 export default function AppRoutes() {
   return (
@@ -146,7 +150,6 @@ export default function AppRoutes() {
           </Route>
           {/* Home  */}
           <Route path="sholat" element={<MasjidSholat />} />
-
           {/* Donasi */}
           <Route path="donasi" element={<MasjidDonationMasjid />} />
           <Route
@@ -154,14 +157,11 @@ export default function AppRoutes() {
             element={<MasjidDonationConfirmDonation />}
           />
           <Route path="donasi/pesan" element={<MasjidDonationMotivation />} />
-
           {/* Laporan Keuangan */}
           <Route path="keuangan" element={<MasjidReportFinansial />} />
-
           {/* Jadwal Kajian dan Detail */}
           <Route path="jadwal-kajian" element={<MasjidScheduleLecture />} />
           <Route path="jadwal-kajian/:id" element={<MasjidDetailLecture />} />
-
           {/* Soal & Materi Kajian */}
           <Route path="soal-materi" element={<MasjidMaterial />} />
           <Route
@@ -200,44 +200,62 @@ export default function AppRoutes() {
             path="soal-materi/:lecture_session_slug/dokumen"
             element={<MasjidDocsLectureSessions />}
           />
-
+          {/* Materi per Bulan */}
+          <Route
+            path="materi-bulan/:month"
+            element={<MasjidMaterialByMonth />}
+          />
           {/* Tema */}
           <Route
             path="tema/:lecture_slug"
             element={<MasjidLectureMaterial />}
           />
           <Route
-            path="tema/:id/informasi"
+            path="tema/:lecture_slug/informasi"
             element={<MasjidInformationLecture />}
           />
           <Route
-            path="tema/:id/certificate/:user_exam_id"
+            path="tema/:lecture_slug/certificate/:user_exam_id"
             element={<MasjidCertificateLecture />}
           />
-          <Route path="tema/:id/dokumen" element={<MasjidDocsLecture />} />
           <Route
-            path="tema/:id/video-audio"
+            path="tema/:lecture_slug/dokumen"
+            element={<MasjidDocsLecture />}
+          />
+          <Route
+            path="tema/:lecture_slug/video-audio"
             element={<MasjidVideoAudioLecture />}
           />
-          <Route path="tema/:id/ujian" element={<MasjidExamLecture />} />
           <Route
-            path="tema/:id/ujian/hasil"
+            path="tema/:lecture_slug/ujian"
+            element={<MasjidExamLecture />}
+          />
+          <Route
+            path="tema/:lecture_slug/ujian/hasil"
             element={<MasjidResultExamLecture />}
           />
-          <Route path="tema/:id/soal" element={<MasjidQuizLecture />} />
           <Route
-            path="tema/:id/materi-lengkap"
+            path="tema/:lecture_slug/soal"
+            element={<MasjidQuizLecture />}
+          />
+          <Route
+            path="tema/:lecture_slug/materi-lengkap"
             element={<MasjidFullTransciptLecture />}
           />
-          <Route path="tema/:id/ringkasan" element={<MasjidSummaryLecture />} />
-
+          <Route
+            path="tema/:lecture_slug/ringkasan"
+            element={<MasjidSummaryLecture />}
+          />
+          <Route
+            path="tema/:lecture_slug/ringkasan/detail"
+            element={<MasjidDetailSummaryLecture />}
+          />{" "}
+          {/* detail */}
           <Route path="post" element={<MasjidPost />} />
           <Route path="post/:postId" element={<MasjidDetailPost />} />
           <Route path="motivation/:id" element={<MasjidDetailDonation />} />
-
           {/* Activity  */}
           <Route path="aktivitas" element={<MasjidMyActivity />} />
-
           {/* Menu Activity  */}
           <Route
             path="aktivitas/kajian-saya"
@@ -245,7 +263,6 @@ export default function AppRoutes() {
           />
           <Route path="aktivitas/donasi-saya" element={<MasjidMyDonation />} />
           <Route path="aktivitas/statistik-saya" element={<MasjidMyStats />} />
-
           {/* Nested setting layout */}
           <Route path="aktivitas/pengaturan" element={<MasjidSettingLayout />}>
             <Route path="menu" element={<MasjidSettingMenu />} />
@@ -262,7 +279,8 @@ export default function AppRoutes() {
       {/* ==== Protected Routes - DKM ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
         <Route path="/dkm" element={<DkmLayout />}>
-          <Route index element={<DashboardAdminDkm />} />
+          {/* <Route index element={<DashboardAdminDkm />} /> */}
+          <Route index element={<Navigate to="profil-masjid" replace />} />
 
           {/* Profil Masjid */}
           <Route path="profil-masjid" element={<DKMProfilMasjidParent />}>
@@ -276,7 +294,12 @@ export default function AppRoutes() {
           </Route>
           <Route path="profil-dkm" element={<DKMProfilMasjidParent />}>
             <Route index element={<ProfileDKMPengajar />} />
+            {/* 🆕 Edit Pengajar */}
           </Route>
+          <Route
+            path="pengajar/edit/:id"
+            element={<DKMEditProfileDKMTeacher />}
+          />
 
           <Route path="kajian" element={<DKMLectureParent />}>
             <Route index element={<DKMLectureSessions />} />
@@ -413,6 +436,10 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Route>
+      {/*  */}
+      {/*  */}
+      {/* === Public Routes Masjidku === */}
+      <Route path="/masjidku" index element={<MasjidkuHome />} />
       {/* ==== Protected Routes - Author ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["author"]} />}>
         <Route path="/author" element={<AuthorLayout />}>
