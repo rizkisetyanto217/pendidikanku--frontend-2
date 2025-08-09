@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import AuthLayout from "@/layout/AuthLayout";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -13,6 +13,7 @@ declare global {
 }
 
 export default function Login() {
+  const { slug } = useParams(); // ⬅️ slug dari URL
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -37,11 +38,15 @@ export default function Login() {
         navigate("/teacher");
         break;
       case "user":
-        navigate("/masjid/masjid-baitussalam");
+      default: {
+        // ⬅️ arahkan ke masjid sesuai slug kalau ada
+        const target = slug ? `/masjid/${slug}` : "/masjid/masjid-baitussalam";
+        navigate(target, { replace: true });
         break;
-      default:
-        navigate("/login");
+      }
     }
+    // Jika kamu butuh refresh state auth global berbasis cookie,
+    // boleh pakai reload. Kalau sudah pakai state management, hapus baris ini.
     window.location.reload();
   };
 

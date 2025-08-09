@@ -141,6 +141,9 @@ export default function AppRoutes() {
       // 2. Dengan layout untuk halaman lainnya
       <Route path="/" element={<MasjidLayout />}>
         <Route path="masjid/:slug">
+          {/* ==== Public Routes ==== */}
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           {/* Profil Masjid */}
           <Route path="profil">
             <Route index element={<MasjidProfile />} />
@@ -235,7 +238,7 @@ export default function AppRoutes() {
             element={<MasjidResultExamLecture />}
           />
           <Route
-            path="tema/:lecture_slug/soal"
+            path="tema/:lecture_slug/latihan-soal"
             element={<MasjidQuizLecture />}
           />
           <Route

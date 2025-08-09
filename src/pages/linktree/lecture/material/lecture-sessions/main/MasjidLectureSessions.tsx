@@ -290,8 +290,12 @@ export default function MasjidLectureSessions() {
                   setShowLoginPrompt(true);
                 } else {
                   navigate(
-                    `/masjid/${slug}/soal-materi/${lecture_session_slug}/${item.path}`,
-                    { state: { fromTab: tab } }
+                    `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal`,
+                    {
+                      state: {
+                        backTo: `/masjid/${slug}/soal-materi/${lecture_session_slug}`, // <- balik ke sesi
+                      },
+                    }
                   );
                 }
               }}

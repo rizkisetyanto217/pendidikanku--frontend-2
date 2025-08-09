@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -23,14 +23,11 @@ import {
   XCircle,
 } from "lucide-react";
 
-// =====================
-// ✅ Interface lokal
-// =====================
+/* ---------------- Types ---------------- */
 interface Teacher {
   id: string;
   name: string;
 }
-
 interface Lecture {
   lecture_id: string;
   lecture_slug: string;
@@ -40,19 +37,26 @@ interface Lecture {
   lecture_is_certificate_generated: boolean;
   lecture_teachers: Teacher[];
 }
-
-interface LectureSession {
+interface SessionAPI {
   lecture_session_id: string;
   lecture_session_title: string;
   lecture_session_slug: string;
   lecture_session_description: string;
   lecture_session_image_url: string;
-
   lecture_session_start_time: string;
+  lecture_session_end_time: string;
   lecture_session_place: string;
-  UserName: string;
+  lecture_title?: string;
+  user_grade_result?: number | null;
+  user_attendance_status?: number | null;
+}
+interface SessionsBuckets {
+  lecture: Lecture;
+  upcoming: SessionAPI[];
+  finished: SessionAPI[];
 }
 
+/* ---------------- Component ---------------- */
 export default function MasjidLectureMaterial() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -62,14 +66,12 @@ export default function MasjidLectureMaterial() {
     slug: string;
   }>();
   const { data: currentUser } = useCurrentUser();
-  const location = useLocation();
   const [swiperInstance, setSwiperInstance] = useState<SwiperCore>();
-  const [tab, setTab] = useState("navigasi"); // nilai: "navigasi" atau "kajian"
+  const [tab, setTab] = useState<"navigasi" | "kajian">("navigasi");
 
-  // 🔁 Dapatkan data tema kajian
-  // 🔁 Dapatkan data tema kajian
+  /* ---------- Lecture (tetap) ---------- */
   const {
-    data: lectureData,
+    data: lectureWrap,
     isLoading: loadingLecture,
     isError: errorLecture,
   } = useQuery<{
@@ -85,49 +87,150 @@ export default function MasjidLectureMaterial() {
       const res = await axios.get(`/public/lectures/by-slug/${lecture_slug}`, {
         headers,
       });
-      console.log("📦 Data tema kajian:", res.data);
       return res.data?.data;
     },
     enabled: !!lecture_slug,
     staleTime: 5 * 60 * 1000,
   });
+  const lecture = lectureWrap?.lecture;
+  const userProgress = lectureWrap?.user_progress;
 
-  const lecture = lectureData?.lecture;
-  const userProgress = lectureData?.user_progress;
-
+  /* ---------- Sessions buckets (baru) ---------- */
   const {
-    data: sessions,
-    isLoading: loadingSessions,
-    isError: errorSessions,
-  } = useQuery<LectureSession[]>({
-    queryKey: ["lecture-sessions", lecture_slug],
+    data: buckets,
+    isLoading: loadingBuckets,
+    isError: errorBuckets,
+  } = useQuery<SessionsBuckets>({
+    queryKey: ["lecture-sessions-all", lecture_slug, currentUser?.id],
     queryFn: async () => {
+      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
       const res = await axios.get(
-        `/public/lectures/${lecture_slug}/lecture-sessions-by-slug`
+        `/public/lecture-sessions-u/by-lecture-slug/${lecture_slug}/all`,
+        { headers }
       );
-      return res.data?.data ?? [];
+      return res.data;
     },
     enabled: !!lecture_slug,
     staleTime: 5 * 60 * 1000,
   });
 
+  const upcoming = buckets?.upcoming ?? [];
+  const finished = buckets?.finished ?? [];
+
+  /* ---------- Render helpers ---------- */
+  const SessionCard = (s: SessionAPI) => (
+    <div
+      key={
+        s.lecture_session_id ||
+        `${s.lecture_session_slug}-${s.lecture_session_start_time}`
+      }
+      onClick={() =>
+        navigate(`/masjid/${slug}/soal-materi/${s.lecture_session_slug}`, {
+          state: { fromTab: tab, lectureSlug: lecture_slug },
+        })
+      }
+      className="p-4 rounded-lg shadow cursor-pointer hover:opacity-90 transition"
+      style={{ backgroundColor: theme.white1 }}
+    >
+      <h3 className="font-semibold" style={{ color: theme.black1 }}>
+        {s.lecture_session_title}
+      </h3>
+
+      <div
+        className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
+        style={{ color: theme.silver2 }}
+      >
+        <FormattedDate value={s.lecture_session_start_time} />
+        <span>•</span>
+        <span>📍 {s.lecture_session_place || "-"}</span>
+        {typeof s.user_attendance_status === "number" && (
+          <>
+            <span>•</span>
+            <span>
+              Hadir: {s.user_attendance_status === 1 ? "Ya" : "Tidak"}
+            </span>
+          </>
+        )}
+        {typeof s.user_grade_result === "number" && (
+          <>
+            <span>•</span>
+            <span>Nilai: {s.user_grade_result}</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const SessionsAll = () => {
+    if (loadingBuckets) {
+      return (
+        <p className="text-sm" style={{ color: theme.silver2 }}>
+          Memuat sesi kajian...
+        </p>
+      );
+    }
+    if (errorBuckets) {
+      return <p className="text-sm text-red-500">Gagal memuat daftar sesi.</p>;
+    }
+    if (!upcoming.length && !finished.length) {
+      return (
+        <p className="text-sm" style={{ color: theme.silver2 }}>
+          Belum ada sesi.
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-5">
+        {!!upcoming.length && (
+          <section>
+            <h4
+              className="text-sm font-semibold mb-2"
+              style={{ color: theme.black1 }}
+            >
+              Mendatang
+            </h4>
+            <div className="space-y-3">{upcoming.map(SessionCard)}</div>
+          </section>
+        )}
+
+        {!!upcoming.length && !!finished.length && (
+          <div
+            className="h-px my-1"
+            style={{ backgroundColor: theme.silver1 }}
+          />
+        )}
+
+        {!!finished.length && (
+          <section>
+            <h4
+              className="text-sm font-semibold mb-2"
+              style={{ color: theme.black1 }}
+            >
+              Selesai
+            </h4>
+            <div className="space-y-3">{finished.map(SessionCard)}</div>
+          </section>
+        )}
+      </div>
+    );
+  };
+
+  /* ---------- UI ---------- */
   return (
     <>
       <PageHeaderUser
         title="Tema Kajian Detail"
-        onBackClick={() => {
-          navigate(`/masjid/${slug}/soal-materi?tab=tema`);
-        }}
+        onBackClick={() => navigate(`/masjid/${slug}/soal-materi?tab=tema`)}
       />
+
       <Tabs
         value={tab}
         onChange={(val) => {
-          setTab(val);
-          if (val === "navigasi") {
-            swiperInstance?.slideTo(0);
-          } else if (val === "kajian") {
-            swiperInstance?.slideTo(1);
-          }
+          const v = val as "navigasi" | "kajian";
+          setTab(v);
+          if (v === "navigasi") swiperInstance?.slideTo(0);
+          else swiperInstance?.slideTo(1);
         }}
         tabs={[
           { label: "Navigasi", value: "navigasi" },
@@ -135,18 +238,16 @@ export default function MasjidLectureMaterial() {
         ]}
       />
 
-      {/* // Ganti TabsContent => SwiperSlide */}
       <Swiper
         onSwiper={setSwiperInstance}
-        onSlideChange={(swiper) => {
-          const newTab = swiper.activeIndex === 0 ? "navigasi" : "kajian";
-          setTab(newTab);
-        }}
+        onSlideChange={(sw) =>
+          setTab(sw.activeIndex === 0 ? "navigasi" : "kajian")
+        }
         initialSlide={tab === "kajian" ? 1 : 0}
         spaceBetween={50}
         slidesPerView={1}
       >
-        {/* =============== 🧭 Navigasi Utama =============== */}
+        {/* ======= Navigasi ======= */}
         <SwiperSlide>
           <div
             className="rounded-lg p-4 shadow mt-4"
@@ -160,7 +261,9 @@ export default function MasjidLectureMaterial() {
             </h2>
 
             {loadingLecture ? (
-              <p className="text-sm text-silver-400">Memuat informasi...</p>
+              <p className="text-sm" style={{ color: theme.silver2 }}>
+                Memuat informasi...
+              </p>
             ) : errorLecture || !lecture ? (
               <p className="text-red-500 text-sm">Gagal memuat data.</p>
             ) : (
@@ -182,7 +285,6 @@ export default function MasjidLectureMaterial() {
                       {lecture.lecture_title}
                     </p>
                   </div>
-
                   <div className="flex items-start gap-2">
                     <User
                       size={18}
@@ -191,7 +293,7 @@ export default function MasjidLectureMaterial() {
                     <p>
                       <strong style={{ color: theme.black1 }}>Pengajar:</strong>{" "}
                       {Array.isArray(lecture?.lecture_teachers) &&
-                      lecture.lecture_teachers.length > 0
+                      lecture.lecture_teachers.length
                         ? [
                             ...new Set(
                               lecture.lecture_teachers.map((t) => t.name)
@@ -200,7 +302,6 @@ export default function MasjidLectureMaterial() {
                         : "-"}
                     </p>
                   </div>
-
                   <div className="flex items-start gap-2">
                     <CalendarDays
                       size={18}
@@ -211,7 +312,6 @@ export default function MasjidLectureMaterial() {
                       {lecture.lecture_description || "-"}
                     </p>
                   </div>
-
                   <div className="flex items-start gap-2">
                     <CalendarCheck
                       size={18}
@@ -222,7 +322,6 @@ export default function MasjidLectureMaterial() {
                       Mei 2024 – Sekarang
                     </p>
                   </div>
-
                   <div className="flex items-start gap-2">
                     <MapPin
                       size={18}
@@ -230,11 +329,11 @@ export default function MasjidLectureMaterial() {
                     />
                     <p>
                       <strong style={{ color: theme.black1 }}>Lokasi:</strong>{" "}
-                      Masjid At-Taqwa, Ciracas
+                      Masjid At‑Taqwa, Ciracas
                     </p>
                   </div>
 
-                  {userProgress && (
+                  {!!userProgress && (
                     <>
                       <div className="flex items-start gap-2">
                         <Calculator
@@ -248,7 +347,6 @@ export default function MasjidLectureMaterial() {
                           {userProgress.grade_result ?? "-"}
                         </p>
                       </div>
-
                       <div className="flex items-start gap-2">
                         <Book
                           size={18}
@@ -292,7 +390,6 @@ export default function MasjidLectureMaterial() {
                 { label: "Informasi", path: "informasi" },
                 { label: "Video Audio", path: "video-audio" },
                 { label: "Latihan Soal", path: "latihan-soal" },
-                // { label: "Materi Lengkap", path: "materi-lengkap" },
                 { label: "Ringkasan", path: "ringkasan" },
                 { label: "Tanya Jawab", path: "tanya-jawab" },
                 { label: "Masukan dan Saran", path: "masukan-saran" },
@@ -300,7 +397,6 @@ export default function MasjidLectureMaterial() {
               ].map((item) => {
                 const isSertifikat = item.label === "Sertifikat";
                 const isAvailable = item.highlight;
-
                 return (
                   <div
                     key={item.label}
@@ -346,51 +442,15 @@ export default function MasjidLectureMaterial() {
           </div>
         </SwiperSlide>
 
-        {/* =============== 📘 Sesi Kajian =============== */}
+        {/* ======= Sesi Kajian (upcoming & finished) ======= */}
         <SwiperSlide>
-          <div className="fpx-4 pb-24 space-y-4 mt-4">
-            {loadingSessions ? (
-              <p className="text-sm text-silver-400">Memuat sesi kajian...</p>
-            ) : errorSessions ? (
-              <p className="text-red-500 text-sm">Gagal memuat daftar sesi.</p>
-            ) : sessions && sessions.length > 0 ? (
-              sessions.map((sesi) => (
-                <div
-                  key={sesi.lecture_session_id}
-                  onClick={() =>
-                    navigate(
-                      `/masjid/${slug}/soal-materi/${sesi.lecture_session_slug}`,
-                      {
-                        state: { fromTab: tab, lectureSlug: lecture_slug },
-                      }
-                    )
-                  }
-                  className="p-4 rounded-lg shadow cursor-pointer hover:opacity-90 transition"
-                  style={{ backgroundColor: theme.white1 }}
-                >
-                  <h3 className="font-semibold" style={{ color: theme.black1 }}>
-                    {sesi.lecture_session_title}
-                  </h3>
-                  <p className="text-sm" style={{ color: theme.silver2 }}>
-                    {sesi.UserName}
-                  </p>
-                  <p className="text-xs pb-2" style={{ color: theme.silver2 }}>
-                    <FormattedDate value={sesi.lecture_session_start_time} />
-                  </p>
-                  <p className="text-sm" style={{ color: theme.silver2 }}>
-                    📍 {sesi.lecture_session_place || "-"}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-silver-500">
-                Belum ada sesi tersedia.
-              </p>
-            )}
+          <div className="px-4 pb-24 space-y-4 mt-4">
+            {/* Tanpa sub-tab, langsung render semuanya */}
+            <SessionsAll />
           </div>
         </SwiperSlide>
       </Swiper>
-      {/* Bottom Navigation */}
+
       <BottomNavbar />
     </>
   );

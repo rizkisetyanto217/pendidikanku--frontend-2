@@ -1,7 +1,7 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function MasjidResultQuizDetailLectureSessions() {
   const { state } = useLocation();
@@ -9,27 +9,51 @@ export default function MasjidResultQuizDetailLectureSessions() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
+  // Ambil param untuk fallback jika state kosong
+  const {
+    slug: slugParam,
+    lecture_session_slug: sessionParam,
+    lecture_slug,
+  } = useParams();
+
   const {
     correct = 0,
     total = 0,
     duration = 0,
-    slug = "",
-    id = "",
-    lecture_session_slug = "", // ✅ gunakan ini
-  } = state || {};
+    slug = slugParam || "",
+    lecture_session_slug = sessionParam || "",
+    from, // <- dikirim dari halaman quiz
+    backTo, // <- alias opsional
+  } = (state as any) || {};
+
+  // Tentukan tujuan balik
+  const backTarget = useMemo(() => {
+    // Prioritas: state.from -> state.backTo -> fallback ke halaman sesi -> fallback terakhir ke tema (kalau lecture_slug ada)
+    return (
+      from ||
+      backTo ||
+      (slug && lecture_session_slug
+        ? `/masjid/${slug}/soal-materi/${lecture_session_slug}`
+        : lecture_slug
+          ? `/masjid/${slug}/tema/${lecture_slug}`
+          : "/")
+    );
+  }, [from, backTo, slug, lecture_session_slug, lecture_slug]);
 
   const minutes = Math.floor(duration / 60);
   const seconds = duration % 60;
   const score = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   useEffect(() => {
-    console.log("📊 Hasil Quiz Diterima:");
-    console.log("✅ Benar:", correct);
-    console.log("❓ Total Soal:", total);
-    console.log("⏱️ Durasi:", `${minutes} menit ${seconds} detik`);
-    console.log("🧭 Slug:", slug);
-    console.log("🆔 Session ID:", id);
-  }, [correct, total, duration, slug, id]);
+    console.log("📊 Hasil Quiz Diterima:", {
+      correct,
+      total,
+      duration,
+      slug,
+      lecture_session_slug,
+      backTarget,
+    });
+  }, [correct, total, duration, slug, lecture_session_slug, backTarget]);
 
   return (
     <div
@@ -45,7 +69,7 @@ export default function MasjidResultQuizDetailLectureSessions() {
             Alhamdulillah Pembelajaran Selesai
           </h1>
           <p className="text-sm font-medium text-gray-500 dark:text-white/70">
-            “ Bersyukurlah atas apa yang kita telah dapatkan “
+            “Bersyukurlah atas apa yang kita telah dapatkan”
           </p>
         </div>
 
@@ -71,23 +95,8 @@ export default function MasjidResultQuizDetailLectureSessions() {
         </div>
 
         <div className="space-y-3 pt-2">
-          {/* <button
-            onClick={() => alert("Ulasan belum tersedia.")}
-            className="w-full py-3 rounded-lg font-semibold"
-            style={{
-              backgroundColor: theme.white3,
-              color: theme.primary,
-              border: `1px solid ${theme.primary}`,
-            }}
-          >
-            Ulasan
-          </button> */}
-
           <button
-            onClick={() => {
-              const targetUrl = `/masjid/${slug}/soal-materi/${lecture_session_slug}`;
-              window.location.href = targetUrl;
-            }}
+            onClick={() => navigate(backTarget, { replace: true })}
             className="w-full py-3 rounded-lg text-white font-semibold"
             style={{ backgroundColor: theme.primary }}
           >

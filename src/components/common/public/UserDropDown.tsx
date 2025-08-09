@@ -39,20 +39,25 @@ export default function PublicUserDropdown({
   const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await api.post("/api/auth/logout", null, { withCredentials: true });
-      queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
-      sessionStorage.clear();
-      localStorage.clear();
-      setTimeout(() => {
+const handleLogout = async () => {
+  setIsLoggingOut(true);
+  try {
+    await api.post("/api/auth/logout", null, { withCredentials: true });
+    queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
+    sessionStorage.clear();
+    localStorage.clear();
+    setTimeout(() => {
+      if (slug) {
+        navigate(`/masjid/${slug}/login`);
+      } else {
         navigate("/login");
-      }, 150);
-    } catch (err) {
-      console.error("Logout error:", err);
-    }
-  };
+      }
+    }, 150);
+  } catch (err) {
+    console.error("Logout error:", err);
+  }
+};
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
