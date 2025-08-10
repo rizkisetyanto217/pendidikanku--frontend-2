@@ -76,13 +76,16 @@ export default function BottomNavbar({
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 border-t w-full max-w-2xl mx-auto flex justify-between sm:justify-center sm:gap-0 transition-transform duration-300 ${
-        hideOnScroll && !visible ? "translate-y-full" : "translate-y-0"
-      }`}
+      className={`fixed bottom-0 left-0 right-0 z-50 border-t w-full max-w-2xl mx-auto
+  flex justify-between gap-2 sm:justify-center sm:gap-6
+  transition-transform duration-300 ${hideOnScroll && !visible ? "translate-y-full" : "translate-y-0"}`}
       style={{
         backgroundColor: theme.white1,
         borderColor: theme.silver1,
         minHeight: "56px",
+        paddingLeft: "12px", // ≈ px-3
+        paddingRight: "12px",
+        paddingBottom: "calc(env(safe-area-inset-bottom) + 6px)", // ekstra ruang di iPhone, dll
       }}
     >
       {tabs.map((tab) => {

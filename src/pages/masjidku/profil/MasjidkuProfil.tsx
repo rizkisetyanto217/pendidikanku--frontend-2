@@ -13,6 +13,7 @@ export default function MasjidkuProfil() {
       <PageHeaderUser
         title="Profil MasjidKu"
         onBackClick={() => navigate(`/`)}
+        withPaddingTop // aktifin padding top
       />
 
       <div
@@ -22,10 +23,10 @@ export default function MasjidkuProfil() {
           borderColor: theme.white3, // garis halus
         }}
       >
-        {/* Judul */}
+        {/* Judul
         <h1 className="text-2xl font-bold" style={{ color: theme.primary }}>
           Profil MasjidKu
-        </h1>
+        </h1> */}
 
         {/* Latar Belakang */}
         <section>

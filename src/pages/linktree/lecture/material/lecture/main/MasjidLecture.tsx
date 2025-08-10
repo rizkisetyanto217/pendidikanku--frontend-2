@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList"; // ⬅️ sesuaikan path import kamu
 import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
+import ShareBCLectureButton from "@/components/common/public/ShareBCLectureButton";
 
 /* ---------------- Types ---------------- */
 interface Teacher {
@@ -318,6 +319,23 @@ export default function MasjidLectureMaterial() {
                     <span>Sertifikat belum tersedia</span>
                   </div>
                 )}
+                {/* tombol share pojok kanan */}
+                <div className="absolute top-3 right-3">
+                  <ShareBCLectureButton
+                    variant="ghost"
+                    buttonLabel="Bagikan"
+                    lectureTitle={lecture?.lecture_title || "Tema Kajian"}
+                    teacherNames={teacherNames}
+                    // otomatis pilih sesi terdekat dari upcoming
+                    sessions={(buckets?.upcoming || []).map((s) => ({
+                      startTime: s.lecture_session_start_time,
+                      place: s.lecture_session_place,
+                    }))}
+                    // atau bisa langsung nextDateIso jika sudah ada:
+                    // nextDateIso={someIso}
+                    url={`${window.location.origin}/masjid/${slug}/tema/${lecture_slug}`}
+                  />
+                </div>
               </div>
             )}
 

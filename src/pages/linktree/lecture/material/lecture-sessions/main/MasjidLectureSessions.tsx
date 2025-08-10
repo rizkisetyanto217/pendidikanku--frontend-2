@@ -26,6 +26,7 @@ import ShimmerImage from "@/components/common/main/ShimmerImage";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import LoginPromptModal from "@/components/common/home/LoginPromptModal";
 import ShowImageFull from "@/components/pages/home/ShowImageFull";
+import ShareBCButton from "@/components/common/public/ShareBCLectureSessionsButton";
 
 // =====================
 // ✅ Interface
@@ -288,6 +289,16 @@ export default function MasjidLectureSessions() {
                       : "✕ Catat Kehadiran"}
                   </p>
                 </div>
+              </div>
+              <div className="mt-2 pt-2 w-full flex justify-end">
+                <ShareBCButton
+                  variant="ghost"
+                  title={data?.lecture_session_title || "Kajian Masjid"}
+                  teacher={data?.lecture_session_teacher_name || ""}
+                  dateIso={data?.lecture_session_start_time}
+                  place={data?.lecture_session_place || ""}
+                  url={`${window.location.origin}/masjid/${slug}/soal-materi/${lecture_session_slug}`}
+                />
               </div>
             </>
           )}

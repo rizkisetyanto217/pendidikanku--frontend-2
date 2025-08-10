@@ -13,6 +13,7 @@ interface PageHeaderProps {
     onClick?: () => void;
   };
   onBackClick?: () => void;
+  withPaddingTop?: boolean; // ✅ tambahan opsional
 }
 
 export default function PageHeaderUser({
@@ -20,13 +21,18 @@ export default function PageHeaderUser({
   backTo,
   actionButton,
   onBackClick,
+  withPaddingTop = false, // default false
 }: PageHeaderProps) {
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
   return (
-    <div className="sticky top-0 z-30 px-1 pt-1 pb-2 backdrop-blur-md bg-opacity-80">
+    <div
+      className={`sticky top-0 z-30 px-1 pb-2 backdrop-blur-md bg-opacity-80 ${
+        withPaddingTop ? "pt-4" : "pt-1"
+      }`}
+    >
       <div className="flex items-center justify-between mb-2">
         {/* Back & Title */}
         <div className="flex items-center gap-4">
@@ -51,7 +57,7 @@ export default function PageHeaderUser({
         </div>
 
         {/* Langsung render dropdown */}
-        <PublicUserDropdown variant="icon"  />
+        <PublicUserDropdown variant="icon" />
       </div>
     </div>
   );
