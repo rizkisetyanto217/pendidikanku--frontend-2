@@ -74,6 +74,7 @@ export default function MasjidMaterial() {
         `/public/lecture-sessions-u/soal-materi/${slug}`,
         { headers }
       );
+      console.log("📦 Data sesi kajian:", res.data);
       return res.data?.data ?? [];
     },
     enabled: !!slug,
@@ -83,6 +84,7 @@ export default function MasjidMaterial() {
     LectureTheme[]
   >({
     queryKey: ["lectureThemesBySlug", slug],
+
     queryFn: async () => {
       const res = await axios.get(`/public/lectures/by-masjid-slug/${slug}`);
       return res.data?.data ?? [];

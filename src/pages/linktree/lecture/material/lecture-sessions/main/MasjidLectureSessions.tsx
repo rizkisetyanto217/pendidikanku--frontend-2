@@ -60,7 +60,6 @@ export default function MasjidLectureSessions() {
   const [searchParams] = useSearchParams();
   const tab = searchParams.get("tab") || "navigasi";
 
-  const { data: currentUser } = useCurrentUser();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const queryClient = useQueryClient();
 
@@ -70,12 +69,22 @@ export default function MasjidLectureSessions() {
     "quiz" | "attendance" | null
   >(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  // 1) Ambil status user + flags
+  const {
+    data: currentUser,
+    isLoading: loadingUser,
+    isFetched: userFetched,
+  } = useCurrentUser();
+
+  // Bikin key khusus (agar cache anon ≠ cache user)
+  const userKey = currentUser?.id ?? "anon";
 
   // ✅ Ambil data sesi berdasarkan slug
-  const { data, isLoading } = useQuery<LectureSession>({
-    queryKey: ["lectureSessionDetail", lecture_session_slug, currentUser?.id],
+  // 2) Query detail sesi — tunggu userFetched, bedakan key dengan userKey
+  const { data, isLoading, refetch } = useQuery<LectureSession>({
+    queryKey: ["lectureSessionDetail", lecture_session_slug, userKey],
     queryFn: async () => {
-      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+      const headers = currentUser ? { "X-User-Id": currentUser.id } : undefined;
       const res = await axios.get(
         `/public/lecture-sessions-u/by-slug/${lecture_session_slug}`,
         { headers }
@@ -83,8 +92,9 @@ export default function MasjidLectureSessions() {
       console.log("📦 Data sesi kajian:", res.data);
       return res.data;
     },
-    enabled: !!lecture_session_slug,
-    staleTime: 5 * 60 * 1000,
+    enabled: !!lecture_session_slug && userFetched, // ⬅️ jangan fetch sebelum tahu status user
+    staleTime: 60 * 1000, // aman lebih pendek
+    refetchOnMount: "always", // hindari pakai cache anon
   });
 
   // ✅ Ambil data kehadiran berdasarkan session_id dari data
@@ -96,6 +106,7 @@ export default function MasjidLectureSessions() {
         `/public/user-lecture-sessions-attendance/${data?.lecture_session_id}`,
         { headers }
       );
+
       return res.data;
     },
     enabled: !!data?.lecture_session_id && !!currentUser?.id,
@@ -107,6 +118,19 @@ export default function MasjidLectureSessions() {
     ustadz: data?.lecture_session_teacher_name || "-",
     jadwal: data?.lecture_session_start_time || "-",
     tempat: data?.lecture_session_place || "-",
+  };
+
+  type MenuPath =
+    | "informasi"
+    | "video-audio"
+    | "latihan-soal"
+    | "ringkasan"
+    | "dokumen"
+    | "catatanku";
+
+  const resolvePath = (p: MenuPath) => {
+    // kalau "informasi" mau tetap di halaman ini, arahkan ke root detail
+    return `/masjid/${slug}/soal-materi/${lecture_session_slug}/${p}`;
   };
 
   const menuItems = [
@@ -284,20 +308,20 @@ export default function MasjidLectureSessions() {
               key={item.label}
               onClick={() => {
                 if (item.path === "catatanku" && !currentUser) {
-                  setShowCatatanModal(true); // Ganti jadi state khusus catatan
-                } else if (item.path === "latihan-soal" && !currentUser) {
-                  setLoginPromptSource("quiz"); // tambahkan ini untuk identifikasi
-                  setShowLoginPrompt(true);
-                } else {
-                  navigate(
-                    `/masjid/${slug}/soal-materi/${lecture_session_slug}/latihan-soal`,
-                    {
-                      state: {
-                        backTo: `/masjid/${slug}/soal-materi/${lecture_session_slug}`, // <- balik ke sesi
-                      },
-                    }
-                  );
+                  setShowCatatanModal(true);
+                  return;
                 }
+                if (item.path === "latihan-soal" && !currentUser) {
+                  setLoginPromptSource("quiz");
+                  setShowLoginPrompt(true);
+                  return;
+                }
+
+                navigate(resolvePath(item.path as MenuPath), {
+                  state: {
+                    backTo: `/masjid/${slug}/soal-materi/${lecture_session_slug}`,
+                  },
+                });
               }}
               className="flex flex-col items-center text-center text-sm p-3 rounded-md cursor-pointer hover:opacity-90 transition"
               style={{

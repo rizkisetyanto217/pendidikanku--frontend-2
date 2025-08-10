@@ -2,24 +2,29 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useResponsive } from "@/hooks/isResponsive";
-import { LocationEditIcon, Share } from "lucide-react";
-import { useState } from "react";
-import { useRef, useEffect } from "react";
+import { Share } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  BookOpen,
+  Share2,
+  Phone,
+} from "lucide-react";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BorderLine from "@/components/common/main/Border";
-import SharePopover from "@/components/common/public/SharePopover";
 import CartLink from "@/components/common/main/CardLink";
 import FormattedDate from "@/constants/formattedDate";
 import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
 import SocialMediaModal from "@/components/pages/home/SocialMediaModal";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 
-const currentUrl = window.location.href;
+const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
 // Types
 interface Masjid {
@@ -33,6 +38,8 @@ interface Masjid {
   masjid_instagram_url?: string;
   masjid_whatsapp_url?: string;
   masjid_youtube_url?: string;
+  masjid_facebook_url?: string;
+  masjid_tiktok_url?: string;
   masjid_donation_link?: string;
   masjid_created_at: string;
 }
@@ -46,6 +53,53 @@ interface Kajian {
   lecture_session_start_time: string;
 }
 
+/* =========================
+   Helpers: normalisasi sosmed
+========================= */
+type SosmedKind = "instagram" | "whatsapp" | "youtube" | "facebook" | "tiktok";
+
+function buildSosmedUrl(kind: SosmedKind, raw?: string): string | null {
+  if (!raw) return null;
+  const v0 = raw.trim();
+  if (!v0) return null;
+
+  const isURL = /^https?:\/\//i.test(v0);
+  switch (kind) {
+    case "instagram": {
+      const v = v0.replace(/^@/, "");
+      return isURL ? v0 : `https://instagram.com/${v}`;
+    }
+    case "whatsapp": {
+      // ambil digit saja, ubah 0 awal -> 62
+      const digits = v0.replace(/[^\d]/g, "").replace(/^0/, "62");
+      return isURL ? v0 : digits ? `https://wa.me/${digits}` : null;
+    }
+    case "youtube": {
+      return isURL ? v0 : `https://${v0}`;
+    }
+    case "facebook": {
+      return isURL ? v0 : `https://facebook.com/${v0}`;
+    }
+    case "tiktok": {
+      const v = v0.replace(/^@/, "");
+      return isURL ? v0 : `https://tiktok.com/@${v}`;
+    }
+    default:
+      return null;
+  }
+}
+
+function buildWhatsAppContact(raw?: string, message?: string): string | null {
+  const base = buildSosmedUrl("whatsapp", raw);
+  if (!base) return null;
+  if (!message) return base;
+  const text = encodeURIComponent(message);
+  return base.includes("?") ? `${base}&text=${text}` : `${base}?text=${text}`;
+}
+
+/* =========================
+   Component
+========================= */
 export default function PublicLinktree() {
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -64,23 +118,16 @@ export default function PublicLinktree() {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const { data: user, isLoading: loadingUser } = useCurrentUser();
-  const isLoggedIn = !!user;
   const [showSocialModal, setShowSocialModal] = useState(false);
 
   const scrollLeft = () => {
     sliderRef.current?.scrollBy({ left: -300, behavior: "smooth" });
-
-    setTimeout(() => {
-      updateArrowVisibility();
-    }, 50); // delay untuk memastikan scrollLeft ter-update
+    setTimeout(updateArrowVisibility, 50);
   };
 
   const scrollRight = () => {
     sliderRef.current?.scrollBy({ left: 300, behavior: "smooth" });
-
-    setTimeout(() => {
-      updateArrowVisibility();
-    }, 50); // delay untuk memastikan scrollLeft ter-update
+    setTimeout(updateArrowVisibility, 50);
   };
 
   const { data: masjidData, isLoading: loadingMasjid } = useQuery<Masjid>({
@@ -121,10 +168,8 @@ export default function PublicLinktree() {
   const updateArrowVisibility = () => {
     const el = sliderRef.current;
     if (!el) return;
-
     const atStart = Math.floor(el.scrollLeft) <= 0;
     const atEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth;
-
     setShowLeft(!atStart);
     setShowRight(!atEnd);
   };
@@ -132,15 +177,13 @@ export default function PublicLinktree() {
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
-
-    updateArrowVisibility(); // initial check
+    updateArrowVisibility();
     el.addEventListener("scroll", updateArrowVisibility);
-
     return () => el.removeEventListener("scroll", updateArrowVisibility);
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(updateArrowVisibility, 100); // sedikit delay setelah render
+    const timeout = setTimeout(updateArrowVisibility, 100);
     return () => clearTimeout(timeout);
   }, [kajianList]);
 
@@ -153,21 +196,20 @@ export default function PublicLinktree() {
         setShowShareMenu(false);
       }
     }
-    if (showShareMenu) {
+    if (showShareMenu)
       document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showShareMenu]);
 
-  if (loadingMasjid || loadingKajian || loadingUser || !masjidData)
+  if (loadingMasjid || loadingKajian || loadingUser || !masjidData) {
     return <div>Loading...</div>;
+  }
 
-  // console.log("user", user);
-  // console.log("isLoggedIn", isLoggedIn);
+  // URL sosmed yang sudah dinormalisasi
+  const waURL = buildSosmedUrl("whatsapp", masjidData.masjid_whatsapp_url);
+  const igURL = buildSosmedUrl("instagram", masjidData.masjid_instagram_url);
+  const ytURL = buildSosmedUrl("youtube", masjidData.masjid_youtube_url);
 
-  // if (isDesktop) {
   return (
     <>
       {/* NAVBAR */}
@@ -181,11 +223,11 @@ export default function PublicLinktree() {
           >
             Kajian Mendatang
           </h2>
-          {/* Gambar Kajian */}
+
+          {/* Slider Kajian */}
           <div className="relative">
             {kajianList && kajianList.length > 0 && (
               <div className="relative">
-                {/* Tombol kiri */}
                 {showLeft && (
                   <button
                     onClick={scrollLeft}
@@ -195,7 +237,6 @@ export default function PublicLinktree() {
                   </button>
                 )}
 
-                {/* Tombol kanan */}
                 {showRight && (
                   <button
                     onClick={scrollRight}
@@ -258,7 +299,6 @@ export default function PublicLinktree() {
                   </div>
                 </div>
 
-                {/* Tambahan teks "Kajian Terbaru Lainnya" */}
                 <div className="mt-4 text-right ">
                   <span
                     className="text-sm underline cursor-pointer hover:text-primary transition"
@@ -271,8 +311,11 @@ export default function PublicLinktree() {
               </div>
             )}
           </div>
+
           <BorderLine />
+
           <SholatScheduleCard location="DKI Jakarta" slug={slug || ""} />
+
           {/* --- SECTION: INFO MASJID --- */}
           <div className="mb-4 mt-4">
             <h1
@@ -281,14 +324,14 @@ export default function PublicLinktree() {
             >
               {masjidData.masjid_name}
             </h1>
-            <p
-              className="text-base mt-2"
-              style={{ color: themeColors.black2 }}
-            >
+            <p className="text-base mt-2" style={{ color: themeColors.black2 }}>
               Dikelola oleh DKM Masjid untuk ummat muslim
             </p>
+
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(masjidData.masjid_location || "")}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                masjidData.masjid_location || ""
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-base inline-flex flex-col gap-0.5 pb-2 pt-2"
@@ -300,22 +343,10 @@ export default function PublicLinktree() {
               <span className="underline text-sm mt-0.5">Alamat Masjid</span>
             </a>
 
-            {/* <p
-                className="text-sm italic mt-2"
-                style={{ color: themeColors.silver4 }}
-              >
-                Bergabung pada{" "}
-                <FormattedDate value={masjidData.masjid_created_at} fullMonth />
-              </p> */}
-
             <div className="flex justify-between items-center mt-4">
               <div className="flex space-x-3">
-                {masjidData.masjid_whatsapp_url && (
-                  <a
-                    href={masjidData.masjid_whatsapp_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                {waURL && (
+                  <a href={waURL} target="_blank" rel="noreferrer">
                     <ShimmerImage
                       src="/icons/whatsapp.svg"
                       alt="WhatsApp"
@@ -324,12 +355,8 @@ export default function PublicLinktree() {
                     />
                   </a>
                 )}
-                {masjidData.masjid_instagram_url && (
-                  <a
-                    href={masjidData.masjid_instagram_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                {igURL && (
+                  <a href={igURL} target="_blank" rel="noreferrer">
                     <ShimmerImage
                       src="/icons/instagram.svg"
                       alt="Instagram"
@@ -338,12 +365,8 @@ export default function PublicLinktree() {
                     />
                   </a>
                 )}
-                {masjidData.masjid_youtube_url && (
-                  <a
-                    href={masjidData.masjid_youtube_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                {ytURL && (
+                  <a href={ytURL} target="_blank" rel="noreferrer">
                     <ShimmerImage
                       src="/icons/youtube.svg"
                       alt="YouTube"
@@ -364,7 +387,9 @@ export default function PublicLinktree() {
               </button>
             </div>
           </div>
+
           <BorderLine />
+
           {/* --- SECTION: MENU UTAMA --- */}
           <div>
             <h2
@@ -376,318 +401,50 @@ export default function PublicLinktree() {
             <div className="space-y-2 pt-2">
               <CartLink
                 label="Profil Masjid"
-                icon="📍"
+                icon={<MapPin size={18} />}
                 href={`/masjid/${masjidData.masjid_slug}/profil`}
               />
               <CartLink
                 label="Jadwal Kajian"
-                icon="📚"
+                icon={<BookOpen size={18} />}
                 href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
               />
               <CartLink
                 label="Grup Masjid & Sosial Media"
-                icon="📚"
+                icon={<Share2 size={18} />}
                 onClick={() => setShowSocialModal(true)}
               />
               <CartLink
                 label="Hubungi Kami"
-                icon="🏛️"
-                href={`/masjid/${masjidData.masjid_slug}/profil`}
-                internal
+                icon={<Phone size={18} />}
+                href={
+                  buildWhatsAppContact(
+                    masjidData.masjid_whatsapp_url,
+                    `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${masjidData.masjid_name}.`
+                  ) || `/masjid/${masjidData.masjid_slug}/profil`
+                }
+                internal={false}
               />
+
+              {/* Modal Sosmed */}
               <SocialMediaModal
                 show={showSocialModal}
                 onClose={() => setShowSocialModal(false)}
                 data={{
-                  instagram: "masjidbaitussalam",
-                  whatsapp: "6281234567890",
-                  youtube: "https://www.youtube.com/@masjidbaitussalam",
-                  facebook: "masjidbaitussalam.id",
-                  tiktok: "masjidbaitussalam",
+                  masjid_instagram_url: masjidData.masjid_instagram_url,
+                  masjid_whatsapp_url: masjidData.masjid_whatsapp_url,
+                  masjid_youtube_url: masjidData.masjid_youtube_url,
+                  masjid_facebook_url: (masjidData as any).masjid_facebook_url, // jika ada di tipe, pindahkan ke interface Masjid di atas
+                  masjid_tiktok_url: (masjidData as any).masjid_tiktok_url,
                 }}
               />
-
-              {/* <LinkItem
-                  label="Laporan Keuangan"
-                  icon="📆"
-                  href={`/masjid/${masjidData.masjid_slug}/keuangan`}
-                  internal
-                /> */}
-              {/* <LinkItem
-                  label="Jelajahi"
-                  icon="📚"
-                  href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
-                  internal
-                /> */}
             </div>
           </div>
+
           {/* Bottom Navigation */}
           <BottomNavbar />
         </div>
       </div>
     </>
   );
-  // }
-
-  // return (
-  //   <>
-  //     {/* Navbar Atas */}
-  //     <PublicNavbar masjidName={masjidData.masjid_name} />
-
-  //     <div
-  //       className="w-full min-h-screen flex items-center justify-center overflow-hidden"
-  //       style={{
-  //         backgroundColor: themeColors.white2,
-  //       }}
-  //     >
-  //       <div
-  //         className="max-w-4xl w-full grid md:grid-cols-2 gap-8 items-center p-6 rounded-xl shadow"
-  //         style={{ backgroundColor: themeColors.white1 }}
-  //       >
-  //         {/* Gambar Kajian */}
-  //         <div className="relative">
-  //           {kajianList && kajianList.length > 0 && (
-  //             <div className="relative">
-  //               {/* Tombol kiri */}
-  //               {showLeft && (
-  //                 <button
-  //                   onClick={scrollLeft}
-  //                   className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
-  //                 >
-  //                   <ChevronLeft size={20} />
-  //                 </button>
-  //               )}
-
-  //               {/* Tombol kanan */}
-  //               {showRight && (
-  //                 <button
-  //                   onClick={scrollRight}
-  //                   className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
-  //                 >
-  //                   <ChevronRight size={20} />
-  //                 </button>
-  //               )}
-
-  //               <div className="w-full overflow-x-auto">
-  //                 <div
-  //                   ref={sliderRef}
-  //                   className="flex space-x-4 snap-x scroll-smooth no-scrollbar"
-  //                   style={{
-  //                     minWidth: "fit-content",
-  //                     maxWidth: "100%",
-  //                   }}
-  //                 >
-  //                   {kajianList.map((kajian, idx) => (
-  //                     <div
-  //                       key={idx}
-  //                       onClick={() =>
-  //                         navigate(
-  //                           `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
-  //                         )
-  //                       }
-  //                       className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
-  //                       style={{ backgroundColor: themeColors.white1 }}
-  //                     >
-  //                       <img
-  //                         src={
-  //                           kajian.lecture_session_image_url ||
-  //                           "/assets/placeholder/lecture.png"
-  //                         }
-  //                         alt={kajian.lecture_session_title}
-  //                         className="w-full aspect-[3/4] object-cover"
-  //                       />
-  //                       <div className="p-3">
-  //                         <h2
-  //                           className="font-semibold text-sm truncate"
-  //                           style={{ color: themeColors.black1 }}
-  //                         >
-  //                           {kajian.lecture_session_title}
-  //                         </h2>
-  //                         <p
-  //                           className="text-xs"
-  //                           style={{ color: themeColors.silver2 }}
-  //                         >
-  //                           {kajian.lecture_session_teacher_name} •{" "}
-  //                           {kajian.lecture_session_start_time ? (
-  //                             <FormattedDate
-  //                               value={kajian.lecture_session_start_time}
-  //                             />
-  //                           ) : (
-  //                             "-"
-  //                           )}
-  //                         </p>
-  //                         <p
-  //                           className="text-xs"
-  //                           style={{ color: themeColors.silver4 }}
-  //                         >
-  //                           {kajian.lecture_session_place}
-  //                         </p>
-  //                       </div>
-  //                     </div>
-  //                   ))}
-  //                 </div>
-  //               </div>
-
-  //               {/* Tambahan teks "Kajian Terbaru Lainnya" */}
-  //               <div className="mt-2 pr-4 text-right">
-  //                 <span
-  //                   className="text-sm underline cursor-pointer hover:text-primary transition"
-  //                   style={{ color: themeColors.tertiary }}
-  //                   onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
-  //                 >
-  //                   Kajian Terbaru Lainnya
-  //                 </span>
-  //               </div>
-  //             </div>
-  //           )}
-  //         </div>
-
-  //         {/* Masjid Info */}
-  //         <div className="space-y-4">
-  //           <div>
-  //             <SholatScheduleCard location="DKI Jakarta" />{" "}
-  //             <h1
-  //               className="text-2xl font-semibold pb-2 mt-6"
-  //               style={{ color: themeColors.black1 }}
-  //             >
-  //               {masjidData.masjid_name}
-  //             </h1>
-  //             <a
-  //               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(masjidData.masjid_location || "")}`}
-  //               target="_blank"
-  //               rel="noopener noreferrer"
-  //               className="text-sm inline-flex flex-col gap-0.5 pb-2"
-  //               style={{ color: themeColors.silver2 }}
-  //             >
-  //               <span className="inline-flex items-center gap-0.5">
-  //                 <span>{masjidData.masjid_location || "-"}</span>
-  //               </span>
-  //               <span className="underline text-xs mt-0.5">Alamat Masjid</span>
-  //             </a>
-  //             <p
-  //               className="text-xs italic pb-2"
-  //               style={{ color: themeColors.silver4 }}
-  //             >
-  //               {masjidData.masjid_bio_short}
-  //             </p>
-  //           </div>
-
-  //           <div className="flex items-center justify-between mt-2">
-  //             <div className="flex items-center space-x-3">
-  //               {masjidData.masjid_instagram_url && (
-  //                 <a
-  //                   href={masjidData.masjid_instagram_url}
-  //                   target="_blank"
-  //                   rel="noopener noreferrer"
-  //                 >
-  //                   <img
-  //                     src="/icons/instagram.svg"
-  //                     alt="IG"
-  //                     className="w-6 h-6"
-  //                   />
-  //                 </a>
-  //               )}
-  //               {masjidData.masjid_youtube_url && (
-  //                 <a
-  //                   href={masjidData.masjid_youtube_url}
-  //                   target="_blank"
-  //                   rel="noopener noreferrer"
-  //                 >
-  //                   <img
-  //                     src="/icons/youtube.svg"
-  //                     alt="YT"
-  //                     className="w-6 h-6"
-  //                   />
-  //                 </a>
-  //               )}
-  //               {masjidData.masjid_whatsapp_url && (
-  //                 <a
-  //                   href={masjidData.masjid_whatsapp_url}
-  //                   target="_blank"
-  //                   rel="noopener noreferrer"
-  //                 >
-  //                   <img
-  //                     src="/icons/whatsapp.svg"
-  //                     alt="WA"
-  //                     className="w-6 h-6"
-  //                   />
-  //                 </a>
-  //               )}
-  //             </div>
-
-  //             <SharePopover
-  //               title={`Profil Masjid ${masjidData.masjid_name}`}
-  //               url={window.location.href}
-  //               forceCustom // agar selalu tampil popover versi kamu
-  //             />
-  //           </div>
-
-  //           <div className="space-y-2 pt-2">
-  //             <CartLink
-  //               label="Profil Masjid"
-  //               icon="📍"
-  //               href={`/masjid/${masjidData.masjid_slug}/profil`}
-  //             />
-  //             <CartLink
-  //               label="Jadwal Kajian"
-  //               icon="📚"
-  //               href={`/masjid/${masjidData.masjid_slug}/jadwal-kajian`}
-  //             />
-  //             <CartLink
-  //               label="Grup Masjid & Sosial Media"
-  //               icon="📚"
-  //               onClick={() => setShowSocialModal(true)}
-  //             />
-  //             <CartLink
-  //               label="Hubungi Kami"
-  //               icon="📞"
-  //               href={`https://wa.me/${masjidData.masjid_whatsapp_url}`}
-  //               internal={false}
-  //             />
-  //             <SocialMediaModal
-  //               show={showSocialModal}
-  //               onClose={() => setShowSocialModal(false)}
-  //               data={{
-  //                 instagram: "masjidbaitussalam",
-  //                 whatsapp: "6281234567890",
-  //                 youtube: "https://www.youtube.com/@masjidbaitussalam",
-  //                 facebook: "masjidbaitussalam.id",
-  //                 tiktok: "masjidbaitussalam",
-  //               }}
-  //             />
-
-  //             {/* <LinkItem
-  //                 label="Laporan Keuangan"
-  //                 icon="📆"
-  //                 href={`/masjid/${masjidData.masjid_slug}/keuangan`}
-  //                 internal
-  //               /> */}
-  //             {/* <LinkItem
-  //                 label="Jelajahi"
-  //                 icon="📚"
-  //                 href={`/masjid/${masjidData.masjid_slug}/soal-materi`}
-  //                 internal
-  //               /> */}
-  //           </div>
-
-  //           {/* <button
-  //             onClick={() =>
-  //               navigate(`/masjid/${masjidData.masjid_slug}/donasi`)
-  //             }
-  //             className="block w-full text-center py-3 rounded font-bold"
-  //             style={{
-  //               backgroundColor: themeColors.primary,
-  //               color: themeColors.white1,
-  //             }}
-  //           >
-  //             Donasi
-  //           </button> */}
-  //         </div>
-  //       </div>
-  //     </div>
-
-  //     {/* Bottom navigation */}
-  //     <BottomNavbar hideOnScroll />
-  //   </>
-  // );
 }

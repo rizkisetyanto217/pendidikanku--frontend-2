@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { Tabs, TabsContent } from "@/components/common/main/Tabs";
+import { Tabs } from "@/components/common/main/Tabs";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import FormattedDate from "@/constants/formattedDate";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -22,6 +21,8 @@ import {
   Book,
   XCircle,
 } from "lucide-react";
+import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList"; // ⬅️ sesuaikan path import kamu
+import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
 
 /* ---------------- Types ---------------- */
 interface Teacher {
@@ -56,12 +57,49 @@ interface SessionsBuckets {
   finished: SessionAPI[];
 }
 
+/* ---------------- Helpers ---------------- */
+const fmtTime = (iso: string) =>
+  new Date(iso).toLocaleString("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+function toLectureItem(
+  s: SessionAPI,
+  teacherNames: string,
+  isFinished: boolean,
+  meta: { lectureId?: string; masjidName?: string } = {}
+): LectureMaterialItem {
+  return {
+    id: s.lecture_session_id || s.lecture_session_slug,
+    lecture_session_slug: s.lecture_session_slug,
+    imageUrl: s.lecture_session_image_url,
+    title: s.lecture_session_title,
+    teacher: teacherNames,
+    time: fmtTime(s.lecture_session_start_time),
+
+    // ✅ fields yang sebelumnya hilang
+    location: s.lecture_session_place || "-",
+    lectureId: meta.lectureId ?? "",
+    masjidName: meta.masjidName ?? "",
+
+    // opsional
+    attendanceStatus:
+      typeof s.user_attendance_status === "number"
+        ? s.user_attendance_status
+        : undefined,
+    gradeResult:
+      typeof s.user_grade_result === "number" ? s.user_grade_result : undefined,
+    status: isFinished ? "tersedia" : "proses",
+  };
+}
+
 /* ---------------- Component ---------------- */
 export default function MasjidLectureMaterial() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
-  const { lecture_slug, slug } = useParams<{
+  const { lecture_slug = "", slug = "" } = useParams<{
     lecture_slug: string;
     slug: string;
   }>();
@@ -92,10 +130,15 @@ export default function MasjidLectureMaterial() {
     enabled: !!lecture_slug,
     staleTime: 5 * 60 * 1000,
   });
+
   const lecture = lectureWrap?.lecture;
   const userProgress = lectureWrap?.user_progress;
+  const teacherNames =
+    Array.isArray(lecture?.lecture_teachers) && lecture!.lecture_teachers.length
+      ? [...new Set(lecture!.lecture_teachers.map((t) => t.name))].join(", ")
+      : "-";
 
-  /* ---------- Sessions buckets (baru) ---------- */
+  /* ---------- Sessions buckets ---------- */
   const {
     data: buckets,
     isLoading: loadingBuckets,
@@ -106,7 +149,9 @@ export default function MasjidLectureMaterial() {
       const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
       const res = await axios.get(
         `/public/lecture-sessions-u/by-lecture-slug/${lecture_slug}/all`,
-        { headers }
+        {
+          headers,
+        }
       );
       return res.data;
     },
@@ -114,107 +159,15 @@ export default function MasjidLectureMaterial() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const upcoming = buckets?.upcoming ?? [];
-  const finished = buckets?.finished ?? [];
+  const upcomingItems: LectureMaterialItem[] = useMemo(() => {
+    const list = buckets?.upcoming ?? [];
+    return list.map((s) => toLectureItem(s, teacherNames, false));
+  }, [buckets?.upcoming, teacherNames]);
 
-  /* ---------- Render helpers ---------- */
-  const SessionCard = (s: SessionAPI) => (
-    <div
-      key={
-        s.lecture_session_id ||
-        `${s.lecture_session_slug}-${s.lecture_session_start_time}`
-      }
-      onClick={() =>
-        navigate(`/masjid/${slug}/soal-materi/${s.lecture_session_slug}`, {
-          state: { fromTab: tab, lectureSlug: lecture_slug },
-        })
-      }
-      className="p-4 rounded-lg shadow cursor-pointer hover:opacity-90 transition"
-      style={{ backgroundColor: theme.white1 }}
-    >
-      <h3 className="font-semibold" style={{ color: theme.black1 }}>
-        {s.lecture_session_title}
-      </h3>
-
-      <div
-        className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
-        style={{ color: theme.silver2 }}
-      >
-        <FormattedDate value={s.lecture_session_start_time} />
-        <span>•</span>
-        <span>📍 {s.lecture_session_place || "-"}</span>
-        {typeof s.user_attendance_status === "number" && (
-          <>
-            <span>•</span>
-            <span>
-              Hadir: {s.user_attendance_status === 1 ? "Ya" : "Tidak"}
-            </span>
-          </>
-        )}
-        {typeof s.user_grade_result === "number" && (
-          <>
-            <span>•</span>
-            <span>Nilai: {s.user_grade_result}</span>
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const SessionsAll = () => {
-    if (loadingBuckets) {
-      return (
-        <p className="text-sm" style={{ color: theme.silver2 }}>
-          Memuat sesi kajian...
-        </p>
-      );
-    }
-    if (errorBuckets) {
-      return <p className="text-sm text-red-500">Gagal memuat daftar sesi.</p>;
-    }
-    if (!upcoming.length && !finished.length) {
-      return (
-        <p className="text-sm" style={{ color: theme.silver2 }}>
-          Belum ada sesi.
-        </p>
-      );
-    }
-
-    return (
-      <div className="space-y-5">
-        {!!upcoming.length && (
-          <section>
-            <h4
-              className="text-sm font-semibold mb-2"
-              style={{ color: theme.black1 }}
-            >
-              Mendatang
-            </h4>
-            <div className="space-y-3">{upcoming.map(SessionCard)}</div>
-          </section>
-        )}
-
-        {!!upcoming.length && !!finished.length && (
-          <div
-            className="h-px my-1"
-            style={{ backgroundColor: theme.silver1 }}
-          />
-        )}
-
-        {!!finished.length && (
-          <section>
-            <h4
-              className="text-sm font-semibold mb-2"
-              style={{ color: theme.black1 }}
-            >
-              Selesai
-            </h4>
-            <div className="space-y-3">{finished.map(SessionCard)}</div>
-          </section>
-        )}
-      </div>
-    );
-  };
+  const finishedItems: LectureMaterialItem[] = useMemo(() => {
+    const list = buckets?.finished ?? [];
+    return list.map((s) => toLectureItem(s, teacherNames, true));
+  }, [buckets?.finished, teacherNames]);
 
   /* ---------- UI ---------- */
   return (
@@ -292,14 +245,7 @@ export default function MasjidLectureMaterial() {
                     />
                     <p>
                       <strong style={{ color: theme.black1 }}>Pengajar:</strong>{" "}
-                      {Array.isArray(lecture?.lecture_teachers) &&
-                      lecture.lecture_teachers.length
-                        ? [
-                            ...new Set(
-                              lecture.lecture_teachers.map((t) => t.name)
-                            ),
-                          ].join(", ")
-                        : "-"}
+                      {teacherNames}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
@@ -411,7 +357,11 @@ export default function MasjidLectureMaterial() {
                         isSertifikat && isAvailable
                           ? theme.success1
                           : theme.white3,
-                      border: `1px solid ${isSertifikat && isAvailable ? theme.success1 : theme.silver1}`,
+                      border: `1px solid ${
+                        isSertifikat && isAvailable
+                          ? theme.success1
+                          : theme.silver1
+                      }`,
                       color:
                         isSertifikat && isAvailable
                           ? theme.specialColor
@@ -444,9 +394,51 @@ export default function MasjidLectureMaterial() {
 
         {/* ======= Sesi Kajian (upcoming & finished) ======= */}
         <SwiperSlide>
-          <div className="px-4 pb-24 space-y-4 mt-4">
-            {/* Tanpa sub-tab, langsung render semuanya */}
-            <SessionsAll />
+          <div className="pb-24 space-y-4 mt-4">
+            {loadingBuckets ? (
+              <p className="text-sm" style={{ color: theme.silver2 }}>
+                Memuat sesi kajian...
+              </p>
+            ) : errorBuckets ? (
+              <p className="text-sm text-red-500">Gagal memuat daftar sesi.</p>
+            ) : !upcomingItems.length && !finishedItems.length ? (
+              <p className="text-sm" style={{ color: theme.silver2 }}>
+                Belum ada sesi.
+              </p>
+            ) : (
+              <>
+                {!!upcomingItems.length && (
+                  <section>
+                    <h4
+                      className="text-sm font-semibold mb-2"
+                      style={{ color: theme.black1 }}
+                    >
+                      Mendatang
+                    </h4>
+                    <LectureMaterialList data={upcomingItems} />
+                  </section>
+                )}
+
+                {!!upcomingItems.length && !!finishedItems.length && (
+                  <div
+                    className="h-px my-2"
+                    style={{ backgroundColor: theme.silver1 }}
+                  />
+                )}
+
+                {!!finishedItems.length && (
+                  <section>
+                    <h4
+                      className="text-sm font-semibold mb-2"
+                      style={{ color: theme.black1 }}
+                    >
+                      Selesai
+                    </h4>
+                    <LectureMaterialList data={finishedItems} />
+                  </section>
+                )}
+              </>
+            )}
           </div>
         </SwiperSlide>
       </Swiper>

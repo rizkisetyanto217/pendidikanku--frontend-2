@@ -104,7 +104,7 @@ export default function MasjidkuHome() {
           </div>
         </div>
 
-        <SocialMediaModal
+        {/* <SocialMediaModal
           show={showSocialModal}
           onClose={() => setShowSocialModal(false)}
           data={{
@@ -112,7 +112,7 @@ export default function MasjidkuHome() {
             whatsapp: masjid.masjid_whatsapp_url,
             youtube: masjid.masjid_youtube_url,
           }}
-        />
+        /> */}
 
       </div>
     </>
