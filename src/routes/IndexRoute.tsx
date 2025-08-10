@@ -134,6 +134,8 @@ import MasjidDetailDKMPengajarMobile from "@/pages/linktree/profil/MasjidDetailD
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* === Public Routes Masjidku === */}
+      <Route path="/" index element={<MasjidkuHome />} />
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -450,8 +452,6 @@ export default function AppRoutes() {
       </Route>
       {/*  */}
       {/*  */}
-      {/* === Public Routes Masjidku === */}
-      <Route path="/masjidku" index element={<MasjidkuHome />} />
       {/* ==== Protected Routes - Author ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["author"]} />}>
         <Route path="/author" element={<AuthorLayout />}>
