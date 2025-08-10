@@ -9,12 +9,16 @@ interface PublicNavbarProps {
   masjidName: string;
   masjidSlug?: string; // 🔁 optional, biar bisa fallback dari URL
   hideOnScroll?: boolean;
+  showLogin?: boolean; // ✅ baru: bisa sembunyikan tombol login
+  loginEnabled?: boolean; // ✅ baru: paksa enable/disable (default true)
 }
 
 export default function PublicNavbar({
   masjidName,
   masjidSlug,
   hideOnScroll = false,
+  showLogin = true, // default: tampilkan login
+  loginEnabled = true, // default: tombol login aktif
 }: PublicNavbarProps) {
   const navigate = useNavigate();
   const { slug: slugFromParams } = useParams<{ slug?: string }>();
@@ -83,6 +87,8 @@ export default function PublicNavbar({
     }
   };
 
+  const willDisableLogin = !resolvedSlug || !loginEnabled; // ✅ gabung kondisi
+
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 shadow max-w-2xl mx-auto transition-transform duration-300 ${
@@ -95,22 +101,32 @@ export default function PublicNavbar({
       <div className="flex items-center gap-2" ref={dropdownRef}>
         {!isLoading && isLoggedIn ? (
           <PublicUserDropdown />
-        ) : (
+        ) : showLogin ? ( // ✅ hanya render tombol login kalau showLogin = true
           <div className="flex items-center gap-2">
             <button
               onClick={handleLoginClick}
-              disabled={!resolvedSlug} // 🔒 cegah klik saat slug belum siap
+              disabled={willDisableLogin} // ✅ tetap bisa dinonaktifkan
+              aria-disabled={willDisableLogin}
               className="text-sm font-semibold px-4 py-2 rounded-md shadow-sm hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: themeColors.primary,
                 color: themeColors.white1,
               }}
-              title={!resolvedSlug ? "Menyiapkan halaman..." : "Login"}
+              title={
+                willDisableLogin
+                  ? !resolvedSlug
+                    ? "Menyiapkan halaman..."
+                    : "Login dimatikan untuk halaman ini"
+                  : "Login"
+              }
             >
               Login
             </button>
             <PublicUserDropdown variant="icon" />
           </div>
+        ) : (
+          // ✅ kalau showLogin = false, cukup icon menu saja (atau kosong)
+          <PublicUserDropdown variant="icon" />
         )}
       </div>
     </div>
