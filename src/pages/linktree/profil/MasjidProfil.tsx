@@ -14,6 +14,32 @@ import {
   ChevronRight,
   Megaphone,
 } from "lucide-react";
+import { useMemo } from "react";
+import parse from "html-react-parser";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
+import { limitWords } from "@/constants/limitWords";
+
+type ProfileItem = {
+  masjid_profile_teacher_dkm_id: string;
+  masjid_profile_teacher_dkm_masjid_id: string;
+  masjid_profile_teacher_dkm_name: string;
+  masjid_profile_teacher_dkm_role: string;
+  masjid_profile_teacher_dkm_description?: string;
+  masjid_profile_teacher_dkm_message?: string;
+  masjid_profile_teacher_dkm_image_url?: string;
+  masjid_profile_teacher_dkm_created_at: string;
+};
+
+type MasjidProfileDetail = {
+  masjid_profile_id: string;
+  masjid_profile_description?: string;
+  masjid_profile_founded_year?: number;
+  masjid_profile_masjid_id: string;
+  masjid_profile_logo_url?: string;
+  masjid_profile_stamp_url?: string;
+  masjid_profile_ttd_ketua_dkm_url?: string;
+  masjid_profile_created_at: string;
+};
 
 export default function MasjidProfile() {
   const { slug } = useParams();
@@ -21,6 +47,7 @@ export default function MasjidProfile() {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
+  // Profil masjid (umum)
   const { data: masjid, isLoading } = useQuery({
     queryKey: ["masjid-profile", slug],
     queryFn: async () => {
@@ -30,20 +57,66 @@ export default function MasjidProfile() {
     enabled: !!slug,
   });
 
-  const greetings = [
-    {
-      name: "Muhammad",
-      role: "Pengajar",
-      message:
-        "Semoga Allah ta’ala mudahkan kita dalam menuntut ilmu agama. Allah ta’ala berikan kemudahan bagi kita semua terutama bagi orang-orang yang sedang kesulitan agar dilancarkan usahanya.",
+  // Detail profil lembaga masjid (description, created_at, founded_year)
+  const {
+    data: masjidProfile,
+    isLoading: loadingProfile,
+    isError: errorProfile,
+  } = useQuery({
+    queryKey: ["masjid-profile-detail-by-slug", slug],
+    queryFn: async () => {
+      const res = await axios.get(`/public/masjid-profiles/by-slug/${slug}`);
+      return res.data.data as MasjidProfileDetail;
     },
-    {
-      name: "Budi",
-      role: "Ketua DKM",
-      message:
-        "Semoga Allah ta’ala mudahkan kita dalam menuntut ilmu agama. Allah ta’ala berikan kemudahan bagi kita semua terutama bagi orang-orang yang sedang kesulitan agar dilancarkan usahanya.",
+    enabled: !!slug,
+    staleTime: 60_000,
+  });
+
+  // Greetings (DKM & Pengajar)
+  const {
+    data: profiles,
+    isLoading: loadingGreetings,
+    isError: errorGreetings,
+  } = useQuery({
+    queryKey: ["masjid-profile-teacher-dkm", slug],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/masjid-profile-teacher-dkm/by-masjid-slug/${slug}`
+      );
+      return (res.data?.data || []) as ProfileItem[];
     },
-  ];
+    enabled: !!slug,
+    staleTime: 60_000,
+  });
+
+  const visibleGreetings = useMemo(
+    () =>
+      (profiles || [])
+        .filter((p) => !!p.masjid_profile_teacher_dkm_message)
+        .slice(0, 3)
+        .map((p) => ({
+          name: p.masjid_profile_teacher_dkm_name,
+          role: p.masjid_profile_teacher_dkm_role,
+          message: p.masjid_profile_teacher_dkm_message as string,
+        })),
+    [profiles]
+  );
+
+  // Format "Bulan YYYY" (id-ID)
+  const didirikanText = useMemo(() => {
+    const year = masjidProfile?.masjid_profile_founded_year;
+    if (!year) return null;
+    return `Didirikan tahun ${year}`;
+  }, [masjidProfile?.masjid_profile_founded_year]);
+
+  // Bersihkan & render deskripsi HTML
+  const cleanedDesc = useMemo(
+    () =>
+      masjidProfile?.masjid_profile_description
+        ? cleanTranscriptHTML(masjidProfile.masjid_profile_description)
+        : "",
+    [masjidProfile?.masjid_profile_description]
+  );
 
   if (isLoading || !masjid) return <div>Loading...</div>;
 
@@ -87,7 +160,11 @@ export default function MasjidProfile() {
             {masjid.masjid_location}
           </p>
           <p className="text-base" style={{ color: themeColors.silver2 }}>
-            Bergabung pada April 2025
+            {loadingProfile
+              ? "Memuat tahun didirikan…"
+              : errorProfile
+                ? "—"
+                : didirikanText || "—"}
           </p>
         </div>
 
@@ -103,10 +180,20 @@ export default function MasjidProfile() {
             <BookOpen size={18} />
             <span>Profil Lembaga</span>
           </h2>
-          <p className="text-base" style={{ color: themeColors.black2 }}>
-            {masjid.masjid_profile_story ||
-              "Masjid ini didirikan dengan tujuan menjadi tempat ibadah dan pusat kegiatan umat Islam di lingkungan sekitarnya."}
-          </p>
+
+          <div
+            className="text-base leading-relaxed"
+            style={{ color: themeColors.black2 }}
+          >
+            {loadingProfile ? (
+              <span>Memuat deskripsi…</span>
+            ) : cleanedDesc ? (
+              <span>{limitWords(cleanedDesc, 50)}</span>
+            ) : (
+              "Masjid ini didirikan dengan tujuan menjadi tempat ibadah dan pusat kegiatan umat Islam di lingkungan sekitarnya."
+            )}
+          </div>
+
           <button
             onClick={() => navigate("detail")}
             className="mt-2 px-4 py-2 text-base rounded hover:opacity-80 border flex items-center gap-2"
@@ -174,30 +261,45 @@ export default function MasjidProfile() {
             <strong>{masjid.masjid_name}</strong>
           </p>
 
-          {greetings.map((greet, i) => (
-            <div
-              key={i}
-              className="p-3 rounded-lg text-base space-y-1"
-              style={{
-                backgroundColor: themeColors.white2,
-                borderColor: themeColors.white3,
-                borderWidth: 1,
-              }}
-            >
-              <p
-                className="font-semibold"
-                style={{ color: themeColors.black1 }}
+          {loadingGreetings ? (
+            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+              Memuat sambutan…
+            </p>
+          ) : errorGreetings ? (
+            <p className="text-sm text-red-500">Gagal memuat sambutan.</p>
+          ) : visibleGreetings.length > 0 ? (
+            visibleGreetings.map((greet, i) => (
+              <div
+                key={i}
+                className="p-3 rounded-lg text-base space-y-1"
+                style={{
+                  backgroundColor: themeColors.white2,
+                  borderColor: themeColors.white3,
+                  borderWidth: 1,
+                }}
               >
-                {greet.name}
-              </p>
-              <p className="text-base" style={{ color: themeColors.silver2 }}>
-                {greet.role}
-              </p>
-              <p className="text-base" style={{ color: themeColors.black2 }}>
-                {greet.message}
-              </p>
-            </div>
-          ))}
+                <p
+                  className="font-semibold"
+                  style={{ color: themeColors.black1 }}
+                >
+                  {greet.name}
+                </p>
+                <p className="text-base" style={{ color: themeColors.silver2 }}>
+                  {greet.role}
+                </p>
+                <p
+                  className="text-base leading-relaxed"
+                  style={{ color: themeColors.black2 }}
+                >
+                  {greet.message}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+              Belum ada sambutan.
+            </p>
+          )}
 
           <button
             onClick={() => navigate("sambutan")}
@@ -210,16 +312,6 @@ export default function MasjidProfile() {
             <span>Selengkapnya</span>
             <ChevronRight size={18} />
           </button>
-
-          {/* 
-          <button
-            onClick={() => navigate(`/masjid/${slug}/donasi`)}
-            className="w-full py-3 rounded font-semibold hover:opacity-90 text-base"
-            style={{ backgroundColor: themeColors.primary, color: themeColors.white1 }}
-          >
-            Donasi
-          </button> 
-          */}
         </div>
 
         {/* Bottom Navigation */}

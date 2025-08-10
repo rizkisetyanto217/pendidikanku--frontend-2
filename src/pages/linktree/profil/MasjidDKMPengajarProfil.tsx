@@ -1,116 +1,103 @@
+// MasjidDKMPengajarProfil.tsx
+import { useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useResponsive } from "@/hooks/isResponsive";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
 
-const dummyPengurus = [
-  {
-    id: 1,
-    type: "pengurus",
-    role: "Ketua DKM",
-    name: "Bapak Hardi",
-    jabatan: "Ketua DKM",
-    sambutan:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-    aktivitas: "Menjadi pengajar tetap di Masjid daerah jabodetabek.",
-    lainnya: "Sudah menjadi ketua DKM sejak 2020.",
-  },
-  {
-    id: 2,
-    type: "pengurus",
-    role: "Bendahara",
-    name: "Ustadz Muhammad Yassir",
-    jabatan: "Bendahara",
-    sambutan: "Sambutan dari bendahara.",
-    aktivitas: "Mengelola keuangan masjid.",
-    lainnya: "Sudah menjadi bendahara sejak 2021.",
-  },
-  {
-    id: 3,
-    type: "pengurus",
-    role: "Sekretaris",
-    name: "Ustadz Taufiq",
-    jabatan: "Sekretaris",
-    sambutan: "Sambutan dari sekretaris.",
-    aktivitas: "Membantu pencatatan dan administrasi.",
-    lainnya: "Sudah menjadi sekretaris sejak 2022.",
-  },
-];
-
-const dummyPengajar = [
-  {
-    id: 1,
-    type: "pengajar",
-    title: "Kajian Tematik",
-    name: "Ustadz Firza, Lc",
-    bidang: "Ushul Fiqh",
-    sambutan:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-    pendidikan: [
-      "S1 Universitas Islam Madinah jurusan Hadist",
-      "S2 Universitas Islam Madinah jurusan Hadist",
-    ],
-    aktivitas: "Menjadi pengajar tetap di Masjid daerah jabodetabek.",
-  },
-  {
-    id: 2,
-    type: "pengajar",
-    title: "Kajian Aqidah",
-    name: "Ustadz Taufiq",
-    bidang: "Aqidah",
-    sambutan: "Contoh sambutan dari ustadz Taufiq.",
-    pendidikan: ["S1 UIN Jakarta", "S2 Universitas Al-Azhar"],
-    aktivitas: "Aktif sebagai pembina pengajian remaja masjid.",
-  },
-];
+type ProfileItem = {
+  masjid_profile_teacher_dkm_id: string;
+  masjid_profile_teacher_dkm_masjid_id: string;
+  masjid_profile_teacher_dkm_name: string;
+  masjid_profile_teacher_dkm_role: string; // "DKM" | "Teacher" | lainnya
+  masjid_profile_teacher_dkm_description?: string; // jabatan/aktivitas ringkas
+  masjid_profile_teacher_dkm_message?: string; // sambutan / pesan
+  masjid_profile_teacher_dkm_image_url?: string;
+  masjid_profile_teacher_dkm_created_at: string;
+};
 
 export default function MasjidDKMPengajarProfil() {
+  const { slug } = useParams();
   const { isMobile } = useResponsive();
   const navigate = useNavigate();
-  const [selectedDetail, setSelectedDetail] = useState<any>(null);
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  const handleSelect = (person: any) => {
+  const [selectedDetail, setSelectedDetail] = useState<ProfileItem | null>(
+    null
+  );
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["masjid-profile-teacher-dkm", slug],
+    queryFn: async () => {
+      const res = await axios.get(
+        `/public/masjid-profile-teacher-dkm/by-masjid-slug/${slug}`
+      );
+      return (res.data.data || []) as ProfileItem[];
+    },
+    enabled: !!slug,
+  });
+
+  const dkmList = useMemo(
+    () =>
+      (data || []).filter(
+        (x) => (x.masjid_profile_teacher_dkm_role || "").toUpperCase() === "DKM"
+      ),
+    [data]
+  );
+
+  const pengajarList = useMemo(
+    () =>
+      (data || []).filter(
+        (x) => (x.masjid_profile_teacher_dkm_role || "").toUpperCase() !== "DKM"
+      ),
+    [data]
+  );
+
+  // di MasjidDKMPengajarProfil.tsx
+  const handleSelect = (person: ProfileItem) => {
     if (isMobile) {
-      navigate("/dkm/pengajar/edit/" + person.id);
+      navigate(`detail/${person.masjid_profile_teacher_dkm_id}`, {
+        state: { item: person, slug },
+      });
     } else {
       setSelectedDetail(person);
     }
   };
 
-  const renderPersonCard = (item: any, label?: string) => {
+  const renderPersonCard = (item: ProfileItem, label?: string) => {
     const isActive =
-      selectedDetail?.id === item.id && selectedDetail?.type === item.type;
+      selectedDetail?.masjid_profile_teacher_dkm_id ===
+      item.masjid_profile_teacher_dkm_id;
 
     return (
       <button
-        key={`${item.type}-${item.id}`}
+        key={item.masjid_profile_teacher_dkm_id}
         onClick={() => handleSelect(item)}
-        className="w-full flex justify-between items-center p-3 rounded border mt-2"
+        className="w-full flex justify-between items-center p-3 rounded border mt-2 transition-colors"
         style={{
           backgroundColor: isActive ? themeColors.success2 : themeColors.white1,
           borderColor: themeColors.silver1,
           color: themeColors.black1,
         }}
         onMouseEnter={(e) => {
-          if (!isActive) {
+          if (!isActive)
             e.currentTarget.style.backgroundColor = themeColors.white2;
-          }
         }}
         onMouseLeave={(e) => {
-          if (!isActive) {
+          if (!isActive)
             e.currentTarget.style.backgroundColor = themeColors.white1;
-          }
         }}
       >
         <span className="flex flex-col items-start text-left">
-          <span className="font-medium">{label || item.title}</span>
+          <span className="font-medium">
+            {label || item.masjid_profile_teacher_dkm_role || "—"}
+          </span>
           <span className="text-sm" style={{ color: themeColors.silver2 }}>
-            {item.name}
+            {item.masjid_profile_teacher_dkm_name}
           </span>
         </span>
         <span className="text-lg">›</span>
@@ -129,25 +116,55 @@ export default function MasjidDKMPengajarProfil() {
 
       <div className="md:flex md:gap-6">
         <div className="md:w-1/2 space-y-4">
-          <div>
-            <h2
-              className="font-semibold text-lg"
-              style={{ color: themeColors.black1 }}
-            >
-              DKM Masjid
-            </h2>
-            {dummyPengurus.map((item) => renderPersonCard(item, item.role))}
-          </div>
+          {isLoading ? (
+            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+              Memuat data…
+            </p>
+          ) : isError ? (
+            <p className="text-sm text-red-500">Gagal memuat data.</p>
+          ) : (
+            <>
+              <div>
+                <h2
+                  className="font-semibold text-lg"
+                  style={{ color: themeColors.black1 }}
+                >
+                  DKM Masjid
+                </h2>
+                {dkmList.length > 0 ? (
+                  dkmList.map((item) =>
+                    renderPersonCard(item, item.masjid_profile_teacher_dkm_role)
+                  )
+                ) : (
+                  <p
+                    className="text-sm mt-2"
+                    style={{ color: themeColors.silver2 }}
+                  >
+                    Belum ada data DKM.
+                  </p>
+                )}
+              </div>
 
-          <div className="pt-4">
-            <h3
-              className="text-md font-semibold"
-              style={{ color: themeColors.primary }}
-            >
-              Pengajar
-            </h3>
-            {dummyPengajar.map((item) => renderPersonCard(item))}
-          </div>
+              <div className="pt-4">
+                <h3
+                  className="text-md font-semibold"
+                  style={{ color: themeColors.black1 }}
+                >
+                  Pengajar
+                </h3>
+                {pengajarList.length > 0 ? (
+                  pengajarList.map((item) => renderPersonCard(item))
+                ) : (
+                  <p
+                    className="text-sm mt-2"
+                    style={{ color: themeColors.silver2 }}
+                  >
+                    Belum ada data pengajar.
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {!isMobile && (
@@ -161,54 +178,33 @@ export default function MasjidDKMPengajarProfil() {
                   className="text-lg font-semibold"
                   style={{ color: themeColors.quaternary }}
                 >
-                  {selectedDetail.name}
+                  {selectedDetail.masjid_profile_teacher_dkm_name}
                 </h3>
 
                 <div
                   className="space-y-2 text-sm"
                   style={{ color: themeColors.black2 }}
                 >
-                  {selectedDetail.jabatan && (
+                  {selectedDetail.masjid_profile_teacher_dkm_role && (
                     <div>
-                      <p className="font-semibold">Jabatan</p>
-                      <p>{selectedDetail.jabatan}</p>
+                      <p className="font-semibold">Peran</p>
+                      <p>{selectedDetail.masjid_profile_teacher_dkm_role}</p>
                     </div>
                   )}
 
-                  {selectedDetail.bidang && (
+                  {selectedDetail.masjid_profile_teacher_dkm_description && (
                     <div>
-                      <p className="font-semibold">Bidang Pengajaran</p>
-                      <p>{selectedDetail.bidang}</p>
+                      <p className="font-semibold">Deskripsi</p>
+                      <p>
+                        {selectedDetail.masjid_profile_teacher_dkm_description}
+                      </p>
                     </div>
                   )}
 
-                  <div>
-                    <p className="font-semibold">Sambutan</p>
-                    <p>{selectedDetail.sambutan}</p>
-                  </div>
-
-                  {selectedDetail.pendidikan?.length > 0 && (
+                  {selectedDetail.masjid_profile_teacher_dkm_message && (
                     <div>
-                      <p className="font-semibold">Latar Belakang Pendidikan</p>
-                      <ul className="list-disc list-inside">
-                        {selectedDetail.pendidikan.map(
-                          (item: string, idx: number) => (
-                            <li key={idx}>{item}</li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div>
-                    <p className="font-semibold">Aktivitas</p>
-                    <p>{selectedDetail.aktivitas}</p>
-                  </div>
-
-                  {selectedDetail.lainnya && (
-                    <div>
-                      <p className="font-semibold">Lainnya</p>
-                      <p>{selectedDetail.lainnya}</p>
+                      <p className="font-semibold">Sambutan</p>
+                      <p>{selectedDetail.masjid_profile_teacher_dkm_message}</p>
                     </div>
                   )}
                 </div>

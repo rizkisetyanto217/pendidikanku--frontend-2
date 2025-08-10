@@ -129,6 +129,7 @@ import DKMEditProfileDKMTeacher from "@/pages/dashboard/dkm/profile/dkm/DKMEditP
 import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
 import MasjidMaterialByMonth from "@/pages/linktree/lecture/material/lecture-sessions-by-month/MasjidLectureSessionsByMonth";
 import MasjidDetailSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidDetailSummaryLecture";
+import MasjidDetailDKMPengajarMobile from "@/pages/linktree/profil/MasjidDetailDKMPengajarProfilMobile";
 
 export default function AppRoutes() {
   return (
@@ -149,6 +150,14 @@ export default function AppRoutes() {
             <Route index element={<MasjidProfile />} />
             <Route path="dkm-pengajar" element={<MasjidDKMPengajarProfil />} />
             <Route path="sambutan" element={<MasjidDetailSpeech />} />
+            {/* Group DKM & Pengajar */}
+            <Route path="dkm-pengajar">
+              <Route index element={<MasjidDKMPengajarProfil />} />
+              <Route
+                path="detail/:id"
+                element={<MasjidDetailDKMPengajarMobile />}
+              />
+            </Route>
             <Route path="detail" element={<MasjidProfileDetail />} />
           </Route>
           {/* Home  */}
