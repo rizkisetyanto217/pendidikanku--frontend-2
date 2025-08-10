@@ -9,6 +9,8 @@ import SocialMediaModal from "@/components/pages/home/SocialMediaModal";
 
 // ✅ import icon dari lucide-react
 import { MapPin, BookOpen, CreditCard, FileText, Phone } from "lucide-react";
+import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
+import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
 
 export default function MasjidkuHome() {
   const { slug } = useParams();
@@ -28,8 +30,11 @@ export default function MasjidkuHome() {
 
   return (
     <>
-      <PublicNavbar masjidName={masjid.masjid_name} showLogin={false} />
-      <div className="w-full max-w-2xl mx-auto min-h-screen pt-20 pb-28 px-4">
+      <PublicNavbar masjidName="MasjidKu ini" showLogin={false} />
+
+      <div className="pt-20"></div>
+      <MasjidkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} />
+      <div className="w-full max-w-2xl mx-auto min-h-screen pb-28 pt-8">
         <div className="flex flex-col items-center text-center">
           <ShimmerImage
             src="/image/Gambar-Masjid.jpeg"
@@ -48,27 +53,27 @@ export default function MasjidkuHome() {
             <CartLink
               label="Profil Kami"
               icon={<MapPin size={18} />}
-              href={`/masjid/${slug}/profil`}
+              href="/profil" // ✅ dari /masjid/:slug/profil → /profil
             />
             <CartLink
               label="Masjid yang telah bekerjasama"
               icon={<BookOpen size={18} />}
-              href={`/masjid/${slug}/jadwal-kajian`}
+              href="/masjid" // ✅ dari /masjid/:slug/jadwal-kajian → /masjid
             />
             <CartLink
               label="Ikut Program Digitalisasi 100 Masjid"
               icon={<CreditCard size={18} />}
-              href={`/masjid/${slug}/donasi`}
+              href="/program" // ✅ dari /masjid/:slug/donasi → /program
             />
             <CartLink
               label="Laporan Keuangan"
               icon={<FileText size={18} />}
-              href={`/masjid/${slug}/donasi`}
+              href="/finansial" // ✅ dari /masjid/:slug/donasi → /finansial
             />
             <CartLink
               label="Kontak Kami"
               icon={<Phone size={18} />}
-              onClick={() => setShowSocialModal(true)}
+              onClick={() => setShowSocialModal(true)} // ✅ tetap modal
             />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -12,6 +12,7 @@ import { useState } from "react";
 export default function MasjidDetailLecture() {
   const { id, slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
   const [showImageModal, setShowImageModal] = useState(false);
@@ -41,12 +42,26 @@ export default function MasjidDetailLecture() {
       </p>
     );
 
+  const handleBack = () => {
+    // 1) prioritas: from (kirim saat push ke halaman ini)
+    if (location.state && (location.state as any).from) {
+      navigate((location.state as any).from);
+      return;
+    }
+    // 2) ada riwayat? (React Router v6 simpan idx di history.state)
+    const idx =
+      (window.history.state && (window.history.state as any).idx) ?? 0;
+    if (idx > 0) {
+      navigate(-1);
+      return;
+    }
+    // 3) fallback
+    navigate(`/masjid/${slug}/jadwal-kajian`);
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
-      <PageHeaderUser
-        title="Detail Kajian"
-        onBackClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
-      />
+      <PageHeaderUser title="Detail Kajian" onBackClick={handleBack} />
 
       <div
         className="rounded-md shadow-sm"

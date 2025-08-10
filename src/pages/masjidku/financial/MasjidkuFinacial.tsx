@@ -1,0 +1,7 @@
+export default function MasjidkuFinancial()  {
+    return (
+        <div className="text-xl font-bold text-green-700">
+            Ini Masjidku Profil
+        </div>
+    )
+}

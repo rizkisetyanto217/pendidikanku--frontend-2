@@ -130,12 +130,23 @@ import MasjidkuHome from "@/pages/masjidku/MasjidkuHome";
 import MasjidMaterialByMonth from "@/pages/linktree/lecture/material/lecture-sessions-by-month/MasjidLectureSessionsByMonth";
 import MasjidDetailSummaryLecture from "@/pages/linktree/lecture/material/lecture/materials/MasjidDetailSummaryLecture";
 import MasjidDetailDKMPengajarMobile from "@/pages/linktree/profil/MasjidDetailDKMPengajarProfilMobile";
+import MasjidkuLayout from "@/layout/MasjidkuLayout";
+import MasjidkuFinancial from "@/pages/masjidku/financial/MasjidkuFinacial";
+import MasjidkuListMasjid from "@/pages/masjidku/masjid/MasjidkuListMasjid";
+import MasjidkuProfil from "@/pages/masjidku/profil/MasjidkuProfil";
+import MasjidkuProgram from "@/pages/masjidku/program/MasjidkuProgram";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* === Public Routes Masjidku === */}
-      <Route path="/" index element={<MasjidkuHome />} />
+      <Route element={<MasjidkuLayout />}>
+        <Route index element={<MasjidkuHome />} />
+        <Route path="finansial" element={<MasjidkuFinancial />} />
+        <Route path="masjid" element={<MasjidkuListMasjid />} />
+        <Route path="profil" element={<MasjidkuProfil />} />
+        <Route path="program" element={<MasjidkuProgram />} />
+      </Route>
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
