@@ -1,12 +1,19 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import PageHeader from "@/components/common/home/PageHeaderDashboard";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
+import {
+  Landmark,
+  BookOpen,
+  Users,
+  ClipboardList,
+  ChevronRight,
+  Megaphone,
+} from "lucide-react";
 
 export default function MasjidProfile() {
   const { slug } = useParams();
@@ -49,10 +56,7 @@ export default function MasjidProfile() {
         }}
       />
 
-      <div
-        className="rounded-xl overflow-hidden pb-20 "
-        // style={{ backgroundColor: themeColors.white1 }}
-      >
+      <div className="rounded-xl overflow-hidden pb-20">
         {/* Gambar Masjid */}
         <ShimmerImage
           src={masjid.masjid_image_url || ""}
@@ -63,52 +67,72 @@ export default function MasjidProfile() {
 
         {/* Informasi Umum */}
         <div
-          className="py-4 md:p-5 space-y-2"
+          className="py-4 md:p-5 space-y-2 text-base"
           style={{ color: themeColors.black1 }}
         >
-          <h1 style={{ color: themeColors.primary }}>
-            🏛️ {masjid.masjid_name}
+          <h1
+            className="text-xl md:text-2xl font-semibold flex items-center gap-2"
+            style={{ color: themeColors.primary }}
+          >
+            <Landmark size={20} style={{ color: themeColors.primary }} />
+            <span>{masjid.masjid_name}</span>
           </h1>
-          <p style={{ color: themeColors.silver2 }}>
+          <p className="text-base" style={{ color: themeColors.silver2 }}>
             Dikelola oleh DKM Masjid untuk umat muslim
           </p>
-          <p style={{ color: themeColors.black2, fontWeight: 500 }}>
+          <p
+            className="text-base font-medium"
+            style={{ color: themeColors.black2 }}
+          >
             {masjid.masjid_location}
           </p>
-          <p style={{ color: themeColors.silver2, fontSize: 12 }}>
+          <p className="text-base" style={{ color: themeColors.silver2 }}>
             Bergabung pada April 2025
           </p>
         </div>
 
         {/* Profil Lembaga */}
         <div
-          className="border-t-[5px] py-4 md:p-5 space-y-2"
+          className="border-t-[5px] py-4 md:p-5 space-y-2 text-base"
           style={{ borderColor: themeColors.white3 }}
         >
-          <h2 style={{ color: themeColors.quaternary }}>📘 Profil Lembaga</h2>
-          <p style={{ color: themeColors.black2, fontSize: 14 }}>
+          <h2
+            className="text-lg font-semibold flex items-center gap-2"
+            style={{ color: themeColors.quaternary }}
+          >
+            <BookOpen size={18} />
+            <span>Profil Lembaga</span>
+          </h2>
+          <p className="text-base" style={{ color: themeColors.black2 }}>
             {masjid.masjid_profile_story ||
               "Masjid ini didirikan dengan tujuan menjadi tempat ibadah dan pusat kegiatan umat Islam di lingkungan sekitarnya."}
           </p>
           <button
             onClick={() => navigate("detail")}
+            className="mt-2 px-4 py-2 text-base rounded hover:opacity-80 border flex items-center gap-2"
             style={{
               borderColor: themeColors.quaternary,
               color: themeColors.quaternary,
             }}
-            className="mt-2 px-4 py-2 text-sm rounded hover:opacity-80 border"
           >
-            Profil Lengkap
+            <span>Profil Lengkap</span>
+            <ChevronRight size={18} />
           </button>
         </div>
 
         {/* Pengurus & Pengajar */}
         <div
-          className="border-t-[5px] py-4 md:p-5 space-y-2"
+          className="border-t-[5px] py-4 md:p-5 space-y-2 text-base"
           style={{ borderColor: themeColors.white3 }}
         >
-          <h2 style={{ color: themeColors.primary }}>📄 Pengurus & Pengajar</h2>
-          <p style={{ color: themeColors.black2, fontSize: 14 }}>
+          <h2
+            className="text-lg font-semibold flex items-center gap-2"
+            style={{ color: themeColors.primary }}
+          >
+            <Users size={18} />
+            <span>Pengurus & Pengajar</span>
+          </h2>
+          <p className="text-base" style={{ color: themeColors.black2 }}>
             Pengurus dan Pengajar berasal dari masyarakat setempat yang memiliki
             tujuan memajukan Masjid.
           </p>
@@ -116,7 +140,7 @@ export default function MasjidProfile() {
           <div className="space-y-2 pt-1">
             <button
               onClick={() => navigate("dkm-pengajar")}
-              className="w-full flex justify-between items-center p-3 rounded hover:opacity-80"
+              className="w-full flex justify-between items-center p-3 rounded hover:opacity-80 text-base"
               style={{
                 backgroundColor: themeColors.white2,
                 borderColor: themeColors.white3,
@@ -124,28 +148,28 @@ export default function MasjidProfile() {
                 color: themeColors.black1,
               }}
             >
-              <span className="flex items-center space-x-2">
-                <span>📋</span>
+              <span className="flex items-center gap-2">
+                <ClipboardList size={18} />
                 <span>Profil Pengurus Masjid dan Pengajar</span>
               </span>
-              <span>›</span>
+              <ChevronRight size={18} style={{ color: themeColors.silver2 }} />
             </button>
           </div>
         </div>
 
         {/* Sambutan & Donasi */}
         <div
-          className="border-t-[5px] py-4 md:p-5 space-y-3"
+          className="border-t-[5px] py-4 md:p-5 space-y-3 text-base"
           style={{ borderColor: themeColors.white3 }}
         >
           <h2
-            className="flex items-center space-x-2"
+            className="flex items-center gap-2 text-lg font-semibold"
             style={{ color: themeColors.quaternary }}
           >
-            <span>🧑‍🤝‍🧑</span>
+            <Megaphone size={18} />
             <span>Sambutan dan Motivasi</span>
           </h2>
-          <p style={{ color: themeColors.black2, fontSize: 14 }}>
+          <p className="text-base" style={{ color: themeColors.black2 }}>
             Tulisan dari pengurus, pengajar dan jamaah{" "}
             <strong>{masjid.masjid_name}</strong>
           </p>
@@ -153,46 +177,51 @@ export default function MasjidProfile() {
           {greetings.map((greet, i) => (
             <div
               key={i}
-              className="p-3 rounded-lg text-sm space-y-1"
+              className="p-3 rounded-lg text-base space-y-1"
               style={{
                 backgroundColor: themeColors.white2,
                 borderColor: themeColors.white3,
                 borderWidth: 1,
               }}
             >
-              <p style={{ color: themeColors.black1, fontWeight: 600 }}>
+              <p
+                className="font-semibold"
+                style={{ color: themeColors.black1 }}
+              >
                 {greet.name}
               </p>
-              <p style={{ color: themeColors.silver2, fontSize: 12 }}>
+              <p className="text-base" style={{ color: themeColors.silver2 }}>
                 {greet.role}
               </p>
-              <p style={{ color: themeColors.black2 }}>{greet.message}</p>
+              <p className="text-base" style={{ color: themeColors.black2 }}>
+                {greet.message}
+              </p>
             </div>
           ))}
 
           <button
             onClick={() => navigate("sambutan")}
+            className="w-full text-base rounded px-4 py-2 font-medium flex justify-between items-center border hover:opacity-80"
             style={{
               borderColor: themeColors.quaternary,
               color: themeColors.quaternary,
             }}
-            className="w-full text-sm rounded px-4 py-2 font-medium flex justify-between items-center border hover:opacity-80"
           >
             <span>Selengkapnya</span>
-            <span>›</span>
+            <ChevronRight size={18} />
           </button>
 
-          {/* <button
+          {/* 
+          <button
             onClick={() => navigate(`/masjid/${slug}/donasi`)}
-            style={{
-              backgroundColor: themeColors.primary,
-              color: themeColors.white1,
-            }}
-            className="w-full py-3 rounded font-semibold hover:opacity-90"
+            className="w-full py-3 rounded font-semibold hover:opacity-90 text-base"
+            style={{ backgroundColor: themeColors.primary, color: themeColors.white1 }}
           >
             Donasi
-          </button> */}
+          </button> 
+          */}
         </div>
+
         {/* Bottom Navigation */}
         <BottomNavbar />
       </div>

@@ -42,6 +42,9 @@ interface Masjid {
   masjid_tiktok_url?: string;
   masjid_donation_link?: string;
   masjid_created_at: string;
+  // ✅ tambah ini
+  masjid_whatsapp_group_ikhwan_url?: string;
+  masjid_whatsapp_group_akhwat_url?: string;
 }
 
 interface Kajian {
@@ -436,6 +439,11 @@ export default function PublicLinktree() {
                   masjid_youtube_url: masjidData.masjid_youtube_url,
                   masjid_facebook_url: (masjidData as any).masjid_facebook_url, // jika ada di tipe, pindahkan ke interface Masjid di atas
                   masjid_tiktok_url: (masjidData as any).masjid_tiktok_url,
+                  // ✅ kirim juga group
+                  masjid_whatsapp_group_ikhwan_url:
+                    masjidData.masjid_whatsapp_group_ikhwan_url,
+                  masjid_whatsapp_group_akhwat_url:
+                    masjidData.masjid_whatsapp_group_akhwat_url,
                 }}
               />
             </div>

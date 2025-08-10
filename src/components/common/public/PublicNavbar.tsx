@@ -1,37 +1,48 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublicUserDropdown from "./UserDropDown";
-import { MoreVertical } from "lucide-react";
 
 interface PublicNavbarProps {
   masjidName: string;
+  masjidSlug?: string; // 🔁 optional, biar bisa fallback dari URL
   hideOnScroll?: boolean;
 }
 
 export default function PublicNavbar({
   masjidName,
+  masjidSlug,
   hideOnScroll = false,
 }: PublicNavbarProps) {
   const navigate = useNavigate();
+  const { slug: slugFromParams } = useParams<{ slug?: string }>();
+
+  // 🔁 Resolve slug dengan prioritas: props → useParams → pathname
+  const resolvedSlug = useMemo(() => {
+    if (masjidSlug && masjidSlug.trim()) return masjidSlug.trim();
+    if (slugFromParams && slugFromParams.trim()) return slugFromParams.trim();
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    // cari pola /masjid/:slug/...
+    const masjidIdx = parts.indexOf("masjid");
+    if (masjidIdx !== -1 && parts[masjidIdx + 1]) return parts[masjidIdx + 1];
+    return ""; // terakhir kalau benar2 ga ketemu
+  }, [masjidSlug, slugFromParams]);
+
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
   const { data: user, isLoading } = useCurrentUser();
   const isLoggedIn = !!user;
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ⬇️ Sembunyikan navbar saat scroll (jika aktif)
   useEffect(() => {
     if (!hideOnScroll) return;
-
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if (!ticking.current) {
@@ -45,24 +56,32 @@ export default function PublicNavbar({
         ticking.current = true;
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hideOnScroll]);
 
-  // ⬇️ Tutup dropdown jika klik di luar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setDropdownOpen(false);
+        // setDropdownOpen(false); // kalau pakai state dropdown
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLoginClick = () => {
+    if (resolvedSlug) {
+      navigate(`/masjid/${resolvedSlug}/login`);
+    } else {
+      // fallback aman kalau slug belum kebaca → arahkan ke /login umum
+      console.warn("[PublicNavbar] masjidSlug unresolved, fallback to /login");
+      navigate(`/login`);
+    }
+  };
 
   return (
     <div
@@ -73,30 +92,26 @@ export default function PublicNavbar({
     >
       <h2 className="text-lg font-semibold">{masjidName}</h2>
 
-      <div className="flex items-center gap-2">
-        {/* 🔒 Tampilkan tombol Login jika belum login */}
+      <div className="flex items-center gap-2" ref={dropdownRef}>
         {!isLoading && isLoggedIn ? (
           <PublicUserDropdown />
         ) : (
           <div className="flex items-center gap-2">
-            {/* ⬅️ Tampilkan Login langsung */}
             <button
-              onClick={() => navigate("/login")}
-              className="text-sm font-semibold px-4 py-2 rounded-md shadow-sm hover:opacity-90 transition"
+              onClick={handleLoginClick}
+              disabled={!resolvedSlug} // 🔒 cegah klik saat slug belum siap
+              className="text-sm font-semibold px-4 py-2 rounded-md shadow-sm hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: themeColors.primary,
                 color: themeColors.white1,
               }}
+              title={!resolvedSlug ? "Menyiapkan halaman..." : "Login"}
             >
               Login
             </button>
-
-            {/* Tetap tampilkan dropdown titik tiga (MoreVertical) */}
             <PublicUserDropdown variant="icon" />
           </div>
         )}
-
-     
       </div>
     </div>
   );

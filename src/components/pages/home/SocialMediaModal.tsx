@@ -12,6 +12,9 @@ interface SocialMediaModalProps {
     masjid_youtube_url?: string;
     masjid_facebook_url?: string;
     masjid_tiktok_url?: string;
+    // ✅ tambahkan ini
+    masjid_whatsapp_group_ikhwan_url?: string;
+    masjid_whatsapp_group_akhwat_url?: string;
   };
 }
 
@@ -21,13 +24,16 @@ type ItemConf = {
   prefix?: string;
   iconSrc: string;
   normalize?: (v: string) => string;
+  // ✅ untuk kasus khusus (WhatsApp group)
+  customHref?: (raw: string) => string;
 };
 
-/* --- BUKAN hook: aman terhadap urutan hooks --- */
+/* --- fungsi biasa: aman untuk hooks order --- */
 function toHref(conf: ItemConf, rawValue: string) {
   const v = conf.normalize ? conf.normalize(rawValue.trim()) : rawValue.trim();
   const isURL = /^https?:\/\//i.test(v);
   if (isURL) return v;
+  if (conf.customHref) return conf.customHref(v);
   if (conf.prefix) return `${conf.prefix}${v}`;
   return `https://${v}`;
 }
@@ -73,6 +79,23 @@ export default function SocialMediaModal({
       prefix: "https://tiktok.com/@",
       iconSrc: "/icons/tiktok.svg",
       normalize: (v) => v.replace(/^@/, ""),
+    },
+
+    // ✅ Grup WhatsApp Ikhwan
+    {
+      key: "masjid_whatsapp_group_ikhwan_url",
+      label: "Grup WhatsApp Ikhwan",
+      iconSrc: "/icons/whatsapp.svg",
+      customHref: (v) =>
+        /^https?:\/\//i.test(v) ? v : `https://chat.whatsapp.com/${v}`,
+    },
+    // ✅ Grup WhatsApp Akhwat
+    {
+      key: "masjid_whatsapp_group_akhwat_url",
+      label: "Grup WhatsApp Akhwat",
+      iconSrc: "/icons/whatsapp.svg",
+      customHref: (v) =>
+        /^https?:\/\//i.test(v) ? v : `https://chat.whatsapp.com/${v}`,
     },
   ];
 

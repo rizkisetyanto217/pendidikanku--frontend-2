@@ -249,11 +249,6 @@ export default function MasjidSholat({
               )}
             </tbody>
           </table>
-
-          <p className="text-xs mt-4 opacity-80 text-right">
-            Lokasi: {scheduleData?.lokasi || "-"} • Tanggal:{" "}
-            {jadwal?.tanggal || "-"}
-          </p>
         </div>
       </div>
 

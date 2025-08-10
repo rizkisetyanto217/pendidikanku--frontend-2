@@ -1,37 +1,56 @@
 // MasjidProfileDetail.tsx
-import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import { useNavigate } from "react-router-dom";
+import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import { useNavigate, useParams } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import PageHeaderUser from "@/components/common/home/PageHeaderUser";
+import { useQuery } from "@tanstack/react-query";
+import axios from "@/lib/axios";
+import parse from "html-react-parser";
+import cleanTranscriptHTML from "@/constants/cleanTransciptHTML"; // ← pakai util clean HTML
 
 export default function MasjidProfileDetail() {
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
 
-  // Dummy data
-  const data = {
-    tahun_didirikan: "2020",
-    latar_belakang:
-      "Masjid At-Taqwa didirikan pada tahun 2000 dengan tujuan untuk menjadi tempat ibadah untuk warga Ciracas dan sekitarnya.",
-    visi: "Masjid At-Taqwa didirikan pada tahun 2000 dengan tujuan untuk menjadi tempat ibadah untuk warga Ciracas dan sekitarnya.",
-    misi: "Masjid At-Taqwa didirikan pada tahun 2000 dengan tujuan untuk menjadi tempat ibadah untuk warga Ciracas dan sekitarnya.",
-    lainnya:
-      "Masjid At-Taqwa didirikan pada tahun 2000 dengan tujuan untuk menjadi tempat ibadah untuk warga Ciracas dan sekitarnya.",
-  };
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["masjid-profile-detail", slug],
+    queryFn: async () => {
+      const res = await axios.get(`/public/masjid-profiles/by-slug/${slug}`);
+      return res.data.data as {
+        masjid_profile_founded_year?: number;
+        masjid_profile_description?: string;
+      };
+    },
+    enabled: !!slug,
+  });
 
-  const InfoItem = ({ label, content }: { label: string; content: string }) => (
+  const InfoItem = ({
+    label,
+    content,
+  }: {
+    label: string;
+    content: React.ReactNode;
+  }) => (
     <div className="mb-4">
       <p style={{ color: themeColors.quaternary, fontWeight: 600 }}>{label}</p>
-      <p style={{ color: themeColors.black1, fontSize: "0.875rem" }}>
+      <div
+        className="text-base leading-relaxed"
+        style={{ color: themeColors.black1 }}
+      >
         {content}
-      </p>
+      </div>
     </div>
   );
 
+  // Bersihkan HTML sebelum render
+  const cleanedDesc = data?.masjid_profile_description
+    ? cleanTranscriptHTML(data.masjid_profile_description)
+    : "";
+
   return (
-    <div className="min-h-screenrounded-md">
+    <div className="min-h-screen rounded-md">
       <div className="mx-auto">
         <PageHeaderUser
           title="Profil Lembaga"
@@ -41,11 +60,22 @@ export default function MasjidProfileDetail() {
         />
 
         <div className="p-2">
-          <InfoItem label="Tahun Didirikan" content={data.tahun_didirikan} />
-          <InfoItem label="Latar Belakang" content={data.latar_belakang} />
-          <InfoItem label="Visi" content={data.visi} />
-          <InfoItem label="Misi" content={data.misi} />
-          <InfoItem label="Lainnya" content={data.lainnya} />
+          {isLoading ? (
+            <p>Memuat data…</p>
+          ) : isError ? (
+            <p>Gagal memuat data profil masjid.</p>
+          ) : (
+            <>
+              <InfoItem
+                label="Tahun Didirikan"
+                content={data?.masjid_profile_founded_year ?? "-"}
+              />
+              <InfoItem
+                label="Deskripsi"
+                content={cleanedDesc ? parse(cleanedDesc) : "-"}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
