@@ -20,8 +20,16 @@ import {
   Calculator,
   Book,
   XCircle,
+  Info,
+  PlayCircle,
+  ListChecks,
+  NotebookText,
+  MessageSquare,
+  MessageSquarePlus,
+  FileText,
+  Award,
 } from "lucide-react";
-import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList"; // ⬅️ sesuaikan path import kamu
+import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
 import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
 import ShareBCLectureButton from "@/components/common/public/ShareBCLectureButton";
 
@@ -51,6 +59,7 @@ interface SessionAPI {
   lecture_title?: string;
   user_grade_result?: number | null;
   user_attendance_status?: number | null;
+  lecture_session_approved_by_dkm_at: string | null; // ✅ sumber status
 }
 interface SessionsBuckets {
   lecture: Lecture;
@@ -65,12 +74,13 @@ const fmtTime = (iso: string) =>
     timeStyle: "short",
   });
 
+/** Map API → item list; status diambil dari approved_by_dkm */
 function toLectureItem(
   s: SessionAPI,
   teacherNames: string,
-  isFinished: boolean,
   meta: { lectureId?: string; masjidName?: string } = {}
 ): LectureMaterialItem {
+  const approved = !!s.lecture_session_approved_by_dkm_at?.trim();
   return {
     id: s.lecture_session_id || s.lecture_session_slug,
     lecture_session_slug: s.lecture_session_slug,
@@ -78,20 +88,16 @@ function toLectureItem(
     title: s.lecture_session_title,
     teacher: teacherNames,
     time: fmtTime(s.lecture_session_start_time),
-
-    // ✅ fields yang sebelumnya hilang
     location: s.lecture_session_place || "-",
     lectureId: meta.lectureId ?? "",
     masjidName: meta.masjidName ?? "",
-
-    // opsional
     attendanceStatus:
       typeof s.user_attendance_status === "number"
         ? s.user_attendance_status
         : undefined,
     gradeResult:
       typeof s.user_grade_result === "number" ? s.user_grade_result : undefined,
-    status: isFinished ? "tersedia" : "proses",
+    status: approved ? "tersedia" : "proses",
   };
 }
 
@@ -134,10 +140,12 @@ export default function MasjidLectureMaterial() {
 
   const lecture = lectureWrap?.lecture;
   const userProgress = lectureWrap?.user_progress;
-  const teacherNames =
-    Array.isArray(lecture?.lecture_teachers) && lecture!.lecture_teachers.length
-      ? [...new Set(lecture!.lecture_teachers.map((t) => t.name))].join(", ")
-      : "-";
+
+  const teacherNames = useMemo(() => {
+    const arr = lecture?.lecture_teachers ?? [];
+    if (!arr.length) return "-";
+    return [...new Set(arr.map((t) => t.name))].join(", ");
+  }, [lecture?.lecture_teachers]);
 
   /* ---------- Sessions buckets ---------- */
   const {
@@ -150,9 +158,7 @@ export default function MasjidLectureMaterial() {
       const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
       const res = await axios.get(
         `/public/lecture-sessions-u/by-lecture-slug/${lecture_slug}/all`,
-        {
-          headers,
-        }
+        { headers }
       );
       return res.data;
     },
@@ -162,12 +168,12 @@ export default function MasjidLectureMaterial() {
 
   const upcomingItems: LectureMaterialItem[] = useMemo(() => {
     const list = buckets?.upcoming ?? [];
-    return list.map((s) => toLectureItem(s, teacherNames, false));
+    return list.map((s) => toLectureItem(s, teacherNames));
   }, [buckets?.upcoming, teacherNames]);
 
   const finishedItems: LectureMaterialItem[] = useMemo(() => {
     const list = buckets?.finished ?? [];
-    return list.map((s) => toLectureItem(s, teacherNames, true));
+    return list.map((s) => toLectureItem(s, teacherNames));
   }, [buckets?.finished, teacherNames]);
 
   /* ---------- UI ---------- */
@@ -204,7 +210,7 @@ export default function MasjidLectureMaterial() {
         {/* ======= Navigasi ======= */}
         <SwiperSlide>
           <div
-            className="rounded-lg p-4 shadow mt-4"
+            className="rounded-lg p-4 shadow mt-4 relative" // ✅ relative untuk anchor tombol share
             style={{ backgroundColor: theme.white1 }}
           >
             <h2
@@ -229,7 +235,7 @@ export default function MasjidLectureMaterial() {
                   className="text-base space-y-2"
                   style={{ color: theme.black2 }}
                 >
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-start gap-2 pt-4">
                     <BookOpen
                       size={18}
                       style={{ color: theme.black1, marginTop: 2 }}
@@ -269,16 +275,16 @@ export default function MasjidLectureMaterial() {
                       Mei 2024 – Sekarang
                     </p>
                   </div>
-                  <div className="flex items-start gap-2">
+                  {/* <div className="flex items-start gap-2">
                     <MapPin
                       size={18}
                       style={{ color: theme.black1, marginTop: 2 }}
                     />
                     <p>
                       <strong style={{ color: theme.black1 }}>Lokasi:</strong>{" "}
-                      Masjid At‑Taqwa, Ciracas
+                      Masjid At-Taqwa, Ciracas
                     </p>
-                  </div>
+                  </div> */}
 
                   {!!userProgress && (
                     <>
@@ -319,21 +325,20 @@ export default function MasjidLectureMaterial() {
                     <span>Sertifikat belum tersedia</span>
                   </div>
                 )}
-                {/* tombol share pojok kanan */}
-                <div className="absolute top-3 right-3">
+
+                {/* tombol share di pojok kanan kartu */}
+                <div className="absolute top-4 right-2">
                   <ShareBCLectureButton
                     variant="ghost"
                     buttonLabel="Bagikan"
                     lectureTitle={lecture?.lecture_title || "Tema Kajian"}
                     teacherNames={teacherNames}
-                    // otomatis pilih sesi terdekat dari upcoming
                     sessions={(buckets?.upcoming || []).map((s) => ({
                       startTime: s.lecture_session_start_time,
                       place: s.lecture_session_place,
                     }))}
-                    // atau bisa langsung nextDateIso jika sudah ada:
-                    // nextDateIso={someIso}
                     url={`${window.location.origin}/masjid/${slug}/tema/${lecture_slug}`}
+                    masjidSlug={slug}
                   />
                 </div>
               </div>
@@ -349,18 +354,43 @@ export default function MasjidLectureMaterial() {
             <div className="space-y-2">
               {[
                 ...(lecture?.lecture_is_certificate_generated
-                  ? [{ label: "Sertifikat", path: "ujian", highlight: true }]
+                  ? [
+                      {
+                        label: "Sertifikat",
+                        path: "ujian",
+                        highlight: true,
+                        icon: Award,
+                      },
+                    ]
                   : []),
-                { label: "Informasi", path: "informasi" },
-                { label: "Video Audio", path: "video-audio" },
-                { label: "Latihan Soal", path: "latihan-soal" },
-                { label: "Ringkasan", path: "ringkasan" },
-                { label: "Tanya Jawab", path: "tanya-jawab" },
-                { label: "Masukan dan Saran", path: "masukan-saran" },
-                { label: "Dokumen", path: "dokumen" },
+                { label: "Informasi", path: "informasi", icon: Info },
+                { label: "Video Audio", path: "video-audio", icon: PlayCircle },
+                {
+                  label: "Latihan Soal",
+                  path: "latihan-soal",
+                  icon: ListChecks,
+                },
+                { label: "Ringkasan", path: "ringkasan", icon: NotebookText },
+                {
+                  label: "Tanya Jawab",
+                  path: "tanya-jawab",
+                  icon: MessageSquare,
+                },
+                {
+                  label: "Masukan dan Saran",
+                  path: "masukan-saran",
+                  icon: MessageSquarePlus,
+                },
+                { label: "Dokumen", path: "dokumen", icon: FileText },
               ].map((item) => {
                 const isSertifikat = item.label === "Sertifikat";
-                const isAvailable = item.highlight;
+                const isAvailable = (item as any).highlight;
+                const Icon = item.icon as React.ComponentType<{
+                  size?: number;
+                  className?: string;
+                  style?: React.CSSProperties;
+                }>;
+
                 return (
                   <div
                     key={item.label}
@@ -386,10 +416,26 @@ export default function MasjidLectureMaterial() {
                           : theme.black1,
                     }}
                   >
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
+                      {/* optional confetti untuk sertifikat */}
                       {isSertifikat && isAvailable && <span>🎉</span>}
+
+                      {/* ⬇️ icon per item */}
+                      {Icon && (
+                        <Icon
+                          size={18}
+                          style={{
+                            color:
+                              isSertifikat && isAvailable
+                                ? theme.specialColor
+                                : theme.black1,
+                          }}
+                        />
+                      )}
+
                       <span>{item.label}</span>
                     </div>
+
                     {isSertifikat && isAvailable ? (
                       <span
                         className="text-xs font-semibold px-2 py-0.5 rounded-full"

@@ -220,39 +220,40 @@ export default function PublicLinktree() {
 
       <div className="w-full max-w-2xl mx-auto min-h-screen pb-28 overflow-auto bg-cover bg-no-repeat bg-center pt-16">
         <div className="p-4">
-          <h2
-            className="text-base font-semibold mb-4 mt-4"
-            style={{ color: themeColors.black1 }}
-          >
-            Kajian Mendatang
-          </h2>
-
           {/* Slider Kajian */}
           <div className="relative">
+            <h2
+              className="text-lg font-semibold mb-4 mt-4"
+              style={{ color: themeColors.black1 }}
+            >
+              Kajian Mendatang
+            </h2>
             {kajianList && kajianList.length > 0 && (
               <div className="relative">
                 {showLeft && (
                   <button
                     onClick={scrollLeft}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                    className="absolute left-1 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800/80 hover:bg-white/95 p-1.5 rounded-full shadow"
+                    aria-label="Scroll kiri"
                   >
-                    <ChevronLeft size={20} />
+                    <ChevronLeft size={18} />
                   </button>
                 )}
 
                 {showRight && (
                   <button
                     onClick={scrollRight}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 bg-opacity-70 hover:bg-opacity-100 p-2 rounded-full shadow"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800/80 hover:bg-white/95 p-1.5 rounded-full shadow"
+                    aria-label="Scroll kanan"
                   >
-                    <ChevronRight size={20} />
+                    <ChevronRight size={18} />
                   </button>
                 )}
 
                 <div className="overflow-hidden">
                   <div
                     ref={sliderRef}
-                    className="flex overflow-x-auto no-scrollbar space-x-4 pr-4 snap-x scroll-smooth"
+                    className="flex overflow-x-auto no-scrollbar gap-3 pr-3 snap-x scroll-smooth"
                   >
                     {kajianList.map((kajian, idx) => (
                       <div
@@ -262,26 +263,40 @@ export default function PublicLinktree() {
                             `/masjid/${slug}/jadwal-kajian/${kajian.lecture_session_id}`
                           )
                         }
-                        className="flex-shrink-0 snap-start w-[320px] rounded-lg overflow-hidden shadow cursor-pointer hover:opacity-90 transition"
-                        style={{ backgroundColor: themeColors.white1 }}
+                        className="flex-shrink-0 snap-start w-[200px] sm:w-[220px] md:w-[240px] rounded-lg overflow-hidden border cursor-pointer hover:opacity-90 transition"
+                        style={{
+                          backgroundColor: themeColors.white1,
+                          borderColor: themeColors.silver1,
+                        }}
                       >
                         <ShimmerImage
                           src={kajian.lecture_session_image_url || ""}
                           alt={kajian.lecture_session_title}
-                          className="w-full aspect-[3/4] rounded-lg"
+                          className="w-full aspect-[4/5] object-cover"
                         />
-                        <div className="p-3">
+                        <div className="p-2.5">
                           <h2
-                            className="font-semibold text-base truncate"
+                            className="font-semibold text-sm line-clamp-2"
                             style={{ color: themeColors.black1 }}
+                            title={kajian.lecture_session_title}
                           >
                             {kajian.lecture_session_title}
                           </h2>
+
+                          {/* Nama pengajar */}
                           <p
-                            className="text-base"
+                            className="text-xs mt-1 line-clamp-1"
+                            style={{ color: themeColors.black2 }}
+                            title={kajian.lecture_session_teacher_name}
+                          >
+                            {kajian.lecture_session_teacher_name || "-"}
+                          </p>
+
+                          {/* Waktu */}
+                          <p
+                            className="text-xs line-clamp-1"
                             style={{ color: themeColors.black2 }}
                           >
-                            {kajian.lecture_session_teacher_name} •{" "}
                             {kajian.lecture_session_start_time ? (
                               <FormattedDate
                                 value={kajian.lecture_session_start_time}
@@ -290,25 +305,19 @@ export default function PublicLinktree() {
                               "-"
                             )}
                           </p>
-                          <p
-                            className="text-base"
-                            style={{ color: themeColors.black2 }}
-                          >
-                            {kajian.lecture_session_place}
-                          </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-4 text-right ">
+                <div className="mt-3 text-right">
                   <span
-                    className="text-sm underline cursor-pointer hover:text-primary transition"
-                    style={{ color: themeColors.quaternary }}
+                    className="text-sm underline cursor-pointer hover:opacity-80 transition"
+                    style={{ color: themeColors.black2 }}
                     onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
                   >
-                    Kajian Terbaru Lainnya
+                    Lihat kajian lainnya
                   </span>
                 </div>
               </div>
@@ -383,7 +392,7 @@ export default function PublicLinktree() {
               <button
                 onClick={handleShareClick}
                 className="flex items-center space-x-1 text-sm"
-                style={{ color: themeColors.quaternary }}
+                style={{ color: themeColors.black2 }}
               >
                 <Share size={16} />
                 <span>Bagikan</span>
@@ -396,7 +405,7 @@ export default function PublicLinktree() {
           {/* --- SECTION: MENU UTAMA --- */}
           <div>
             <h2
-              className="text-base font-semibold mb-2"
+              className="text-lg font-semibold mb-2"
               style={{ color: themeColors.black1 }}
             >
               Menu Utama

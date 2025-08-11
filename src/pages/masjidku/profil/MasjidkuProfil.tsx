@@ -17,7 +17,7 @@ export default function MasjidkuProfil() {
       />
 
       <div
-        className="max-w-3xl mx-auto p-6 space-y-6 rounded-xl "
+        className="max-w-3xl mx-auto space-y-6 rounded-xl "
         style={{
           backgroundColor: theme.white1, // kartu latar mengikuti tema
           borderColor: theme.white3, // garis halus

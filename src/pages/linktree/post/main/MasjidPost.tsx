@@ -235,12 +235,12 @@ export default function MasjidPost() {
               <div className="space-y-1 p-4">
                 {/* <Link to={`/masjid/${slug}/post/${post.post_id}`}> */}
                 <p
-                  className="font-semibold text-sm"
+                  className="font-semibold text-base"
                   style={{ color: themeColors.black2 }}
                 >
                   {post.post_theme?.post_theme_name || "Tanpa Tema"}
                 </p>
-                <p className="text-sm" style={{ color: themeColors.silver4 }}>
+                <p className="text-base" style={{ color: themeColors.silver4 }}>
                   <strong>{post.post_title}</strong> – {post.post_content}
                 </p>
                 {/* </Link> */}
@@ -248,7 +248,7 @@ export default function MasjidPost() {
                 <FormattedDate
                   value={post.post_created_at}
                   fullMonth
-                  className="text-xs pt-1"
+                  className="text-sm pt-1"
                 />
 
                 <div className="flex items-center justify-between pt-2 text-xs">

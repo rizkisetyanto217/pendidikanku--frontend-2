@@ -17,6 +17,9 @@ export default function SholatScheduleCard({
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
+  const textColor = "#000"; // ⬅️ semua font hitam
+  const dividerColor = "#00000033"; // garis pembatas transparan
+
   const [now, setNow] = useState(new Date());
   const [nextPrayer, setNextPrayer] = useState<{
     name: string;
@@ -25,9 +28,7 @@ export default function SholatScheduleCard({
   const [showingCurrentPrayer, setShowingCurrentPrayer] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
+    const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -79,7 +80,7 @@ export default function SholatScheduleCard({
       time: toDate(jadwalTomorrow.subuh, tomorrow),
     };
 
-    return [...scheduleToday, subuhBesok]; // total 6 item
+    return [...scheduleToday, subuhBesok];
   };
 
   const { data: hijriDate, isLoading: loadingHijri } = useQuery({
@@ -94,43 +95,29 @@ export default function SholatScheduleCard({
     staleTime: 1000 * 60 * 15,
   });
 
-  // Logic untuk tentukan waktu sholat berikutnya (dengan 15 menit delay setelah masuk waktu)
   useEffect(() => {
     if (!schedule) return;
 
-    const updatedPrayer = schedule.find((item, index) => {
-      const currentPrayerTime = item.time;
-      const nextPrayerTime =
-        schedule[index + 1]?.time ||
-        new Date(currentPrayerTime.getTime() + 24 * 60 * 60 * 1000); // default ke besok
-
-      const isBeforePrayer = now < currentPrayerTime;
-
-      const isDuringPrayer =
-        now >= currentPrayerTime &&
-        now < new Date(currentPrayerTime.getTime() + 15 * 60 * 1000);
-
-      if (isBeforePrayer) {
+    const updated = schedule.find((item) => {
+      const start = item.time;
+      const during =
+        now >= start && now < new Date(start.getTime() + 15 * 60 * 1000);
+      if (now < start) {
         setShowingCurrentPrayer(false);
         return true;
       }
-
-      if (isDuringPrayer) {
+      if (during) {
         setShowingCurrentPrayer(true);
         return true;
       }
-
       return false;
     });
 
-    if (updatedPrayer) {
-      setNextPrayer(updatedPrayer);
-    }
+    if (updated) setNextPrayer(updated);
   }, [now, schedule]);
 
   const getCountdown = () => {
     if (!nextPrayer) return null;
-
     const target = showingCurrentPrayer
       ? new Date(nextPrayer.time.getTime() + 15 * 60 * 1000)
       : nextPrayer.time;
@@ -140,17 +127,12 @@ export default function SholatScheduleCard({
 
     const totalMinutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
-
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    if (hours > 0) {
-      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
-        seconds
-      ).padStart(2, "0")}`;
-    } else {
-      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    }
+    return hours > 0
+      ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+      : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
   return (
@@ -158,21 +140,24 @@ export default function SholatScheduleCard({
       <div
         className="rounded-xl p-3 grid grid-cols-3 gap-3 items-center w-full max-w-md shadow-md cursor-pointer hover:opacity-90 transition"
         style={{
-          backgroundColor: theme.secondary,
-          color: theme.white1,
+          backgroundColor: theme.tertiary, // background tetap pakai theme
+          color: textColor, // ⬅️ semua teks hitam
           maxWidth: "100%",
-          gridTemplateColumns: "0.5fr 1.5fr 1.5fr", // Grid 1 lebih kecil
+          gridTemplateColumns: "0.5fr 1.5fr 1.5fr",
         }}
       >
         {/* Grid 1: Waktu Sholat */}
         <div
           className="text-left border-r pr-3"
-          style={{ borderColor: `${theme.white1}80` }}
+          style={{ borderColor: dividerColor }}
         >
-          <p className="text-sm font-semibold">
+          <p className="text-sm font-semibold" style={{ color: textColor }}>
             {loadingPrayer || !nextPrayer ? "..." : nextPrayer.name}
           </p>
-          <p className="text-xl font-bold leading-tight">
+          <p
+            className="text-xl font-bold leading-tight"
+            style={{ color: textColor }}
+          >
             {loadingPrayer || !nextPrayer
               ? "--:--"
               : nextPrayer.time.toLocaleTimeString("id-ID", {
@@ -186,23 +171,30 @@ export default function SholatScheduleCard({
         {/* Grid 2: Tanggal Hijriah & Lokasi */}
         <div
           className="text-left border-r px-3"
-          style={{ borderColor: `${theme.white1}80` }}
+          style={{ borderColor: dividerColor }}
         >
-          <p className="text-sm font-semibold">
+          <p className="text-sm font-semibold" style={{ color: textColor }}>
             {loadingHijri ? "Memuat tanggal..." : hijriDate}
           </p>
-          <p className="text-xs">{location}</p>
+          <p className="text-xs" style={{ color: textColor }}>
+            {location}
+          </p>
         </div>
 
         {/* Grid 3: Hitung Mundur + CTA */}
         <div className="text-left pl-3 space-y-1">
           {nextPrayer && (
-            <p className="text-sm leading-tight">
+            <p className="text-sm leading-tight" style={{ color: textColor }}>
               {showingCurrentPrayer ? "Waktu Sholat Berlangsung" : "Menuju"}{" "}
               {nextPrayer.name}: {getCountdown()}
             </p>
           )}
-          <p className="text-xs underline opacity-80">Lihat Jadwal Lengkap</p>
+          <p
+            className="text-xs underline opacity-80"
+            style={{ color: textColor }}
+          >
+            Lihat Jadwal Lengkap
+          </p>
         </div>
       </div>
     </Link>

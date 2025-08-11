@@ -104,13 +104,13 @@ export default function BottomNavbar({
             <Icon
               className="w-5 h-5 sm:w-6 sm:h-6"
               style={{
-                color: isActive ? theme.primary : theme.black2,
+                color: isActive ? theme.black1 : theme.black2,
               }}
             />
             <span
               className="text-xs sm:text-base mt-1 sm:mt-0 sm:ml-2 font-medium"
               style={{
-                color: isActive ? theme.primary : theme.black2,
+                color: isActive ? theme.black1 : theme.black2,
               }}
             >
               {tab.label}

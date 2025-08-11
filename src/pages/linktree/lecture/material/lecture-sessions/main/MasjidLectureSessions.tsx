@@ -39,6 +39,7 @@ interface LectureSession {
   lecture_session_place: string;
   lecture_session_image_url?: string;
   lecture_session_slug: string;
+  lecture_session_approved_by_dkm_at: string | null;
   user_grade_result?: number;
 }
 
@@ -143,6 +144,14 @@ export default function MasjidLectureSessions() {
     { label: "Dokumen", icon: FolderOpen, path: "dokumen" },
     { label: "Catatanku", icon: FolderOpen, path: "catatanku" },
   ];
+
+  const isApproved = Boolean(data?.lecture_session_approved_by_dkm_at);
+  // menu yang ditampilkan
+  const visibleMenuItems = isApproved
+    ? menuItems
+    : menuItems.filter(
+        (m) => !["ringkasan", "latihan-soal"].includes(m.path as string)
+      );
 
   return (
     <div className="pb-20 space-y-0 max-w-2xl mx-auto">
@@ -298,6 +307,7 @@ export default function MasjidLectureSessions() {
                   dateIso={data?.lecture_session_start_time}
                   place={data?.lecture_session_place || ""}
                   url={`${window.location.origin}/masjid/${slug}/soal-materi/${lecture_session_slug}`}
+                  masjidSlug={slug}
                 />
               </div>
             </>
@@ -314,7 +324,7 @@ export default function MasjidLectureSessions() {
           Navigasi Utama
         </h2>
         <div className="grid grid-cols-3 lg:grid-cols-4 gap-4">
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <div
               key={item.label}
               onClick={() => {
