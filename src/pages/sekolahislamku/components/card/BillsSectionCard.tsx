@@ -22,6 +22,7 @@ export default function BillsSectionCard({
   formatIDR,
   seeAllPath = "/tagihan",
   getPayHref = (b) => `/tagihan/${b.id}`,
+  className = "", // ⬅️ baru: biar parent bisa atur lebar/spacing
 }: {
   palette: Palette;
   bills: BillItem[];
@@ -29,14 +30,20 @@ export default function BillsSectionCard({
   formatIDR: (n: number) => string;
   seeAllPath?: string;
   getPayHref?: (bill: BillItem) => string;
+  className?: string;
 }) {
   const unpaid = bills.filter((b) => b.status !== "paid");
 
   return (
-    <SectionCard palette={palette} className="lg:col-span-2">
-      <div className="p-4 md:p-5 pb-2 flex flex-row items-center justify-between">
+    <SectionCard
+      palette={palette}
+      className={`w-full min-w-0 ${className}`} // ⬅️ fluid, hilangkan lg:col-span-2
+    >
+      {/* Header */}
+      <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
         <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
-          <Wallet size={20} color={palette.quaternary} /> Tagihan & Pembayaran
+          <Wallet size={20} color={palette.quaternary} />
+          Tagihan & Pembayaran
         </h3>
         <Link to={seeAllPath}>
           <Btn size="sm" variant="ghost" palette={palette}>
@@ -45,7 +52,8 @@ export default function BillsSectionCard({
         </Link>
       </div>
 
-      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
+      {/* List */}
+      <div className="px-4 md:px-5 pb-4 pt-2 space-y-3 min-w-0">
         {unpaid.length === 0 && (
           <div style={{ fontSize: 14, color: palette.silver2 }}>
             Tidak ada tagihan yang belum dibayar. Alhamdulillah!
@@ -53,21 +61,19 @@ export default function BillsSectionCard({
         )}
 
         {unpaid.map((bill) => (
-          <SectionCard
+          <div
             key={bill.id}
-            palette={palette}
-            className="p-3"
-            style={{ background: palette.white2 }}
+            className="rounded-xl border p-3"
+            style={{ borderColor: palette.silver1, background: palette.white2 }}
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-1">
-                <div className="font-medium">{bill.title}</div>
+              <div className="min-w-0">
+                <div className="font-medium truncate">{bill.title}</div>
                 <div style={{ fontSize: 12, color: palette.silver2 }}>
                   Jatuh tempo: {dateFmt(bill.dueDate)}
                 </div>
               </div>
 
-              {/* kanan: amount + badge sejajar di mobile, stack di desktop */}
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3 md:justify-end">
                 <div className="flex items-center gap-2 md:block md:text-right">
                   <div className="text-sm font-semibold">
@@ -101,7 +107,7 @@ export default function BillsSectionCard({
                 </Link>
               </div>
             </div>
-          </SectionCard>
+          </div>
         ))}
       </div>
     </SectionCard>

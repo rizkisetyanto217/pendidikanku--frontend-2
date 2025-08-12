@@ -135,16 +135,28 @@ import MasjidkuFinancial from "@/pages/masjidku/financial/MasjidkuFinacial";
 import MasjidkuListMasjid from "@/pages/masjidku/masjid/MasjidkuListMasjid";
 import MasjidkuProfil from "@/pages/masjidku/profil/MasjidkuProfil";
 import MasjidkuProgram from "@/pages/masjidku/program/MasjidkuProgram";
-import ParentHome from "@/pages/sekolahislamku/dashboard/StudentDashboard";
-import StudentProgressDetail from "@/pages/sekolahislamku/dashboard/progress/StudentProgress";
-import StudentDashboard from "@/pages/sekolahislamku/dashboard/StudentDashboard";
-import StudentFInance from "@/pages/sekolahislamku/dashboard/finance/StudentFinance";
-import StudentSchedule from "@/pages/sekolahislamku/dashboard/schedule/StudentSchedule";
-import StudentAnnouncement from "@/pages/sekolahislamku/dashboard/announcement/StudentAnnouncement";
-import StudentRaport from "@/pages/sekolahislamku/dashboard/progress/raport/StudentRaport";
-import StudentNotesSummary from "@/pages/sekolahislamku/dashboard/progress/notes-summary/StudentNotesSummary";
-import StudentAbsence from "@/pages/sekolahislamku/dashboard/progress/absence/StudentAbsence";
+import ParentHome from "@/pages/sekolahislamku/dashboard-student/StudentDashboard";
+import StudentProgressDetail from "@/pages/sekolahislamku/dashboard-student/progress/StudentProgress";
+import StudentDashboard from "@/pages/sekolahislamku/dashboard-student/StudentDashboard";
+import StudentFInance from "@/pages/sekolahislamku/dashboard-student/finance/StudentFinance";
+import StudentSchedule from "@/pages/sekolahislamku/dashboard-student/schedule/StudentSchedule";
+import StudentAnnouncement from "@/pages/sekolahislamku/dashboard-student/announcement/StudentAnnouncement";
+import StudentRaport from "@/pages/sekolahislamku/dashboard-student/progress/raport/StudentRaport";
+import StudentNotesSummary from "@/pages/sekolahislamku/dashboard-student/progress/notes-summary/StudentNotesSummary";
+import StudentAbsence from "@/pages/sekolahislamku/dashboard-student/progress/absence/StudentAbsence";
 import StudentLayout from "@/layout/StudentLayout";
+import TeacherDashboard from "@/pages/sekolahislamku/dashboard-teacher/TeacherDashboard";
+import SchoolDashboard from "@/pages/sekolahislamku/dashboard-school/SchoolDashboard";
+import TeacherClass from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClass";
+import TeacherAttendance from "@/pages/sekolahislamku/dashboard-teacher/attendance/TeacherAttendance";
+import TeacherGrading from "@/pages/sekolahislamku/dashboard-teacher/grade/TeacherGrade";
+import TeacherAnnouncements from "@/pages/sekolahislamku/dashboard-teacher/announcement/TeacherAnnouncement";
+import SchoolStudent from "@/pages/sekolahislamku/dashboard-school/student/SchoolStudent";
+import SchoolTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/StudentTeacher";
+import SchoolClasses from "@/pages/sekolahislamku/dashboard-school/class/SchoolClass";
+import SchoolAttendance from "@/pages/sekolahislamku/dashboard-school/attendance/SchoolAttendance";
+import SchoolFinance from "@/pages/sekolahislamku/dashboard-school/finance/SchoolFinance";
+import SchoolAnnouncement from "@/pages/sekolahislamku/dashboard-school/announcement/SchoolAnnouncement";
 
 export default function AppRoutes() {
   return (
@@ -480,11 +492,11 @@ export default function AppRoutes() {
         </Route>
       </Route>
       {/* ==== Protected Routes - Teacher ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
+      {/* <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
         <Route path="/teacher" element={<TeacherLayout />}>
           <Route index element={<TeacherHome />} />
         </Route>
-      </Route>
+      </Route> */}
       {/* ==== Protected Routes - Teacher ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["treasurer"]} />}>
         <Route path="/treasurer" element={<TreasurerLayout />}>
@@ -497,7 +509,7 @@ export default function AppRoutes() {
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-      <Route path="/student" element={<StudentLayout />}>
+      <Route path="/murid" element={<StudentLayout />}>
         <Route index element={<StudentDashboard />} />
 
         <Route path="progress" element={<StudentProgressDetail />} />
@@ -510,6 +522,22 @@ export default function AppRoutes() {
         {/* opsional: detail list */}
         <Route path="absensi" element={<StudentAbsence />} />
         <Route path="catatan" element={<StudentNotesSummary />} />
+      </Route>
+      <Route path="/guru" element={<StudentLayout />}>
+        <Route index element={<TeacherDashboard />} />
+        <Route path="kelas" element={<TeacherClass />} />
+        <Route path="kehadiran" element={<TeacherAttendance />} />
+        <Route path="penilaian" element={<TeacherGrading />} />
+        <Route path="pengumuman" element={<TeacherAnnouncements />} />
+      </Route>
+      <Route path="/sekolah" element={<StudentLayout />}>
+        <Route index element={<SchoolDashboard />} />
+        <Route path="murid" element={<SchoolStudent />} />
+        <Route path="guru" element={<SchoolTeacher />} />
+        <Route path="kelas" element={<SchoolClasses />} />
+        <Route path="kehadiran" element={<SchoolAttendance />} />
+        <Route path="keuangan" element={<SchoolFinance />} />
+        <Route path="pengumuman" element={<SchoolAnnouncement />} />
       </Route>
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />

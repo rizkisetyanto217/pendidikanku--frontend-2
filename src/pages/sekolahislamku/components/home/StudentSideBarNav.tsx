@@ -21,15 +21,15 @@ type Item = {
 };
 
 const NAVS: Item[] = [
-  { to: "/student", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/student/progress", label: "Progress Anak", icon: ClipboardCheck },
-  { to: "/student/finance", label: "Pembayaran", icon: Wallet },
-  { to: "/student/jadwal", label: "Jadwal", icon: CalendarDays },
-  { to: "/student/pengumuman", label: "Pengumuman", icon: Bell },
-  { to: "/student/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
+  { to: "/murid", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/murid/progress", label: "Progress Anak", icon: ClipboardCheck },
+  { to: "/murid/finance", label: "Pembayaran", icon: Wallet },
+  { to: "/murid/jadwal", label: "Jadwal", icon: CalendarDays },
+  { to: "/murid/pengumuman", label: "Pengumuman", icon: Bell },
+  { to: "/murid/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
 ];
 
-export default function ParentSidebarNav({ palette }: { palette: Palette }) {
+export default function StudentSideBarNav({ palette }: { palette: Palette }) {
   return (
     <nav
       className="
@@ -55,7 +55,7 @@ export default function ParentSidebarNav({ palette }: { palette: Palette }) {
                       "hover:translate-x-[1px]",
                     ].join(" ")}
                     style={{
-                      background: isActive ? palette.primary2 : palette.white1,
+                      background: isActive ? palette.white1 : palette.white1,
                       borderColor: isActive ? palette.primary : palette.silver1,
                       boxShadow: isActive
                         ? `0 0 0 1px ${palette.primary} inset`

@@ -9,19 +9,49 @@ export function SectionCard({
   palette,
   className = "",
   style,
+  bg = "auto", // <--- NEW
+  bgOnDark, // <--- NEW
 }: {
   children: React.ReactNode;
   palette: Palette;
   className?: string;
   style?: React.CSSProperties;
+  /** Paksa bg di semua mode: "white1" | "black1" | "auto" (default) */
+  bg?: "auto" | "white1" | "black1";
+  /** Override bg khusus saat dark mode: "white1" | "black1" */
+  bgOnDark?: "white1" | "black1";
 }) {
+  // Coba deteksi dark mode dari palette yang dikirim
+  const isDark =
+    palette === (colors as any).dark ||
+    // fallback: heuristik sederhana (bila white1 cenderung gelap)
+    (typeof palette.white1 === "string" &&
+      /^#/.test(palette.white1) &&
+      // nilai luminance kira-kira; ambil dua digit pertama saja untuk cepat
+      parseInt(palette.white1.slice(1, 3), 16) < 0x66);
+
+  // Tentukan background final
+  let background = palette.white1;
+  if (bg === "black1") background = palette.black1;
+  if (bg === "white1") background = palette.white1;
+
+  // Jika dark mode & ada override khusus
+  if (isDark && bgOnDark) {
+    background = palette[bgOnDark] as string;
+  }
+
+  // Kontraskan warna teks & border
+  const isBgBlack = background === (palette.black1 as string);
+  const textColor = isBgBlack ? palette.white1 : palette.black1;
+  const borderColor = isBgBlack ? palette.white3 : palette.silver1;
+
   return (
     <div
       className={`rounded-2xl border shadow-sm ${className}`}
       style={{
-        background: palette.white1,
-        borderColor: palette.silver1,
-        color: palette.black1,
+        background,
+        borderColor,
+        color: textColor,
         ...style,
       }}
     >
@@ -69,6 +99,20 @@ export function Badge({
 }
 
 /* ---- Button ---- */
+/* ---- Button ---- */
+type BtnVariant =
+  | "default"
+  | "secondary"
+  | "outline"
+  | "quaternary"
+  | "ghost"
+  | "destructive"
+  | "success"
+  | "black1" // NEW
+  | "white1"; // NEW
+
+type BtnSize = "sm" | "md" | "lg" | "icon";
+
 export function Btn({
   children,
   variant = "default",
@@ -76,18 +120,19 @@ export function Btn({
   palette,
   className = "",
   style,
+  tone = "normal",
+  block = false, // NEW: full width
+  loading = false, // NEW: spinner + disabled
+  disabled,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?:
-    | "default"
-    | "secondary"
-    | "outline"
-    | "quaternary"
-    | "ghost"
-    | "destructive"
-    | "success";
-  size?: "sm" | "md" | "lg" | "icon";
+  variant?: BtnVariant;
+  size?: BtnSize;
   palette: Palette;
+  /** pakai saat tombol di atas surface gelap (black1) */
+  tone?: "normal" | "inverted";
+  block?: boolean;
+  loading?: boolean;
 }) {
   const sizeCls =
     size === "sm"
@@ -95,12 +140,12 @@ export function Btn({
       : size === "lg"
         ? "h-12 px-5 text-base"
         : size === "icon"
-          ? "h-10 w-10"
+          ? "h-10 w-10 p-0"
           : "h-10 px-4 text-sm";
 
   const baseStyle: React.CSSProperties = { borderRadius: 16, fontWeight: 600 };
 
-  const variants: Record<string, React.CSSProperties> = {
+  const variants: Record<BtnVariant, React.CSSProperties> = {
     default: {
       background: palette.primary,
       color: palette.white1,
@@ -136,14 +181,77 @@ export function Btn({
       color: palette.white1,
       border: `1px solid ${palette.success1}`,
     },
+    // NEW variants
+    black1: {
+      background: palette.black1,
+      color: palette.white1,
+      border: `1px solid ${palette.white3}`,
+    },
+    white1: {
+      background: palette.white1,
+      color: palette.black1,
+      border: `1px solid ${palette.silver1}`,
+    },
+  };
+
+  // Override khusus saat di surface gelap
+  const invertedOverrides: Partial<Record<BtnVariant, React.CSSProperties>> = {
+    outline: { color: palette.white1, border: `1px solid ${palette.white3}` },
+    secondary: {
+      background: palette.black1,
+      color: palette.white1,
+      border: `1px solid ${palette.white3}`,
+    },
+    ghost: {
+      background: "transparent",
+      color: palette.white1,
+      border: `1px solid ${palette.black1}`,
+    },
+  };
+
+  const computedStyle: React.CSSProperties = {
+    ...baseStyle,
+    ...variants[variant],
+    ...(tone === "inverted" ? invertedOverrides[variant] : {}),
+    ...(disabled || loading ? { opacity: 0.6, cursor: "not-allowed" } : {}),
+    ...style,
   };
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 font-medium transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 ${sizeCls} ${className}`}
-      style={{ ...baseStyle, ...variants[variant], ...style }}
+      className={`${
+        block ? "w-full" : ""
+      } inline-flex items-center justify-center gap-1.5 font-medium transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 ${sizeCls} ${className}`}
+      style={computedStyle}
+      disabled={disabled || loading}
       {...props}
     >
+      {loading && (
+        <svg
+          className="animate-spin"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          style={{ color: "currentColor" }}
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+            fill="none"
+            opacity="0.25"
+          />
+          <path
+            d="M22 12a10 10 0 0 1-10 10"
+            stroke="currentColor"
+            strokeWidth="4"
+            fill="none"
+          />
+        </svg>
+      )}
       {children}
     </button>
   );

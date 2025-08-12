@@ -11,7 +11,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import PageTopBar from "../../components/home/PageTopBar";
-import ParentSidebarNav from "../../components/home/ParentSideBarNav";
+import ParentSidebarNav from "../../components/home/StudentSideBarNav";
 import ParentTopBar from "../../components/home/ParentTopBar";
 
 /* ================= Types ================= */
@@ -197,7 +197,6 @@ export default function StudentSchedule() {
       <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
-        // dateFmt={dateLong}
         title="Jadwal"
       />
 

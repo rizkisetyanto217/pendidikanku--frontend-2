@@ -11,7 +11,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "../../components/home/ParentTopBar"; // ⬅️ pakai ParentTopBar
-import ParentSidebarNav from "../../components/home/ParentSideBarNav";
+import ParentSidebarNav from "../../components/home/StudentSideBarNav";
 
 /* ========= Types ========= */
 type AnnType = "info" | "warning" | "success";
@@ -116,7 +116,6 @@ export default function StudentAnnouncement() {
       <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
         title="Pengumuman"
       />
 

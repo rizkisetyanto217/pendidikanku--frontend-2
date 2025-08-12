@@ -24,7 +24,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import PageTopBar from "@/pages/sekolahislamku/components/home/PageTopBar";
-import ParentSidebarNav from "@/pages/sekolahislamku/components/home/ParentSideBarNav";
+import ParentSidebarNav from "@/pages/sekolahislamku/components/home/StudentSideBarNav";
 import ParentTopBar from "../../components/home/ParentTopBar";
 
 /* ===== Types ===== */
@@ -187,7 +187,6 @@ export default function StudentProgress() {
       <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
-        dateFmt={dateLong}
         title="Kemajuan Murid"
       />
 

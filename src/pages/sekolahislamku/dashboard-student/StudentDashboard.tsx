@@ -7,7 +7,7 @@ import ChildSummaryCard from "@/pages/sekolahislamku/components/card/ChildSummar
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ParentSidebarNav from "../components/home/ParentSideBarNav";
+import ParentSidebarNav from "../components/home/StudentSideBarNav";
 
 // --- Types ---
 interface ChildDetail {
@@ -135,9 +135,6 @@ export default function StudentDashboard() {
     queryFn: fetchParentHome,
     staleTime: 60_000,
   });
-
-  const child = data?.child;
-  const unpaidBills = (data?.bills ?? []).filter((b) => b.status !== "paid");
 
   return (
     <div

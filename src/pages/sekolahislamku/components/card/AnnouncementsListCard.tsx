@@ -76,7 +76,11 @@ export default function AnnouncementsListCard({
 
               {/* actions: di bawah pada mobile, di kanan pada md+ */}
               <div className="flex items-center gap-2 mt-3 md:mt-0 md:ml-4">
-                <Btn size="sm" variant="outline" palette={palette}>
+                <Btn
+                  size="sm"
+                  palette={palette}
+                  variant="white1"
+                >
                   <Download className="mr-2" size={16} /> Lampiran
                 </Btn>
               </div>
