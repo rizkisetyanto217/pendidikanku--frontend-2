@@ -12,6 +12,7 @@ import {
   NotebookPen,
   Phone,
   Mail,
+  ChevronRight,
 } from "lucide-react";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -24,6 +25,7 @@ import {
   ProgressBar,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
+import PublicUserDropdown from "@/components/common/public/UserDropDown";
 
 /* ===== Types ===== */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -186,28 +188,26 @@ export default function StudentProgress() {
           <div className="flex items-center gap-2">
             <Link to="/student">
               <Btn variant="outline" size="sm" palette={palette}>
-                <ArrowLeft size={16} /> Kembali
+                <ArrowLeft size={16} />
               </Btn>
             </Link>
-            <div className="pl-1">
-              <div className="text-sm" style={{ color: palette.silver2 }}>
+
+            {/* sejajarkan label + nama */}
+            <div className="pl-1 flex items-center gap-2 min-w-0">
+              <span className="text-sm" style={{ color: palette.silver2 }}>
                 Detail Anak
-              </div>
-              <div className="font-semibold">{child?.name ?? "—"}</div>
+              </span>
+              <span
+                className="hidden sm:inline-block w-1 h-1 rounded-full"
+                style={{ background: palette.silver2 }}
+              />
+              <span className="font-semibold truncate max-w-[50vw]">
+                {child?.name ?? "—"}
+              </span>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2">
-            <Link to="/anak/progress">
-              <Btn size="sm" variant="secondary" palette={palette}>
-                <FileSpreadsheet size={16} /> Rapor
-              </Btn>
-            </Link>
-            <Link to="/komunikasi">
-              <Btn size="sm" variant="outline" palette={palette}>
-                <MessageSquare size={16} /> Hubungi Guru
-              </Btn>
-            </Link>
-          </div>
+
+          <PublicUserDropdown variant="icon" />
         </div>
       </div>
 
@@ -433,10 +433,19 @@ export default function StudentProgress() {
 
         {/* Riwayat Absensi */}
         <SectionCard palette={palette} className="p-4 md:p-5">
-          <div className="font-medium mb-3 flex items-center gap-2">
-            <CalendarDays size={18} color={palette.quaternary} /> Riwayat
-            Absensi (7 Hari)
+          <div className="mb-3 flex items-center justify-between">
+            <div className="font-medium flex items-center gap-2">
+              <CalendarDays size={18} color={palette.quaternary} />
+              Riwayat Absensi (7 Hari)
+            </div>
+
+            <Link to={`/absensi${child?.id ? `?child=${child.id}` : ""}`}>
+              <Btn variant="secondary" size="sm" palette={palette}>
+                Lihat selengkapnya  <ChevronRight className="ml-1" size={16} />
+              </Btn>
+            </Link>
           </div>
+
           <div className="grid grid-cols-1 gap-2">
             {(data?.attendanceHistory ?? []).map((a, i) => (
               <div

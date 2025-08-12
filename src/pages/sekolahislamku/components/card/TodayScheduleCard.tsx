@@ -30,7 +30,7 @@ export default function TodayScheduleCard({
         </h3>
       </div>
 
-      <div className="sm:p-4 md:pt-1 pt-2 space-y-3">
+      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0  mb-4 space-y-3">
         {items.map((s, i) => (
           <SectionCard
             key={`${s.title}-${i}`}

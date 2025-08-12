@@ -57,7 +57,7 @@ export default function ChildSummaryCard({
         </div>
       </div>
 
-      <div className="sm:p-4 md:pt-1 pt-0 grid gap-4">
+      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Absensi */}
           <SectionCard

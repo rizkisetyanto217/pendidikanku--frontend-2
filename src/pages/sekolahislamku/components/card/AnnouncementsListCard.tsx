@@ -41,7 +41,7 @@ export default function AnnouncementsListCard({
         </div>
       </div>
 
-      <div className="sm:p-4 md:pt-1 grid gap-3">
+      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
         {items.map((a) => (
           <SectionCard
             key={a.id}

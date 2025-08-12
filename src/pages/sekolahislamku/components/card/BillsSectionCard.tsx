@@ -45,7 +45,7 @@ export default function BillsSectionCard({
         </Link>
       </div>
 
-      <div className="sm:p-4 md:pt-1 pt-2 space-y-3">
+      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
         {unpaid.length === 0 && (
           <div style={{ fontSize: 14, color: palette.silver2 }}>
             Tidak ada tagihan yang belum dibayar. Alhamdulillah!
