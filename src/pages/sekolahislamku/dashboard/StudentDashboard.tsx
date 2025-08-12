@@ -1,39 +1,13 @@
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-import {
-  CalendarDays,
-  Bell,
-  BookOpen,
-  GraduationCap,
-  User2,
-  FileSpreadsheet,
-  Wallet,
-  ClipboardCheck,
-  CheckCircle2,
-  Clock,
-  ChevronRight,
-  NotebookPen,
-  MessageSquare,
-  Download,
-  Plus,
-} from "lucide-react";
 import { colors } from "@/constants/colorsThema";
-import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import ParentTopBar from "../components/home/ParentTopBar";
 
-// + imports baru
-import {
-  SectionCard,
-  Badge,
-  Btn,
-  ProgressBar,
-} from "@/pages/sekolahislamku/components/ui/Primitives";
 import ChildSummaryCard from "@/pages/sekolahislamku/components/card/ChildSummaryCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
+import ParentSidebarNav from "../components/home/ParentSideBarNav";
 
 // --- Types ---
 interface ChildDetail {
@@ -61,6 +35,23 @@ interface BillItem {
   status: "unpaid" | "paid" | "overdue";
 }
 
+// --- Types tambahan (taruh dekat blok Types kamu)
+type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
+type AttendanceMode = "onsite" | "online";
+interface TodaySummary {
+  attendance: {
+    status: AttendanceStatus; // Wajib
+    mode?: AttendanceMode;
+    time?: string;
+  };
+  informasiUmum: string; // Wajib
+  nilai?: number; // Opsional
+  materiPersonal?: string; // Opsional
+  penilaianPersonal?: string; // Opsional
+  hafalan?: string; // Opsional
+  pr?: string; // Opsional
+}
+
 // --- Fake API layer (replace with axios) ---
 async function fetchParentHome() {
   return Promise.resolve({
@@ -76,6 +67,20 @@ async function fetchParentHome() {
       iqraLevel: "Iqra 2",
       lastScore: 88,
     } as ChildDetail,
+
+    // ⬇️ DATA DUMMY HARI INI
+    today: {
+      attendance: { status: "hadir", mode: "onsite", time: "07:28" },
+      informasiUmum:
+        "Hari ini belajar ngaji & praktik sholat. Evaluasi wudhu dilakukan bergiliran.",
+      nilai: 89,
+      materiPersonal: "Membaca Al-Baqarah 255–257",
+      penilaianPersonal:
+        "Fokus meningkat, makhraj lebih baik; perhatikan mad thabi'i.",
+      hafalan: "An-Naba 1–10",
+      pr: "An-Naba 11–15 tambah hafalan",
+    } as TodaySummary,
+
     announcements: [
       {
         id: "a1",
@@ -85,6 +90,7 @@ async function fetchParentHome() {
         type: "info",
       },
     ] as Announcement[],
+
     bills: [
       {
         id: "b1",
@@ -96,6 +102,7 @@ async function fetchParentHome() {
         status: "unpaid",
       },
     ] as BillItem[],
+
     todaySchedule: [
       { time: "07:30", title: "Tahsin Kelas", room: "Aula 1" },
       { time: "09:30", title: "Hafalan Juz 30", room: "R. Tahfiz" },
@@ -137,7 +144,6 @@ export default function StudentDashboard() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
       <ParentTopBar
         palette={palette}
         parentName={data?.parentName}
@@ -146,86 +152,49 @@ export default function StudentDashboard() {
         dateFmt={dateFmt}
       />
 
-      {/* Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link to="/absensi">
-            <Btn
-              variant="secondary"
-              className="w-full justify-start"
-              palette={palette}
-            >
-              <ClipboardCheck className="mr-2" size={16} /> Lihat Absensi
-            </Btn>
-          </Link>
-          <Link to="/tagihan">
-            <Btn
-              variant="secondary"
-              className="w-full justify-start"
-              palette={palette}
-            >
-              <Wallet className="mr-2" size={16} /> Tagihan & Pembayaran
-            </Btn>
-          </Link>
-          <Link to="/rapor">
-            <Btn
-              variant="secondary"
-              className="w-full justify-start"
-              palette={palette}
-            >
-              <FileSpreadsheet className="mr-2" size={16} /> Rapor Nilai
-            </Btn>
-          </Link>
-          <Link to="/komunikasi">
-            <Btn
-              variant="secondary"
-              className="w-full justify-start"
-              palette={palette}
-            >
-              <MessageSquare className="mr-2" size={16} /> Komunikasi Guru
-            </Btn>
-          </Link>
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="lg:flex lg:items-start lg:gap-4">
+          {/* Sidebar kiri hanya tampil di PC */}
+          <ParentSidebarNav palette={palette} />
+
+          {/* Konten utama */}
+          <div className="flex-1 space-y-6">
+            <section>
+              <ChildSummaryCard
+                child={data?.child}
+                today={data?.today}
+                palette={palette}
+                detailPath="/student/progress"
+                todayDisplay="compact"
+              />
+            </section>
+
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <BillsSectionCard
+                palette={palette}
+                bills={data?.bills ?? []}
+                dateFmt={dateFmt}
+                formatIDR={formatIDR}
+                seeAllPath="/student/finance"
+                getPayHref={(b) => `/tagihan/${b.id}`}
+              />
+              <TodayScheduleCard
+                palette={palette}
+                items={data?.todaySchedule ?? []}
+                seeAllPath="/student/jadwal"
+              />
+            </section>
+
+            <section>
+              <AnnouncementsList
+                palette={palette}
+                items={data?.announcements ?? []}
+                dateFmt={dateFmt}
+                seeAllPath="/student/pengumuman"
+              />
+            </section>
+          </div>
         </div>
-
-        {/* Child Summary */}
-        <section>
-          <ChildSummaryCard
-            child={child}
-            palette={palette}
-            detailPath="/student/student-progress"
-            notePath="/student/student-progress"
-            progressPath="/student/student-progress"
-          />
-        </section>
-
-        {/* Bills & Payments + Today schedule */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <BillsSectionCard
-            palette={palette}
-            bills={data?.bills ?? []}
-            dateFmt={dateFmt}
-            formatIDR={formatIDR}
-            seeAllPath="/student/finance"
-            getPayHref={(b) => `/tagihan/${b.id}`}
-          />
-
-          <TodayScheduleCard
-            palette={palette}
-            items={data?.todaySchedule ?? []}
-            seeAllPath="/student/schedule"
-          />
-        </section>
-
-        {/* Announcements */}
-        <section>
-          <AnnouncementsList
-            palette={palette}
-            items={data?.announcements ?? []}
-            dateFmt={dateFmt}
-            seeAllPath="/student/announcement"
-          />
-        </section>
       </main>
     </div>
   );

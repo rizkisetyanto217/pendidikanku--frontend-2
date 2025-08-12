@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Wallet } from "lucide-react";
+import { ChevronRight, Wallet } from "lucide-react";
 import {
   SectionCard,
   Btn,
@@ -40,7 +40,7 @@ export default function BillsSectionCard({
         </h3>
         <Link to={seeAllPath}>
           <Btn size="sm" variant="ghost" palette={palette}>
-            Lihat semua
+            Lihat semua <ChevronRight className="ml-1" size={16} />
           </Btn>
         </Link>
       </div>

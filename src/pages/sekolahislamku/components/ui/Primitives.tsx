@@ -169,7 +169,7 @@ export function ProgressBar({
     >
       <div
         className="h-full rounded-full transition-all duration-300"
-        style={{ width: `${v}%`, background: palette.primary }}
+        style={{ width: `${v}%`, background: palette.black1 }}
       />
     </div>
   );

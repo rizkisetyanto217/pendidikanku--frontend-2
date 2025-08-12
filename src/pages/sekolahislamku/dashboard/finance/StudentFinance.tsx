@@ -16,6 +16,9 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
+import PageTopBar from "../../components/home/PageTopBar";
+import ParentSidebarNav from "../../components/home/ParentSideBarNav";
+import ParentTopBar from "../../components/home/ParentTopBar";
 
 /* =========================
    Types
@@ -143,62 +146,6 @@ function Row({
     <div className="flex items-center justify-between py-1 text-sm">
       <span style={{ color: palette.silver2 }}>{left}</span>
       <span style={{ fontWeight: boldRight ? 700 : 500 }}>{right}</span>
-    </div>
-  );
-}
-
-/* =========================
-   Local components (inline)
-========================= */
-function FinanceTopBar({
-  palette,
-  title,
-  status,
-}: {
-  palette: Palette;
-  title?: string;
-  status?: BillStatus;
-}) {
-  const statusVariant: Record<
-    BillStatus,
-    "secondary" | "success" | "destructive"
-  > = {
-    unpaid: "secondary",
-    paid: "success",
-    overdue: "destructive",
-  };
-  return (
-    <div
-      className="sticky top-0 z-40 border-b"
-      style={{
-        background: `${palette.white1}E6`,
-        borderColor: palette.silver1,
-      }}
-    >
-      <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Link to="/student">
-            <Btn variant="outline" size="sm" palette={palette}>
-              <ArrowLeft size={16} /> Kembali
-            </Btn>
-          </Link>
-          <div className="pl-1">
-            <div className="text-sm" style={{ color: palette.silver2 }}>
-              Detail Tagihan
-            </div>
-            <div className="font-semibold">{title ?? "—"}</div>
-          </div>
-        </div>
-        {status && (
-          <Badge variant={statusVariant[status]} palette={palette}>
-            {status === "unpaid"
-              ? "Belum bayar"
-              : status === "paid"
-                ? "Lunas"
-                : "Terlambat"}
-          </Badge>
-        )}
-      </div>
     </div>
   );
 }
@@ -401,12 +348,11 @@ function SummaryCard({
   );
 }
 
-/* =========================
-   Page
-========================= */
+// =========================
+// Page
+// =========================
 export default function StudentFinance() {
   const { billId: billIdParam } = useParams();
-  // fallback ke "default" supaya dummy tetap muncul meski param kosong
   const billId = billIdParam || "default";
 
   const { isDark } = useHtmlDarkMode();
@@ -423,22 +369,33 @@ export default function StudentFinance() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <FinanceTopBar
+      {/* Top Bar */}
+      <ParentTopBar
         palette={palette}
-        title={data?.title}
-        status={data?.status}
+        gregorianDate={new Date().toISOString()}
+        dateFmt={dateLong}
+        title="Pembayaran"
       />
 
-      <main className="mx-auto max-w-5xl px-4 py-6 space-y-6">
-        <FinanceHeaderCard palette={palette} data={data} />
+      {/* Content + Sidebar */}
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="lg:flex lg:items-start lg:gap-4">
+          {/* Sidebar kiri (sticky di desktop) */}
+          <ParentSidebarNav palette={palette} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <ItemsTable
-            palette={palette}
-            items={data?.items}
-            loading={isLoading}
-          />
-          <SummaryCard palette={palette} data={data} />
+          {/* Konten utama */}
+          <div className="flex-1 space-y-6">
+            <FinanceHeaderCard palette={palette} data={data} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <ItemsTable
+                palette={palette}
+                items={data?.items}
+                loading={isLoading}
+              />
+              <SummaryCard palette={palette} data={data} />
+            </div>
+          </div>
         </div>
       </main>
     </div>

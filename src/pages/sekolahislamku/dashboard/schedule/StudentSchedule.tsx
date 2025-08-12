@@ -1,8 +1,7 @@
 // src/pages/sekolahislamku/schedule/ParentSchedulePage.tsx
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, ArrowLeft } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
@@ -11,6 +10,9 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
+import PageTopBar from "../../components/home/PageTopBar";
+import ParentSidebarNav from "../../components/home/ParentSideBarNav";
+import ParentTopBar from "../../components/home/ParentTopBar";
 
 /* ================= Types ================= */
 type ScheduleItem = {
@@ -51,7 +53,6 @@ const parseMinutes = (hhmm: string) => {
 
 /* =============== Fake API =============== */
 async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
-  // Seed jadwal harian konsisten dengan widget Home
   const baseToday: ScheduleItem[] = [
     {
       id: "1",
@@ -78,7 +79,6 @@ async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
     return d;
   };
 
-  // Contoh variasi untuk hari-hari berikutnya
   const make = (date: Date, items: ScheduleItem[]): DaySchedule => ({
     date: date.toISOString(),
     items: items.sort((a, b) => parseMinutes(a.time) - parseMinutes(b.time)),
@@ -172,7 +172,7 @@ export default function StudentSchedule() {
 
   const [dateStr, setDateStr] = useState<string>(() => toISODate(new Date()));
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["parent-schedule", dateStr],
     queryFn: () => fetchSchedule(dateStr),
     staleTime: 60_000,
@@ -186,7 +186,6 @@ export default function StudentSchedule() {
   const onToday = () => {
     const today = toISODate(new Date());
     setDateStr(today);
-    // react-query auto refetch by key change; panggil refetch opsional
   };
 
   return (
@@ -194,205 +193,205 @@ export default function StudentSchedule() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top bar */}
-      <div
-        className="sticky top-0 z-40 border-b"
-        style={{
-          background: `${palette.white1}E6`,
-          borderColor: palette.silver1,
-        }}
-      >
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Link to="/student">
-              <Btn size="sm" variant="outline" palette={palette}>
-                <ArrowLeft size={16} /> Kembali
-              </Btn>
-            </Link>
-            <div className="pl-1">
-              <div className="text-sm" style={{ color: palette.silver2 }}>
-                Jadwal
+      {/* Top Bar */}
+      <ParentTopBar
+        palette={palette}
+        gregorianDate={new Date().toISOString()}
+        // dateFmt={dateLong}
+        title="Jadwal"
+      />
+
+      {/* Content + Sidebar */}
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="lg:flex lg:items-start lg:gap-4">
+          {/* Sidebar kiri (sticky di desktop) */}
+          <ParentSidebarNav palette={palette} />
+
+          {/* Konten utama */}
+          <div className="flex-1 space-y-6">
+            {/* Filter (desktop) */}
+            <SectionCard palette={palette} className="p-3 hidden md:block">
+              <div className="flex items-center gap-2">
+                <CalendarDays size={18} color={palette.quaternary} />
+                <input
+                  type="date"
+                  value={dateStr}
+                  onChange={(e) => setDateStr(e.target.value)}
+                  className="h-9 w-48 rounded-xl px-3 text-sm"
+                  style={{
+                    background: palette.white1,
+                    color: palette.black1,
+                    border: `1px solid ${palette.silver1}`,
+                  }}
+                />
+                <Btn
+                  size="sm"
+                  variant="secondary"
+                  palette={palette}
+                  onClick={onToday}
+                >
+                  Hari ini
+                </Btn>
               </div>
-              <div className="font-semibold">{selectedPretty}</div>
-            </div>
-          </div>
+            </SectionCard>
 
-          <div className="hidden md:flex items-center gap-2">
-            <CalendarDays size={16} />
-            <input
-              type="date"
-              value={dateStr}
-              onChange={(e) => setDateStr(e.target.value)}
-              className="h-9 rounded-xl px-3 text-sm"
-              style={{
-                background: palette.white1,
-                color: palette.black1,
-                border: `1px solid ${palette.silver1}`,
-              }}
-            />
-            <Btn
-              size="sm"
-              variant="secondary"
-              palette={palette}
-              onClick={onToday}
-            >
-              Hari ini
-            </Btn>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
-        {/* Filter (mobile) */}
-        <SectionCard palette={palette} className="p-3 md:hidden">
-          <div className="flex items-center gap-2">
-            <CalendarDays size={18} color={palette.quaternary} />
-            <input
-              type="date"
-              value={dateStr}
-              onChange={(e) => setDateStr(e.target.value)}
-              className="h-9 flex-1 rounded-xl px-3 text-sm"
-              style={{
-                background: palette.white1,
-                color: palette.black1,
-                border: `1px solid ${palette.silver1}`,
-              }}
-            />
-            <Btn
-              size="sm"
-              variant="secondary"
-              palette={palette}
-              onClick={onToday}
-            >
-              Hari ini
-            </Btn>
-          </div>
-        </SectionCard>
-
-        {/* Jadwal hari terpilih */}
-        <SectionCard palette={palette}>
-          <div className="p-4 md:p-5 pb-2">
-            <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
-              <CalendarDays size={20} color={palette.quaternary} /> Jadwal{" "}
-              {selectedPretty}
-            </h3>
-            {(isLoading || isFetching) && (
-              <div className="mt-2 text-sm" style={{ color: palette.silver2 }}>
-                Memuat…
+            {/* Filter (mobile) */}
+            <SectionCard palette={palette} className="p-3 md:hidden">
+              <div className="flex items-center gap-2">
+                <CalendarDays size={18} color={palette.quaternary} />
+                <input
+                  type="date"
+                  value={dateStr}
+                  onChange={(e) => setDateStr(e.target.value)}
+                  className="h-9 flex-1 rounded-xl px-3 text-sm"
+                  style={{
+                    background: palette.white1,
+                    color: palette.black1,
+                    border: `1px solid ${palette.silver1}`,
+                  }}
+                />
+                <Btn
+                  size="sm"
+                  variant="secondary"
+                  palette={palette}
+                  onClick={onToday}
+                >
+                  Hari ini
+                </Btn>
               </div>
-            )}
-          </div>
+            </SectionCard>
 
-          <div className="p-4 md:p-5 pt-2 space-y-3">
-            {data && data.selected.items.length === 0 && (
-              <div
-                className="rounded-xl border p-4 text-sm"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white2,
-                  color: palette.silver2,
-                }}
-              >
-                Tidak ada jadwal pada tanggal ini.
-              </div>
-            )}
-
-            {(data?.selected.items ?? []).map((s) => (
-              <SectionCard
-                key={s.id}
-                palette={palette}
-                className="p-3 flex items-center justify-between"
-                style={{ background: palette.white2 }}
-              >
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{s.title}</div>
+            {/* Jadwal hari terpilih */}
+            <SectionCard palette={palette}>
+              <div className="p-4 md:p-5 pb-2">
+                <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
+                  <CalendarDays size={20} color={palette.quaternary} /> Jadwal{" "}
+                  {selectedPretty}
+                </h3>
+                {(isLoading || isFetching) && (
                   <div
-                    className="text-xs mt-0.5 truncate"
+                    className="mt-2 text-sm"
                     style={{ color: palette.silver2 }}
                   >
-                    {s.room ?? "-"} {s.teacher ? `• ${s.teacher}` : ""}
+                    Memuat…
                   </div>
-                  {s.note && (
-                    <div
-                      className="text-xs mt-1"
-                      style={{ color: palette.black2 }}
-                    >
-                      {s.note}
-                    </div>
-                  )}
-                </div>
+                )}
+              </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <TypeBadge t={s.type} palette={palette} />
-                  <Badge variant="outline" palette={palette}>
-                    {s.time}
-                  </Badge>
+              <div className="p-4 md:p-5 pt-2 space-y-3">
+                {data && data.selected.items.length === 0 && (
+                  <div
+                    className="rounded-xl border p-4 text-sm"
+                    style={{
+                      borderColor: palette.silver1,
+                      background: palette.white2,
+                      color: palette.silver2,
+                    }}
+                  >
+                    Tidak ada jadwal pada tanggal ini.
+                  </div>
+                )}
+
+                {(data?.selected.items ?? []).map((s) => (
+                  <SectionCard
+                    key={s.id}
+                    palette={palette}
+                    className="p-3 flex items-center justify-between"
+                    style={{ background: palette.white2 }}
+                  >
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate">
+                        {s.title}
+                      </div>
+                      <div
+                        className="text-xs mt-0.5 truncate"
+                        style={{ color: palette.silver2 }}
+                      >
+                        {s.room ?? "-"} {s.teacher ? `• ${s.teacher}` : ""}
+                      </div>
+                      {s.note && (
+                        <div
+                          className="text-xs mt-1"
+                          style={{ color: palette.black2 }}
+                        >
+                          {s.note}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <TypeBadge t={s.type} palette={palette} />
+                      <Badge variant="outline" palette={palette}>
+                        {s.time}
+                      </Badge>
+                    </div>
+                  </SectionCard>
+                ))}
+              </div>
+            </SectionCard>
+
+            {/* Sekilas minggu ini */}
+            {data && data.nextDays.length > 0 && (
+              <SectionCard palette={palette}>
+                <div className="p-4 md:p-5 pb-2">
+                  <h3 className="text-base font-semibold tracking-tight">
+                    Minggu Ini
+                  </h3>
+                </div>
+                <div className="p-4 md:p-5 pt-2 grid gap-3">
+                  {data.nextDays.map((d) => (
+                    <div
+                      key={d.date}
+                      className="rounded-2xl border"
+                      style={{
+                        borderColor: palette.silver1,
+                        background: palette.white2,
+                      }}
+                    >
+                      <div
+                        className="px-3 py-2 text-sm font-medium"
+                        style={{ borderBottom: `1px solid ${palette.silver1}` }}
+                      >
+                        {idDate(new Date(d.date))}
+                      </div>
+                      <div className="p-3 grid gap-2">
+                        {d.items.map((s) => (
+                          <div
+                            key={s.id}
+                            className="flex items-center justify-between rounded-xl border px-3 py-2"
+                            style={{
+                              borderColor: palette.silver1,
+                              background: palette.white1,
+                            }}
+                          >
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {s.title}
+                              </div>
+                              <div
+                                className="text-xs mt-0.5 truncate"
+                                style={{ color: palette.silver2 }}
+                              >
+                                {s.room ?? "-"}{" "}
+                                {s.teacher ? `• ${s.teacher}` : ""}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <TypeBadge t={s.type} palette={palette} />
+                              <Badge variant="outline" palette={palette}>
+                                {s.time}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </SectionCard>
-            ))}
+            )}
           </div>
-        </SectionCard>
-
-        {/* Sekilas minggu ini */}
-        {data && data.nextDays.length > 0 && (
-          <SectionCard palette={palette}>
-            <div className="p-4 md:p-5 pb-2">
-              <h3 className="text-base font-semibold tracking-tight">
-                Minggu Ini
-              </h3>
-            </div>
-            <div className="p-4 md:p-5 pt-2 grid gap-3">
-              {data.nextDays.map((d) => (
-                <div
-                  key={d.date}
-                  className="rounded-2xl border"
-                  style={{
-                    borderColor: palette.silver1,
-                    background: palette.white2,
-                  }}
-                >
-                  <div
-                    className="px-3 py-2 text-sm font-medium"
-                    style={{ borderBottom: `1px solid ${palette.silver1}` }}
-                  >
-                    {idDate(new Date(d.date))}
-                  </div>
-                  <div className="p-3 grid gap-2">
-                    {d.items.map((s) => (
-                      <div
-                        key={s.id}
-                        className="flex items-center justify-between rounded-xl border px-3 py-2"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white1,
-                        }}
-                      >
-                        <div className="min-w-0">
-                          <div className="text-sm font-medium truncate">
-                            {s.title}
-                          </div>
-                          <div
-                            className="text-xs mt-0.5 truncate"
-                            style={{ color: palette.silver2 }}
-                          >
-                            {s.room ?? "-"} {s.teacher ? `• ${s.teacher}` : ""}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <TypeBadge t={s.type} palette={palette} />
-                          <Badge variant="outline" palette={palette}>
-                            {s.time}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        )}
+        </div>
       </main>
     </div>
   );

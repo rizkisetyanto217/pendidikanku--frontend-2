@@ -1,8 +1,7 @@
 // src/pages/sekolahislamku/announcements/ParentAnnouncementsPage.tsx
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, ArrowLeft, Download, Plus } from "lucide-react";
+import { Download } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
@@ -11,6 +10,8 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
+import ParentTopBar from "../../components/home/ParentTopBar"; // ⬅️ pakai ParentTopBar
+import ParentSidebarNav from "../../components/home/ParentSideBarNav";
 
 /* ========= Types ========= */
 type AnnType = "info" | "warning" | "success";
@@ -75,7 +76,6 @@ async function fetchAnnouncements({
         x.title.toLowerCase().includes(qq) || x.body.toLowerCase().includes(qq)
     );
   }
-  // sort terbaru
   list = list.sort((a, b) => +new Date(b.date) - +new Date(a.date));
   return Promise.resolve(list);
 }
@@ -88,7 +88,7 @@ export default function StudentAnnouncement() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<AnnType | "all">("all");
 
-  const { data, isLoading, isFetching, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["parent-announcements", q, tab],
     queryFn: () => fetchAnnouncements({ q, type: tab }),
     staleTime: 30_000,
@@ -112,130 +112,123 @@ export default function StudentAnnouncement() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
-      <div
-        className="sticky top-0 z-40 border-b"
-        style={{
-          background: `${palette.white1}E6`,
-          borderColor: palette.silver1,
-        }}
-      >
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Link to="/student">
-              <Btn size="sm" variant="outline" palette={palette}>
-                <ArrowLeft size={16} /> Kembali
-              </Btn>
-            </Link>
-            <div className="pl-1">
-              <div className="text-sm" style={{ color: palette.silver2 }}>
-                Pengumuman
-              </div>
-              <div className="font-semibold">
-                {isFetching ? "Memuat…" : "Lihat semua"}
-              </div>
-            </div>
-          </div>
-          <Bell size={18} color={palette.quaternary} />
-        </div>
-      </div>
+      {/* Top Bar: brand + tanggal (otomatis highlight menu via NavLink di drawer) */}
+      <ParentTopBar
+        palette={palette}
+        gregorianDate={new Date().toISOString()}
+        dateFmt={dateLong}
+        title="Pengumuman"
+      />
 
-      {/* Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
-        {/* Filter */}
-        <SectionCard palette={palette} className="p-3 md:p-4">
-          <div className="flex flex-col md:flex-row md:items-center gap-3">
-            <div className="flex-1">
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Cari pengumuman…"
-                className="h-10 w-full rounded-2xl px-3 text-sm"
-                style={{
-                  background: palette.white1,
-                  color: palette.black1,
-                  border: `1px solid ${palette.silver1}`,
-                }}
-              />
-            </div>
+      {/* Content + Sidebar */}
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="lg:flex lg:items-start lg:gap-4">
+          {/* Sidebar kiri (sticky di desktop) */}
+          <ParentSidebarNav palette={palette} />
 
-            <div className="flex flex-wrap gap-2">
-              {tabs.map((t) => (
-                <Btn
-                  key={t.key}
-                  size="sm"
-                  variant={tab === t.key ? "secondary" : "outline"}
+          {/* Konten utama */}
+          <div className="flex-1 space-y-6">
+            {/* Filter */}
+            <SectionCard palette={palette} className="p-3 md:p-4">
+              <div className="flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex-1">
+                  <input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Cari pengumuman…"
+                    className="h-10 w-full rounded-2xl px-3 text-sm"
+                    style={{
+                      background: palette.white1,
+                      color: palette.black1,
+                      border: `1px solid ${palette.silver1}`,
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {tabs.map((t) => (
+                    <Btn
+                      key={t.key}
+                      size="sm"
+                      variant={tab === t.key ? "secondary" : "outline"}
+                      palette={palette}
+                      onClick={() => setTab(t.key)}
+                    >
+                      {t.label}
+                    </Btn>
+                  ))}
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* List */}
+            <div className="grid gap-3">
+              {isLoading && (
+                <div className="text-sm" style={{ color: palette.silver2 }}>
+                  Memuat…
+                </div>
+              )}
+
+              {(data ?? []).map((a) => (
+                <SectionCard
+                  key={a.id}
                   palette={palette}
-                  onClick={() => setTab(t.key)}
+                  className="p-3 md:p-4"
+                  style={{ background: palette.white1 }}
                 >
-                  {t.label}
-                </Btn>
-              ))}
-            </div>
-          </div>
-        </SectionCard>
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-medium">{a.title}</div>
+                      <div
+                        className="text-xs"
+                        style={{ color: palette.silver2 }}
+                      >
+                        {dateLong(a.date)}
+                      </div>
+                      <p
+                        className="text-sm mt-1"
+                        style={{ color: palette.black2 }}
+                      >
+                        {a.body}
+                      </p>
 
-        {/* List */}
-        <div className="grid gap-3">
-          {isLoading && (
-            <div className="text-sm" style={{ color: palette.silver2 }}>
-              Memuat…
-            </div>
-          )}
+                      <div className="mt-2 flex items-center gap-2">
+                        <Badge
+                          variant={typeToVariant[a.type]}
+                          palette={palette}
+                        >
+                          {a.type}
+                        </Badge>
+                        {a.attachmentName && (
+                          <Badge variant="outline" palette={palette}>
+                            {a.attachmentName}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
 
-          {(data ?? []).map((a) => (
-            <SectionCard
-              key={a.id}
-              palette={palette}
-              className="p-3 md:p-4"
-              style={{ background: palette.white1 }}
-            >
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="font-medium">{a.title}</div>
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
-                    {dateLong(a.date)}
-                  </div>
-                  <p className="text-sm mt-1" style={{ color: palette.black2 }}>
-                    {a.body}
-                  </p>
-
-                  <div className="mt-2 flex items-center gap-2">
-                    <Badge variant={typeToVariant[a.type]} palette={palette}>
-                      {a.type}
-                    </Badge>
+                    {/* Actions — tampil hanya jika ada lampiran */}
                     {a.attachmentName && (
-                      <Badge variant="outline" palette={palette}>
-                        {a.attachmentName}
-                      </Badge>
+                      <div className="flex flex-col sm:flex-row gap-2 md:ml-4 mt-2 md:mt-0">
+                        <Btn size="sm" variant="outline" palette={palette}>
+                          <Download className="mr-2" size={16} />
+                          Lampiran
+                        </Btn>
+                      </div>
                     )}
                   </div>
-                </div>
+                </SectionCard>
+              ))}
 
-                {/* Actions — mobile: di bawah; desktop: kanan */}
-                <div className="flex flex-col sm:flex-row gap-2 md:ml-4 mt-2 md:mt-0">
-                  {a.attachmentName && (
-                    <Btn size="sm" variant="outline" palette={palette}>
-                      <Download className="mr-2" size={16} />
-                      Lampiran
-                    </Btn>
-                  )}
-                  <Btn size="sm" variant="secondary" palette={palette}>
-                    <Plus className="mr-2" size={16} />
-                    Ingatkan
-                  </Btn>
-                </div>
-              </div>
-            </SectionCard>
-          ))}
-
-          {(data?.length ?? 0) === 0 && !isLoading && (
-            <SectionCard palette={palette} className="p-6 text-center">
-              <div className="text-sm" style={{ color: palette.silver2 }}>
-                Tidak ada pengumuman yang cocok.
-              </div>
-            </SectionCard>
-          )}
+              {(data?.length ?? 0) === 0 && !isLoading && (
+                <SectionCard palette={palette} className="p-6 text-center">
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    Tidak ada pengumuman yang cocok.
+                  </div>
+                </SectionCard>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>

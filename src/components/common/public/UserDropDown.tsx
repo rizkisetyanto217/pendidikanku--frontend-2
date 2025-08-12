@@ -1,3 +1,4 @@
+// src/components/common/public/UserDropDown.tsx
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -18,12 +19,13 @@ import { useResponsive } from "@/hooks/isResponsive";
 
 interface PublicUserDropdownProps {
   variant?: "default" | "icon";
+  /** Default: true -> tombol trigger memakai bg abu/silver */
+  withBg?: boolean;
 }
-
-// ...import tetap sama
 
 export default function PublicUserDropdown({
   variant = "default",
+  withBg = true, // ⬅️ default pakai background silver
 }: PublicUserDropdownProps) {
   const { isDark, setDarkMode } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -39,25 +41,21 @@ export default function PublicUserDropdown({
   const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
 
-const handleLogout = async () => {
-  setIsLoggingOut(true);
-  try {
-    await api.post("/api/auth/logout", null, { withCredentials: true });
-    queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
-    sessionStorage.clear();
-    localStorage.clear();
-    setTimeout(() => {
-      if (slug) {
-        navigate(`/masjid/${slug}/login`);
-      } else {
-        navigate("/login");
-      }
-    }, 150);
-  } catch (err) {
-    console.error("Logout error:", err);
-  }
-};
-
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await api.post("/api/auth/logout", null, { withCredentials: true });
+      queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
+      sessionStorage.clear();
+      localStorage.clear();
+      setTimeout(() => {
+        if (slug) navigate(`/masjid/${slug}/login`);
+        else navigate("/login");
+      }, 150);
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -74,7 +72,6 @@ const handleLogout = async () => {
 
   const menuItemClass =
     "w-full flex items-center gap-2 px-4 py-2 text-left transition";
-
   const hoverStyle = (e: React.MouseEvent<HTMLButtonElement>) =>
     (e.currentTarget.style.backgroundColor = theme.white2);
   const outStyle = (e: React.MouseEvent<HTMLButtonElement>) =>
@@ -82,13 +79,18 @@ const handleLogout = async () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Tombol trigger */}
+      {/* Trigger */}
       <button
         onClick={() => setOpen(!open)}
-        className={`p-2 rounded-md transition ${
-          variant === "default" ? "flex items-center gap-2" : ""
+        className={`h-9 w-9 grid place-items-center rounded-xl transition ${
+          variant === "default" ? "px-2" : ""
         }`}
-        style={{ backgroundColor: theme.white3, color: theme.black1 }}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        style={{
+          backgroundColor: withBg ? theme.white3 : "transparent", // ⬅️ kontrol bg
+          color: theme.black1,
+        }}
       >
         <MoreVertical className="w-5 h-5" />
       </button>
@@ -97,6 +99,7 @@ const handleLogout = async () => {
       {open && (
         <div
           className="absolute right-0 mt-2 w-48 rounded-lg border z-50"
+          role="menu"
           style={{
             backgroundColor: theme.white1,
             borderColor: theme.silver1,
@@ -104,7 +107,6 @@ const handleLogout = async () => {
           }}
         >
           <ul className="py-2 text-sm" style={{ color: theme.black1 }}>
-            {/* Login (hanya jika belum login) */}
             {!isLoggedIn && (
               <li>
                 <button
@@ -121,7 +123,6 @@ const handleLogout = async () => {
               </li>
             )}
 
-            {/* Pengaturan (hanya jika sudah login) */}
             {isLoggedIn && (
               <li>
                 <button
@@ -141,7 +142,6 @@ const handleLogout = async () => {
               </li>
             )}
 
-            {/* Bantuan */}
             <li>
               <button
                 onClick={() => {
@@ -156,7 +156,6 @@ const handleLogout = async () => {
               </button>
             </li>
 
-            {/* Dark Mode */}
             <li>
               <button
                 onClick={() => {
@@ -179,18 +178,16 @@ const handleLogout = async () => {
               </button>
             </li>
 
-            {/* Share */}
             <li>
               <div className="px-4 py-2">
                 <SharePopover
                   title={document.title}
                   url={window.location.href}
-                  forceCustom={true}
+                  forceCustom
                 />
               </div>
             </li>
 
-            {/* Logout (hanya jika sudah login) */}
             {isLoggedIn && (
               <li>
                 <button

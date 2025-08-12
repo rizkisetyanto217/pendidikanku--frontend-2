@@ -136,11 +136,15 @@ import MasjidkuListMasjid from "@/pages/masjidku/masjid/MasjidkuListMasjid";
 import MasjidkuProfil from "@/pages/masjidku/profil/MasjidkuProfil";
 import MasjidkuProgram from "@/pages/masjidku/program/MasjidkuProgram";
 import ParentHome from "@/pages/sekolahislamku/dashboard/StudentDashboard";
-import OrtuStudentProgressDetail from "@/pages/sekolahislamku/dashboard/progress/StudentProgress";
-import OrtuDashboard from "@/pages/sekolahislamku/dashboard/StudentDashboard";
-import OrtuFInance from "@/pages/sekolahislamku/dashboard/finance/StudentFinance";
-import OrtuSchedule from "@/pages/sekolahislamku/dashboard/schedule/StudentSchedule";
-import OrtuAnnouncement from "@/pages/sekolahislamku/dashboard/announcement/StudentAnnouncement";
+import StudentProgressDetail from "@/pages/sekolahislamku/dashboard/progress/StudentProgress";
+import StudentDashboard from "@/pages/sekolahislamku/dashboard/StudentDashboard";
+import StudentFInance from "@/pages/sekolahislamku/dashboard/finance/StudentFinance";
+import StudentSchedule from "@/pages/sekolahislamku/dashboard/schedule/StudentSchedule";
+import StudentAnnouncement from "@/pages/sekolahislamku/dashboard/announcement/StudentAnnouncement";
+import StudentRaport from "@/pages/sekolahislamku/dashboard/progress/raport/StudentRaport";
+import StudentNotesSummary from "@/pages/sekolahislamku/dashboard/progress/notes-summary/StudentNotesSummary";
+import StudentAbsence from "@/pages/sekolahislamku/dashboard/progress/absence/StudentAbsence";
+import StudentLayout from "@/layout/StudentLayout";
 
 export default function AppRoutes() {
   return (
@@ -493,21 +497,19 @@ export default function AppRoutes() {
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-      <Route path="/student">
-        <Route index element={<OrtuDashboard />} />
-        {/* <Route path="anak" element={<ParentChildDetail />} /> */}
-        <Route
-          path="student-progress"
-          element={<OrtuStudentProgressDetail />}
-        />
-        <Route path="finance" element={<OrtuFInance />} />
-        <Route path="schedule" element={<OrtuSchedule />} />
-        <Route path="announcement" element={<OrtuAnnouncement />}></Route>
-        {/* optional:
-  <Route path="tagihan" element={<ParentBills />} />
-  <Route path="jadwal" element={<ParentSchedule />} />
-  <Route path="notifikasi" element={<ParentNotifications />} />
-  <Route path="komunikasi" element={<ParentChat />} /> */}
+      <Route path="/student" element={<StudentLayout />}>
+        <Route index element={<StudentDashboard />} />
+
+        <Route path="progress" element={<StudentProgressDetail />} />
+        <Route path="progress/raport" element={<StudentRaport />} />
+
+        <Route path="finance" element={<StudentFInance />} />
+        <Route path="jadwal" element={<StudentSchedule />} />
+        <Route path="pengumuman" element={<StudentAnnouncement />} />
+
+        {/* opsional: detail list */}
+        <Route path="absensi" element={<StudentAbsence />} />
+        <Route path="catatan" element={<StudentNotesSummary />} />
       </Route>
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />

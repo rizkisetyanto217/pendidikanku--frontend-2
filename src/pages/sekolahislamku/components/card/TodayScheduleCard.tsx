@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronRight } from "lucide-react";
 import {
   SectionCard,
   Btn,
@@ -53,7 +53,7 @@ export default function TodayScheduleCard({
         <div className="pt-3">
           <Link to={seeAllPath}>
             <Btn variant="outline" className="w-full" palette={palette}>
-              Lihat Jadwal
+              Lihat Jadwal <ChevronRight className="ml-1" size={16} />
             </Btn>
           </Link>
         </div>
