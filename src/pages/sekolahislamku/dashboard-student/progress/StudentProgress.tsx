@@ -25,7 +25,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import PageTopBar from "@/pages/sekolahislamku/components/home/PageTopBar";
 import ParentSidebarNav from "@/pages/sekolahislamku/components/home/StudentSideBarNav";
-import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentTopBar from "../../components/home/StudentTopBar";
 
 /* ===== Types ===== */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";

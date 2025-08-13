@@ -10,10 +10,11 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TeacherSidebarNav from "../../components/home/TeacherSideBarNav";
 import { DeleteConfirmButton } from "../../components/common/DeleteConfirmModal";
 import ScheduleEditorModal from "./components/ScheduleEditorModal";
+import TeacherTopBar from "../../components/home/TeacherTopBar";
 
 /* ================= Types ================= */
 type ScheduleItem = {
@@ -232,7 +233,7 @@ export default function TeacherSchedule() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title="Jadwal (Guru)"

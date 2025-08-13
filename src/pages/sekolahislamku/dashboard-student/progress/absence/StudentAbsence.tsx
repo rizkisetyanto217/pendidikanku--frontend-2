@@ -12,7 +12,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { useMemo } from "react";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import ParentSidebarNav from "@/pages/sekolahislamku/components/home/StudentSideBarNav";
 
 /* ================= Types ================= */

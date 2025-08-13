@@ -11,7 +11,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
 import {
@@ -24,6 +24,7 @@ import {
   CalendarDays,
   Users,
 } from "lucide-react";
+import TeacherTopBar from "../../components/home/TeacherTopBar";
 
 /* ================= Types ================ */
 type Assignment = {
@@ -228,7 +229,7 @@ export default function TeacherGrading() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         title="Penilaian"
         gregorianDate={data?.gregorianDate}

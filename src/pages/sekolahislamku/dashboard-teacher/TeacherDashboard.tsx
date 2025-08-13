@@ -12,7 +12,7 @@ import {
 
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import { NavLink } from "react-router-dom";
 
 import {
@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import TeacherSidebarNav from "../components/home/TeacherSideBarNav";
 import MiniBar from "../components/ui/MiniBar";
+import TeacherTopBar from "../components/home/TeacherTopBar";
 
 /* ================= Types ================ */
 interface Announcement {
@@ -258,7 +259,7 @@ export default function TeacherDashboard() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         title="Dashboard Pengajar"
         gregorianDate={data?.gregorianDate}

@@ -18,9 +18,10 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 import MiniBar from "../../components/ui/MiniBar";
+import TeacherTopBar from "../../components/home/TeacherTopBar";
 
 /* ================= Types ================= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -212,7 +213,7 @@ export default function TeacherAttendance() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         title="Kehadiran"
         gregorianDate={qDate}

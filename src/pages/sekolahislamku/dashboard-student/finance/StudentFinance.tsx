@@ -18,7 +18,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import PageTopBar from "../../components/home/PageTopBar";
 import ParentSidebarNav from "../../components/home/StudentSideBarNav";
-import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentTopBar from "../../components/home/StudentTopBar";
 
 /* =========================
    Types

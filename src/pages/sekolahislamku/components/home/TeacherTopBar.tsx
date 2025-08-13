@@ -6,24 +6,46 @@ import {
   GraduationCap,
   Menu,
   X,
+  // === ikon untuk NAV guru (match TeacherSidebarNav)
   LayoutDashboard,
-  ClipboardCheck,
-  FileSpreadsheet,
-  Wallet,
-  CalendarDays as CalendarIcon,
+  Users,
+  CheckSquare,
+  ClipboardList,
+  NotebookPen,
+  Megaphone,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import { colors } from "@/constants/colorsThema";
 import { useEffect, useState } from "react";
 
-interface ParentTopBarProps {
+/* ============ Types ============ */
+type NavItem = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  end?: boolean;
+};
+
+interface TeacherTopBarProps {
   palette: typeof colors.light;
   parentName?: string;
   hijriDate?: string;
   gregorianDate?: string;
   dateFmt?: (iso: string) => string;
   title?: React.ReactNode; // custom title; jika ada, ikon brand disembunyikan
+  /** opsional: override daftar nav. default = NAV guru (sama seperti TeacherSidebarNav) */
+  navs?: NavItem[];
 }
+
+/* ============ Default NAV: GURU (persis seperti TeacherSidebarNav) ============ */
+const TEACHER_NAVS: NavItem[] = [
+  { to: "/guru", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/guru/kelas", label: "Kelas Saya", icon: Users },
+  { to: "/guru/kehadiran", label: "Kehadiran", icon: CheckSquare },
+  { to: "/guru/penilaian", label: "Penilaian", icon: ClipboardList },
+  { to: "/guru/materials", label: "Materi & Tugas", icon: NotebookPen },
+  { to: "/guru/pengumuman", label: "Pengumuman", icon: Megaphone },
+];
 
 /* ===== Small Primitives (local) ===== */
 function Badge({
@@ -67,39 +89,25 @@ function Btn({
   );
 }
 
-/* ===== NAV items (sinkron dengan sidebar) ===== */
-type Item = {
-  to: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  end?: boolean;
-};
-const NAVS: Item[] = [
-  { to: "/student", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/student/progress", label: "Progress Anak", icon: ClipboardCheck },
-  { to: "/student/finance", label: "Pembayaran", icon: Wallet },
-  { to: "/student/jadwal", label: "Jadwal", icon: CalendarIcon },
-  { to: "/student/pengumuman", label: "Pengumuman", icon: Bell },
-  { to: "/student/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
-];
-
-export default function ParentTopBar({
+/* ============ Component ============ */
+export default function TeacherTopBar({
   palette,
   hijriDate,
   gregorianDate,
   dateFmt,
   title,
-}: ParentTopBarProps) {
+  navs,
+}: TeacherTopBarProps) {
   const [open, setOpen] = useState(false);
+  const NAVS: NavItem[] = navs ?? TEACHER_NAVS; // <- default pakai NAV guru
 
   useEffect(() => {
-    if (open) {
-      const original = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = original;
-      };
-    }
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
   }, [open]);
 
   // Ikon tampil hanya saat pakai brand default
@@ -234,7 +242,7 @@ export default function ParentTopBar({
             ) : null}
           </div>
 
-          {/* nav list */}
+          {/* nav list (SAMA dengan TeacherSidebarNav) */}
           <nav className="px-2 pb-4" aria-label="Navigasi">
             <ul className="space-y-2">
               {NAVS.map(({ to, label, icon: Icon, end }) => (
@@ -247,13 +255,9 @@ export default function ParentTopBar({
                   >
                     {({ isActive }) => (
                       <div
-                        className={[
-                          "flex items-center gap-3 rounded-xl px-3 py-2 border transition-all",
-                        ].join(" ")}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all"
                         style={{
-                          background: isActive
-                            ? palette.primary2
-                            : palette.white1,
+                          background: palette.white1,
                           borderColor: isActive
                             ? palette.primary
                             : palette.silver1,

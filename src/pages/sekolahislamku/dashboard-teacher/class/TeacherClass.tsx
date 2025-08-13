@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/TeacherClassDetail.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -12,7 +12,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
@@ -30,6 +30,7 @@ import {
 import MiniBar from "../../components/ui/MiniBar";
 import StatPill from "../../components/ui/StatPill";
 import StudentsTable from "./components/StudentTable";
+import TeacherTopBar from "../../components/home/TeacherTopBar";
 
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -257,6 +258,8 @@ function ClassSelector({
 export default function TeacherClass() {
   const params = useParams<{ id: string }>();
   const classId = params.id ?? "tpa-a";
+  // di dalam komponen:
+  const navigate = useNavigate();
 
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
@@ -307,7 +310,7 @@ export default function TeacherClass() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         title={`Kelas ${data?.name ?? ""}`}
         gregorianDate={data?.gregorianDate}
@@ -317,8 +320,7 @@ export default function TeacherClass() {
       {/* ===== Content + Sidebar ===== */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-            <TeacherSidebarNav palette={palette} />
-
+          <TeacherSidebarNav palette={palette} />
 
           {/* Main content */}
           <div className="flex-1 min-w-0 space-y-6">
@@ -356,7 +358,7 @@ export default function TeacherClass() {
             </div>
             {/* ===== Header info + Actions ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-8">
+              <SectionCard palette={palette} className="lg:col-span-7">
                 <div className="p-4 md:p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -389,7 +391,10 @@ export default function TeacherClass() {
                   </div>
 
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <Btn palette={palette} onClick={() => alert("Mulai Absen")}>
+                    <Btn
+                      palette={palette}
+                      onClick={() => navigate("/guru/kelas/kehadiran")}
+                    >
                       <CheckSquare className="mr-2" size={16} /> Mulai Absen
                     </Btn>
                     <Btn
@@ -410,11 +415,13 @@ export default function TeacherClass() {
                 </div>
               </SectionCard>
 
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-5">
                 <TodayScheduleCard
                   palette={palette}
                   items={data?.scheduleToday ?? []}
                   seeAllPath="/teacher/jadwal"
+                  addLabel="Tambah Jadwal"
+                  addHref="/teacher/jadwal/tambah"
                 />
               </div>
             </section>
@@ -516,7 +523,7 @@ export default function TeacherClass() {
                 <div className="p-4 md:p-5">
                   <div className="flex items-center justify-between">
                     <div className="font-medium flex items-center gap-2">
-                      <BookOpen size={16} /> Materi Terbaru
+                      <BookOpen size={16} /> Materi
                     </div>
                     <Btn
                       palette={palette}

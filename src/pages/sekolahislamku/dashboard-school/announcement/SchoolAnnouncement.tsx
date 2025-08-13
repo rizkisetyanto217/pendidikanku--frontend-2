@@ -14,7 +14,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 
 import {
   Megaphone,

@@ -11,7 +11,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
 import {
@@ -30,6 +30,7 @@ import {
   EyeOff,
   Clock,
 } from "lucide-react";
+import TeacherTopBar from "../../components/home/TeacherTopBar";
 
 /* ================= Types ================ */
 type AStatus = "published" | "draft" | "scheduled";
@@ -201,7 +202,7 @@ export default function TeacherAnnouncements() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         title="Pengumuman"
         gregorianDate={data?.gregorianDate}

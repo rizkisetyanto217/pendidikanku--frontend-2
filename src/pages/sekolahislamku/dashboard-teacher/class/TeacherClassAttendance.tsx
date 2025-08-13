@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+// src/pages/sekolahislamku/teacher/TeacherAttendancePage.tsx
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
@@ -13,6 +14,7 @@ import {
   Check,
   RotateCcw,
   NotebookPen,
+  GraduationCap,
 } from "lucide-react";
 
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -24,28 +26,28 @@ import {
   ProgressBar,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+import TeacherTopBar from "../../components/home/TeacherTopBar";
 
-/* ================= Types ================= */
-type AttendanceStatus = "hadir" | "online" | "sakit" | "izin" | "alpa" | null;
+/* ========================================
+   Types & constants
+======================================== */
+type AttendanceCore = "hadir" | "sakit" | "izin" | "alpa";
+type AttendanceStatus = AttendanceCore | null;
 
 type Student = { id: string; name: string };
 
 type Entry = {
   studentId: string;
 
-  // (1) Absensi - WAJIB
+  // Wajib
   status: AttendanceStatus;
-  time?: string; // jam jika hadir/online
-
-  // (2) Nilai - OPSIONAL
-  score?: number; // 0..100
-
-  // (3) Informasi umum - WAJIB
   infoUmum?: string;
 
-  // (4)-(7) OPSIONAL
+  // Opsional
+  time?: string; // jam jika hadir/online
+  score?: number; // 0..100
   materiPersonal?: string;
   penilaianPersonal?: string;
   hafalan?: string;
@@ -59,7 +61,23 @@ type AttendanceDoc = {
   finalized?: boolean;
 };
 
-/* ================= Helpers ================= */
+type ClassInfo = {
+  id: string;
+  name: string;
+  room?: string;
+  studentsCount: number;
+};
+
+const STATUS_OPTIONS: { key: AttendanceCore; label: string }[] = [
+  { key: "hadir", label: "Hadir" },
+  { key: "sakit", label: "Sakit" },
+  { key: "izin", label: "Izin" },
+  { key: "alpa", label: "Alpa" },
+];
+
+/* ========================================
+   Helpers
+======================================== */
 const toISODate = (d: Date) => d.toISOString().slice(0, 10);
 const idDateLong = (iso: string) =>
   new Date(iso).toLocaleDateString("id-ID", {
@@ -69,8 +87,25 @@ const idDateLong = (iso: string) =>
     day: "numeric",
   });
 
-/* ================= Fake roster API ================= */
+const nowHHMM = () => {
+  const t = new Date();
+  return `${String(t.getHours()).padStart(2, "0")}:${String(
+    t.getMinutes()
+  ).padStart(2, "0")}`;
+};
+
+/* ========================================
+   Fake APIs (gampang diganti backend)
+======================================== */
+async function fetchTeacherClasses(): Promise<ClassInfo[]> {
+  return Promise.resolve([
+    { id: "tpa-a", name: "TPA A", room: "Aula 1", studentsCount: 22 },
+    { id: "tpa-b", name: "TPA B", room: "Aula 2", studentsCount: 20 },
+    { id: "tpa-c", name: "TPA C", room: "Aula 3", studentsCount: 18 },
+  ]);
+}
 async function fetchRoster(classId: string): Promise<Student[]> {
+  // bisa dihubungkan dengan classId
   return Promise.resolve([
     { id: "s1", name: "Ahmad" },
     { id: "s2", name: "Fatimah" },
@@ -82,22 +117,25 @@ async function fetchRoster(classId: string): Promise<Student[]> {
   ]);
 }
 
-/* ================= Local storage store ================= */
+/* ========================================
+   LocalStorage store (keyed by class+date)
+======================================== */
 const LS_KEY = "tpa_attend_progress_v1";
 type Store = Record<string, AttendanceDoc>; // key: `${classId}__${dateISO}`
 
-const readStore = (): Store => {
+const makeKey = (classId: string, dateISO: string) => `${classId}__${dateISO}`;
+
+function readStore(): Store {
   try {
     const raw = localStorage.getItem(LS_KEY);
     return raw ? (JSON.parse(raw) as Store) : {};
   } catch {
     return {};
   }
-};
-const writeStore = (s: Store) =>
+}
+function writeStore(s: Store) {
   localStorage.setItem(LS_KEY, JSON.stringify(s));
-const makeKey = (classId: string, dateISO: string) => `${classId}__${dateISO}`;
-
+}
 function loadOrCreateDoc(
   classId: string,
   dateISO: string,
@@ -113,31 +151,25 @@ function loadOrCreateDoc(
     dateISO,
     entries: roster.map((st) => ({
       studentId: st.id,
-      status: null,
-      // field lain biarkan undefined (opsional)
+      status: null, // wajib tapi belum diisi
     })),
   };
   s[key] = doc;
   writeStore(s);
   return doc;
 }
-
 function saveDoc(doc: AttendanceDoc) {
   const s = readStore();
   s[makeKey(doc.classId, doc.dateISO)] = doc;
   writeStore(s);
 }
 
-/* ================= Small UI bits ================= */
-function StatusBadge({
-  s,
-  palette,
-}: {
-  s: Exclude<AttendanceStatus, null>;
-  palette: Palette;
-}) {
+/* ========================================
+   UI bits (kecil & reusable)
+======================================== */
+function StatusBadge({ s, palette }: { s: AttendanceCore; palette: Palette }) {
   const map: Record<
-    Exclude<AttendanceStatus, null>,
+    AttendanceCore,
     {
       v: "success" | "info" | "warning" | "secondary" | "destructive";
       label: string;
@@ -148,11 +180,6 @@ function StatusBadge({
       v: "success",
       label: "Hadir",
       icon: <CheckCircle2 size={12} className="mr-1" />,
-    },
-    online: {
-      v: "info",
-      label: "Online",
-      icon: <Wifi size={12} className="mr-1" />,
     },
     sakit: {
       v: "warning",
@@ -187,19 +214,12 @@ function StatusSelector({
   palette,
 }: {
   value: AttendanceStatus;
-  onChange: (s: Exclude<AttendanceStatus, null>) => void;
+  onChange: (s: AttendanceCore) => void;
   palette: Palette;
 }) {
-  const opts: { key: Exclude<AttendanceStatus, null>; label: string }[] = [
-    { key: "hadir", label: "Hadir" },
-    { key: "online", label: "Online" },
-    { key: "sakit", label: "Sakit" },
-    { key: "izin", label: "Izin" },
-    { key: "alpa", label: "Alpa" },
-  ];
   return (
     <div className="flex gap-1 overflow-x-auto">
-      {opts.map((o) => {
+      {STATUS_OPTIONS.map((o) => {
         const active = value === o.key;
         return (
           <button
@@ -207,7 +227,7 @@ function StatusSelector({
             onClick={() => onChange(o.key)}
             className="px-3 h-8 rounded-full border text-xs whitespace-nowrap"
             style={{
-              background: active ? colors.light.primary2 : palette.white2,
+              background: active ? palette.primary2 : palette.white2,
               color: active ? palette.primary : palette.black1,
               borderColor: active ? palette.primary : palette.silver1,
             }}
@@ -245,6 +265,7 @@ function StatChip({
   );
 }
 
+/* ====== Modal editor siswa (WAJIB/OPSIONAL) ====== */
 function StudentDetailEditor({
   open,
   onClose,
@@ -284,6 +305,7 @@ function StudentDetailEditor({
 }) {
   const [data, setData] = useState(value);
 
+  // open/close + restore
   useEffect(() => {
     if (!open) return;
     setData(value);
@@ -298,7 +320,8 @@ function StudentDetailEditor({
   }, [open, value, onClose]);
 
   if (!open) return null;
-  const mustTime = data.status === "hadir" || data.status === "online";
+
+  const mustTime = data.status === "hadir";
 
   return (
     <div
@@ -315,28 +338,26 @@ function StudentDetailEditor({
           background: palette.white1,
           color: palette.black1,
           border: `1px solid ${palette.silver1}`,
-          maxHeight: "86vh", // batas tinggi panel
-          // gunakan dvh kalau mau lebih akurat di iOS terbaru:
-          // maxHeight: "86dvh",
+          maxHeight: "86vh",
         }}
       >
-        {/* Header (tetap) */}
+        {/* Header (sticky) */}
         <div
           className="p-4 md:p-5 border-b"
           style={{ borderColor: palette.silver1 }}
         >
           <div className="font-semibold">Absensi & Detail — {name}</div>
           <div className="text-xs mt-1" style={{ color: palette.silver2 }}>
-            Isi yang opsional boleh dikosongkan. Status & Informasi Umum wajib.
+            Status & Informasi Umum wajib. Yang lain opsional.
           </div>
         </div>
 
-        {/* CONTENT (scrollable) */}
+        {/* Content (scrollable) */}
         <div
           className="p-4 md:p-5 space-y-4 overflow-y-auto min-h-0"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
-          {/* Status (WAJIB) */}
+          {/* Status */}
           <div>
             <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
               Status (WAJIB)
@@ -352,7 +373,7 @@ function StudentDetailEditor({
           <div className="grid md:grid-cols-2 gap-3">
             <div>
               <label className="text-xs" style={{ color: palette.silver2 }}>
-                Jam (opsional, aktif saat Hadir/Online)
+                Jam (opsional, aktif saat Hadir)
               </label>
               <input
                 type="time"
@@ -398,7 +419,7 @@ function StudentDetailEditor({
             </div>
           </div>
 
-          {/* Informasi Umum (WAJIB) */}
+          {/* Informasi umum (WAJIB) */}
           <div>
             <label className="text-xs" style={{ color: palette.silver2 }}>
               Informasi Umum (WAJIB)
@@ -419,7 +440,7 @@ function StudentDetailEditor({
             />
           </div>
 
-          {/* Opsional */}
+          {/* Opsional lainnya */}
           <div>
             <label className="text-xs" style={{ color: palette.silver2 }}>
               Materi Personal (OPSIONAL)
@@ -496,7 +517,7 @@ function StudentDetailEditor({
           </div>
         </div>
 
-        {/* Footer (tetap) */}
+        {/* Footer (sticky) */}
         <div
           className="p-4 md:p-5 pt-0 flex items-center justify-end gap-2 border-t"
           style={{ borderColor: palette.silver1 }}
@@ -524,23 +545,36 @@ function StudentDetailEditor({
   );
 }
 
-/* ================= Page ================= */
+/* ========================================
+   Main Page
+======================================== */
 export default function TeacherAttendancePage({
-  classId = "tpa-a",
+  classId: initialClassId = "tpa-a",
 }: {
   classId?: string;
 }) {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
 
+  // ----- state utama
+  const [classId, setClassId] = useState<string>(initialClassId);
   const [dateISO, setDateISO] = useState<string>(() => toISODate(new Date()));
   const [doc, setDoc] = useState<AttendanceDoc | null>(null);
-
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<AttendanceStatus | "all">("all");
-
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(
     null
+  );
+
+  // ----- data kelas & roster
+  const { data: classList } = useQuery({
+    queryKey: ["teacher-classes"],
+    queryFn: fetchTeacherClasses,
+    staleTime: 5 * 60_000,
+  });
+  const currentClass = useMemo(
+    () => classList?.find((c) => c.id === classId),
+    [classList, classId]
   );
 
   const { data: roster } = useQuery({
@@ -549,66 +583,73 @@ export default function TeacherAttendancePage({
     staleTime: 60_000,
   });
 
-  // load/create doc
+  // ----- load/create dokumen saat class/date/roster berubah
   useEffect(() => {
     if (!roster) return;
     const d = loadOrCreateDoc(classId, dateISO, roster);
     setDoc(d);
   }, [classId, dateISO, roster]);
 
-  // autosave
+  // ----- autosave draft (debounce ringan)
   useEffect(() => {
     if (!doc) return;
     const t = setTimeout(() => saveDoc(doc), 300);
     return () => clearTimeout(t);
   }, [doc]);
 
+  // ----- helper map id->student
   const mapStudent = useMemo(() => {
     const m = new Map<string, Student>();
     (roster ?? []).forEach((s) => m.set(s.id, s));
     return m;
   }, [roster]);
 
-  const setEntry = (studentId: string, patch: Partial<Entry>) => {
-    if (!doc) return;
-    setDoc({
-      ...doc,
-      entries: doc.entries.map((e) =>
-        e.studentId === studentId ? { ...e, ...patch } : e
-      ),
-    });
-  };
+  // ----- update helpers
+  const setEntry = useCallback(
+    (studentId: string, patch: Partial<Entry>) => {
+      if (!doc) return;
+      setDoc({
+        ...doc,
+        entries: doc.entries.map((e) =>
+          e.studentId === studentId ? { ...e, ...patch } : e
+        ),
+      });
+    },
+    [doc]
+  );
 
-  const markAll = (status: Exclude<AttendanceStatus, null>) => {
-    if (!doc) return;
-    const timeNow = new Date();
-    const hh = String(timeNow.getHours()).padStart(2, "0");
-    const mm = String(timeNow.getMinutes()).padStart(2, "0");
-    setDoc({
-      ...doc,
-      entries: doc.entries.map((e) => ({
-        ...e,
-        status,
-        time:
-          status === "hadir" || status === "online" ? `${hh}:${mm}` : undefined,
-      })),
-    });
-  };
+  const markAll = useCallback(
+    (status: AttendanceCore) => {
+      if (!doc) return;
+      const t = nowHHMM();
+      setDoc({
+        ...doc,
+        entries: doc.entries.map((e) => ({
+          ...e,
+        })),
+      });
+    },
+    [doc]
+  );
 
-  const broadcastInfoUmum = (text: string, mode: "kosong" | "semua") => {
-    if (!doc) return;
-    setDoc({
-      ...doc,
-      entries: doc.entries.map((e) => {
-        if (mode === "semua") return { ...e, infoUmum: text };
-        // "kosong" saja
-        if (!e.infoUmum || !e.infoUmum.trim()) return { ...e, infoUmum: text };
-        return e;
-      }),
-    });
-  };
+  const broadcastInfoUmum = useCallback(
+    (text: string, mode: "kosong" | "semua") => {
+      if (!doc) return;
+      const val = text.trim();
+      if (!val) return;
+      setDoc({
+        ...doc,
+        entries: doc.entries.map((e) => {
+          if (mode === "semua") return { ...e, infoUmum: val };
+          if (!e.infoUmum || !e.infoUmum.trim()) return { ...e, infoUmum: val };
+          return e;
+        }),
+      });
+    },
+    [doc]
+  );
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     if (!doc) return;
     setDoc({
       ...doc,
@@ -616,12 +657,12 @@ export default function TeacherAttendancePage({
         ...e,
         status: null,
         time: undefined,
-        // progress opsional tidak dihapus
       })),
       finalized: false,
     });
-  };
+  }, [doc]);
 
+  // ----- ringkasan
   const counts = useMemo(() => {
     const base = {
       hadir: 0,
@@ -649,6 +690,7 @@ export default function TeacherAttendancePage({
     return Math.round((n / total) * 100);
   }, [doc]);
 
+  // ----- filter + search
   const filtered = useMemo(() => {
     if (!doc) return [];
     const withName = doc.entries
@@ -662,7 +704,8 @@ export default function TeacherAttendancePage({
       : byStatus;
   }, [doc, mapStudent, filter, q]);
 
-  const finalize = () => {
+  // ----- finalisasi (validasi wajib)
+  const finalize = useCallback(() => {
     if (!doc) return;
     const missingStatus = doc.entries
       .filter((e) => !e.status)
@@ -674,10 +717,14 @@ export default function TeacherAttendancePage({
     if (missingStatus.length || missingInfo.length) {
       const head = "Data wajib belum lengkap:";
       const a = missingStatus.length
-        ? `\n- Absensi: ${missingStatus.slice(0, 5).join(", ")}${missingStatus.length > 5 ? "…" : ""}`
+        ? `\n- Absensi: ${missingStatus
+            .slice(0, 5)
+            .join(", ")}${missingStatus.length > 5 ? "…" : ""}`
         : "";
       const b = missingInfo.length
-        ? `\n- Informasi umum: ${missingInfo.slice(0, 5).join(", ")}${missingInfo.length > 5 ? "…" : ""}`
+        ? `\n- Informasi umum: ${missingInfo
+            .slice(0, 5)
+            .join(", ")}${missingInfo.length > 5 ? "…" : ""}`
         : "";
       alert(head + a + b);
       return;
@@ -686,7 +733,7 @@ export default function TeacherAttendancePage({
     saveDoc(newDoc);
     setDoc(newDoc);
     alert("Absensi & progress harian dikirim. Barakallahu fiikum!");
-  };
+  }, [doc, mapStudent]);
 
   /* ===== UI ===== */
   return (
@@ -694,7 +741,7 @@ export default function TeacherAttendancePage({
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         title="Absensi & Progress Harian (Guru)"
         gregorianDate={new Date().toISOString()}
@@ -706,25 +753,60 @@ export default function TeacherAttendancePage({
           <TeacherSidebarNav palette={palette} />
 
           <div className="flex-1 space-y-6">
-            {/* Filter bar */}
+            {/* ===== Filter bar (kelas + tanggal + search + status) ===== */}
             <SectionCard palette={palette} className="p-3">
               <div className="flex flex-wrap items-center gap-2">
-                <CalendarDays size={18} color={palette.quaternary} />
-                <input
-                  type="date"
-                  value={dateISO}
-                  onChange={(e) => setDateISO(e.target.value)}
-                  className="h-9 w-48 rounded-xl px-3 text-sm"
-                  style={{
-                    background: palette.white1,
-                    color: palette.black1,
-                    border: `1px solid ${palette.silver1}`,
-                  }}
-                />
+                {/* Kelas */}
+                <div className="flex items-center gap-2">
+                  <GraduationCap size={18} color={palette.quaternary} />
+                  <select
+                    value={classId}
+                    onChange={(e) => setClassId(e.target.value)}
+                    className="h-9 min-w-[11rem] rounded-xl px-3 text-sm"
+                    style={{
+                      background: palette.white1,
+                      color: palette.black1,
+                      border: `1px solid ${palette.silver1}`,
+                    }}
+                  >
+                    {(classList ?? []).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Info kelas (sembunyikan di layar kecil jika sempit) */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    <Badge variant="outline" palette={palette}>
+                      {currentClass?.room ?? "-"}
+                    </Badge>
+                    <Badge variant="outline" palette={palette}>
+                      <Users size={14} className="mr-1" />
+                      {currentClass?.studentsCount ?? roster?.length ?? 0} siswa
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Tanggal */}
+                <div className="flex items-center gap-2">
+                  <CalendarDays size={18} color={palette.quaternary} />
+                  <input
+                    type="date"
+                    value={dateISO}
+                    onChange={(e) => setDateISO(e.target.value)}
+                    className="h-9 w-44 sm:w-48 rounded-xl px-3 text-sm"
+                    style={{
+                      background: palette.white1,
+                      color: palette.black1,
+                      border: `1px solid ${palette.silver1}`,
+                    }}
+                  />
+                </div>
 
                 {/* Search */}
                 <div
-                  className="ml-0 md:ml-4 flex items-center gap-2 rounded-xl border px-3 h-9"
+                  className="ml-0 md:ml-2 flex items-center gap-2 rounded-xl border px-3 h-9 flex-1 min-w-[200px]"
                   style={{
                     borderColor: palette.silver1,
                     background: palette.white1,
@@ -735,39 +817,57 @@ export default function TeacherAttendancePage({
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
                     placeholder="Cari siswa…"
-                    className="bg-transparent outline-none text-sm"
+                    className="bg-transparent outline-none text-sm w-full"
                     style={{ color: palette.black1 }}
                   />
                 </div>
 
                 {/* Filter status */}
-                <div className="flex items-center gap-1 ml-auto">
-                  {(
-                    ["all", "hadir", "online", "sakit", "izin", "alpa"] as (
-                      | AttendanceStatus
-                      | "all"
-                    )[]
-                  ).map((s) => (
-                    <button
-                      key={s as string}
-                      onClick={() => setFilter(s)}
-                      className="px-3 h-8 rounded-full border text-xs"
-                      style={{
-                        background:
-                          filter === s ? palette.primary2 : palette.white1,
-                        color: filter === s ? palette.primary : palette.black1,
-                        borderColor:
-                          filter === s ? palette.primary : palette.silver1,
-                      }}
-                    >
-                      {(s as string).toUpperCase()}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-1 md:ml-auto w-full md:w-auto">
+                  {(["all", ...STATUS_OPTIONS.map((s) => s.key)] as const).map(
+                    (s) => (
+                      <button
+                        key={s as string}
+                        onClick={() => setFilter(s as any)}
+                        className="px-3 h-8 rounded-full border text-xs"
+                        style={{
+                          background:
+                            filter === s ? palette.primary2 : palette.white1,
+                          color:
+                            filter === s ? palette.primary : palette.black1,
+                          borderColor:
+                            filter === s ? palette.primary : palette.silver1,
+                        }}
+                      >
+                        {(s as string).toUpperCase()}
+                      </button>
+                    )
+                  )}
                 </div>
+              </div>
+
+              {/* Info mini (mobile) */}
+              <div
+                className="sm:hidden mt-2 text-xs flex flex-wrap gap-2"
+                style={{ color: palette.silver2 }}
+              >
+                <span>
+                  Kelas:{" "}
+                  <span
+                    className="font-medium"
+                    style={{ color: palette.black1 }}
+                  >
+                    {currentClass?.name ?? "-"}
+                  </span>
+                </span>
+                {currentClass?.room && <span>• {currentClass.room}</span>}
+                <span>
+                  • {currentClass?.studentsCount ?? roster?.length ?? 0} siswa
+                </span>
               </div>
             </SectionCard>
 
-            {/* Ringkasan + Aksi cepat */}
+            {/* ===== Ringkasan + Aksi cepat ===== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -777,19 +877,11 @@ export default function TeacherAttendancePage({
                   <div className="flex items-center gap-2">
                     <Btn
                       size="sm"
-                      variant="secondary"
+                      variant="white1"
                       palette={palette}
                       onClick={() => markAll("hadir")}
                     >
                       Tandai semua Hadir
-                    </Btn>
-                    <Btn
-                      size="sm"
-                      variant="outline"
-                      palette={palette}
-                      onClick={() => markAll("online")}
-                    >
-                      Tandai semua Online
                     </Btn>
                     <Btn
                       size="sm"
@@ -816,12 +908,6 @@ export default function TeacherAttendancePage({
                     palette={palette}
                   />
                   <StatChip
-                    icon={<Wifi size={14} />}
-                    label="Online"
-                    value={counts.online}
-                    palette={palette}
-                  />
-                  <StatChip
                     icon={<Thermometer size={14} />}
                     label="Sakit"
                     value={counts.sakit}
@@ -845,8 +931,7 @@ export default function TeacherAttendancePage({
                   <div>
                     <ProgressBar
                       value={Math.round(
-                        ((counts.hadir + counts.online) / (counts.total || 1)) *
-                          100
+                        (counts.hadir / (counts.total || 1)) * 100
                       )}
                       palette={palette}
                     />
@@ -854,7 +939,7 @@ export default function TeacherAttendancePage({
                       className="mt-1 text-xs"
                       style={{ color: palette.silver2 }}
                     >
-                      Progress absensi (hadir + online)
+                      Progress absensi (hadir)
                     </div>
                   </div>
                   <div>
@@ -870,34 +955,7 @@ export default function TeacherAttendancePage({
               </div>
             </SectionCard>
 
-            {/* Broadcast informasi umum untuk percepat input */}
-            <SectionCard palette={palette} className="p-3">
-              <div className="flex items-start gap-2">
-                <NotebookPen
-                  size={18}
-                  color={palette.quaternary}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    Isi “Informasi Umum” massal
-                  </div>
-                  <div
-                    className="text-xs mb-2"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Terapkan ke semua siswa (atau hanya yang masih kosong).
-                  </div>
-                  <BroadcastInfoForm
-                    palette={palette}
-                    onApply={(text, mode) => broadcastInfoUmum(text, mode)}
-                  />
-                </div>
-              </div>
-            </SectionCard>
-
-            {/* Tabel siswa */}
-            {/* Tabel siswa (sederhana: tampilan ringkasan) */}
+            {/* ===== Daftar Siswa (desktop table + mobile cards) ===== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-3">
                 <div className="text-sm" style={{ color: palette.silver2 }}>
@@ -906,7 +964,7 @@ export default function TeacherAttendancePage({
                 </div>
               </div>
 
-              {/* ===== Desktop Table ===== */}
+              {/* Desktop */}
               <div className="px-4 md:px-5 pb-5 hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -945,7 +1003,10 @@ export default function TeacherAttendancePage({
                           <td className="py-3 px-3">
                             {e.status ? (
                               <div className="flex items-center gap-2 flex-wrap">
-                                <StatusBadge s={e.status} palette={palette} />
+                                <StatusBadge
+                                  s={e.status as AttendanceCore}
+                                  palette={palette}
+                                />
                                 {e.time && (
                                   <Badge variant="outline" palette={palette}>
                                     {e.time}
@@ -1012,7 +1073,7 @@ export default function TeacherAttendancePage({
                 </table>
               </div>
 
-              {/* ===== Mobile List (Cards) ===== */}
+              {/* Mobile */}
               <div className="px-3 md:px-5 pb-5 md:hidden">
                 <div role="list" className="grid gap-2">
                   {filtered.map((e) => {
@@ -1035,14 +1096,15 @@ export default function TeacherAttendancePage({
                           background: palette.white1,
                         }}
                       >
-                        {/* Baris atas: Nama + tombol */}
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <div className="font-medium truncate">{e.name}</div>
-                            {/* Status + Ringkasan */}
                             <div className="mt-1 flex items-center gap-2 flex-wrap">
                               {e.status ? (
-                                <StatusBadge s={e.status} palette={palette} />
+                                <StatusBadge
+                                  s={e.status as AttendanceCore}
+                                  palette={palette}
+                                />
                               ) : (
                                 <Badge variant="outline" palette={palette}>
                                   Belum
@@ -1053,20 +1115,17 @@ export default function TeacherAttendancePage({
                                   {e.time}
                                 </Badge>
                               )}
-
                               <Badge
                                 palette={palette}
                                 variant={infoDone ? "success" : "outline"}
                               >
                                 Info {infoDone ? "✓" : "—"}
                               </Badge>
-
                               {typeof e.score === "number" && (
                                 <Badge palette={palette} variant="secondary">
                                   Nilai {e.score}
                                 </Badge>
                               )}
-
                               {extrasCount > 0 && (
                                 <Badge palette={palette} variant="info">
                                   {extrasCount} opsional
@@ -1074,21 +1133,8 @@ export default function TeacherAttendancePage({
                               )}
                             </div>
                           </div>
-
-                          <Btn
-                            palette={palette}
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              setEditing({ id: e.studentId, name: e.name })
-                            }
-                            className="shrink-0"
-                          >
-                            Aksi / Detail
-                          </Btn>
                         </div>
 
-                        {/* Seluruh kartu bisa dipencet juga */}
                         <button
                           onClick={() =>
                             setEditing({ id: e.studentId, name: e.name })
@@ -1121,7 +1167,7 @@ export default function TeacherAttendancePage({
               </div>
             </SectionCard>
 
-            {/* Footer actions */}
+            {/* ===== Footer actions ===== */}
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="text-xs" style={{ color: palette.silver2 }}>
                 Disimpan otomatis ke perangkat.{" "}
@@ -1152,7 +1198,7 @@ export default function TeacherAttendancePage({
               </div>
             </div>
 
-            {/* Detail editor modal */}
+            {/* ===== Modal editor ===== */}
             {editing && doc && (
               <StudentDetailEditor
                 open={!!editing}
@@ -1177,50 +1223,6 @@ export default function TeacherAttendancePage({
           </div>
         </div>
       </main>
-    </div>
-  );
-}
-
-/* ====== Form kecil untuk broadcast informasi umum ====== */
-function BroadcastInfoForm({
-  palette,
-  onApply,
-}: {
-  palette: Palette;
-  onApply: (text: string, mode: "kosong" | "semua") => void;
-}) {
-  const [text, setText] = useState("");
-  return (
-    <div className="grid md:grid-cols-[1fr_auto_auto] gap-2">
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Contoh: Hari ini belajar ngaji & praktik sholat…"
-        className="min-h-[56px] w-full rounded-xl px-3 py-2 text-sm"
-        style={{
-          background: palette.white1,
-          color: palette.black1,
-          border: `1px solid ${palette.silver1}`,
-        }}
-      />
-      <Btn
-        palette={palette}
-        variant="secondary"
-        size="sm"
-        onClick={() => onApply(text.trim(), "kosong")}
-        disabled={!text.trim()}
-      >
-        Terapkan (yang kosong)
-      </Btn>
-      <Btn
-        palette={palette}
-        variant="outline"
-        size="sm"
-        onClick={() => onApply(text.trim(), "semua")}
-        disabled={!text.trim()}
-      >
-        Ganti semua
-      </Btn>
     </div>
   );
 }

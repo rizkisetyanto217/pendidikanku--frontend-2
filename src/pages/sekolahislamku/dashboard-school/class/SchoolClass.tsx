@@ -22,7 +22,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "../../components/home/SchoolSideBarNav";
 
 /* =============== Types =============== */

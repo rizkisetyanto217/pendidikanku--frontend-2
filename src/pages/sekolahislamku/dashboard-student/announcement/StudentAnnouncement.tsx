@@ -10,7 +10,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "../../components/home/ParentTopBar"; // ⬅️ pakai ParentTopBar
+import ParentTopBar from "../../components/home/StudentTopBar"; // ⬅️ pakai ParentTopBar
 import ParentSidebarNav from "../../components/home/StudentSideBarNav";
 
 /* ========= Types ========= */

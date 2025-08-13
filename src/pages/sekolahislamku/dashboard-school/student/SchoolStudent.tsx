@@ -26,7 +26,7 @@ import {
   Phone,
 } from "lucide-react";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
 
 /* ================= Types ================ */

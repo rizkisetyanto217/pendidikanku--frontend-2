@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import ParentTopBar from "../components/home/ParentTopBar";
+import ParentTopBar from "../components/home/StudentTopBar";
 
 import ChildSummaryCard from "@/pages/sekolahislamku/components/card/ChildSummaryCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";

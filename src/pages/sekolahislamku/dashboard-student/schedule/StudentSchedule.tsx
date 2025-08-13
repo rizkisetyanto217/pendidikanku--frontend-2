@@ -11,7 +11,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentSidebarNav from "../../components/home/StudentSideBarNav";
-import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentTopBar from "../../components/home/StudentTopBar";
 
 /* ================= Types ================= */
 type ScheduleItem = {
@@ -90,60 +90,59 @@ async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
 
   const selectedDay = make(selected, baseToday);
 
-const nextDays: DaySchedule[] = [
-  make(add(1), [
-    {
-      id: "3",
-      time: "07:15",
-      title: "Doa & Tilawah Pagi",
-      room: "Masjid",
-      teacher: "Semua Guru",
-      type: "event",
-      description: "Pembukaan hari dengan doa bersama dan tilawah juz amma.",
-    },
-    {
-      id: "4",
-      time: "08:00",
-      title: "Tahfiz Setoran",
-      room: "R. Tahfiz",
-      teacher: "Ust.ah Siti",
-      type: "class",
-      description: "Setoran hafalan harian. Target 5 ayat per siswa.",
-    },
-  ]),
-  make(add(2), [
-    {
-      id: "5",
-      time: "07:30",
-      title: "Fiqih Ibadah",
-      room: "Aula 2",
-      teacher: "Ust. Ali",
-      type: "class",
-      description: "Materi wudhu dan tayamum, sesi tanya jawab di akhir.",
-    },
-    {
-      id: "6",
-      time: "10:00",
-      title: "Evaluasi Tajwid",
-      room: "Aula 1",
-      teacher: "Ust. Rahmat",
-      type: "exam",
-      description: "Ujian lisan: makhraj dan sifat huruf. Persiapkan mushaf.",
-    },
-  ]),
-  make(add(3), [
-    {
-      id: "7",
-      time: "07:20",
-      title: "Adab Majelis",
-      room: "Aula 1",
-      teacher: "Ust. Farid",
-      type: "class",
-      description: "Adab duduk, mendengar, dan bertanya di majelis ilmu.",
-    },
-  ]),
-];
-
+  const nextDays: DaySchedule[] = [
+    make(add(1), [
+      {
+        id: "3",
+        time: "07:15",
+        title: "Doa & Tilawah Pagi",
+        room: "Masjid",
+        teacher: "Semua Guru",
+        type: "event",
+        description: "Pembukaan hari dengan doa bersama dan tilawah juz amma.",
+      },
+      {
+        id: "4",
+        time: "08:00",
+        title: "Tahfiz Setoran",
+        room: "R. Tahfiz",
+        teacher: "Ust.ah Siti",
+        type: "class",
+        description: "Setoran hafalan harian. Target 5 ayat per siswa.",
+      },
+    ]),
+    make(add(2), [
+      {
+        id: "5",
+        time: "07:30",
+        title: "Fiqih Ibadah",
+        room: "Aula 2",
+        teacher: "Ust. Ali",
+        type: "class",
+        description: "Materi wudhu dan tayamum, sesi tanya jawab di akhir.",
+      },
+      {
+        id: "6",
+        time: "10:00",
+        title: "Evaluasi Tajwid",
+        room: "Aula 1",
+        teacher: "Ust. Rahmat",
+        type: "exam",
+        description: "Ujian lisan: makhraj dan sifat huruf. Persiapkan mushaf.",
+      },
+    ]),
+    make(add(3), [
+      {
+        id: "7",
+        time: "07:20",
+        title: "Adab Majelis",
+        room: "Aula 1",
+        teacher: "Ust. Farid",
+        type: "class",
+        description: "Adab duduk, mendengar, dan bertanya di majelis ilmu.",
+      },
+    ]),
+  ];
 
   return Promise.resolve({ selected: selectedDay, nextDays });
 }
