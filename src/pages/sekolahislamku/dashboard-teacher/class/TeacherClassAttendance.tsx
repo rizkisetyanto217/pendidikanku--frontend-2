@@ -282,7 +282,6 @@ function StudentDetailEditor({
     Entry,
     | "status"
     | "time"
-    | "infoUmum"
     | "score"
     | "materiPersonal"
     | "penilaianPersonal"
@@ -294,7 +293,6 @@ function StudentDetailEditor({
       Entry,
       | "status"
       | "time"
-      | "infoUmum"
       | "score"
       | "materiPersonal"
       | "penilaianPersonal"
@@ -419,27 +417,6 @@ function StudentDetailEditor({
             </div>
           </div>
 
-          {/* Informasi umum (WAJIB) */}
-          <div>
-            <label className="text-xs" style={{ color: palette.silver2 }}>
-              Informasi Umum (WAJIB)
-            </label>
-            <textarea
-              value={data.infoUmum ?? ""}
-              onChange={(e) =>
-                setData((s) => ({ ...s, infoUmum: e.target.value }))
-              }
-              className="min-h-[80px] w-full rounded-xl px-3 py-2 text-sm"
-              style={{
-                background: palette.white2,
-                color: palette.black1,
-                border: `1px solid ${palette.silver1}`,
-              }}
-              placeholder="Contoh: Hari ini belajar ngaji, praktik sholat…"
-              required
-            />
-          </div>
-
           {/* Opsional lainnya */}
           <div>
             <label className="text-xs" style={{ color: palette.silver2 }}>
@@ -531,8 +508,6 @@ function StudentDetailEditor({
             palette={palette}
             onClick={() => {
               if (!data.status) return alert("Status wajib diisi.");
-              if (!data.infoUmum || !data.infoUmum.trim())
-                return alert("Informasi umum wajib diisi.");
               onSave(data);
               onClose();
             }}
@@ -866,31 +841,12 @@ export default function TeacherAttendancePage({
                 </span>
               </div>
             </SectionCard>
-
             {/* ===== Ringkasan + Aksi cepat ===== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="font-medium flex items-center gap-2">
                     <Users size={16} /> Ringkasan — {idDateLong(dateISO)}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Btn
-                      size="sm"
-                      variant="white1"
-                      palette={palette}
-                      onClick={() => markAll("hadir")}
-                    >
-                      Tandai semua Hadir
-                    </Btn>
-                    <Btn
-                      size="sm"
-                      variant="white1"
-                      palette={palette}
-                      onClick={clearAll}
-                    >
-                      <RotateCcw className="mr-1" size={14} /> Reset Absensi
-                    </Btn>
                   </div>
                 </div>
 
@@ -954,7 +910,6 @@ export default function TeacherAttendancePage({
                 </div>
               </div>
             </SectionCard>
-
             {/* ===== Daftar Siswa (desktop table + mobile cards) ===== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-3">
@@ -1166,35 +1121,56 @@ export default function TeacherAttendancePage({
                 </div>
               </div>
             </SectionCard>
-
-            {/* ===== Footer actions ===== */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="text-xs" style={{ color: palette.silver2 }}>
-                Disimpan otomatis ke perangkat.{" "}
-                {doc?.finalized ? "Status: Terkirim" : "Status: Draft"}
-              </div>
-              <div className="flex items-center gap-2">
-                <Btn
-                  palette={palette}
-                  variant="white1"
-                  size="sm"
-                  onClick={() => {
-                    if (doc) {
-                      saveDoc(doc);
-                      alert("Draft disimpan.");
-                    }
+            {/* ===== Footer actions (compact, full-width) ===== */}
+            <div className="sticky bottom-0 z-30">
+              {/* full-width di mobile, center + rounded di desktop */}
+              <div className="-mx-4 md:mx-0">
+                <div
+                  className="px-3 md:px-4 py-2 md:py-2.5 border-t md:border md:rounded-xl md:shadow-sm backdrop-blur"
+                  style={{
+                    borderColor: palette.silver1,
+                    // sedikit transparan agar tidak terasa “berat”
+                    background: `${palette.white1}D9`,
                   }}
                 >
-                  <Save className="mr-1" size={14} /> Simpan Draft
-                </Btn>
-                <Btn
-                  palette={palette}
-                  variant="default"
-                  size="sm"
-                  onClick={finalize}
-                >
-                  Kirim <Check className="ml-1" size={14} />
-                </Btn>
+                  <div className="flex flex-col md:flex-row md:items-center gap-2">
+                    <div
+                      className="text-[11px] md:text-xs md:flex-1"
+                      style={{ color: palette.silver2 }}
+                    >
+                      Disimpan otomatis ke perangkat.{" "}
+                      {doc?.finalized ? "Status: Terkirim" : "Status: Draft"}
+                    </div>
+
+                    <div className="flex gap-2 w-full md:w-auto">
+                      <Btn
+                        palette={palette}
+                        variant="white1"
+                        size="sm"
+                        onClick={() => {
+                          if (doc) {
+                            saveDoc(doc);
+                            alert("Draft disimpan.");
+                          }
+                        }}
+                        className="h-9 md:w-auto w-1/3"
+                      >
+                        <Save className="mr-1" size={14} /> Simpan Draft
+                      </Btn>
+
+                      {/* CTA lebih ramping tapi tetap dominan */}
+                      <Btn
+                        palette={palette}
+                        variant="default"
+                        size="sm"
+                        onClick={finalize}
+                        className="h-10 w-full md:w-[220px] justify-center"
+                      >
+                        Kirim <Check className="ml-1" size={14} />
+                      </Btn>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1209,7 +1185,6 @@ export default function TeacherAttendancePage({
                   doc.entries.find((x) => x.studentId === editing.id) ?? {
                     status: null,
                     time: undefined,
-                    infoUmum: "",
                     score: undefined,
                     materiPersonal: "",
                     penilaianPersonal: "",
