@@ -61,6 +61,7 @@ export function SectionCard({
 }
 
 /* ---- Badge ---- */
+/* ---- Badge ---- */
 export function Badge({
   children,
   variant = "default",
@@ -75,7 +76,9 @@ export function Badge({
     | "destructive"
     | "success"
     | "warning"
-    | "info";
+    | "info"
+    | "black1" // NEW
+    | "white1"; // NEW
   palette: Palette;
   className?: string;
 }) {
@@ -87,7 +90,20 @@ export function Badge({
     success: { background: palette.success1, color: palette.white1 },
     warning: { background: palette.warning1, color: palette.white1 },
     info: { background: palette.quaternary, color: palette.white1 },
+
+    // NEW
+    black1: {
+      background: palette.black1,
+      color: palette.white1,
+      border: `1px solid ${palette.white3}`,
+    },
+    white1: {
+      background: palette.white1,
+      color: palette.black1,
+      border: `1px solid ${palette.silver1}`,
+    },
   };
+
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${className}`}

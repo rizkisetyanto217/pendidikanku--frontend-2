@@ -33,6 +33,8 @@ export interface TodaySummary {
   pr?: string; // opsional
 }
 
+type AttendanceAgg = { present: number; total: number };
+
 export interface ChildDetail {
   id: string;
   name: string;
@@ -52,6 +54,7 @@ export default function ChildSummaryCard({
   detailPath = "/anak",
   progressPath = "/anak/progress",
   todayDisplay = "compact", // ⬅️ default ringkas
+  attendanceAgg,
 }: {
   child?: ChildDetail;
   today?: TodaySummary;
@@ -59,6 +62,7 @@ export default function ChildSummaryCard({
   detailPath?: string;
   progressPath?: string;
   todayDisplay?: TodayDisplay;
+  attendanceAgg?: AttendanceAgg;
 }) {
   const quickStatus: AttendanceStatus | "unknown" = today
     ? today.attendance.status
@@ -102,6 +106,12 @@ export default function ChildSummaryCard({
     );
   };
 
+  const quickPresent = attendanceAgg?.present ?? 0;
+  const quickTotal = attendanceAgg?.total ?? 0;
+  const quickRate = quickTotal
+    ? Math.round((quickPresent / quickTotal) * 100)
+    : 0;
+
   return (
     <SectionCard palette={palette}>
       {/* Header */}
@@ -110,7 +120,7 @@ export default function ChildSummaryCard({
           <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
             <User2 size={20} color={palette.quaternary} />
             <span>{child?.name ?? "—"}</span>
-            <Badge variant="outline" className="ml-1" palette={palette}>
+            <Badge variant="black1" className="ml-1" palette={palette}>
               {child?.className ?? "Kelas"}
             </Badge>
           </h3>
@@ -128,23 +138,39 @@ export default function ChildSummaryCard({
           {/* Absensi Cepat */}
           <SectionCard
             palette={palette}
-            className="p-3"
+            className="p-3" /* atau bgOnDark="black1" kalau perlu */
             style={{ background: palette.white2 }}
           >
-            <div style={{ fontSize: 12, color: palette.silver2 }}>
-              Absensi Hari Ini
+            <div className="flex items-start justify-between">
+              {/* Kiri: status terakhir */}
+              <div>
+                <div style={{ fontSize: 12, color: palette.silver2 }}>
+                  Kehadiran
+                </div>
+              </div>
+
+              {/* Kanan: total hadir / pertemuan */}
+              <div className="text-right">
+                <div
+                  className="font-semibold"
+                  style={{ color: palette.quaternary }}
+                >
+                  {quickPresent}/{quickTotal}
+                </div>
+              </div>
             </div>
-            <div className="mt-1 flex items-center gap-2">
-              {quickStatus === "unknown" ? (
-                <Badge variant="outline" palette={palette}>
-                  Belum tercatat
-                </Badge>
-              ) : (
-                renderStatusBadge(quickStatus as AttendanceStatus)
-              )}
+
+            {/* Progress hadir */}
+            <div className="mt-2">
+              <ProgressBar value={quickRate} palette={palette} />
+              <div
+                className="mt-1 text-[11px]"
+                style={{ color: palette.silver2 }}
+              >
+                {quickRate}% hadir
+              </div>
             </div>
           </SectionCard>
-
           {/* Hafalan */}
           <SectionCard
             palette={palette}
@@ -211,30 +237,22 @@ export default function ChildSummaryCard({
                         • {today.attendance.time}
                       </span>
                     )}
-                    {today.attendance.mode && (
-                      <span style={{ color: palette.silver2 }}>
-                        •{" "}
-                        {today.attendance.mode === "onsite"
-                          ? "Tatap muka"
-                          : "Online"}
-                      </span>
-                    )}
                   </span>
 
                   {typeof today.nilai === "number" && (
-                    <Badge variant="outline" palette={palette}>
+                    <Badge variant="white1" palette={palette}>
                       Nilai: {today.nilai}
                     </Badge>
                   )}
 
                   {today.hafalan && (
-                    <Badge variant="outline" palette={palette}>
+                    <Badge variant="white1" palette={palette}>
                       Hafalan: {today.hafalan}
                     </Badge>
                   )}
 
                   {today.pr && (
-                    <Badge variant="outline" palette={palette}>
+                    <Badge variant="white1" palette={palette}>
                       PR: {today.pr}
                     </Badge>
                   )}

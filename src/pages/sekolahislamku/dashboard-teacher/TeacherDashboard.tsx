@@ -27,6 +27,7 @@ import {
   NotebookPen,
 } from "lucide-react";
 import TeacherSidebarNav from "../components/home/TeacherSideBarNav";
+import MiniBar from "../components/ui/MiniBar";
 
 /* ================= Types ================ */
 interface Announcement {
@@ -279,8 +280,8 @@ export default function TeacherDashboard() {
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
-                  seeAllPath="/teacher/jadwal"
-                  addHref="/teacher/jadwal/new"
+                  seeAllPath="/guru/kelas/jadwal"
+                  addHref="/guru/kelas/jadwal"
                   addLabel="Tambah Jadwal"
                 />
               </div>
@@ -349,11 +350,10 @@ export default function TeacherDashboard() {
                       ] as AttendanceStatus[]
                     ).map((k) => (
                       <MiniBar
-                        key={k}
+                        palette={palette}
                         label={k.toUpperCase()}
                         value={data?.attendanceSummary.byStatus[k] ?? 0}
                         total={data?.attendanceSummary.totalStudents ?? 0}
-                        palette={palette}
                       />
                     ))}
                   </div>
@@ -413,7 +413,8 @@ export default function TeacherDashboard() {
                 palette={palette}
                 items={data?.announcements ?? []}
                 dateFmt={dateFmt}
-                seeAllPath="/student/pengumuman"
+                seeAllPath="/guru/pengumuman" // halaman list
+                getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`} // detail per item
               />
             </section>
 
@@ -452,37 +453,6 @@ function StatPill({
   );
 }
 
-function MiniBar({
-  label,
-  value,
-  total,
-  palette,
-}: {
-  label: string;
-  value: number;
-  total: number;
-  palette: Palette;
-}) {
-  const pct = percent(value, total);
-  return (
-    <div>
-      <div className="flex items-center justify-between text-xs mb-1">
-        <span style={{ color: palette.silver2 }}>{label}</span>
-        <span style={{ color: palette.silver2 }}>{value}</span>
-      </div>
-      <div
-        className="h-2 w-full rounded-full overflow-hidden"
-        style={{ background: palette.white2 }}
-      >
-        <div
-          className="h-full transition-[width] duration-300"
-          style={{ width: `${pct}%`, background: palette.primary }}
-        />
-      </div>
-    </div>
-  );
-}
-
 function PendingItem({
   pg,
   palette,
@@ -502,7 +472,7 @@ function PendingItem({
   return (
     <div
       className="p-3 rounded-xl border flex flex-col gap-2"
-      style={{ borderColor: palette.silver1, background: palette.white1}}
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">

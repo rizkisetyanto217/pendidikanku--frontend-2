@@ -20,6 +20,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+import MiniBar from "../../components/ui/MiniBar";
 
 /* ================= Types ================= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -535,37 +536,6 @@ function StatPill({
         {label}
       </div>
       <div className="text-lg font-semibold">{value}</div>
-    </div>
-  );
-}
-
-function MiniBar({
-  label,
-  value,
-  total,
-  palette,
-}: {
-  label: string;
-  value: number;
-  total: number;
-  palette: Palette;
-}) {
-  const pct = percent(value, total);
-  return (
-    <div>
-      <div className="flex items-center justify-between text-xs mb-1">
-        <span style={{ color: palette.silver2 }}>{label}</span>
-        <span style={{ color: palette.silver2 }}>{value}</span>
-      </div>
-      <div
-        className="h-2 w-full rounded-full overflow-hidden"
-        style={{ background: palette.white2 }}
-      >
-        <div
-          className="h-full transition-[width] duration-300"
-          style={{ width: `${pct}%`, background: palette.primary }}
-        />
-      </div>
     </div>
   );
 }

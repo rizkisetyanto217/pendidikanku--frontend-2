@@ -268,7 +268,8 @@ export default function SchoolDashboard() {
                     palette={palette}
                     items={data?.announcements ?? []}
                     dateFmt={dateFmt}
-                    seeAllPath="/school/announcements"
+                    seeAllPath="/student/pengumuman" // halaman list
+                    getDetailHref={(a) => `/student/pengumuman/detail/${a.id}`} // detail per item
                   />
                 </div>
               </div>

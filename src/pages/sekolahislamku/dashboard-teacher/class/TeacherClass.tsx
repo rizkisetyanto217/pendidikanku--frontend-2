@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/teacher/TeacherClassDetail.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
@@ -14,7 +14,6 @@ import {
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
-import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
 import {
@@ -22,13 +21,15 @@ import {
   CheckSquare,
   ClipboardList,
   Megaphone,
-  CalendarDays,
   BookOpen,
   Plus,
   Filter,
   Search,
   GraduationCap,
 } from "lucide-react";
+import MiniBar from "../../components/ui/MiniBar";
+import StatPill from "../../components/ui/StatPill";
+import StudentsTable from "./components/StudentTable";
 
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -62,14 +63,6 @@ type MaterialItem = {
   attachments?: number;
 };
 
-type Announcement = {
-  id: string;
-  title: string;
-  date: string;
-  body: string;
-  type?: "info" | "warning" | "success";
-};
-
 type ClassDetail = {
   id: string;
   name: string;
@@ -82,7 +75,6 @@ type ClassDetail = {
   students: StudentRow[];
   assignments: Assignment[];
   materials: MaterialItem[];
-  announcements: Announcement[];
   gregorianDate: string;
   hijriDate: string;
 };
@@ -141,8 +133,8 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
 
   return Promise.resolve({
     id: classId,
-    name: "TPA A",
-    room: "Aula 1",
+    name: classId.toUpperCase().replace("-", " "), // contoh kecil biar terasa dinamis
+    room: classId === "tpa-b" ? "R. Tahfiz" : "Aula 1",
     homeroom: "Ustadz Abdullah",
     assistants: ["Ustadzah Amina"],
     studentsCount: 22,
@@ -181,18 +173,19 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
       },
       { id: "m2", title: "Latihan Makhraj (ba, ta, tha)", date: iso },
     ],
-    announcements: [
-      {
-        id: "a1",
-        title: "Tryout Tahfiz Kamis",
-        date: iso,
-        body: "Datang 10 menit lebih awal ya.",
-        type: "info",
-      },
-    ],
     gregorianDate: iso,
     hijriDate: "16 Muharram 1447 H",
   });
+}
+
+/* ============ Class options (ganti dgn axios) ============ */
+type ClassOption = { id: string; name: string; room?: string };
+async function fetchClassOptions(): Promise<ClassOption[]> {
+  return Promise.resolve([
+    { id: "tpa-a", name: "TPA A", room: "Aula 1" },
+    { id: "tpa-b", name: "TPA B", room: "R. Tahfiz" },
+    { id: "tpa-c", name: "TPA C", room: "Aula 2" },
+  ]);
 }
 
 /* ================= Helpers ================ */
@@ -215,6 +208,51 @@ const dateShort = (iso?: string) =>
 const percent = (a: number, b: number) =>
   b > 0 ? Math.round((a / b) * 100) : 0;
 
+/* ============ Small inline component ============ */
+function ClassSelector({
+  palette,
+  value,
+  options,
+  onChange,
+}: {
+  palette: Palette;
+  value: string;
+  options: ClassOption[];
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div
+      className="w-full rounded-xl border p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
+    >
+      <div className="text-sm" style={{ color: palette.silver2 }}>
+        Pilih Kelas
+      </div>
+      <div className="flex items-center gap-2">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 rounded-lg px-3 border outline-none"
+          style={{
+            background: palette.white2,
+            color: palette.black1,
+            borderColor: palette.silver1,
+          }}
+        >
+          {options.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.name} {opt.room ? `• ${opt.room}` : ""}
+            </option>
+          ))}
+        </select>
+        <Badge palette={palette} variant="outline">
+          Kelas aktif
+        </Badge>
+      </div>
+    </div>
+  );
+}
+
 /* ================= Page ================= */
 export default function TeacherClass() {
   const params = useParams<{ id: string }>();
@@ -223,10 +261,28 @@ export default function TeacherClass() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
 
+  // Opsi kelas
+  const { data: classOptions = [] } = useQuery({
+    queryKey: ["teacher-class-options"],
+    queryFn: () => fetchClassOptions(),
+    staleTime: 5 * 60_000,
+  });
+
+  // State kelas terpilih, default dari URL param
+  const [selectedClassId, setSelectedClassId] = useState<string>(classId);
+  useEffect(() => {
+    setSelectedClassId(classId);
+  }, [classId]);
+
+  // Id efektif yang dipakai untuk query detail
+  const effectiveClassId = selectedClassId || classId;
+
+  // Detail kelas
   const { data } = useQuery({
-    queryKey: ["teacher-class-detail", classId],
-    queryFn: () => fetchClassDetail(classId),
+    queryKey: ["teacher-class-detail", effectiveClassId],
+    queryFn: () => fetchClassDetail(effectiveClassId),
     staleTime: 60_000,
+    enabled: !!effectiveClassId,
   });
 
   const [q, setQ] = useState("");
@@ -236,14 +292,14 @@ export default function TeacherClass() {
 
   const filteredStudents = useMemo(() => {
     const base = data?.students ?? [];
-    const f1 =
+    const byStatus =
       statusFilter === "all"
         ? base
-        : base.filter((s) => (s.statusToday ?? "hadir") === statusFilter);
-    const f2 = q.trim()
-      ? f1.filter((s) => s.name.toLowerCase().includes(q.trim().toLowerCase()))
-      : f1;
-    return f2;
+        : base.filter((s) => s.statusToday === statusFilter);
+    const qStr = q.trim().toLowerCase();
+    return qStr
+      ? byStatus.filter((s) => s.name.toLowerCase().includes(qStr))
+      : byStatus;
   }, [data?.students, q, statusFilter]);
 
   return (
@@ -258,15 +314,46 @@ export default function TeacherClass() {
         hijriDate={data?.hijriDate}
         dateFmt={(iso) => dateLong(iso)}
       />
-
       {/* ===== Content + Sidebar ===== */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar */}
-          <TeacherSidebarNav palette={palette} />
+            <TeacherSidebarNav palette={palette} />
+
 
           {/* Main content */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 min-w-0 space-y-6">
+            <ClassSelector
+              palette={palette}
+              value={effectiveClassId}
+              options={classOptions}
+              onChange={(nextId) => setSelectedClassId(nextId)}
+            />
+
+            {/* Banner info kelas aktif */}
+            <div
+              className="rounded-xl p-3 md:p-4"
+              style={{ background: palette.primary2, color: palette.primary }}
+            >
+              <div className="text-sm" style={{ color: palette.primary }}>
+                Anda sedang melihat:
+              </div>
+              <div className="font-semibold text-base md:text-lg">
+                Kelas {data?.name ?? "-"}
+                {data?.room ? (
+                  <span
+                    className="font-normal"
+                    style={{ color: palette.black1 }}
+                  >
+                    {" "}
+                    • Ruang {data.room}
+                  </span>
+                ) : null}
+              </div>
+              <div className="text-sm" style={{ color: palette.silver2 }}>
+                Wali Kelas: {data?.homeroom ?? "-"} • {data?.studentsCount ?? 0}{" "}
+                siswa
+              </div>
+            </div>
             {/* ===== Header info + Actions ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
               <SectionCard palette={palette} className="lg:col-span-8">
@@ -332,60 +419,9 @@ export default function TeacherClass() {
               </div>
             </section>
 
-            {/* ===== Attendance summary + Assignments ===== */}
+            {/* ===== Assignments ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-4">
-                <div className="p-4 md:p-5">
-                  <div className="font-medium mb-2 flex items-center gap-2">
-                    <CheckSquare size={16} /> Ringkasan Kehadiran Hari Ini
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <StatPill
-                      palette={palette}
-                      label="Total Siswa"
-                      value={data?.studentsCount ?? 0}
-                    />
-                    <StatPill
-                      palette={palette}
-                      label="Hadir"
-                      value={data?.attendanceToday.byStatus.hadir ?? 0}
-                    />
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    {(
-                      [
-                        "hadir",
-                        "online",
-                        "sakit",
-                        "izin",
-                        "alpa",
-                      ] as AttendanceStatus[]
-                    ).map((k) => (
-                      <MiniBar
-                        key={k}
-                        palette={palette}
-                        label={k.toUpperCase()}
-                        value={data?.attendanceToday.byStatus[k] ?? 0}
-                        total={data?.studentsCount ?? 0}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="mt-4">
-                    <Btn
-                      palette={palette}
-                      size="sm"
-                      onClick={() => alert("Kelola Absen")}
-                    >
-                      Kelola Absen
-                    </Btn>
-                  </div>
-                </div>
-              </SectionCard>
-
-              <SectionCard palette={palette} className="lg:col-span-8">
+              <SectionCard palette={palette} className="lg:col-span-12">
                 <div className="p-4 md:p-5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="font-medium flex items-center gap-2">
@@ -474,7 +510,7 @@ export default function TeacherClass() {
               </SectionCard>
             </section>
 
-            {/* ===== Materials + Announcements ===== */}
+            {/* ===== Materials + Attendance Summary ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
               <SectionCard palette={palette} className="lg:col-span-7">
                 <div className="p-4 md:p-5">
@@ -531,14 +567,56 @@ export default function TeacherClass() {
                 </div>
               </SectionCard>
 
-              <div className="lg:col-span-5">
-                <AnnouncementsList
-                  palette={palette}
-                  items={data?.announcements ?? []}
-                  dateFmt={(iso) => dateLong(iso)}
-                  seeAllPath="/teacher/pengumuman"
-                />
-              </div>
+              <SectionCard palette={palette} className="lg:col-span-5">
+                <div className="p-4 md:p-5">
+                  <div className="font-medium mb-2 flex items-center gap-2">
+                    <CheckSquare size={16} /> Ringkasan Kehadiran Hari Ini
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <StatPill
+                      palette={palette}
+                      label="Total Siswa"
+                      value={data?.studentsCount ?? 0}
+                    />
+                    <StatPill
+                      palette={palette}
+                      label="Hadir"
+                      value={data?.attendanceToday.byStatus.hadir ?? 0}
+                    />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        "hadir",
+                        "online",
+                        "sakit",
+                        "izin",
+                        "alpa",
+                      ] as AttendanceStatus[]
+                    ).map((k) => (
+                      <MiniBar
+                        key={k}
+                        palette={palette}
+                        label={k.toUpperCase()}
+                        value={data?.attendanceToday.byStatus[k] ?? 0}
+                        total={data?.studentsCount ?? 0}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-4">
+                    <Btn
+                      palette={palette}
+                      size="sm"
+                      onClick={() => alert("Kelola Absen")}
+                    >
+                      Kelola Absen
+                    </Btn>
+                  </div>
+                </div>
+              </SectionCard>
             </section>
 
             {/* ===== Students table ===== */}
@@ -612,123 +690,12 @@ export default function TeacherClass() {
                   </div>
 
                   {/* Table */}
-                  <div className="mt-4 overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr style={{ color: palette.silver2 }}>
-                          <th className="text-left py-2 pr-3 font-medium">
-                            Nama
-                          </th>
-                          <th className="text-left py-2 px-3 font-medium">
-                            Status
-                          </th>
-                          <th className="text-left py-2 px-3 font-medium">
-                            Iqra
-                          </th>
-                          <th className="text-left py-2 px-3 font-medium">
-                            Juz
-                          </th>
-                          <th className="text-left py-2 px-3 font-medium">
-                            Nilai Terakhir
-                          </th>
-                          <th className="text-right py-2 pl-3 font-medium">
-                            Aksi
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredStudents.map((s) => (
-                          <tr
-                            key={s.id}
-                            className="border-t"
-                            style={{ borderColor: palette.silver1 }}
-                          >
-                            <td className="py-3 pr-3">
-                              <div className="font-medium">{s.name}</div>
-                              {s.time && (
-                                <div
-                                  className="text-xs"
-                                  style={{ color: palette.silver2 }}
-                                >
-                                  {s.mode === "online" ? "Online" : "Onsite"} •{" "}
-                                  {s.time}
-                                </div>
-                              )}
-                            </td>
-                            <td className="py-3 px-3">
-                              <Badge
-                                palette={palette}
-                                variant={
-                                  s.statusToday === "hadir"
-                                    ? "success"
-                                    : s.statusToday === "online"
-                                      ? "info"
-                                      : s.statusToday === "alpa"
-                                        ? "destructive"
-                                        : "warning"
-                                }
-                              >
-                                {(s.statusToday ?? "-").toUpperCase()}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3">{s.iqraLevel ?? "-"}</td>
-                            <td className="py-3 px-3">
-                              <div className="w-40">
-                                <MiniBar
-                                  palette={palette}
-                                  label=""
-                                  value={
-                                    Math.round((s.juzProgress ?? 0) * 10) / 10
-                                  }
-                                  total={30}
-                                />
-                              </div>
-                              <div
-                                className="text-xs"
-                                style={{ color: palette.silver2 }}
-                              >
-                                {(s.juzProgress ?? 0).toFixed(1)} / 30
-                              </div>
-                            </td>
-                            <td className="py-3 px-3">
-                              {typeof s.lastScore === "number"
-                                ? s.lastScore
-                                : "-"}
-                            </td>
-                            <td className="py-3 pl-3 text-right">
-                              <div className="inline-flex gap-2">
-                                <Btn
-                                  palette={palette}
-                                  size="sm"
-                                  variant="outline"
-                                >
-                                  Detail
-                                </Btn>
-                                <Btn
-                                  palette={palette}
-                                  size="sm"
-                                  variant="quaternary"
-                                >
-                                  Nilai
-                                </Btn>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredStudents.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan={6}
-                              className="py-6 text-center"
-                              style={{ color: palette.silver2 }}
-                            >
-                              Tidak ada data siswa.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <StudentsTable
+                    palette={palette}
+                    rows={filteredStudents}
+                    onDetail={(id) => alert(`Detail siswa ${id}`)}
+                    onGrade={(id) => alert(`Nilai siswa ${id}`)}
+                  />
 
                   {/* Footer actions */}
                   <div className="mt-4 flex justify-between items-center">
@@ -759,62 +726,6 @@ export default function TeacherClass() {
           </div>
         </div>
       </main>
-    </div>
-  );
-}
-
-/* ================= Small UI helpers ================= */
-function StatPill({
-  palette,
-  label,
-  value,
-}: {
-  palette: Palette;
-  label: string;
-  value: number | string;
-}) {
-  return (
-    <div
-      className="p-3 rounded-xl border"
-      style={{ borderColor: palette.silver1, background: palette.white2 }}
-    >
-      <div className="text-xs" style={{ color: palette.silver2 }}>
-        {label}
-      </div>
-      <div className="text-lg font-semibold">{value}</div>
-    </div>
-  );
-}
-
-function MiniBar({
-  palette,
-  label,
-  value,
-  total,
-}: {
-  palette: Palette;
-  label: string;
-  value: number;
-  total: number;
-}) {
-  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
-  return (
-    <div>
-      {label ? (
-        <div className="flex items-center justify-between text-xs mb-1">
-          <span style={{ color: palette.silver2 }}>{label}</span>
-          <span style={{ color: palette.silver2 }}>{value}</span>
-        </div>
-      ) : null}
-      <div
-        className="h-2 w-full rounded-full overflow-hidden"
-        style={{ background: palette.white2 }}
-      >
-        <div
-          className="h-full"
-          style={{ width: `${pct}%`, background: palette.primary }}
-        />
-      </div>
     </div>
   );
 }

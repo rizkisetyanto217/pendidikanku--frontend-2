@@ -198,9 +198,6 @@ function FinanceHeaderCard({
             <Btn variant="outline" palette={palette}>
               <FileText size={16} /> Unduh Invoice
             </Btn>
-            <Btn variant="secondary" palette={palette}>
-              <Printer size={16} /> Cetak
-            </Btn>
           </div>
         )}
       </div>

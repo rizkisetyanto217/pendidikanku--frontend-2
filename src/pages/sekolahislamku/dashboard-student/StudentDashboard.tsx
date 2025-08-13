@@ -161,25 +161,29 @@ export default function StudentDashboard() {
                 child={data?.child}
                 today={data?.today}
                 palette={palette}
-                detailPath="/student/progress"
+                detailPath="/murid/progress"
                 todayDisplay="compact"
               />
             </section>
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:items-stretch">
+              <div className="lg:col-span-8">
+                <BillsSectionCard
+                  palette={palette}
+                  bills={data?.bills ?? []}
+                  dateFmt={dateFmt}
+                  formatIDR={formatIDR}
+                  seeAllPath="/murid/finance"
+                  getPayHref={(b) => `/tagihan/${b.id}`}
+                />
+              </div>
 
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <BillsSectionCard
-                palette={palette}
-                bills={data?.bills ?? []}
-                dateFmt={dateFmt}
-                formatIDR={formatIDR}
-                seeAllPath="/student/finance"
-                getPayHref={(b) => `/tagihan/${b.id}`}
-              />
-              <TodayScheduleCard
-                palette={palette}
-                items={data?.todaySchedule ?? []}
-                seeAllPath="/student/jadwal"
-              />
+              <div className="lg:col-span-4">
+                <TodayScheduleCard
+                  palette={palette}
+                  items={data?.todaySchedule ?? []}
+                  seeAllPath="/murid/jadwal"
+                />
+              </div>
             </section>
 
             <section>
@@ -187,7 +191,8 @@ export default function StudentDashboard() {
                 palette={palette}
                 items={data?.announcements ?? []}
                 dateFmt={dateFmt}
-                seeAllPath="/student/pengumuman"
+                seeAllPath="/murid/pengumuman" // halaman list
+                getDetailHref={(a) => `/murid/pengumuman/detail/${a.id}`} // detail per item
               />
             </section>
           </div>

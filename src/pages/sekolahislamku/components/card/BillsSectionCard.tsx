@@ -22,7 +22,7 @@ export default function BillsSectionCard({
   formatIDR,
   seeAllPath = "/tagihan",
   getPayHref = (b) => `/tagihan/${b.id}`,
-  className = "", // ⬅️ baru: biar parent bisa atur lebar/spacing
+  className = "",
 }: {
   palette: Palette;
   bills: BillItem[];
@@ -37,10 +37,10 @@ export default function BillsSectionCard({
   return (
     <SectionCard
       palette={palette}
-      className={`w-full min-w-0 ${className}`} // ⬅️ fluid, hilangkan lg:col-span-2
+      className={`w-full min-w-0 h-full flex flex-col ${className}`}
     >
       {/* Header */}
-      <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
+      <div className="p-4  pb-2 flex items-center justify-between">
         <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
           <Wallet size={20} color={palette.quaternary} />
           Tagihan & Pembayaran
@@ -52,8 +52,8 @@ export default function BillsSectionCard({
         </Link>
       </div>
 
-      {/* List */}
-      <div className="px-4 md:px-5 pb-4 pt-2 space-y-3 min-w-0">
+      {/* List (isi mengisi sisa tinggi kartu) */}
+      <div className="px-4 md:px-5 pb-4 pt-2 space-y-3 min-w-0 flex-1">
         {unpaid.length === 0 && (
           <div style={{ fontSize: 14, color: palette.silver2 }}>
             Tidak ada tagihan yang belum dibayar. Alhamdulillah!

@@ -157,6 +157,9 @@ import SchoolClasses from "@/pages/sekolahislamku/dashboard-school/class/SchoolC
 import SchoolAttendance from "@/pages/sekolahislamku/dashboard-school/attendance/SchoolAttendance";
 import SchoolFinance from "@/pages/sekolahislamku/dashboard-school/finance/SchoolFinance";
 import SchoolAnnouncement from "@/pages/sekolahislamku/dashboard-school/announcement/SchoolAnnouncement";
+import StudentDetailAnnouncement from "@/pages/sekolahislamku/dashboard-student/announcement/StudentDetailAnnouncement";
+import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/TeacherSchedule";
+import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
 export default function AppRoutes() {
   return (
@@ -517,7 +520,13 @@ export default function AppRoutes() {
 
         <Route path="finance" element={<StudentFInance />} />
         <Route path="jadwal" element={<StudentSchedule />} />
-        <Route path="pengumuman" element={<StudentAnnouncement />} />
+        <Route path="pengumuman">
+          <Route index element={<StudentAnnouncement />} />
+          <Route
+            path="detail/:id"
+            element={<StudentDetailAnnouncement />}
+          ></Route>
+        </Route>
 
         {/* opsional: detail list */}
         <Route path="absensi" element={<StudentAbsence />} />
@@ -525,10 +534,15 @@ export default function AppRoutes() {
       </Route>
       <Route path="/guru" element={<StudentLayout />}>
         <Route index element={<TeacherDashboard />} />
-        <Route path="kelas" element={<TeacherClass />} />
         <Route path="kehadiran" element={<TeacherAttendance />} />
         <Route path="penilaian" element={<TeacherGrading />} />
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
+
+        <Route path="kelas">
+          <Route index element={<TeacherClass />} />
+          <Route path="jadwal" element={<TeacherSchedule />} />
+          <Route path="kehadiran" element={<TeacherClassAttendance />} />
+        </Route>
       </Route>
       <Route path="/sekolah" element={<StudentLayout />}>
         <Route index element={<SchoolDashboard />} />
@@ -537,7 +551,9 @@ export default function AppRoutes() {
         <Route path="kelas" element={<SchoolClasses />} />
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
-        <Route path="pengumuman" element={<SchoolAnnouncement />} />
+        <Route path="pengumuman">
+          <Route index element={<SchoolAnnouncement />} />
+        </Route>
       </Route>
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />

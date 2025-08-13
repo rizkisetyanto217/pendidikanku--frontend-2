@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/schedule/ParentSchedulePage.tsx
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -10,7 +10,6 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import PageTopBar from "../../components/home/PageTopBar";
 import ParentSidebarNav from "../../components/home/StudentSideBarNav";
 import ParentTopBar from "../../components/home/ParentTopBar";
 
@@ -23,6 +22,7 @@ type ScheduleItem = {
   teacher?: string; // "Ust. Ali"
   type?: "class" | "exam" | "event";
   note?: string;
+  description?: string;
 };
 
 type DaySchedule = {
@@ -61,6 +61,8 @@ async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
       room: "Aula 1",
       teacher: "Ust. Rahmat",
       type: "class",
+      description:
+        "Fokus pada makhraj huruf dan panjang pendek bacaan. Sesi baca bergilir 5 menit per siswa.",
     },
     {
       id: "2",
@@ -69,6 +71,8 @@ async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
       room: "R. Tahfiz",
       teacher: "Ust.ah Siti",
       type: "class",
+      description:
+        "Setoran An-Naba 1–10. Persiapan ujian pekan depan, mohon siswa membawa mushaf masing-masing.",
     },
   ];
 
@@ -86,54 +90,60 @@ async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
 
   const selectedDay = make(selected, baseToday);
 
-  const nextDays: DaySchedule[] = [
-    make(add(1), [
-      {
-        id: "3",
-        time: "07:15",
-        title: "Doa & Tilawah Pagi",
-        room: "Masjid",
-        teacher: "Semua Guru",
-        type: "event",
-      },
-      {
-        id: "4",
-        time: "08:00",
-        title: "Tahfiz Setoran",
-        room: "R. Tahfiz",
-        teacher: "Ust.ah Siti",
-        type: "class",
-      },
-    ]),
-    make(add(2), [
-      {
-        id: "5",
-        time: "07:30",
-        title: "Fiqih Ibadah",
-        room: "Aula 2",
-        teacher: "Ust. Ali",
-        type: "class",
-      },
-      {
-        id: "6",
-        time: "10:00",
-        title: "Evaluasi Tajwid",
-        room: "Aula 1",
-        teacher: "Ust. Rahmat",
-        type: "exam",
-      },
-    ]),
-    make(add(3), [
-      {
-        id: "7",
-        time: "07:20",
-        title: "Adab Majelis",
-        room: "Aula 1",
-        teacher: "Ust. Farid",
-        type: "class",
-      },
-    ]),
-  ];
+const nextDays: DaySchedule[] = [
+  make(add(1), [
+    {
+      id: "3",
+      time: "07:15",
+      title: "Doa & Tilawah Pagi",
+      room: "Masjid",
+      teacher: "Semua Guru",
+      type: "event",
+      description: "Pembukaan hari dengan doa bersama dan tilawah juz amma.",
+    },
+    {
+      id: "4",
+      time: "08:00",
+      title: "Tahfiz Setoran",
+      room: "R. Tahfiz",
+      teacher: "Ust.ah Siti",
+      type: "class",
+      description: "Setoran hafalan harian. Target 5 ayat per siswa.",
+    },
+  ]),
+  make(add(2), [
+    {
+      id: "5",
+      time: "07:30",
+      title: "Fiqih Ibadah",
+      room: "Aula 2",
+      teacher: "Ust. Ali",
+      type: "class",
+      description: "Materi wudhu dan tayamum, sesi tanya jawab di akhir.",
+    },
+    {
+      id: "6",
+      time: "10:00",
+      title: "Evaluasi Tajwid",
+      room: "Aula 1",
+      teacher: "Ust. Rahmat",
+      type: "exam",
+      description: "Ujian lisan: makhraj dan sifat huruf. Persiapkan mushaf.",
+    },
+  ]),
+  make(add(3), [
+    {
+      id: "7",
+      time: "07:20",
+      title: "Adab Majelis",
+      room: "Aula 1",
+      teacher: "Ust. Farid",
+      type: "class",
+      description: "Adab duduk, mendengar, dan bertanya di majelis ilmu.",
+    },
+  ]),
+];
+
 
   return Promise.resolve({ selected: selectedDay, nextDays });
 }
@@ -165,12 +175,142 @@ function TypeBadge({
   );
 }
 
+/* ===== Modal Detail Jadwal ===== */
+type ActiveEntry = { dateISO: string; item: ScheduleItem } | null;
+
+function ScheduleDetailModal({
+  open,
+  onClose,
+  entry,
+  palette,
+}: {
+  open: boolean;
+  onClose: () => void;
+  entry: ActiveEntry;
+  palette: Palette;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
+  if (!open || !entry) return null;
+  const { item, dateISO } = entry;
+  const prettyDate = idDate(new Date(dateISO));
+
+  return (
+    <div
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+      style={{ background: "rgba(0,0,0,0.35)" }}
+    >
+      <div
+        className="mx-auto mt-16 w-[92%] max-w-lg rounded-2xl shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: palette.white1,
+          color: palette.black1,
+          border: `1px solid ${palette.silver1}`,
+        }}
+      >
+        <div
+          className="p-4 md:p-5 border-b"
+          style={{ borderColor: palette.silver1 }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-base font-semibold truncate">
+                {item.title}
+              </div>
+              <div
+                className="mt-1 flex flex-wrap items-center gap-2 text-xs"
+                style={{ color: palette.silver2 }}
+              >
+                <span>{prettyDate}</span>
+                <span>• {item.time}</span>
+                {item.type && (
+                  <>
+                    <span>•</span>
+                    <TypeBadge t={item.type} palette={palette} />
+                  </>
+                )}
+              </div>
+            </div>
+            <Btn
+              variant="outline"
+              size="sm"
+              palette={palette}
+              onClick={onClose}
+            >
+              Tutup
+            </Btn>
+          </div>
+        </div>
+
+        <div className="p-4 md:p-5 space-y-2">
+          <div className="text-sm">
+            <span className="font-medium">Tempat:</span>{" "}
+            <span style={{ color: palette.black2 }}>{item.room ?? "-"}</span>
+          </div>
+          <div className="text-sm">
+            <span className="font-medium">Pengajar:</span>{" "}
+            <span style={{ color: palette.black2 }}>{item.teacher ?? "-"}</span>
+          </div>
+          {item.note && (
+            <div className="text-sm">
+              <span className="font-medium">Catatan:</span>{" "}
+              <span style={{ color: palette.black2 }}>{item.note}</span>
+            </div>
+          )}
+
+          {/* ---- NEW: Deskripsi panjang ---- */}
+          <div
+            className="pt-3 mt-1 border-t"
+            style={{ borderColor: palette.silver1 }}
+          />
+          <div className="text-xs" style={{ color: palette.silver2 }}>
+            Deskripsi
+          </div>
+          <div
+            className="text-sm whitespace-pre-wrap"
+            style={{ color: palette.black2 }}
+          >
+            {item.description && item.description.trim().length > 0
+              ? item.description
+              : "-"}
+          </div>
+          {/* ---- END NEW ---- */}
+        </div>
+
+        <div className="p-4 md:p-5 pt-0 flex items-center justify-end gap-2">
+          <Btn palette={palette} variant="white1" size="sm" onClick={onClose}>
+            Mengerti
+          </Btn>
+          <Btn palette={palette} variant="default" size="sm" onClick={onClose}>
+            OK
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* =============== Page =============== */
 export default function StudentSchedule() {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
 
   const [dateStr, setDateStr] = useState<string>(() => toISODate(new Date()));
+  const [active, setActive] = useState<ActiveEntry>(null);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["parent-schedule", dateStr],
@@ -277,7 +417,7 @@ export default function StudentSchedule() {
                 )}
               </div>
 
-              <div className="p-4 md:p-5 pt-2 space-y-3">
+              <div className="p-4 md:p-0 md:px-5 md:pb-5 pt-2 space-y-3">
                 {data && data.selected.items.length === 0 && (
                   <div
                     className="rounded-xl border p-4 text-sm"
@@ -295,35 +435,42 @@ export default function StudentSchedule() {
                   <SectionCard
                     key={s.id}
                     palette={palette}
-                    className="p-3 flex items-center justify-between"
+                    className="p-0"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">
-                        {s.title}
-                      </div>
-                      <div
-                        className="text-xs mt-0.5 truncate"
-                        style={{ color: palette.silver2 }}
-                      >
-                        {s.room ?? "-"} {s.teacher ? `• ${s.teacher}` : ""}
-                      </div>
-                      {s.note && (
-                        <div
-                          className="text-xs mt-1"
-                          style={{ color: palette.black2 }}
-                        >
-                          {s.note}
+                    <button
+                      onClick={() =>
+                        setActive({ dateISO: data!.selected.date, item: s })
+                      }
+                      className="w-full p-3 flex items-center justify-between text-left rounded-2xl focus-visible:outline-none focus-visible:ring-2"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {s.title}
                         </div>
-                      )}
-                    </div>
+                        <div
+                          className="text-xs mt-0.5 truncate"
+                          style={{ color: palette.silver2 }}
+                        >
+                          {s.room ?? "-"} {s.teacher ? `• ${s.teacher}` : ""}
+                        </div>
+                        {s.note && (
+                          <div
+                            className="text-xs mt-1"
+                            style={{ color: palette.black2 }}
+                          >
+                            {s.note}
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <TypeBadge t={s.type} palette={palette} />
-                      <Badge variant="outline" palette={palette}>
-                        {s.time}
-                      </Badge>
-                    </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <TypeBadge t={s.type} palette={palette} />
+                        <Badge variant="outline" palette={palette}>
+                          {s.time}
+                        </Badge>
+                      </div>
+                    </button>
                   </SectionCard>
                 ))}
               </div>
@@ -337,7 +484,7 @@ export default function StudentSchedule() {
                     Minggu Ini
                   </h3>
                 </div>
-                <div className="p-4 md:p-5 pt-2 grid gap-3">
+                <div className="p-4 md:p-0 md:px-5 pt-2 grid gap-3">
                   {data.nextDays.map((d) => (
                     <div
                       key={d.date}
@@ -355,9 +502,12 @@ export default function StudentSchedule() {
                       </div>
                       <div className="p-3 grid gap-2">
                         {d.items.map((s) => (
-                          <div
+                          <button
                             key={s.id}
-                            className="flex items-center justify-between rounded-xl border px-3 py-2"
+                            onClick={() =>
+                              setActive({ dateISO: d.date, item: s })
+                            }
+                            className="flex items-center justify-between rounded-xl border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2"
                             style={{
                               borderColor: palette.silver1,
                               background: palette.white1,
@@ -381,7 +531,7 @@ export default function StudentSchedule() {
                                 {s.time}
                               </Badge>
                             </div>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -389,6 +539,14 @@ export default function StudentSchedule() {
                 </div>
               </SectionCard>
             )}
+
+            {/* Modal */}
+            <ScheduleDetailModal
+              open={!!active}
+              onClose={() => setActive(null)}
+              entry={active}
+              palette={palette}
+            />
           </div>
         </div>
       </main>

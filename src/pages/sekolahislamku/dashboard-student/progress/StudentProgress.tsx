@@ -223,7 +223,7 @@ export default function StudentProgress() {
 
                 <div className="flex flex-col gap-2 md:flex-row">
                   <Link
-                    to="/student/progress/raport"
+                    to="/murid/progress/raport"
                     className="w-full md:w-auto"
                   >
                     <Btn size="sm" variant="default" palette={palette}>

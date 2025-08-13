@@ -62,7 +62,7 @@ export default function TodayScheduleCard({
                 {s.room}
               </div>
             </div>
-            <Badge variant="outline" palette={palette}>
+            <Badge variant="white1" palette={palette}>
               {s.time}
             </Badge>
           </SectionCard>
@@ -70,7 +70,7 @@ export default function TodayScheduleCard({
 
         <div className="pt-3">
           <Link to={seeAllPath}>
-            <Btn variant="outline" className="w-full" palette={palette}>
+            <Btn variant="ghost" className="w-full" palette={palette}>
               Lihat Jadwal <ChevronRight className="ml-1" size={16} />
             </Btn>
           </Link>
