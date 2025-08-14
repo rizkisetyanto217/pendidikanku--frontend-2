@@ -18,7 +18,7 @@ export default function MasjidkuProgram() {
       />
 
       <div
-        className="max-w-3xl mx-auto p-6 space-y-6 rounded-xl"
+        className="max-w-3xl mx-auto p-2 space-y-6 rounded-xl"
         style={{ backgroundColor: theme.white1, borderColor: theme.white3 }}
       >
         {/* Hero / Intro */}
@@ -36,7 +36,7 @@ export default function MasjidkuProgram() {
 
         {/* Tujuan */}
         <section className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-black">
             <Target size={18} style={{ color: theme.quaternary }} />
             <h2
               className="text-lg font-semibold"
@@ -45,6 +45,7 @@ export default function MasjidkuProgram() {
               Tujuan Program
             </h2>
           </div>
+
           <ul
             className="list-disc pl-5 space-y-2 leading-relaxed"
             style={{ color: theme.black1 }}
@@ -132,8 +133,8 @@ export default function MasjidkuProgram() {
 
           {/* Per Masjid */}
           <div
-            className="rounded-lg ring-1 p-4"
-            style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
+            className=""
+            // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
           >
             <h3 className="font-semibold mb-3" style={{ color: theme.black1 }}>
               A. Per Masjid
@@ -144,36 +145,36 @@ export default function MasjidkuProgram() {
             >
               <div className="col-span-8">1) Setup & Onboarding Teknis</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp300.000
+               300.000
               </div>
 
               <div className="col-span-8">2) Desain & Slicing Halaman</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp250.000
+               250.000
               </div>
 
               <div className="col-span-8">3) Pelatihan Pengurus (online)</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp150.000
+               150.000
               </div>
 
               <div className="col-span-8">4) Produksi Konten Awal</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp200.000
+               200.000
               </div>
 
               <div className="col-span-8">
                 5) Dukungan Operasional (1–3 bulan)
               </div>
               <div className="col-span-4 text-right font-semibold">
-                Rp300.000
+               300.000
               </div>
 
               <div className="col-span-8 opacity-80">
                 Opsional: Custom Domain / Tahun
               </div>
               <div className="col-span-4 text-right font-semibold opacity-80">
-                Rp200.000
+               200.000
               </div>
 
               <div className="col-span-8 mt-2 font-semibold">
@@ -183,15 +184,15 @@ export default function MasjidkuProgram() {
                 className="col-span-4 mt-2 text-right font-bold"
                 style={{ color: theme.specialColor }}
               >
-                Rp1.200.000
+               1.200.000
               </div>
             </div>
           </div>
 
           {/* Skala 100 Masjid */}
           <div
-            className="rounded-lg ring-1 p-4"
-            style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
+            className=""
+            // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
           >
             <h3 className="font-semibold mb-3" style={{ color: theme.black1 }}>
               B. Skala Program 100 Masjid
@@ -204,29 +205,29 @@ export default function MasjidkuProgram() {
                 Implementasi 100 Masjid (Rp1.200.000 x 100)
               </div>
               <div className="col-span-4 text-right font-semibold">
-                Rp120.000.000
+               120.000.000
               </div>
 
               <div className="col-span-8">
                 Pool Program (shared): Platform & Infra
               </div>
               <div className="col-span-4 text-right font-semibold">
-                Rp10.000.000
+               10.000.000
               </div>
 
               <div className="col-span-8">Support, QA, & Koordinasi</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp5.000.000
+               5.000.000
               </div>
 
               <div className="col-span-8">Pelatihan & Materi</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp5.000.000
+               5.000.000
               </div>
 
               <div className="col-span-8">Cadangan/Risiko</div>
               <div className="col-span-4 text-right font-semibold">
-                Rp5.000.000
+               5.000.000
               </div>
 
               <div className="col-span-8 mt-2 font-semibold">
@@ -236,7 +237,7 @@ export default function MasjidkuProgram() {
                 className="col-span-4 mt-2 text-right font-bold"
                 style={{ color: theme.specialColor }}
               >
-                Rp145.000.000
+               145.000.000
               </div>
             </div>
 
@@ -252,8 +253,8 @@ export default function MasjidkuProgram() {
 
           {/* Timeline singkat */}
           <div
-            className="rounded-lg ring-1 p-4"
-            style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
+            // className="rounded-lg ring-1 p-4"
+            // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
           >
             <div className="flex items-center gap-2 mb-2">
               <CalendarCheck size={16} style={{ color: theme.quaternary }} />
@@ -276,16 +277,16 @@ export default function MasjidkuProgram() {
         </section>
 
         {/* CTA / Penutup */}
-        <footer className="flex flex-wrap items-center gap-3">
+        <footer className="flex flex-wrap  items-center gap-3">
           <button
-            className="px-4 py-2 rounded-lg font-semibold"
+            className="px-4 py-2 rounded-lg font-semibold w-full"
             style={{ backgroundColor: theme.primary, color: theme.white1 }}
             onClick={() => navigate("/profil")}
           >
             Dukung & Kolaborasi
           </button>
           <button
-            className="px-4 py-2 rounded-lg font-semibold ring-1"
+            className="px-4 py-2 rounded-lg font-semibold ring-1 w-full"
             style={{ color: theme.primary, borderColor: theme.primary }}
             onClick={() => navigate("/finansial")}
           >

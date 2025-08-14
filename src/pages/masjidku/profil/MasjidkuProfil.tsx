@@ -69,7 +69,7 @@ export default function MasjidkuProfil() {
             Tujuan
           </h2>
           <ul
-            className="list-disc pl-5 space-y-2 leading-relaxed"
+            className="list-disc pl-5 space-y-2 leading-relaxed mb-10"
             style={{ color: theme.black1 }}
           >
             <li>

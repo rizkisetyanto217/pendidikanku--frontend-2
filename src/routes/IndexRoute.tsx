@@ -161,6 +161,9 @@ import StudentDetailAnnouncement from "@/pages/sekolahislamku/dashboard-student/
 import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/TeacherSchedule";
 import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
+import { financeRoutes } from "@/pages/masjidku/financial/routes";
+import SaldoAkhirPage from "@/pages/masjidku/financial/components/SaldoAkhirPage";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -171,6 +174,13 @@ export default function AppRoutes() {
         <Route path="masjid" element={<MasjidkuListMasjid />} />
         <Route path="profil" element={<MasjidkuProfil />} />
         <Route path="program" element={<MasjidkuProgram />} />
+        {financeRoutes.map((route, index) => (
+          <Route
+            key={index}
+            path={route.path.replace("/masjidku/", "")} // Hapus prefix karena sudah di dalam MasjidkuLayout
+            element={route.element}
+          />
+        ))}
       </Route>
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
