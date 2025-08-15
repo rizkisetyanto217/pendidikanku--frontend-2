@@ -69,7 +69,7 @@ export default function TodayScheduleCard({
         ))}
 
         <div className="pt-3">
-          <Link to={seeAllPath}>
+          <Link to={"/sekolah/semua-jadwal"}>
             <Btn variant="ghost" className="w-full" palette={palette}>
               Lihat Jadwal <ChevronRight className="ml-1" size={16} />
             </Btn>

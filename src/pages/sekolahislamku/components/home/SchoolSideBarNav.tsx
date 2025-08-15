@@ -39,7 +39,7 @@ const DEFAULT_NAVS: NavItem[] = [
   { to: "/sekolah/guru", label: "Guru", icon: UserCog },
   { to: "/sekolah/kelas", label: "Kelas", icon: BookOpen },
   { to: "/sekolah/Kehadiran", label: "Absensi", icon: CheckSquare },
-  { to: "/sekolah/Keuangan", label: "Keuangan", icon: Wallet },
+  // { to: "/sekolah/Keuangan", label: "Keuangan", icon: Wallet },
   { to: "/sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
   { to: "/sekolah/reports", label: "Laporan", icon: BarChart2 },
   { to: "/sekolah/settings", label: "Pengaturan", icon: Settings },

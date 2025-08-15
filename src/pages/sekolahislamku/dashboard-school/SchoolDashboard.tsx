@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { NavLink } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { Outlet } from "react-router-dom";
+
 
 import {
   SectionCard,
@@ -190,6 +192,8 @@ export default function SchoolDashboard() {
 
           {/* Main */}
           <div className="flex-1 space-y-6 min-w-0">
+            <Outlet />
+
             {/* KPI */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <KpiTile
@@ -226,7 +230,7 @@ export default function SchoolDashboard() {
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
-                  seeAllPath="/school/schedule"
+                  seeAllPath="semua-jadwal"
                 />
               </div>
 
@@ -255,7 +259,7 @@ export default function SchoolDashboard() {
                   bills={data?.finance.outstandingBills ?? []}
                   dateFmt={dateFmt}
                   formatIDR={formatIDR}
-                  seeAllPath="/school/finance"
+                  seeAllPath="semua-tagihan"
                   getPayHref={(b) => `/finance/bill/${b.id}`}
                   className="w-full"
                 />
@@ -350,20 +354,37 @@ function MiniStat({
   const badgeVariant = tone === "warning" ? "warning" : "outline";
   return (
     <div
-      className="p-3 rounded-xl border"
+      className="p-3 rounded-xl border w-full"
       style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
-      <div className="flex items-center justify-between">
-        <div className="text-xs" style={{ color: palette.silver2 }}>
+      {/* Header: Label + Badge */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+        <div
+          className="text-xs font-medium leading-tight md:flex-1 truncate"
+          style={{ color: palette.silver2 }}
+        >
           {label}
         </div>
-        <Badge palette={palette} variant={badgeVariant}>
+        <Badge
+          palette={palette}
+          variant={badgeVariant}
+          className="flex-shrink-0 w-fit"
+        >
           {label.includes("Tunggakan") ? "Perlu perhatian" : "OK"}
         </Badge>
       </div>
-      <div className="text-lg font-semibold mt-1">{value}</div>
+
+      {/* Value */}
+      <div className="text-lg md:text-xl font-semibold leading-tight mb-1">
+        {value}
+      </div>
+
+      {/* Subtext */}
       {sub && (
-        <div className="text-xs mt-0.5" style={{ color: palette.silver2 }}>
+        <div
+          className="text-xs leading-relaxed"
+          style={{ color: palette.silver2 }}
+        >
           {sub}
         </div>
       )}

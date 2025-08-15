@@ -162,7 +162,9 @@ import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/T
 import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
-import SaldoAkhirPage from "@/pages/masjidku/financial/components/SaldoAkhirPage";
+import SemuaJadwal from "@/pages/sekolahislamku/dashboard-school/components/dashboard/SemuaJadwal";
+import SemuaTagihan from "@/pages/sekolahislamku/dashboard-school/components/dashboard/SemuaTagihan";
+// import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/components/routes";
 
 export default function AppRoutes() {
   return (
@@ -561,6 +563,8 @@ export default function AppRoutes() {
         <Route path="kelas" element={<SchoolClasses />} />
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
+        <Route path="semua-jadwal" element={<SemuaJadwal />} />
+        <Route path="semua-tagihan" element={<SemuaTagihan />} />
         <Route path="pengumuman">
           <Route index element={<SchoolAnnouncement />} />
         </Route>
