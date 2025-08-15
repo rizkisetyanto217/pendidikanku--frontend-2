@@ -5,7 +5,6 @@ import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { Outlet } from "react-router-dom";
 
-
 import {
   SectionCard,
   Badge,
@@ -272,8 +271,8 @@ export default function SchoolDashboard() {
                     palette={palette}
                     items={data?.announcements ?? []}
                     dateFmt={dateFmt}
-                    seeAllPath="/student/pengumuman" // halaman list
-                    getDetailHref={(a) => `/student/pengumuman/detail/${a.id}`} // detail per item
+                    seeAllPath="semua-pengumuman" // halaman list
+                    getDetailHref={(a) => `tryout-ujian-tahfizh`} // detail per item
                   />
                 </div>
               </div>

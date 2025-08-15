@@ -12,6 +12,15 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentSidebarNav from "../../components/home/StudentSideBarNav";
 import ParentTopBar from "../../components/home/StudentTopBar";
+// redux
+import { fetchClasses } from "../../../../reducer/classes";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { calculateProvidedBy } from '../../../../../node_modules/@reduxjs/toolkit/src/query/endpointDefinitions';
+
+
+
+
 
 /* ================= Types ================= */
 type ScheduleItem = {
@@ -305,6 +314,13 @@ function ScheduleDetailModal({
 
 /* =============== Page =============== */
 export default function StudentSchedule() {
+    const dispatch = useDispatch();
+const {data: classes} = useSelector((state  : RootState) => state.classes);
+console.log(classes);
+
+
+
+
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
 

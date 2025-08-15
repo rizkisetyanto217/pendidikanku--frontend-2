@@ -164,7 +164,7 @@ import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/cla
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import SemuaJadwal from "@/pages/sekolahislamku/dashboard-school/components/dashboard/SemuaJadwal";
 import SemuaTagihan from "@/pages/sekolahislamku/dashboard-school/components/dashboard/SemuaTagihan";
-// import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/components/routes";
+import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/components/routes";
 
 export default function AppRoutes() {
   return (
@@ -563,8 +563,15 @@ export default function AppRoutes() {
         <Route path="kelas" element={<SchoolClasses />} />
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
-        <Route path="semua-jadwal" element={<SemuaJadwal />} />
-        <Route path="semua-tagihan" element={<SemuaTagihan />} />
+        {
+          schoolRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={route.element}
+            />
+          ))
+        }
         <Route path="pengumuman">
           <Route index element={<SchoolAnnouncement />} />
         </Route>
