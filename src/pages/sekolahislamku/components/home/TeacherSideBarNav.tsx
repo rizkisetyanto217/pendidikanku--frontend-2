@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/components/home/TeacherSidebarNav.tsx
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import {
   SectionCard,
   Btn,
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 export type NavItem = {
-  to: string;
+  path: string; // relatif, tanpa slug & tanpa /guru
   label: string;
   icon: React.ComponentType<any>;
   end?: boolean;
@@ -30,12 +30,12 @@ export type QuickAction = {
 };
 
 const DEFAULT_NAVS: NavItem[] = [
-  { to: "/guru", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/guru/kelas", label: "Kelas Saya", icon: Users },
-  { to: "/guru/kehadiran", label: "Kehadiran", icon: CheckSquare },
-  { to: "/guru/penilaian", label: "Penilaian", icon: ClipboardList },
-  { to: "/guru/materials", label: "Materi & Tugas", icon: NotebookPen },
-  { to: "/guru/pengumuman", label: "Pengumuman", icon: Megaphone },
+  { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "kelas", label: "Kelas Saya", icon: Users },
+  { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
+  { path: "penilaian", label: "Penilaian", icon: ClipboardList },
+  { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
+  { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
 
 const DEFAULT_ACTIONS: QuickAction[] = [
@@ -72,6 +72,8 @@ export default function TeacherSidebarNav({
   quickActions?: QuickAction[];
   className?: string;
 }) {
+  const { slug } = useParams(); // ambil slug aktif
+
   return (
     <nav
       className={`hidden lg:block w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto ${className}`}
@@ -83,41 +85,51 @@ export default function TeacherSidebarNav({
         style={{ background: palette.white1 }}
       >
         <ul className="space-y-2">
-          {navs.map(({ to, label, icon: Icon, end }) => (
-            <li key={to}>
-              <NavLink to={to} end={!!end} className="block focus:outline-none">
-                {({ isActive }) => (
-                  <div
-                    className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all hover:translate-x-[1px]"
-                    style={{
-                      background: palette.white1,
-                      borderColor: isActive ? palette.primary : palette.silver1,
-                      boxShadow: isActive
-                        ? `0 0 0 1px ${palette.primary} inset`
-                        : "none",
-                      color: isActive ? palette.primary : palette.black1,
-                    }}
-                  >
-                    <span
-                      className="h-7 w-7 grid place-items-center rounded-lg border"
+          {navs.map(({ path, label, icon: Icon, end }) => {
+            const to = path ? `/${slug}/guru/${path}` : `/${slug}/guru`; // dashboard
+
+            return (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  end={!!end}
+                  className="block focus:outline-none"
+                >
+                  {({ isActive }) => (
+                    <div
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all hover:translate-x-[1px]"
                       style={{
-                        background: isActive
-                          ? palette.primary2
-                          : palette.white1,
+                        background: palette.white1,
                         borderColor: isActive
                           ? palette.primary
                           : palette.silver1,
-                        color: isActive ? palette.primary : palette.silver2,
+                        boxShadow: isActive
+                          ? `0 0 0 1px ${palette.primary} inset`
+                          : "none",
+                        color: isActive ? palette.primary : palette.black1,
                       }}
                     >
-                      <Icon size={16} />
-                    </span>
-                    <span className="truncate">{label}</span>
-                  </div>
-                )}
-              </NavLink>
-            </li>
-          ))}
+                      <span
+                        className="h-7 w-7 grid place-items-center rounded-lg border"
+                        style={{
+                          background: isActive
+                            ? palette.primary2
+                            : palette.white1,
+                          borderColor: isActive
+                            ? palette.primary
+                            : palette.silver1,
+                          color: isActive ? palette.primary : palette.silver2,
+                        }}
+                      >
+                        <Icon size={16} />
+                      </span>
+                      <span className="truncate">{label}</span>
+                    </div>
+                  )}
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </SectionCard>
 

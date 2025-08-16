@@ -1,7 +1,7 @@
 // src/pages/sekolahislamku/schedule/ParentSchedulePage.tsx
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, GraduationCap } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
@@ -12,36 +12,47 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentSidebarNav from "../../components/home/StudentSideBarNav";
 import ParentTopBar from "../../components/home/StudentTopBar";
-// redux
-import { fetchClasses } from "../../../../reducer/classes";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store";
-import { calculateProvidedBy } from '../../../../../node_modules/@reduxjs/toolkit/src/query/endpointDefinitions';
-
-
-
-
 
 /* ================= Types ================= */
+type ClassItem = {
+  class_id: string;
+  class_masjid_id: string;
+  class_name: string;
+  class_slug: string;
+  class_description: string;
+  class_level: string;
+  class_image_url?: string;
+  class_fee_monthly_idr: number;
+  class_is_active: boolean;
+  class_created_at: string;
+};
+
+type ClassesResponse = {
+  message: string;
+  data: ClassItem[];
+};
+
 type ScheduleItem = {
   id: string;
-  time: string; // "07:30"
-  title: string; // "Tahsin Kelas"
-  room?: string; // "Aula 1"
-  teacher?: string; // "Ust. Ali"
+  time: string;
+  title: string;
+  room?: string;
+  teacher?: string;
   type?: "class" | "exam" | "event";
   note?: string;
   description?: string;
+  class_id?: string;
+  class_info?: ClassItem;
 };
 
 type DaySchedule = {
-  date: string; // ISO
+  date: string;
   items: ScheduleItem[];
 };
 
 type WeekSchedule = {
   selected: DaySchedule;
-  nextDays: DaySchedule[]; // 3-5 hari ke depan
+  nextDays: DaySchedule[];
 };
 
 /* =============== Helpers =============== */
@@ -53,107 +64,91 @@ const idDate = (d: Date) =>
     year: "numeric",
   });
 
-const toISODate = (d: Date) => d.toISOString().slice(0, 10); // yyyy-mm-dd
+const toISODate = (d: Date) => d.toISOString().slice(0, 10);
 
 const parseMinutes = (hhmm: string) => {
   const [h, m] = hhmm.split(":").map(Number);
   return (h ?? 0) * 60 + (m ?? 0);
 };
 
-/* =============== Fake API =============== */
-async function fetchSchedule(selectedISO: string): Promise<WeekSchedule> {
-  const baseToday: ScheduleItem[] = [
-    {
-      id: "1",
-      time: "07:30",
-      title: "Tahsin Kelas",
-      room: "Aula 1",
-      teacher: "Ust. Rahmat",
-      type: "class",
-      description:
-        "Fokus pada makhraj huruf dan panjang pendek bacaan. Sesi baca bergilir 5 menit per siswa.",
-    },
-    {
-      id: "2",
-      time: "09:30",
-      title: "Hafalan Juz 30",
-      room: "R. Tahfiz",
-      teacher: "Ust.ah Siti",
-      type: "class",
-      description:
-        "Setoran An-Naba 1–10. Persiapan ujian pekan depan, mohon siswa membawa mushaf masing-masing.",
-    },
-  ];
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
 
-  const selected = new Date(selectedISO);
-  const add = (n: number) => {
-    const d = new Date(selected);
-    d.setDate(d.getDate() + n);
-    return d;
-  };
+/* =============== API Functions =============== */
+async function fetchClasses(): Promise<ClassesResponse> {
+  const token =
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Unauthorized - Token tidak ditemukan. Silakan login.");
+  }
+
+  const response = await fetch(
+    "https://masjidkubackend4-production.up.railway.app/api/a/classes",
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+      throw new Error("Unauthorized - Silakan login kembali.");
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function fetchSchedule(
+  selectedISO: string,
+  classes: ClassItem[] = []
+): Promise<WeekSchedule> {
+  const classMap = new Map(classes.map((c) => [c.class_id, c]));
+
+  // filter kelas aktif (sementara pakai created_at ≤ selectedISO)
+  const filtered = classes.filter((cls) => {
+    const created = new Date(cls.class_created_at).toISOString().slice(0, 10);
+    return created <= selectedISO;
+  });
+
+  const items: ScheduleItem[] = filtered.map((cls) => ({
+    id: cls.class_id,
+    time: "07:30", // default jam, bisa disesuaikan kalau API punya field jam
+    title: cls.class_name,
+    room: "Kelas Online",
+    teacher: "-", // isi jika API ada data pengajar
+    type: "class",
+    description: cls.class_description,
+    class_id: cls.class_id,
+    class_info: classMap.get(cls.class_id),
+  }));
 
   const make = (date: Date, items: ScheduleItem[]): DaySchedule => ({
     date: date.toISOString(),
     items: items.sort((a, b) => parseMinutes(a.time) - parseMinutes(b.time)),
   });
 
-  const selectedDay = make(selected, baseToday);
+  const selected = new Date(selectedISO);
 
-  const nextDays: DaySchedule[] = [
-    make(add(1), [
-      {
-        id: "3",
-        time: "07:15",
-        title: "Doa & Tilawah Pagi",
-        room: "Masjid",
-        teacher: "Semua Guru",
-        type: "event",
-        description: "Pembukaan hari dengan doa bersama dan tilawah juz amma.",
-      },
-      {
-        id: "4",
-        time: "08:00",
-        title: "Tahfiz Setoran",
-        room: "R. Tahfiz",
-        teacher: "Ust.ah Siti",
-        type: "class",
-        description: "Setoran hafalan harian. Target 5 ayat per siswa.",
-      },
-    ]),
-    make(add(2), [
-      {
-        id: "5",
-        time: "07:30",
-        title: "Fiqih Ibadah",
-        room: "Aula 2",
-        teacher: "Ust. Ali",
-        type: "class",
-        description: "Materi wudhu dan tayamum, sesi tanya jawab di akhir.",
-      },
-      {
-        id: "6",
-        time: "10:00",
-        title: "Evaluasi Tajwid",
-        room: "Aula 1",
-        teacher: "Ust. Rahmat",
-        type: "exam",
-        description: "Ujian lisan: makhraj dan sifat huruf. Persiapkan mushaf.",
-      },
-    ]),
-    make(add(3), [
-      {
-        id: "7",
-        time: "07:20",
-        title: "Adab Majelis",
-        room: "Aula 1",
-        teacher: "Ust. Farid",
-        type: "class",
-        description: "Adab duduk, mendengar, dan bertanya di majelis ilmu.",
-      },
-    ]),
-  ];
-
-  return Promise.resolve({ selected: selectedDay, nextDays });
+  return {
+    selected: make(selected, items),
+    nextDays: [], // bisa dikembangkan untuk generate jadwal ke depan
+  };
 }
 
 /* =============== Small bits =============== */
@@ -183,9 +178,33 @@ function TypeBadge({
   );
 }
 
+function ClassLevelBadge({
+  level,
+  palette,
+}: {
+  level?: string;
+  palette: Palette;
+}) {
+  if (!level) return null;
+  return (
+    <Badge
+      variant={
+        level === "Dasar"
+          ? "success"
+          : level === "Menengah"
+            ? "warning"
+            : "info"
+      }
+      palette={palette}
+      className="h-6"
+    >
+      {level}
+    </Badge>
+  );
+}
+
 /* ===== Modal Detail Jadwal ===== */
 type ActiveEntry = { dateISO: string; item: ScheduleItem } | null;
-
 function ScheduleDetailModal({
   open,
   onClose,
@@ -263,42 +282,44 @@ function ScheduleDetailModal({
             </Btn>
           </div>
         </div>
-
-        <div className="p-4 md:p-5 space-y-2">
+        <div className="p-4 md:p-5 space-y-3">
           <div className="text-sm">
-            <span className="font-medium">Tempat:</span>{" "}
-            <span style={{ color: palette.black2 }}>{item.room ?? "-"}</span>
+            <span className="font-medium">Tempat:</span> {item.room ?? "-"}
           </div>
           <div className="text-sm">
-            <span className="font-medium">Pengajar:</span>{" "}
-            <span style={{ color: palette.black2 }}>{item.teacher ?? "-"}</span>
+            <span className="font-medium">Pengajar:</span> {item.teacher ?? "-"}
           </div>
-          {item.note && (
-            <div className="text-sm">
-              <span className="font-medium">Catatan:</span>{" "}
-              <span style={{ color: palette.black2 }}>{item.note}</span>
-            </div>
+          {item.class_info && (
+            <>
+              <div
+                className="pt-2 mt-2 border-t"
+                style={{ borderColor: palette.silver1 }}
+              />
+              <div className="text-xs" style={{ color: palette.silver2 }}>
+                Informasi Kelas
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <GraduationCap size={16} color={palette.quaternary} />
+                  <span className="text-sm font-medium">
+                    {item.class_info.class_name}
+                  </span>
+                  <ClassLevelBadge
+                    level={item.class_info.class_level}
+                    palette={palette}
+                  />
+                </div>
+                <div className="text-sm">
+                  {item.class_info.class_description}
+                </div>
+                <div className="text-sm">
+                  <span className="font-medium">Biaya:</span>{" "}
+                  {formatCurrency(item.class_info.class_fee_monthly_idr)}/bulan
+                </div>
+              </div>
+            </>
           )}
-
-          {/* ---- NEW: Deskripsi panjang ---- */}
-          <div
-            className="pt-3 mt-1 border-t"
-            style={{ borderColor: palette.silver1 }}
-          />
-          <div className="text-xs" style={{ color: palette.silver2 }}>
-            Deskripsi
-          </div>
-          <div
-            className="text-sm whitespace-pre-wrap"
-            style={{ color: palette.black2 }}
-          >
-            {item.description && item.description.trim().length > 0
-              ? item.description
-              : "-"}
-          </div>
-          {/* ---- END NEW ---- */}
         </div>
-
         <div className="p-4 md:p-5 pt-0 flex items-center justify-end gap-2">
           <Btn palette={palette} variant="white1" size="sm" onClick={onClose}>
             Mengerti
@@ -314,57 +335,69 @@ function ScheduleDetailModal({
 
 /* =============== Page =============== */
 export default function StudentSchedule() {
-    const dispatch = useDispatch();
-const {data: classes} = useSelector((state  : RootState) => state.classes);
-console.log(classes);
-
-
-
-
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
-
   const [dateStr, setDateStr] = useState<string>(() => toISODate(new Date()));
   const [active, setActive] = useState<ActiveEntry>(null);
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["parent-schedule", dateStr],
-    queryFn: () => fetchSchedule(dateStr),
+  const {
+    data: classesData,
+    isLoading: isLoadingClasses,
+    error: classesError,
+  } = useQuery({
+    queryKey: ["classes"],
+    queryFn: fetchClasses,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
+  const {
+    data: scheduleData,
+    isLoading: isLoadingSchedule,
+    isFetching,
+  } = useQuery({
+    queryKey: ["parent-schedule", dateStr, classesData?.data],
+    queryFn: () => fetchSchedule(dateStr, classesData?.data || []),
     staleTime: 60_000,
+    enabled: !!classesData,
   });
 
   const selectedPretty = useMemo(
-    () => (data ? idDate(new Date(data.selected.date)) : "—"),
-    [data]
+    () => (scheduleData ? idDate(new Date(scheduleData.selected.date)) : "—"),
+    [scheduleData]
   );
 
-  const onToday = () => {
-    const today = toISODate(new Date());
-    setDateStr(today);
-  };
+  const onToday = () => setDateStr(toISODate(new Date()));
+  const isLoading = isLoadingClasses || isLoadingSchedule;
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
       <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title="Jadwal"
       />
-
-      {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri (sticky di desktop) */}
           <ParentSidebarNav palette={palette} />
-
-          {/* Konten utama */}
           <div className="flex-1 space-y-6">
-            {/* Filter (desktop) */}
-            <SectionCard palette={palette} className="p-3 hidden md:block">
+            {classesError && (
+              <SectionCard palette={palette}>
+                <div className="p-4 text-center">
+                  <div className="text-red-500 text-sm font-medium">
+                    {classesError instanceof Error
+                      ? classesError.message
+                      : "Gagal memuat data kelas"}
+                  </div>
+                </div>
+              </SectionCard>
+            )}
+
+            {/* Filter */}
+            <SectionCard palette={palette} className="p-3">
               <div className="flex items-center gap-2">
                 <CalendarDays size={18} color={palette.quaternary} />
                 <input
@@ -386,39 +419,21 @@ console.log(classes);
                 >
                   Hari ini
                 </Btn>
+                {classesData && (
+                  <div
+                    className="ml-auto text-xs"
+                    style={{ color: palette.silver2 }}
+                  >
+                    {classesData.data.length} kelas tersedia
+                  </div>
+                )}
               </div>
             </SectionCard>
 
-            {/* Filter (mobile) */}
-            <SectionCard palette={palette} className="p-3 md:hidden">
-              <div className="flex items-center gap-2">
-                <CalendarDays size={18} color={palette.quaternary} />
-                <input
-                  type="date"
-                  value={dateStr}
-                  onChange={(e) => setDateStr(e.target.value)}
-                  className="h-9 flex-1 rounded-xl px-3 text-sm"
-                  style={{
-                    background: palette.white1,
-                    color: palette.black1,
-                    border: `1px solid ${palette.silver1}`,
-                  }}
-                />
-                <Btn
-                  size="sm"
-                  variant="secondary"
-                  palette={palette}
-                  onClick={onToday}
-                >
-                  Hari ini
-                </Btn>
-              </div>
-            </SectionCard>
-
-            {/* Jadwal hari terpilih */}
+            {/* Jadwal */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2">
-                <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
+                <h3 className="text-base font-semibold flex items-center gap-2">
                   <CalendarDays size={20} color={palette.quaternary} /> Jadwal{" "}
                   {selectedPretty}
                 </h3>
@@ -431,9 +446,8 @@ console.log(classes);
                   </div>
                 )}
               </div>
-
-              <div className="p-4 md:p-0 md:px-5 md:pb-5 pt-2 space-y-3">
-                {data && data.selected.items.length === 0 && (
+              <div className="p-4 space-y-3">
+                {scheduleData?.selected.items?.length === 0 && (
                   <div
                     className="rounded-xl border p-4 text-sm"
                     style={{
@@ -445,8 +459,7 @@ console.log(classes);
                     Tidak ada jadwal pada tanggal ini.
                   </div>
                 )}
-
-                {(data?.selected.items ?? []).map((s) => (
+                {scheduleData?.selected.items?.map((s) => (
                   <SectionCard
                     key={s.id}
                     palette={palette}
@@ -455,30 +468,38 @@ console.log(classes);
                   >
                     <button
                       onClick={() =>
-                        setActive({ dateISO: data!.selected.date, item: s })
+                        setActive({
+                          dateISO: scheduleData!.selected.date,
+                          item: s,
+                        })
                       }
-                      className="w-full p-3 flex items-center justify-between text-left rounded-2xl focus-visible:outline-none focus-visible:ring-2"
+                      className="w-full p-3 flex items-center justify-between text-left rounded-2xl"
                     >
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium truncate">
-                          {s.title}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="text-sm font-medium truncate">
+                            {s.title}
+                          </div>
+                          {s.class_info && (
+                            <ClassLevelBadge
+                              level={s.class_info.class_level}
+                              palette={palette}
+                            />
+                          )}
                         </div>
                         <div
-                          className="text-xs mt-0.5 truncate"
+                          className="text-xs truncate"
+                          style={{ color: palette.silver2 }}
+                        >
+                          {s.class_info?.class_description ?? "-"}
+                        </div>
+                        <div
+                          className="text-xs truncate"
                           style={{ color: palette.silver2 }}
                         >
                           {s.room ?? "-"} {s.teacher ? `• ${s.teacher}` : ""}
                         </div>
-                        {s.note && (
-                          <div
-                            className="text-xs mt-1"
-                            style={{ color: palette.black2 }}
-                          >
-                            {s.note}
-                          </div>
-                        )}
                       </div>
-
                       <div className="flex items-center gap-2 shrink-0">
                         <TypeBadge t={s.type} palette={palette} />
                         <Badge variant="outline" palette={palette}>
@@ -490,70 +511,6 @@ console.log(classes);
                 ))}
               </div>
             </SectionCard>
-
-            {/* Sekilas minggu ini */}
-            {data && data.nextDays.length > 0 && (
-              <SectionCard palette={palette}>
-                <div className="p-4 md:p-5 pb-2">
-                  <h3 className="text-base font-semibold tracking-tight">
-                    Minggu Ini
-                  </h3>
-                </div>
-                <div className="p-4 md:p-0 md:px-5 pt-2 grid gap-3">
-                  {data.nextDays.map((d) => (
-                    <div
-                      key={d.date}
-                      className="rounded-2xl border"
-                      style={{
-                        borderColor: palette.silver1,
-                        background: palette.white2,
-                      }}
-                    >
-                      <div
-                        className="px-3 py-2 text-sm font-medium"
-                        style={{ borderBottom: `1px solid ${palette.silver1}` }}
-                      >
-                        {idDate(new Date(d.date))}
-                      </div>
-                      <div className="p-3 grid gap-2">
-                        {d.items.map((s) => (
-                          <button
-                            key={s.id}
-                            onClick={() =>
-                              setActive({ dateISO: d.date, item: s })
-                            }
-                            className="flex items-center justify-between rounded-xl border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2"
-                            style={{
-                              borderColor: palette.silver1,
-                              background: palette.white1,
-                            }}
-                          >
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium truncate">
-                                {s.title}
-                              </div>
-                              <div
-                                className="text-xs mt-0.5 truncate"
-                                style={{ color: palette.silver2 }}
-                              >
-                                {s.room ?? "-"}{" "}
-                                {s.teacher ? `• ${s.teacher}` : ""}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <TypeBadge t={s.type} palette={palette} />
-                              <Badge variant="outline" palette={palette}>
-                                {s.time}
-                              </Badge>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </SectionCard>
-            )}
 
             {/* Modal */}
             <ScheduleDetailModal

@@ -524,7 +524,7 @@ export default function AppRoutes() {
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-      <Route path="/:slug/murid" element={<StudentLayout />}>
+      <Route path=":slug/murid" element={<StudentLayout />}>
         <Route index element={<StudentDashboard />} />
 
         <Route path="progress" element={<StudentProgressDetail />} />
@@ -532,19 +532,16 @@ export default function AppRoutes() {
 
         <Route path="finance" element={<StudentFInance />} />
         <Route path="jadwal" element={<StudentSchedule />} />
+
         <Route path="pengumuman">
           <Route index element={<StudentAnnouncement />} />
-          <Route
-            path="detail/:id"
-            element={<StudentDetailAnnouncement />}
-          ></Route>
+          <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
         </Route>
 
-        {/* opsional: detail list */}
         <Route path="absensi" element={<StudentAbsence />} />
         <Route path="catatan" element={<StudentNotesSummary />} />
       </Route>
-      <Route path="/:slug/guru" element={<StudentLayout />}>
+      <Route path=":slug/guru" element={<StudentLayout />}>
         <Route index element={<TeacherDashboard />} />
         <Route path="kehadiran" element={<TeacherAttendance />} />
         <Route path="penilaian" element={<TeacherGrading />} />
@@ -556,22 +553,16 @@ export default function AppRoutes() {
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
         </Route>
       </Route>
-      <Route path="/:slug/sekolah" element={<StudentLayout />}>
+      <Route path=":slug/sekolah" element={<StudentLayout />}>
         <Route index element={<SchoolDashboard />} />
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="guru" element={<SchoolTeacher />} />
         <Route path="kelas" element={<SchoolClasses />} />
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
-        {
-          schoolRoutes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-            />
-          ))
-        }
+        {schoolRoutes.map((route) => (
+          <Route key={route.path} path={route.path} element={route.element} />
+        ))}
         <Route path="pengumuman">
           <Route index element={<SchoolAnnouncement />} />
         </Route>

@@ -1,6 +1,5 @@
-// src/pages/sekolahislamku/components/home/SchoolSidebarNav.tsx
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import {
   SectionCard,
   Btn,
@@ -20,7 +19,7 @@ import {
 } from "lucide-react";
 
 export type NavItem = {
-  to: string;
+  path: string; // relatif, bukan absolute
   label: string;
   icon: React.ComponentType<any>;
   end?: boolean;
@@ -34,15 +33,15 @@ export type QuickAction = {
 };
 
 const DEFAULT_NAVS: NavItem[] = [
-  { to: "/sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/sekolah/murid", label: "Siswa", icon: Users },
-  { to: "/sekolah/guru", label: "Guru", icon: UserCog },
-  { to: "/sekolah/kelas", label: "Kelas", icon: BookOpen },
-  { to: "/sekolah/Kehadiran", label: "Absensi", icon: CheckSquare },
-  // { to: "/sekolah/Keuangan", label: "Keuangan", icon: Wallet },
-  { to: "/sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
-  { to: "/sekolah/reports", label: "Laporan", icon: BarChart2 },
-  { to: "/sekolah/settings", label: "Pengaturan", icon: Settings },
+  { path: "sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "sekolah/murid", label: "Siswa", icon: Users },
+  { path: "sekolah/guru", label: "Guru", icon: UserCog },
+  { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
+  { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
+  // { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
+  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
+  { path: "sekolah/reports", label: "Laporan", icon: BarChart2 },
+  { path: "sekolah/settings", label: "Pengaturan", icon: Settings },
 ];
 
 const DEFAULT_ACTIONS: QuickAction[] = [
@@ -79,6 +78,8 @@ export default function SchoolSidebarNav({
   quickActions?: QuickAction[];
   className?: string;
 }) {
+  const { slug } = useParams(); // ambil slug dari URL
+
   return (
     <nav
       className={`hidden lg:block w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto ${className}`}
@@ -86,41 +87,50 @@ export default function SchoolSidebarNav({
     >
       <SectionCard palette={palette} className="p-2">
         <ul className="space-y-2">
-          {navs.map(({ to, label, icon: Icon, end }) => (
-            <li key={to}>
-              <NavLink to={to} end={!!end} className="block focus:outline-none">
-                {({ isActive }) => (
-                  <div
-                    className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all hover:translate-x-px"
-                    style={{
-                      background: palette.white1,
-                      borderColor: isActive ? palette.primary : palette.silver1,
-                      boxShadow: isActive
-                        ? `0 0 0 1px ${palette.primary} inset`
-                        : "none",
-                      color: isActive ? palette.primary : palette.black1,
-                    }}
-                  >
-                    <span
-                      className="h-7 w-7 grid place-items-center rounded-lg border"
+          {navs.map(({ path, label, icon: Icon, end }) => {
+            const to = `/${slug}/${path}`; // inject slug
+            return (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  end={!!end}
+                  className="block focus:outline-none"
+                >
+                  {({ isActive }) => (
+                    <div
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all hover:translate-x-px"
                       style={{
-                        background: isActive
-                          ? palette.primary2
-                          : palette.white1,
+                        background: palette.white1,
                         borderColor: isActive
                           ? palette.primary
                           : palette.silver1,
-                        color: isActive ? palette.primary : palette.silver2,
+                        boxShadow: isActive
+                          ? `0 0 0 1px ${palette.primary} inset`
+                          : "none",
+                        color: isActive ? palette.primary : palette.black1,
                       }}
                     >
-                      <Icon size={16} />
-                    </span>
-                    <span className="truncate">{label}</span>
-                  </div>
-                )}
-              </NavLink>
-            </li>
-          ))}
+                      <span
+                        className="h-7 w-7 grid place-items-center rounded-lg border"
+                        style={{
+                          background: isActive
+                            ? palette.primary2
+                            : palette.white1,
+                          borderColor: isActive
+                            ? palette.primary
+                            : palette.silver1,
+                          color: isActive ? palette.primary : palette.silver2,
+                        }}
+                      >
+                        <Icon size={16} />
+                      </span>
+                      <span className="truncate">{label}</span>
+                    </div>
+                  )}
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </SectionCard>
 

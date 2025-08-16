@@ -1,5 +1,4 @@
-// src/pages/sekolahislamku/components/home/ParentSideBarNav.tsx
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -14,22 +13,28 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 type Item = {
-  to: string;
+  path: string; // relatif, tidak termasuk slug & "murid"
   label: string;
   icon: React.ComponentType<any>;
   end?: boolean;
 };
 
 const NAVS: Item[] = [
-  { to: "/murid", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/murid/progress", label: "Progress Anak", icon: ClipboardCheck },
-  { to: "/murid/finance", label: "Pembayaran", icon: Wallet },
-  { to: "/murid/jadwal", label: "Jadwal", icon: CalendarDays },
-  { to: "/murid/pengumuman", label: "Pengumuman", icon: Bell },
-  { to: "/murid/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
+  { path: "", label: "Dashboard", icon: LayoutDashboard, end: true }, // root murid
+  { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
+  { path: "finance", label: "Pembayaran", icon: Wallet },
+  { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+  { path: "pengumuman", label: "Pengumuman", icon: Bell },
+  {
+    path: "progress/raport", // konsisten dengan route config
+    label: "Rapor Nilai",
+    icon: FileSpreadsheet,
+  },
 ];
 
 export default function StudentSideBarNav({ palette }: { palette: Palette }) {
+  const { slug } = useParams(); // ambil slug aktif
+
   return (
     <nav
       className="
@@ -45,44 +50,52 @@ export default function StudentSideBarNav({ palette }: { palette: Palette }) {
         style={{ background: palette.white1 }}
       >
         <ul className="space-y-2">
-          {NAVS.map(({ to, label, icon: Icon, end }) => (
-            <li key={to}>
-              <NavLink to={to} end={!!end} className="block focus:outline-none">
-                {({ isActive }) => (
-                  <div
-                    className={[
-                      "flex items-center gap-3 rounded-xl px-3 py-2 border transition-all",
-                      "hover:translate-x-[1px]",
-                    ].join(" ")}
-                    style={{
-                      background: isActive ? palette.white1 : palette.white1,
-                      borderColor: isActive ? palette.primary : palette.silver1,
-                      boxShadow: isActive
-                        ? `0 0 0 1px ${palette.primary} inset`
-                        : "none",
-                      color: isActive ? palette.primary : palette.black1,
-                    }}
-                  >
-                    <span
-                      className="h-7 w-7 grid place-items-center rounded-lg border"
+          {NAVS.map(({ path, label, icon: Icon, end }) => {
+            // semua link otomatis jadi /:slug/murid/...
+            const to = path ? `/${slug}/murid/${path}` : `/${slug}/murid`;
+
+            return (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  end={!!end}
+                  className="block focus:outline-none"
+                >
+                  {({ isActive }) => (
+                    <div
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all hover:translate-x-[1px]"
                       style={{
-                        background: isActive
-                          ? palette.primary2
-                          : palette.white1,
+                        background: palette.white1,
                         borderColor: isActive
                           ? palette.primary
                           : palette.silver1,
-                        color: isActive ? palette.primary : palette.silver2,
+                        boxShadow: isActive
+                          ? `0 0 0 1px ${palette.primary} inset`
+                          : "none",
+                        color: isActive ? palette.primary : palette.black1,
                       }}
                     >
-                      <Icon size={16} />
-                    </span>
-                    <span className="truncate">{label}</span>
-                  </div>
-                )}
-              </NavLink>
-            </li>
-          ))}
+                      <span
+                        className="h-7 w-7 grid place-items-center rounded-lg border"
+                        style={{
+                          background: isActive
+                            ? palette.primary2
+                            : palette.white1,
+                          borderColor: isActive
+                            ? palette.primary
+                            : palette.silver1,
+                          color: isActive ? palette.primary : palette.silver2,
+                        }}
+                      >
+                        <Icon size={16} />
+                      </span>
+                      <span className="truncate">{label}</span>
+                    </div>
+                  )}
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </SectionCard>
     </nav>
