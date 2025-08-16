@@ -34,7 +34,7 @@ const DEFAULT_NAVS: NavItem[] = [
   { path: "kelas", label: "Kelas Saya", icon: Users },
   { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
   { path: "penilaian", label: "Penilaian", icon: ClipboardList },
-  { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
+  // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
 
@@ -44,12 +44,6 @@ const DEFAULT_ACTIONS: QuickAction[] = [
     icon: CheckSquare,
     onClick: () => alert("Mulai Absen"),
     variant: "secondary",
-  },
-  {
-    label: "Buat Tugas",
-    icon: ClipboardList,
-    onClick: () => alert("Buat Tugas"),
-    variant: "quaternary",
   },
   {
     label: "Buat Pengumuman",

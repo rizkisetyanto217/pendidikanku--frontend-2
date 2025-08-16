@@ -365,14 +365,7 @@ export default function TeacherAnnouncements() {
                         Buat Pengumuman
                       </Btn>
 
-                      <Btn
-                        palette={palette}
-                        variant="secondary"
-                        onClick={() => alert("Export pengumuman")}
-                      >
-                        <Share2 className="mr-2" size={16} />
-                        Export
-                      </Btn>
+                    
                     </div>
                   </div>
 

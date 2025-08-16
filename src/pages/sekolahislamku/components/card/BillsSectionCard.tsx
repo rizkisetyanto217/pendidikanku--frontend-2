@@ -25,36 +25,33 @@ interface BillsSectionCardProps {
   className?: string;
 }
 
-const getBadgeVariant = (status: BillItem["status"]) => {
-  switch (status) {
-    case "overdue":
-      return "destructive";
-    case "paid":
-      return "success";
-    default:
-      return "secondary";
-  }
-};
+// Jika Btn belum memiliki variant "ghost", tambahkan di type
+type BtnVariant = "primary" | "secondary" | "success" | "destructive" | "ghost";
 
-const getStatusText = (status: BillItem["status"]) => {
-  switch (status) {
-    case "unpaid":
-      return "Belum bayar";
-    case "overdue":
-      return "Terlambat";
-    case "paid":
-      return "Lunas";
-    default:
-      return "Belum bayar";
-  }
-};
+// Mapping status ke variant Badge
+const badgeVariants = {
+  unpaid: "secondary",
+  overdue: "destructive",
+  paid: "success",
+} as const;
 
+const statusTexts = {
+  unpaid: "Belum bayar",
+  overdue: "Terlambat",
+  paid: "Lunas",
+} as const;
+
+const getBadgeVariant = (status: BillItem["status"]) => badgeVariants[status];
+const getStatusText = (status: BillItem["status"]) => statusTexts[status];
+
+// Empty state
 const EmptyState = ({ palette }: { palette: Palette }) => (
-  <div style={{ fontSize: 14, color: palette.silver2 }}>
+  <div className="text-sm" style={{ color: palette.silver2 }}>
     Tidak ada tagihan yang belum dibayar. Alhamdulillah!
   </div>
 );
 
+// Single bill card
 const BillCard = ({
   bill,
   palette,
@@ -70,16 +67,13 @@ const BillCard = ({
 }) => (
   <div
     className="rounded-xl border p-3"
-    style={{
-      borderColor: palette.silver1,
-      background: palette.white2,
-    }}
+    style={{ borderColor: palette.silver1, background: palette.white2 }}
   >
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      {/* Bill Info */}
+      {/* Info Tagihan */}
       <div className="min-w-0">
         <div className="font-medium truncate">{bill.title}</div>
-        <div style={{ fontSize: 12, color: palette.silver2 }}>
+        <div className="text-xs" style={{ color: palette.silver2 }}>
           Jatuh tempo: {dateFmt(bill.dueDate)}
         </div>
       </div>
@@ -87,13 +81,13 @@ const BillCard = ({
       {/* Amount & Actions */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
         <div className="flex items-center gap-2 md:flex-col md:items-center md:gap-1 md:min-w-0 md:flex-1">
-          <div className="text-sm font-semibold text-center md:text-center">
+          <div className="text-sm font-semibold text-center">
             {formatIDR(bill.amount)}
           </div>
           <Badge
             variant={getBadgeVariant(bill.status)}
             palette={palette}
-            className="w-auto md:w-auto md:mt-0  text-center"
+            className="w-auto text-center"
           >
             {getStatusText(bill.status)}
           </Badge>
@@ -105,8 +99,9 @@ const BillCard = ({
         >
           <Btn
             size="sm"
+            variant="primary"
             palette={palette}
-            className="w-full md:w-auto md:px-6 md:mt-5"
+            className="w-full md:w-auto md:px-6 md:mt-2"
           >
             Bayar
           </Btn>
@@ -116,6 +111,7 @@ const BillCard = ({
   </div>
 );
 
+// Main Section
 export default function BillsSectionCard({
   palette,
   bills,
@@ -130,7 +126,7 @@ export default function BillsSectionCard({
   return (
     <SectionCard
       palette={palette}
-      className={`w-full min-w-0 h-full flex flex-col it ${className}`}
+      className={`w-full flex flex-col ${className}`}
     >
       {/* Header */}
       <div className="p-3 pb-2 flex items-center justify-between">
@@ -139,7 +135,7 @@ export default function BillsSectionCard({
           Tagihan & Pembayaran
         </h3>
 
-        <Link to={"/sekolah/semua-tagihan"}>
+        <Link to={seeAllPath}>
           <Btn
             size="sm"
             variant="ghost"
@@ -153,7 +149,7 @@ export default function BillsSectionCard({
       </div>
 
       {/* Bills List */}
-      <div className="px-4 md:px-4 pb-4 pt-2 space-y-3 min-w-0 flex-1">
+      <div className="px-4 pb-4 pt-2 space-y-3 flex-1 min-w-0">
         {unpaidBills.length === 0 ? (
           <EmptyState palette={palette} />
         ) : (

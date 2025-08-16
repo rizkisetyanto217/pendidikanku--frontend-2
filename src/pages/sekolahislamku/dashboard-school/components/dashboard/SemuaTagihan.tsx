@@ -141,9 +141,9 @@ const TotalTagihan: React.FC<TotalTagihanProps> = ({
   return (
     <SectionCard palette={palette} className="p-4">
       <h3 className="text-lg font-semibold mb-3">Ringkasan Tagihan</h3>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div
-          className="text-center p-3 rounded-lg"
+          className="text-start p-3 rounded-lg"
           style={{ background: palette.white1 }}
         >
           <p className="text-sm opacity-70">Total Tagihan</p>
@@ -165,6 +165,7 @@ const TotalTagihan: React.FC<TotalTagihanProps> = ({
     </SectionCard>
   );
 };
+
 
 // Komponen utama
 const SemuaTagihan: React.FC = () => {

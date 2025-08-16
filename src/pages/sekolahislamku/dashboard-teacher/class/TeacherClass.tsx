@@ -399,13 +399,6 @@ export default function TeacherClass() {
                     </Btn>
                     <Btn
                       palette={palette}
-                      variant="quaternary"
-                      onClick={() => alert("Buat Tugas")}
-                    >
-                      <ClipboardList className="mr-2" size={16} /> Buat Tugas
-                    </Btn>
-                    <Btn
-                      palette={palette}
                       variant="secondary"
                       onClick={() => alert("Buat Pengumuman")}
                     >

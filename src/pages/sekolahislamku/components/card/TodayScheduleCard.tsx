@@ -7,32 +7,42 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
+// 🔹 Tambah slug optional
 export interface ScheduleItem {
   time: string; // "07:30"
   title: string;
   room?: string;
+  slug?: string; // NEW
 }
+
+// 🔹 Helper untuk generate slug kalau tidak ada
+const generateSlug = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "");
 
 export default function TodayScheduleCard({
   palette,
   items,
   seeAllPath = "/jadwal",
-  onAdd, // ⬅️ opsional
-  addLabel = "Tambah Jadwal", // ⬅️ opsional (default teks)
-  addHref, // ⬅️ NEW
+  onAdd,
+  addLabel = "Tambah Jadwal",
+  addHref,
 }: {
   palette: Palette;
   items: ScheduleItem[];
   seeAllPath?: string;
-  onAdd?: () => void; // ⬅️ kalau dikirim, tombol muncul
-  addLabel?: string; // ⬅️ bisa ganti teks tombol
-  addHref?: string; // ⬅️ NEW
+  onAdd?: () => void;
+  addLabel?: string;
+  addHref?: string;
 }) {
   return (
     <SectionCard palette={palette}>
       <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
         <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
-          <CalendarDays size={20} color={palette.quaternary} /> Jadwal Hari Ini
+          <CalendarDays size={20} color={palette.quaternary} /> Jadwal 3 Hari
+          Kedepan
         </h3>
 
         {addHref ? (
@@ -49,27 +59,34 @@ export default function TodayScheduleCard({
       </div>
 
       <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
-        {items.map((s, i) => (
-          <SectionCard
-            key={`${s.title}-${i}`}
-            palette={palette}
-            className="p-3 flex items-center justify-between"
-            style={{ background: palette.white2 }}
-          >
-            <div>
-              <div className="text-sm font-medium">{s.title}</div>
-              <div style={{ fontSize: 12, color: palette.silver2 }}>
-                {s.room}
-              </div>
-            </div>
-            <Badge variant="white1" palette={palette}>
-              {s.time}
-            </Badge>
-          </SectionCard>
-        ))}
+        {items.map((s, i) => {
+          const slug = s.slug || generateSlug(s.title);
+
+          return (
+            <Link key={`${s.title}-${i}`} to={`/jadwal/${slug}`}>
+              <SectionCard
+                palette={palette}
+                className="p-3 flex items-center justify-between hover:bg-gray-50 transition rounded-xl mb-3"
+                style={{ background: palette.white2 }}
+              >
+                <div>
+                  <div className="text-sm font-medium flex gap-3">
+                    {s.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: palette.silver2 }}>
+                    {s.room}
+                  </div>
+                </div>
+                <Badge variant="white1" palette={palette}>
+                  {s.time}
+                </Badge>
+              </SectionCard>
+            </Link>
+          );
+        })}
 
         <div className="pt-3">
-          <Link to={"/sekolah/semua-jadwal"}>
+          <Link to={seeAllPath}>
             <Btn variant="ghost" className="w-full" palette={palette}>
               Lihat Jadwal <ChevronRight className="ml-1" size={16} />
             </Btn>

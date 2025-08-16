@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/components/card/AnnouncementsListCard.tsx
 import { Link } from "react-router-dom";
 import { Bell, ChevronRight, Edit3, Trash2 } from "lucide-react";
 import {
@@ -14,7 +13,15 @@ export interface Announcement {
   date: string; // ISO
   body: string;
   type?: "info" | "warning" | "success";
+  slug?: string; // 🔹 NEW optional slug
 }
+
+// 🔹 Helper generate slug dari title
+const generateSlug = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "");
 
 export default function AnnouncementsListCard({
   palette,
@@ -22,17 +29,17 @@ export default function AnnouncementsListCard({
   dateFmt,
   seeAllPath,
   getDetailHref,
-  getEditHref, // optional (tetap didukung)
-  onEdit, // ✅ NEW: buka modal edit
+  getEditHref,
+  onEdit,
   onDelete,
 }: {
   palette: Palette;
   items: Announcement[];
   dateFmt: (iso: string) => string;
   seeAllPath: string;
-  getDetailHref: (a: Announcement) => string;
+  getDetailHref?: (a: Announcement) => string; // 🔹 sekarang opsional
   getEditHref?: (a: Announcement) => string;
-  onEdit?: (a: Announcement) => void; // ✅ NEW
+  onEdit?: (a: Announcement) => void;
   onDelete?: (a: Announcement) => void;
 }) {
   return (
@@ -52,8 +59,13 @@ export default function AnnouncementsListCard({
 
       <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
         {items.map((a) => {
-          const detailHref = getDetailHref(a);
+          // 🔹 slug fallback kalau tidak ada
+          const slug = a.slug || generateSlug(a.title);
+          const detailHref = getDetailHref
+            ? getDetailHref(a)
+            : `/pengumuman/${slug}`;
           const editHref = getEditHref?.(a) ?? detailHref;
+
           return (
             <SectionCard
               key={a.id}
@@ -109,7 +121,7 @@ export default function AnnouncementsListCard({
                     </Link>
                   )}
 
-                  {/* Hapus: pakai warna error dari palette */}
+                  {/* Hapus */}
                   <Btn
                     size="sm"
                     palette={palette}

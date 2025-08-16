@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { Outlet } from "react-router-dom";
@@ -161,6 +161,8 @@ const dateFmt = (iso?: string) =>
 export default function SchoolDashboard() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
+    const { slug } = useParams<{ slug: string }>();
+
 
   const { data, isLoading } = useQuery({
     queryKey: ["school-home"],

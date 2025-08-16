@@ -555,17 +555,17 @@ export default function AppRoutes() {
       </Route>
       <Route path=":slug/sekolah" element={<StudentLayout />}>
         <Route index element={<SchoolDashboard />} />
+
+        {schoolRoutes.map((route) => (
+          <Route key={route.path} path={route.path} element={route.element} />
+        ))}
+
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="guru" element={<SchoolTeacher />} />
         <Route path="kelas" element={<SchoolClasses />} />
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
-        {schoolRoutes.map((route) => (
-          <Route key={route.path} path={route.path} element={route.element} />
-        ))}
-        <Route path="pengumuman">
-          <Route index element={<SchoolAnnouncement />} />
-        </Route>
+        <Route path="pengumuman" element={<SchoolAnnouncement />} />
       </Route>
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />

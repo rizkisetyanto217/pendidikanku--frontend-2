@@ -109,12 +109,12 @@ const TryoutCard: React.FC<TryoutCardProps> = ({ tryout, palette, onDetailClick 
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-start gap-2 mb-2">
               <JenisBadge jenis={tryout.jenisTryout} />
               <StatusBadge status={tryout.status} />
             </div>
             <h3 className="text-lg font-semibold mb-1">{tryout.judul}</h3>
-            <div className="flex items-center gap-4 text-sm opacity-70">
+            <div className="flex gap-4 text-sm opacity-70">
               <div className="flex items-center gap-1">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
@@ -385,7 +385,7 @@ const TryoutUjianTahfiz: React.FC = () => {
           <div className="flex-1 space-y-6">
             {/* Header Section */}
             <SectionCard palette={palette} className="p-6">
-              <div className="text-center">
+              <div className="text-stsrt">
                 <h1 className="text-2xl font-bold mb-2">Tryout Ujian Tahfiz</h1>
                 <p className="opacity-70 mb-4">
                   Lihat semua jadwal tryout dan ujian tahfiz yang akan datang
