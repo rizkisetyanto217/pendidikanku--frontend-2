@@ -524,7 +524,7 @@ export default function AppRoutes() {
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-      <Route path="/murid" element={<StudentLayout />}>
+      <Route path="/:slug/murid" element={<StudentLayout />}>
         <Route index element={<StudentDashboard />} />
 
         <Route path="progress" element={<StudentProgressDetail />} />
@@ -544,7 +544,7 @@ export default function AppRoutes() {
         <Route path="absensi" element={<StudentAbsence />} />
         <Route path="catatan" element={<StudentNotesSummary />} />
       </Route>
-      <Route path="/guru" element={<StudentLayout />}>
+      <Route path="/:slug/guru" element={<StudentLayout />}>
         <Route index element={<TeacherDashboard />} />
         <Route path="kehadiran" element={<TeacherAttendance />} />
         <Route path="penilaian" element={<TeacherGrading />} />
@@ -556,7 +556,7 @@ export default function AppRoutes() {
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
         </Route>
       </Route>
-      <Route path="/sekolah" element={<StudentLayout />}>
+      <Route path="/:slug/sekolah" element={<StudentLayout />}>
         <Route index element={<SchoolDashboard />} />
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="guru" element={<SchoolTeacher />} />

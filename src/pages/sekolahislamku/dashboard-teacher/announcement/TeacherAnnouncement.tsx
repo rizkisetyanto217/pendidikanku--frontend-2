@@ -31,10 +31,20 @@ import {
   Clock,
 } from "lucide-react";
 import TeacherTopBar from "../../components/home/TeacherTopBar";
+import AnnouncementsListCard from "../../components/card/AnnouncementsListCard";
 
+/* ================= Types ================ */
 /* ================= Types ================ */
 type AStatus = "published" | "draft" | "scheduled";
 type AType = "info" | "warning" | "success";
+
+type Announcement = {
+  id: string;
+  title: string;
+  date: string; // ISO
+  body: string;
+  type: AType;
+};
 
 type AnnouncementItem = {
   id: string;
@@ -59,6 +69,8 @@ type AnnPayload = {
     scheduled: number;
   };
   items: AnnouncementItem[];
+  /** ditambah agar dipakai AnnouncementsListCard */
+  announcements: Announcement[];
 };
 
 /* ============ Fake API (replace with axios) ============ */
@@ -111,7 +123,25 @@ async function fetchTeacherAnnouncements(): Promise<AnnPayload> {
     },
   ];
 
-  return Promise.resolve({
+  // ✅ definisikan dan pakai di return
+  const announcements: Announcement[] = [
+    {
+      id: "a1",
+      title: "Tryout Ujian Tahfiz",
+      date: iso,
+      body: "Tryout internal hari Kamis. Mohon siapkan rubrik penilaian makhraj & tajwid.",
+      type: "info",
+    },
+    {
+      id: "a2",
+      title: "Rapat Kurikulum",
+      date: iso,
+      body: "Rapat kurikulum pekan depan. Draft silabus sudah di folder bersama.",
+      type: "success",
+    },
+  ];
+
+  return {
     gregorianDate: iso,
     hijriDate: "16 Muharram 1447 H",
     classes: ["TPA A", "TPA B"],
@@ -122,7 +152,8 @@ async function fetchTeacherAnnouncements(): Promise<AnnPayload> {
       scheduled: items.filter((i) => i.status === "scheduled").length,
     },
     items,
-  });
+    announcements, // ⬅️ ditambahkan
+  };
 }
 
 /* ================= Helpers ================ */
@@ -197,6 +228,104 @@ export default function TeacherAnnouncements() {
     setNewBody("");
   };
 
+  // --- tambahkan helper ini di sekitar blok hooks (setelah itemsFiltered) ---
+  const announcementsFiltered = useMemo(() => {
+    return (itemsFiltered ?? []).map((i) => ({
+      id: i.id,
+      title: i.title,
+      date: i.date,
+      body: i.body,
+      type: i.type,
+    }));
+  }, [itemsFiltered]);
+
+  // ...import & kode kamu...
+
+  type DraftAnnouncement = {
+    id?: string;
+    title: string;
+    date: string; // ISO
+    body: string;
+    type: AType;
+    audience: string;
+    status: Exclude<AStatus, "scheduled">; // kita pakai published|draft saja
+    pinned: boolean;
+  };
+
+  function isoToInput(iso?: string) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  function inputToIso(v: string) {
+    if (!v) return new Date().toISOString();
+    // asumsikan zona lokal, pakai tengah hari agar aman
+    const d = new Date(`${v}T12:00:00`);
+    return d.toISOString();
+  }
+
+  // ===== Modal state =====
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [draft, setDraft] = useState<DraftAnnouncement>({
+    title: "",
+    date: new Date().toISOString(),
+    body: "",
+    type: "info",
+    audience: "Semua",
+    status: "draft",
+    pinned: false,
+  });
+
+  function openCreate() {
+    setModalMode("create");
+    setDraft({
+      title: "",
+      date: new Date().toISOString(),
+      body: "",
+      type: "info",
+      audience: "Semua",
+      status: "draft",
+      pinned: false,
+    });
+    setIsModalOpen(true);
+  }
+
+  function openEdit(a: {
+    id: string;
+    title: string;
+    date: string;
+    body: string;
+    type?: AType;
+  }) {
+    const full = (data?.items ?? []).find((i) => i.id === a.id);
+    setModalMode("edit");
+    setDraft({
+      id: a.id,
+      title: a.title,
+      date: a.date,
+      body: a.body,
+      type: a.type ?? "info", // fallback saat undefined
+      audience: full?.audience ?? "Semua",
+      status: (full?.status as "published" | "draft") ?? "draft",
+      pinned: Boolean(full?.pinned),
+    });
+    setIsModalOpen(true);
+  }
+
+  function handleSave() {
+    // Dummy save — kamu bisa ganti dengan call API
+    const payload = { ...draft };
+    alert(
+      `${modalMode === "create" ? "Create" : "Edit"} (dummy):\n` +
+        JSON.stringify(payload, null, 2)
+    );
+    setIsModalOpen(false);
+  }
+
   return (
     <div
       className="min-h-screen w-full"
@@ -218,20 +347,45 @@ export default function TeacherAnnouncements() {
           {/* Main */}
           <div className="flex-1 space-y-6">
             {/* ===== Filter & Actions + Summary ===== */}
+            {/* ===== Filter & Aksi (desktop-optimized) ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-8">
+              <SectionCard palette={palette} className="lg:col-span-12">
                 <div className="p-4 md:p-5">
-                  <div className="font-medium mb-3 flex items-center gap-2">
-                    <Filter size={16} /> Filter & Aksi
+                  {/* Top bar: title left, actions right (desktop) */}
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Filter size={16} />
+                      <span>Filter & Aksi</span>
+                    </div>
+
+                    {/* Actions stick to the right on desktop */}
+                    <div className="flex gap-2 self-start lg:self-auto">
+                      <Btn palette={palette} onClick={openCreate}>
+                        <Plus className="mr-2" size={16} />
+                        Buat Pengumuman
+                      </Btn>
+
+                      <Btn
+                        palette={palette}
+                        variant="secondary"
+                        onClick={() => alert("Export pengumuman")}
+                      >
+                        <Share2 className="mr-2" size={16} />
+                        Export
+                      </Btn>
+                    </div>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-3">
-                    {/* Search */}
-                    <div
-                      className="flex items-center gap-2 rounded-xl border px-3 h-10"
+                  {/* Controls grid:
+          desktop: search 5/12, audience 3/12, status 4/12 (kanan) */}
+                  <div className="mt-4 grid gap-3 lg:grid-cols-12">
+                    {/* Search (lg: span 5) */}
+                    <label
+                      className="flex items-center gap-2 rounded-xl border px-3 h-11 lg:col-span-5"
                       style={{
                         borderColor: palette.silver1,
                         background: palette.white1,
+                        color: palette.black1,
                       }}
                     >
                       <Search size={16} />
@@ -239,23 +393,23 @@ export default function TeacherAnnouncements() {
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                         placeholder="Cari pengumuman…"
-                        className="bg-transparent outline-none text-sm flex-1"
+                        className="bg-transparent outline-none text-sm flex-1 placeholder:opacity-70"
                         style={{ color: palette.black1 }}
                       />
-                    </div>
+                    </label>
 
-                    {/* Kelas/Audience */}
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="text-sm"
+                    {/* Audience (lg: span 3) */}
+                    <div className="flex items-center justify-between lg:justify-start gap-3 lg:col-span-3">
+                      <div
+                        className="shrink-0 text-xs md:text-sm"
                         style={{ color: palette.silver2 }}
                       >
                         Audience
-                      </span>
+                      </div>
                       <select
                         value={classFilter}
                         onChange={(e) => setClassFilter(e.target.value)}
-                        className="h-10 rounded-xl border px-3 text-sm"
+                        className="h-11 rounded-xl border px-3 text-sm w-full lg:w-[220px]"
                         style={{
                           background: palette.white1,
                           color: palette.black1,
@@ -271,66 +425,60 @@ export default function TeacherAnnouncements() {
                       </select>
                     </div>
 
-                    {/* Status */}
-                    <div className="flex items-center gap-1">
-                      {(
-                        ["all", "published", "draft", "scheduled"] as const
-                      ).map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => setStatus(s)}
-                          className="px-3 h-10 rounded-xl border text-sm"
-                          style={{
-                            background:
-                              status === s ? palette.primary2 : palette.white1,
-                            color:
-                              status === s ? palette.primary : palette.black1,
-                            borderColor:
-                              status === s ? palette.primary : palette.silver1,
-                          }}
-                        >
-                          {s === "all"
-                            ? "Semua"
-                            : s === "published"
-                              ? "Terbit"
-                              : s === "draft"
-                                ? "Draft"
-                                : "Terjadwal"}
-                        </button>
-                      ))}
+                    {/* Status segmented (lg: span 4, right aligned) */}
+                    <div className="lg:col-span-4 flex lg:justify-end">
+                      <div
+                        className="inline-flex rounded-xl overflow-hidden border whitespace-nowrap"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white1,
+                        }}
+                        role="tablist"
+                        aria-label="Status"
+                      >
+                        {(["all", "published", "draft"] as const).map((s) => {
+                          const active = status === s;
+                          return (
+                            <button
+                              key={s}
+                              onClick={() => setStatus(s)}
+                              role="tab"
+                              aria-selected={active}
+                              className="px-4 h-11 text-sm transition-colors border-r last:border-r-0"
+                              style={{
+                                background: active
+                                  ? palette.primary2
+                                  : "transparent",
+                                color: active
+                                  ? palette.primary
+                                  : palette.black1,
+                                borderColor: palette.silver1,
+                              }}
+                            >
+                              {s === "all"
+                                ? "Semua"
+                                : s === "published"
+                                  ? "Terbit"
+                                  : "Draft"}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Btn
-                      palette={palette}
-                      onClick={() => setShowComposer((v) => !v)}
-                    >
-                      <Plus className="mr-2" size={16} />
-                      Buat Pengumuman
-                    </Btn>
-                    <Btn
-                      palette={palette}
-                      variant="secondary"
-                      onClick={() => alert("Export pengumuman")}
-                    >
-                      <Share2 className="mr-2" size={16} />
-                      Export
-                    </Btn>
-                  </div>
-
-                  {/* Composer (simple) */}
+                  {/* Composer (UI only) */}
                   {showComposer && (
                     <div
-                      className="mt-4 rounded-xl border p-3"
+                      className="mt-4 rounded-xl border p-3 md:p-4"
                       style={{
                         borderColor: palette.silver1,
                         background: palette.white1,
                       }}
                     >
-                      <div className="grid gap-2">
+                      <div className="grid gap-3">
                         <input
-                          className="h-10 rounded-lg border px-3 text-sm"
+                          className="h-11 rounded-lg border px-3 text-sm"
                           placeholder="Judul pengumuman"
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
@@ -340,9 +488,9 @@ export default function TeacherAnnouncements() {
                             borderColor: palette.silver1,
                           }}
                         />
-                        <div className="flex gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <select
-                            className="h-10 rounded-lg border px-3 text-sm"
+                            className="h-11 rounded-lg border px-3 text-sm"
                             value={newAudience}
                             onChange={(e) => setNewAudience(e.target.value)}
                             style={{
@@ -357,7 +505,7 @@ export default function TeacherAnnouncements() {
                             ))}
                           </select>
                           <select
-                            className="h-10 rounded-lg border px-3 text-sm"
+                            className="h-11 rounded-lg border px-3 text-sm"
                             value={newType}
                             onChange={(e) =>
                               setNewType(e.target.value as AType)
@@ -385,7 +533,7 @@ export default function TeacherAnnouncements() {
                             borderColor: palette.silver1,
                           }}
                         />
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <Btn
                             palette={palette}
                             onClick={() => {
@@ -413,255 +561,27 @@ export default function TeacherAnnouncements() {
                   )}
                 </div>
               </SectionCard>
-
-              <SectionCard palette={palette} className="lg:col-span-4">
-                <div className="p-4 md:p-5">
-                  <div className="font-medium mb-3 flex items-center gap-2">
-                    <Megaphone size={16} /> Ringkasan
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <StatPill
-                      palette={palette}
-                      label="Total"
-                      value={data?.summary.total ?? 0}
-                    />
-                    <StatPill
-                      palette={palette}
-                      label="Terbit"
-                      value={data?.summary.published ?? 0}
-                    />
-                    <StatPill
-                      palette={palette}
-                      label="Draft"
-                      value={data?.summary.draft ?? 0}
-                    />
-                    <StatPill
-                      palette={palette}
-                      label="Terjadwal"
-                      value={data?.summary.scheduled ?? 0}
-                    />
-                  </div>
-                </div>
-              </SectionCard>
             </section>
 
-            {/* ===== List + Detail ===== */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              {/* List */}
-              <SectionCard palette={palette} className="lg:col-span-6">
-                <div className="p-4 md:p-5">
-                  <div className="font-medium mb-2 flex items-center gap-2">
-                    <Megaphone size={16} /> Daftar Pengumuman
-                  </div>
-
-                  <div className="space-y-3">
-                    {itemsFiltered.map((a) => {
-                      const isActive = (selected?.id ?? "") === a.id;
-                      return (
-                        <button
-                          key={a.id}
-                          onClick={() => setSelectedId(a.id)}
-                          className="w-full text-left"
-                        >
-                          <div
-                            className="p-3 rounded-xl border transition-all"
-                            style={{
-                              borderColor: isActive
-                                ? palette.primary
-                                : palette.silver1,
-                              boxShadow: isActive
-                                ? `0 0 0 1px ${palette.primary} inset`
-                                : "none",
-                              background: palette.white1,
-                            }}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <div className="font-medium truncate">
-                                  {a.title}
-                                </div>
-                                <div
-                                  className="text-xs mt-0.5"
-                                  style={{ color: palette.silver2 }}
-                                >
-                                  <CalendarDays
-                                    className="inline mr-1"
-                                    size={14}
-                                  />
-                                  {a.status === "scheduled"
-                                    ? "jadwal"
-                                    : "terbit"}{" "}
-                                  {dateShort(a.date)} • {a.audience}
-                                </div>
-                              </div>
-                              <div className="shrink-0 flex gap-2">
-                                {a.pinned ? (
-                                  <Badge palette={palette} variant="success">
-                                    Pinned
-                                  </Badge>
-                                ) : null}
-                                <Badge
-                                  palette={palette}
-                                  variant={
-                                    a.type === "warning"
-                                      ? "warning"
-                                      : a.type === "success"
-                                        ? "success"
-                                        : "info"
-                                  }
-                                >
-                                  {a.type}
-                                </Badge>
-                              </div>
-                            </div>
-
-                            <div className="mt-2 flex gap-2">
-                              <Badge palette={palette} variant="outline">
-                                {a.status === "published" ? (
-                                  <Eye size={14} className="mr-1" />
-                                ) : a.status === "draft" ? (
-                                  <EyeOff size={14} className="mr-1" />
-                                ) : (
-                                  <Clock size={14} className="mr-1" />
-                                )}
-                                {a.status === "published"
-                                  ? "Terbit"
-                                  : a.status === "draft"
-                                    ? "Draft"
-                                    : "Terjadwal"}
-                              </Badge>
-                              <Badge palette={palette} variant="outline">
-                                <Users className="mr-1" size={14} />{" "}
-                                {a.audience}
-                              </Badge>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-
-                    {itemsFiltered.length === 0 && (
-                      <div
-                        className="text-sm"
-                        style={{ color: palette.silver2 }}
-                      >
-                        Tidak ada pengumuman sesuai filter.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </SectionCard>
-
-              {/* Detail */}
-              <SectionCard palette={palette} className="lg:col-span-6">
-                <div className="p-4 md:p-5">
-                  {selected ? (
-                    <>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="font-medium text-base">
-                            {selected.title}
-                          </div>
-                          <div
-                            className="text-xs mt-0.5"
-                            style={{ color: palette.silver2 }}
-                          >
-                            <CalendarDays className="inline mr-1" size={14} />
-                            {selected.status === "scheduled"
-                              ? "Terjadwal"
-                              : "Terbit"}{" "}
-                            {dateLong(selected.date)} • oleh {selected.author}
-                          </div>
-                        </div>
-                        <div className="shrink-0 flex flex-wrap gap-2 justify-end">
-                          <Badge
-                            palette={palette}
-                            variant={
-                              selected.type === "warning"
-                                ? "warning"
-                                : selected.type === "success"
-                                  ? "success"
-                                  : "info"
-                            }
-                          >
-                            {selected.type}
-                          </Badge>
-                          <Badge palette={palette} variant="outline">
-                            <Users size={14} className="mr-1" />
-                            {selected.audience}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div
-                        className="mt-3 rounded-xl border p-3 text-sm leading-relaxed"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white1,
-                        }}
-                      >
-                        {selected.body}
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <Btn
-                          palette={palette}
-                          onClick={() =>
-                            alert(
-                              selected.status === "published"
-                                ? "Sembunyikan (ubah ke draft)"
-                                : "Terbitkan sekarang"
-                            )
-                          }
-                        >
-                          {selected.status === "published" ? (
-                            <EyeOff className="mr-2" size={16} />
-                          ) : (
-                            <Eye className="mr-2" size={16} />
-                          )}
-                          {selected.status === "published"
-                            ? "Sembunyikan"
-                            : "Terbitkan"}
-                        </Btn>
-                        <Btn
-                          palette={palette}
-                          variant="secondary"
-                          onClick={() => alert("Edit pengumuman")}
-                        >
-                          <Edit3 className="mr-2" size={16} /> Edit
-                        </Btn>
-                        <Btn
-                          palette={palette}
-                          variant="outline"
-                          onClick={() =>
-                            alert(selected.pinned ? "Lepas pin" : "Pin ke atas")
-                          }
-                        >
-                          {selected.pinned ? (
-                            <PinOff className="mr-2" size={16} />
-                          ) : (
-                            <Pin className="mr-2" size={16} />
-                          )}
-                          {selected.pinned ? "Lepas Pin" : "Pin"}
-                        </Btn>
-                        <Btn
-                          palette={palette}
-                          variant="destructive"
-                          onClick={() => alert("Hapus pengumuman")}
-                        >
-                          <Trash2 className="mr-2" size={16} /> Hapus
-                        </Btn>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-sm" style={{ color: palette.silver2 }}>
-                      Pilih salah satu pengumuman di daftar.
-                    </div>
-                  )}
-                </div>
-              </SectionCard>
+            {/* ================= Row 3 ================= */}
+            <section>
+              <AnnouncementsListCard
+                palette={palette}
+                items={announcementsFiltered}
+                dateFmt={dateShort}
+                seeAllPath="/guru/pengumuman"
+                getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`}
+                onEdit={openEdit}
+                onDelete={(a) => {
+                  // ✅ handler hapus milikmu: panggil API lalu refresh query
+                  if (confirm(`Yakin hapus "${a.title}"?`)) {
+                    // TODO: await api.delete(a.id);
+                    alert(`(mock) terhapus: ${a.title}`);
+                    // contoh refresh: queryClient.invalidateQueries({queryKey:["teacher-announcements"]})
+                  }
+                }}
+              />
             </section>
-
             {isLoading && (
               <div className="text-sm" style={{ color: palette.silver2 }}>
                 Memuat data…
@@ -670,29 +590,223 @@ export default function TeacherAnnouncements() {
           </div>
         </div>
       </main>
-    </div>
-  );
-}
+      {/* ===== Modal Create/Edit Announcement ===== */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.35)" }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-2xl rounded-2xl border shadow-xl"
+            style={{
+              background: palette.white1,
+              borderColor: palette.silver1,
+              color: palette.black1,
+            }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-5 py-4 border-b"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <h3 className="text-base font-semibold">
+                {modalMode === "create" ? "Buat Pengumuman" : "Edit Pengumuman"}
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-sm rounded-lg px-3 h-9"
+                style={{
+                  background: palette.white2,
+                  color: palette.black1,
+                  border: `1px solid ${palette.silver1}`,
+                }}
+              >
+                Tutup
+              </button>
+            </div>
 
-/* =============== Small UI helper =============== */
-function StatPill({
-  palette,
-  label,
-  value,
-}: {
-  palette: Palette;
-  label: string;
-  value: number | string;
-}) {
-  return (
-    <div
-      className="p-3 rounded-xl border"
-      style={{ borderColor: palette.silver1, background: palette.white1 }}
-    >
-      <div className="text-xs" style={{ color: palette.silver2 }}>
-        {label}
-      </div>
-      <div className="text-lg font-semibold">{value}</div>
+            {/* Body / Form */}
+            <div className="px-5 py-4 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-sm" style={{ color: palette.silver2 }}>
+                    Judul
+                  </label>
+                  <input
+                    className="h-10 rounded-lg border px-3 text-sm w-full"
+                    value={draft.title}
+                    onChange={(e) =>
+                      setDraft((d) => ({ ...d, title: e.target.value }))
+                    }
+                    placeholder="Judul pengumuman"
+                    style={{
+                      background: "transparent",
+                      color: palette.black1,
+                      borderColor: palette.silver1,
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm" style={{ color: palette.silver2 }}>
+                    Tanggal
+                  </label>
+                  <input
+                    type="date"
+                    className="h-10 rounded-lg border px-3 text-sm w-full"
+                    value={isoToInput(draft.date)}
+                    onChange={(e) =>
+                      setDraft((d) => ({
+                        ...d,
+                        date: inputToIso(e.target.value),
+                      }))
+                    }
+                    style={{
+                      background: "transparent",
+                      color: palette.black1,
+                      borderColor: palette.silver1,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <label className="text-sm" style={{ color: palette.silver2 }}>
+                    Audience
+                  </label>
+                  <select
+                    className="h-10 rounded-lg border px-3 text-sm w-full"
+                    value={draft.audience}
+                    onChange={(e) =>
+                      setDraft((d) => ({ ...d, audience: e.target.value }))
+                    }
+                    style={{
+                      background: "transparent",
+                      color: palette.black1,
+                      borderColor: palette.silver1,
+                    }}
+                  >
+                    <option>Semua</option>
+                    {(data?.classes ?? []).map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm" style={{ color: palette.silver2 }}>
+                    Tipe
+                  </label>
+                  <select
+                    className="h-10 rounded-lg border px-3 text-sm w-full"
+                    value={draft.type}
+                    onChange={(e) =>
+                      setDraft((d) => ({ ...d, type: e.target.value as AType }))
+                    }
+                    style={{
+                      background: "transparent",
+                      color: palette.black1,
+                      borderColor: palette.silver1,
+                    }}
+                  >
+                    <option value="info">Info</option>
+                    <option value="success">Sukses</option>
+                    <option value="warning">Peringatan</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm" style={{ color: palette.silver2 }}>
+                    Status
+                  </label>
+                  <select
+                    className="h-10 rounded-lg border px-3 text-sm w-full"
+                    value={draft.status}
+                    onChange={(e) =>
+                      setDraft((d) => ({
+                        ...d,
+                        status: e.target.value as DraftAnnouncement["status"],
+                      }))
+                    }
+                    style={{
+                      background: "transparent",
+                      color: palette.black1,
+                      borderColor: palette.silver1,
+                    }}
+                  >
+                    <option value="published">Terbit</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="pinned"
+                  type="checkbox"
+                  checked={draft.pinned}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, pinned: e.target.checked }))
+                  }
+                />
+                <label htmlFor="pinned" className="text-sm">
+                  Pinned
+                </label>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm" style={{ color: palette.silver2 }}>
+                  Isi Pengumuman
+                </label>
+                <textarea
+                  rows={5}
+                  className="rounded-lg border p-3 text-sm w-full"
+                  placeholder="Tulis isi pengumuman…"
+                  value={draft.body}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, body: e.target.value }))
+                  }
+                  style={{
+                    background: "transparent",
+                    color: palette.black1,
+                    borderColor: palette.silver1,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div
+              className="px-5 py-4 border-t flex justify-end gap-2"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <Btn
+                palette={palette}
+                variant="secondary"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Batal
+              </Btn>
+              <Btn
+                palette={palette}
+                onClick={handleSave}
+                style={{
+                  background: palette.primary,
+                  color: palette.white1,
+                  borderColor: palette.primary,
+                }}
+              >
+                {modalMode === "create"
+                  ? "Simpan & Publikasikan"
+                  : "Simpan Perubahan"}
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

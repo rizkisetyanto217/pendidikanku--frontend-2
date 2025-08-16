@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/components/card/AnnouncementsListCard.tsx
 import { Link } from "react-router-dom";
-import { Bell, ChevronRight } from "lucide-react";
+import { Bell, ChevronRight, Edit3, Trash2 } from "lucide-react";
 import {
   SectionCard,
   Btn,
@@ -20,16 +20,20 @@ export default function AnnouncementsListCard({
   palette,
   items,
   dateFmt,
-  seeAllPath, // <- REQUIRED
-  getDetailHref, // <- REQUIRED
+  seeAllPath,
+  getDetailHref,
+  getEditHref, // optional (tetap didukung)
+  onEdit, // ✅ NEW: buka modal edit
+  onDelete,
 }: {
   palette: Palette;
   items: Announcement[];
   dateFmt: (iso: string) => string;
-  /** Rute halaman daftar pengumuman (WAJIB) */
   seeAllPath: string;
-  /** Builder rute detail per item (WAJIB) */
   getDetailHref: (a: Announcement) => string;
+  getEditHref?: (a: Announcement) => string;
+  onEdit?: (a: Announcement) => void; // ✅ NEW
+  onDelete?: (a: Announcement) => void;
 }) {
   return (
     <SectionCard palette={palette}>
@@ -48,7 +52,8 @@ export default function AnnouncementsListCard({
 
       <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 mb-4 space-y-3">
         {items.map((a) => {
-          const href = getDetailHref(a);
+          const detailHref = getDetailHref(a);
+          const editHref = getEditHref?.(a) ?? detailHref;
           return (
             <SectionCard
               key={a.id}
@@ -57,7 +62,8 @@ export default function AnnouncementsListCard({
               style={{ background: palette.white2 }}
             >
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-                <Link to={href} className="min-w-0 block">
+                {/* Left: text -> klik ke detail */}
+                <Link to={detailHref} className="min-w-0 block">
                   <div className="font-medium truncate">{a.title}</div>
                   <div style={{ fontSize: 12, color: palette.silver2 }}>
                     {dateFmt(a.date)}
@@ -81,12 +87,49 @@ export default function AnnouncementsListCard({
                   </div>
                 </Link>
 
+                {/* Right: actions */}
                 <div className="flex items-center gap-2 mt-3 md:mt-0 md:ml-4">
-                  <Link to={href}>
-                    <Btn size="sm" palette={palette} variant="white1">
-                      Buka <ChevronRight className="ml-1" size={16} />
+                  {/* Edit -> pakai onEdit kalau ada, kalau tidak fallback ke Link */}
+                  {onEdit ? (
+                    <Btn
+                      size="sm"
+                      palette={palette}
+                      variant="secondary"
+                      onClick={() => onEdit(a)}
+                    >
+                      <Edit3 className="mr-1" size={16} />
+                      Edit
                     </Btn>
-                  </Link>
+                  ) : (
+                    <Link to={editHref}>
+                      <Btn size="sm" palette={palette} variant="secondary">
+                        <Edit3 className="mr-1" size={16} />
+                        Edit
+                      </Btn>
+                    </Link>
+                  )}
+
+                  {/* Hapus: pakai warna error dari palette */}
+                  <Btn
+                    size="sm"
+                    palette={palette}
+                    onClick={() => {
+                      if (onDelete) return onDelete(a);
+                      if (confirm(`Hapus pengumuman "${a.title}"?`)) {
+                        alert("Implement onDelete untuk menghapus di server.");
+                      }
+                    }}
+                    className="focus:outline-none"
+                    style={{
+                      background: palette.error1,
+                      color: palette.white1,
+                      borderColor: palette.error1,
+                      boxShadow: `0 0 0 2px ${palette.error2} inset`,
+                    }}
+                  >
+                    <Trash2 className="mr-1" size={16} />
+                    Hapus
+                  </Btn>
                 </div>
               </div>
             </SectionCard>
