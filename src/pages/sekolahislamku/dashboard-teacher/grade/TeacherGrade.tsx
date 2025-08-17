@@ -389,7 +389,7 @@ export default function TeacherGrading() {
             
 
               {/* Detail */}
-              <SectionCard palette={palette} className="lg:col-span-6">
+              <SectionCard palette={palette} className="lg:col-span-12">
                 <div className="p-4 md:p-5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="font-medium">

@@ -193,6 +193,7 @@ export default function StudentDashboard() {
                 dateFmt={dateFmt}
                 seeAllPath="/murid/pengumuman" // halaman list
                 getDetailHref={(a) => `/murid/pengumuman/detail/${a.id}`} // detail per item
+                showActions={false}
               />
             </section>
           </div>

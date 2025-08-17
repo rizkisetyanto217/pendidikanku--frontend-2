@@ -44,16 +44,27 @@ export default function PublicUserDropdown({
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await api.post("/api/auth/logout", null, { withCredentials: true });
+      const t = localStorage.getItem("access_token") || "";
+      await api.post(
+        "/api/auth/logout",
+        null,
+        { headers: { Authorization: `Bearer ${t}` } } // fallback kalau interceptor gagal
+      );
+
+      // bersih-bersih
       queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
       sessionStorage.clear();
       localStorage.clear();
-      setTimeout(() => {
-        if (slug) navigate(`/masjid/${slug}/login`);
-        else navigate("/login");
-      }, 150);
-    } catch (err) {
-      console.error("Logout error:", err);
+
+      navigate(slug ? `/masjid/${slug}/login` : "/login");
+    } catch (err: any) {
+      console.error("Logout error:", {
+        status: err?.response?.status,
+        data: err?.response?.data,
+        headers: err?.config?.headers, // cek apakah Authorization terkirim
+      });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 

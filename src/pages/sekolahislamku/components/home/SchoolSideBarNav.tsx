@@ -38,10 +38,8 @@ const DEFAULT_NAVS: NavItem[] = [
   { path: "sekolah/guru", label: "Guru", icon: UserCog },
   { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
   { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
-  // { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
-  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
-  { path: "sekolah/reports", label: "Laporan", icon: BarChart2 },
-  { path: "sekolah/settings", label: "Pengaturan", icon: Settings },
+  { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
+  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone }
 ];
 
 const DEFAULT_ACTIONS: QuickAction[] = [

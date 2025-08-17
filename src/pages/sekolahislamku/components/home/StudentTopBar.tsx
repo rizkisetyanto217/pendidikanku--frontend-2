@@ -75,12 +75,12 @@ type Item = {
   end?: boolean;
 };
 const NAVS: Item[] = [
-  { to: "/student", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/student/progress", label: "Progress Anak", icon: ClipboardCheck },
-  { to: "/student/finance", label: "Pembayaran", icon: Wallet },
-  { to: "/student/jadwal", label: "Jadwal", icon: CalendarIcon },
-  { to: "/student/pengumuman", label: "Pengumuman", icon: Bell },
-  { to: "/student/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
+  { to: "/murid", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/murid/progress", label: "Progress Anak", icon: ClipboardCheck },
+  { to: "/murid/finance", label: "Pembayaran", icon: Wallet },
+  { to: "/murid/jadwal", label: "Jadwal", icon: CalendarIcon },
+  { to: "/murid/pengumuman", label: "Pengumuman", icon: Bell },
+  { to: "/murid/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
 ];
 
 export default function StudentTopBar({
