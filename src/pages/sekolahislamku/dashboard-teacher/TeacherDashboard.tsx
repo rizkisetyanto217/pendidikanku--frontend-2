@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/TeacherDashboard.tsx
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -11,24 +11,13 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
-import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import { NavLink } from "react-router-dom";
 
-import {
-  CalendarDays,
-  ClipboardList,
-  CheckSquare,
-  Users,
-  Megaphone,
-  Plus,
-  CheckCircle2,
-  LayoutDashboard,
-  NotebookPen,
-} from "lucide-react";
+import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import TeacherSidebarNav from "../components/home/TeacherSideBarNav";
-import MiniBar from "../components/ui/MiniBar";
 import TeacherTopBar from "../components/home/TeacherTopBar";
+
+import { Users } from "lucide-react";
+import ListJadwal from "./schedule/modal/ListJadwal";
 
 /* ================= Types ================ */
 interface Announcement {
@@ -206,9 +195,6 @@ const dateFmt = (iso: string) =>
     day: "numeric",
   });
 
-const percent = (a: number, b: number) =>
-  b > 0 ? Math.round((a / b) * 100) : 0;
-
 /* ================= Page ================= */
 export default function TeacherDashboard() {
   const { isDark } = useHtmlDarkMode();
@@ -220,17 +206,27 @@ export default function TeacherDashboard() {
     staleTime: 60_000,
   });
 
-  const scheduleItems = useMemo(
-    () =>
+  // Jadwal: pakai state (UI-only) supaya bisa ditambah/ubah tanpa API
+  type ScheduleItem = {
+    time: string;
+    title: string;
+    room?: string;
+    slug?: string;
+  };
+  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
+
+  // Inisialisasi dari "API" dummy
+  useEffect(() => {
+    const mapped =
       (data?.todayClasses ?? []).map((c) => ({
         time: c.time,
         title: `${c.className} — ${c.subject}`,
         room: c.room,
-      })),
-    [data?.todayClasses]
-  );
+      })) ?? [];
+    setScheduleItems(mapped);
+  }, [data?.todayClasses]);
 
-  // ⬇️ PINDAHKAN KE SINI
+  // Kelas dikelola (dari data todayClasses)
   type ManagedClass = {
     id: string;
     name: string;
@@ -276,16 +272,29 @@ export default function TeacherDashboard() {
           <div className="flex-1 space-y-6">
             {/* ================= Row 1 ================= */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              {/* Jadwal Hari Ini (tanpa SectionCard) */}
+              {/* Jadwal Hari Ini */}
               <div className="lg:col-span-6 xl:col-span-6">
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
                   seeAllPath="/guru/kelas/jadwal"
-                  addHref="/guru/kelas/jadwal"
                   addLabel="Tambah Jadwal"
+                  onAdd={() => {
+                    // UI only: contoh tambah item cepat
+                    const jam = prompt("Jam (HH:MM)?", "10:00") || "";
+                    const judul = prompt("Judul?", "Kegiatan Tambahan") || "";
+                    const ruang =
+                      prompt("Ruangan (opsional)?", "") || undefined;
+                    if (!jam || !judul) return;
+                    setScheduleItems((prev) =>
+                      [...prev, { time: jam, title: judul, room: ruang }].sort(
+                        (a, b) => a.time.localeCompare(b.time)
+                      )
+                    );
+                  }}
                 />
               </div>
+
               {/* Kelas yang Saya Kelola */}
               <div className="lg:col-span-6 xl:col-span-6">
                 <SectionCard palette={palette}>
@@ -317,16 +326,35 @@ export default function TeacherDashboard() {
               </div>
             </section>
 
-          
+            {/* ================= Row 2: List Jadwal (semua) ================= */}
+            <section>
+              <ListJadwal
+                palette={palette}
+                items={scheduleItems}
+                title="Daftar Jadwal"
+                onAdd={() => {
+                  // UI only: aksi sama seperti di kartu atas
+                  const jam = prompt("Jam (HH:MM)?", "13:00") || "";
+                  const judul = prompt("Judul?", "Kegiatan Baru") || "";
+                  const ruang = prompt("Ruangan (opsional)?", "") || undefined;
+                  if (!jam || !judul) return;
+                  setScheduleItems((prev) =>
+                    [...prev, { time: jam, title: judul, room: ruang }].sort(
+                      (a, b) => a.time.localeCompare(b.time)
+                    )
+                  );
+                }}
+              />
+            </section>
 
-            {/* ================= Row 3 ================= */}
+            {/* ================= Row 3: Pengumuman ================= */}
             <section>
               <AnnouncementsList
                 palette={palette}
                 items={data?.announcements ?? []}
                 dateFmt={dateFmt}
-                seeAllPath="/guru/pengumuman" // halaman list
-                getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`} // detail per item
+                seeAllPath="/guru/pengumuman"
+                getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`}
               />
             </section>
 
@@ -343,28 +371,6 @@ export default function TeacherDashboard() {
 }
 
 /* ================= Small UI helpers ================= */
-function StatPill({
-  label,
-  value,
-  palette,
-}: {
-  label: string;
-  value: number | string;
-  palette: Palette;
-}) {
-  return (
-    <div
-      className="p-3 rounded-xl border"
-      style={{ borderColor: palette.silver1, background: palette.white1 }}
-    >
-      <div className="text-xs" style={{ color: palette.silver2 }}>
-        {label}
-      </div>
-      <div className="text-lg font-semibold">{value}</div>
-    </div>
-  );
-}
-
 function PendingItem({
   pg,
   palette,
