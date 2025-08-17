@@ -29,6 +29,10 @@ import {
 import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
 
+import TambahSiswa from "./modal/TambahSiswa";
+// NOTE: pastikan komponen ini menerima props: { open, onClose, palette }
+import UploadFileSiswa from "./modal/UploadFileSiswa";
+
 /* ================= Types ================ */
 export type StudentStatus = "aktif" | "nonaktif" | "alumni";
 
@@ -53,6 +57,23 @@ export default function StudentsPage() {
   const { isDark } = useHtmlDarkMode();
   const theme: Palette = isDark ? colors.dark : colors.light;
 
+  // === Modal states (mutually exclusive)
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openUpload, setOpenUpload] = useState(false);
+
+  const openTambahSiswa = () => {
+    setOpenUpload(false);
+    setOpenAdd(true);
+  };
+  const openUploadCSV = () => {
+    setOpenAdd(false);
+    setOpenUpload(true);
+  };
+  const closeAllModals = () => {
+    setOpenAdd(false);
+    setOpenUpload(false);
+  };
+
   // filters
   const [q, setQ] = useState("");
   const [kelas, setKelas] = useState<string | undefined>(undefined);
@@ -72,7 +93,7 @@ export default function StudentsPage() {
         total: number;
         byGender?: { L?: number; P?: number };
         aktifCount?: number;
-        classes?: string[]; // optional helper from backend
+        classes?: string[];
       };
     },
   });
@@ -93,6 +114,19 @@ export default function StudentsPage() {
 
   return (
     <>
+      {/* Modals (mutually exclusive) */}
+      <TambahSiswa
+        open={openAdd}
+        onClose={closeAllModals}
+        palette={theme}
+        classes={classes}
+      />
+      <UploadFileSiswa
+        open={openUpload}
+        onClose={closeAllModals}
+        palette={theme}
+      />
+
       {/* Top navbar */}
       <ParentTopBar palette={theme} title="Siswa" />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
@@ -125,23 +159,23 @@ export default function StudentsPage() {
 
             <div className="flex items-center gap-2">
               <Btn
-                onClick={() => console.log("IMPORT CSV clicked")}
+                variant="default"
+                onClick={openUploadCSV}
                 className="flex items-center gap-2"
                 size="sm"
                 palette={theme}
               >
                 <Upload size={16} /> Import CSV
               </Btn>
-              <NavLink to="/sekolah/murid/tambah">
-                <Btn
-                  variant="default"
-                  className="flex items-center gap-2"
-                  size="sm"
-                  palette={theme}
-                >
-                  <UserPlus size={16} /> Tambah Siswa
-                </Btn>
-              </NavLink>
+              <Btn
+                variant="default"
+                className="flex items-center gap-2"
+                size="sm"
+                palette={theme}
+                onClick={openTambahSiswa}
+              >
+                <UserPlus size={16} /> Tambah Siswa
+              </Btn>
             </div>
           </div>
 

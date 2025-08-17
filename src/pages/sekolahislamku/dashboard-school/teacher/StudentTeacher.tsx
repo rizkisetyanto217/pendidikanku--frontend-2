@@ -1,5 +1,3 @@
-// src/pages/sekolahislamku/teachers/TeachersPage.tsx
-
 import { useState, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -29,6 +27,12 @@ import {
   Phone,
   Briefcase,
 } from "lucide-react";
+import TambahGuru from "../components/Guru/modal/TambahGuru";
+import UploadFileGuru from "../components/Guru/modal/UploadFileGuru";
+
+
+// ⬇️ Import modal yang dipisah
+
 
 /* ================= Types ================= */
 export type TeacherStatus = "aktif" | "nonaktif" | "alumni";
@@ -60,11 +64,8 @@ interface TeacherStats {
 }
 
 /* ================= Helpers ================= */
-const genderLabel = (gender?: "L" | "P"): string => {
-  if (gender === "L") return "Laki-laki";
-  if (gender === "P") return "Perempuan";
-  return "-";
-};
+const genderLabel = (gender?: "L" | "P"): string =>
+  gender === "L" ? "Laki-laki" : gender === "P" ? "Perempuan" : "-";
 
 const DEFAULT_SUBJECTS = [
   "Matematika",
@@ -75,8 +76,16 @@ const DEFAULT_SUBJECTS = [
   "Agama",
 ];
 
-/* ================= Components ================= */
-const PageHeader = ({ theme }: { theme: Palette }) => (
+/* ================= Components kecil ================= */
+const PageHeader = ({
+  theme,
+  onImportClick,
+  onAddClick,
+}: {
+  theme: Palette;
+  onImportClick: () => void;
+  onAddClick: () => void;
+}) => (
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
     <div className="flex items-center gap-3">
       <div
@@ -103,7 +112,7 @@ const PageHeader = ({ theme }: { theme: Palette }) => (
 
     <div className="flex items-center gap-2 flex-wrap">
       <Btn
-        onClick={() => console.log("IMPORT CSV Guru clicked")}
+        onClick={onImportClick}
         className="flex items-center gap-1.5 text-xs sm:text-sm"
         size="sm"
         palette={theme}
@@ -112,18 +121,18 @@ const PageHeader = ({ theme }: { theme: Palette }) => (
         <span className="hidden sm:inline">Import CSV</span>
         <span className="sm:hidden">Import</span>
       </Btn>
-      <NavLink to="/sekolah/guru/tambah">
-        <Btn
-          variant="default"
-          className="flex items-center gap-1.5 text-xs sm:text-sm"
-          size="sm"
-          palette={theme}
-        >
-          <UserPlus size={14} />
-          <span className="hidden sm:inline">Tambah Guru</span>
-          <span className="sm:hidden">Tambah</span>
-        </Btn>
-      </NavLink>
+
+      <Btn
+        variant="default"
+        className="flex items-center gap-1.5 text-xs sm:text-sm"
+        size="sm"
+        palette={theme}
+        onClick={onAddClick}
+      >
+        <UserPlus size={14} />
+        <span className="hidden sm:inline">Tambah Guru</span>
+        <span className="sm:hidden">Tambah</span>
+      </Btn>
     </div>
   </div>
 );
@@ -229,7 +238,6 @@ const FiltersSection = ({
 }: FiltersProps) => (
   <SectionCard palette={theme} className="p-3 sm:p-4">
     <div className="space-y-3">
-      {/* Search Input */}
       <div
         className="flex items-center gap-2 rounded-xl px-3 py-2.5 sm:py-2 border"
         style={{ borderColor: theme.white3, background: theme.white1 }}
@@ -244,10 +252,8 @@ const FiltersSection = ({
         />
       </div>
 
-      {/* Filter Controls */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <div className="flex gap-2 flex-1">
-          {/* Subject Filter */}
           <div
             className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
             style={{
@@ -273,7 +279,6 @@ const FiltersSection = ({
             </select>
           </div>
 
-          {/* Status Filter */}
           <div
             className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
             style={{
@@ -320,17 +325,12 @@ const TeacherTableRow = ({
   teacher: TeacherItem;
   theme: Palette;
 }) => (
-  <tr
-    key={teacher.id}
-    className="border-t"
-    style={{ borderColor: theme.white3 }}
-  >
+  <tr className="border-t" style={{ borderColor: theme.white3 }}>
     <td className="py-3 align-top">
       <div className="font-medium" style={{ color: theme.quaternary }}>
         {teacher.nip ?? "-"}
       </div>
     </td>
-
     <td className="py-3 align-top">
       <div className="font-medium" style={{ color: theme.quaternary }}>
         {teacher.name}
@@ -341,15 +341,12 @@ const TeacherTableRow = ({
         </div>
       )}
     </td>
-
     <td className="py-3 align-top" style={{ color: theme.primary }}>
       {teacher.subject ?? "-"}
     </td>
-
     <td className="py-3 align-top" style={{ color: theme.quaternary }}>
       {genderLabel(teacher.gender)}
     </td>
-
     <td className="py-3 align-top">
       <div
         className="flex items-center gap-3 text-sm"
@@ -375,7 +372,6 @@ const TeacherTableRow = ({
         )}
       </div>
     </td>
-
     <td className="py-3 align-top">
       {teacher.status === "aktif" && (
         <Badge variant="success" palette={theme}>
@@ -393,7 +389,6 @@ const TeacherTableRow = ({
         </Badge>
       )}
     </td>
-
     <td className="py-3 align-top">
       <div className="flex items-center gap-2 justify-end">
         <NavLink to={`/sekolah/guru/${teacher.id}`}>
@@ -429,141 +424,8 @@ const TeachersTable = ({
   onRefetch,
 }: TeachersTableProps) => (
   <SectionCard palette={theme} className="p-0 sm:p-2 lg:p-4">
-    {/* Mobile Card View */}
-    <div className="block sm:hidden">
-      {isLoading && (
-        <div
-          className="py-8 text-center text-sm"
-          style={{ color: theme.secondary }}
-        >
-          Memuat data…
-        </div>
-      )}
-
-      {isError && (
-        <div className="py-8 px-4">
-          <div
-            className="flex items-center gap-2 justify-center text-sm"
-            style={{ color: theme.warning1 }}
-          >
-            <AlertTriangle size={16} />
-            Terjadi kesalahan.
-            <button className="underline" onClick={onRefetch}>
-              Coba lagi
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!isLoading && !isError && teachers.length === 0 && (
-        <div
-          className="py-10 text-center text-sm"
-          style={{ color: theme.secondary }}
-        >
-          Belum ada data guru.
-        </div>
-      )}
-
-      {!isLoading &&
-        !isError &&
-        teachers.map((teacher) => (
-          <div
-            key={teacher.id}
-            className="border-b p-4 last:border-b-0"
-            style={{ borderColor: theme.white3 }}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1 min-w-0">
-                <h3
-                  className="font-medium text-sm truncate"
-                  style={{ color: theme.quaternary }}
-                >
-                  {teacher.name}
-                </h3>
-                <p className="text-xs mt-1" style={{ color: theme.secondary }}>
-                  {teacher.nip ? `NIP: ${teacher.nip}` : "Tanpa NIP"}
-                </p>
-              </div>
-              <div className="flex-shrink-0 ml-2">
-                {teacher.status === "aktif" && (
-                  <Badge variant="success" palette={theme} className="text-xs">
-                    Aktif
-                  </Badge>
-                )}
-                {teacher.status === "nonaktif" && (
-                  <Badge variant="warning" palette={theme} className="text-xs">
-                    Nonaktif
-                  </Badge>
-                )}
-                {teacher.status === "alumni" && (
-                  <Badge variant="info" palette={theme} className="text-xs">
-                    Alumni
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            <div
-              className="space-y-1 text-xs"
-              style={{ color: theme.secondary }}
-            >
-              <div>
-                Mapel:{" "}
-                <span style={{ color: theme.primary }}>
-                  {teacher.subject ?? "-"}
-                </span>
-              </div>
-              <div>JK: {genderLabel(teacher.gender)}</div>
-              {teacher.phone && (
-                <div className="flex items-center gap-1">
-                  <Phone size={12} />
-                  <a href={`tel:${teacher.phone}`} className="hover:underline">
-                    {teacher.phone}
-                  </a>
-                </div>
-              )}
-              {teacher.email && (
-                <div className="flex items-center gap-1">
-                  <Mail size={12} />
-                  <a
-                    href={`mailto:${teacher.email}`}
-                    className="hover:underline truncate"
-                  >
-                    {teacher.email}
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 mt-3">
-              <NavLink to={`/sekolah/guru/${teacher.id}`} className="flex-1">
-                <Btn
-                  size="sm"
-                  palette={theme}
-                  className="w-full justify-center text-xs"
-                >
-                  Detail
-                </Btn>
-              </NavLink>
-              <NavLink
-                to={`/sekolah/absensi?guru=${teacher.id}`}
-                className="flex-1"
-              >
-                <Btn
-                  size="sm"
-                  palette={theme}
-                  className="w-full justify-center text-xs"
-                >
-                  Absensi
-                </Btn>
-              </NavLink>
-            </div>
-          </div>
-        ))}
-    </div>
-
     {/* Desktop Table View */}
-    <div className="hidden sm:block overflow-auto">
+    <div className="overflow-auto">
       <table className="min-w-[800px] w-full">
         <thead>
           <tr className="text-left text-sm" style={{ color: theme.secondary }}>
@@ -576,9 +438,7 @@ const TeachersTable = ({
             <th className="text-right pr-2">Aksi</th>
           </tr>
         </thead>
-
         <tbody>
-          {/* Loading State */}
           {isLoading && (
             <tr>
               <td
@@ -590,8 +450,6 @@ const TeachersTable = ({
               </td>
             </tr>
           )}
-
-          {/* Error State */}
           {isError && (
             <tr>
               <td colSpan={7} className="py-8">
@@ -608,8 +466,6 @@ const TeachersTable = ({
               </td>
             </tr>
           )}
-
-          {/* Empty State */}
           {!isLoading && !isError && teachers.length === 0 && (
             <tr>
               <td
@@ -621,24 +477,17 @@ const TeachersTable = ({
               </td>
             </tr>
           )}
-
-          {/* Data Rows */}
           {!isLoading &&
             !isError &&
-            teachers.map((teacher) => (
-              <TeacherTableRow
-                key={teacher.id}
-                teacher={teacher}
-                theme={theme}
-              />
+            teachers.map((t) => (
+              <TeacherTableRow key={t.id} teacher={t} theme={theme} />
             ))}
         </tbody>
       </table>
     </div>
 
-    {/* Table Footer */}
     <div
-      className="p-3 sm:mt-3 text-xs flex items-center justify-between border-t sm:border-t-0"
+      className="p-3 sm:mt-3 text-xs flex items-center justify-between border-t"
       style={{ color: theme.secondary, borderColor: theme.white3 }}
     >
       <div>
@@ -658,6 +507,12 @@ export default function TeachersPage() {
   const { isDark } = useHtmlDarkMode();
   const theme: Palette = isDark ? colors.dark : colors.light;
 
+  // Modal tambah guru
+  const [openAdd, setOpenAdd] = useState(false);
+  // upload file
+  const [openImport, setOpenImport] = useState(false);
+
+
   // Filter states
   const [q, setQ] = useState("");
   const [mapel, setMapel] = useState<string | undefined>(undefined);
@@ -671,17 +526,14 @@ export default function TeachersPage() {
       if (q) params.q = q;
       if (mapel) params.subject = mapel;
       if (status !== "semua") params.status = status;
-
       const response = await axios.get("/api/a/teachers", { params });
       return response.data;
     },
   });
 
-  // Derived data
   const teachers = data?.list ?? [];
   const subjects = data?.subjects ?? DEFAULT_SUBJECTS;
 
-  // Statistics calculation
   const stats: TeacherStats = useMemo(() => {
     const total = data?.total ?? teachers.length;
     const L =
@@ -690,19 +542,34 @@ export default function TeachersPage() {
       data?.byGender?.P ?? teachers.filter((t) => t.gender === "P").length;
     const aktif =
       data?.aktifCount ?? teachers.filter((t) => t.status === "aktif").length;
-
     return { total, L, P, aktif };
   }, [data, teachers]);
 
   return (
     <>
-      <ParentTopBar palette={theme} title="Guru" />
+   
+      <TambahGuru
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        palette={theme}
+        subjects={subjects}
+      />
+      <UploadFileGuru
+        open={openImport} // was: false
+        onClose={() => setOpenImport(false)} // was: () => {}
+        palette={theme}
+      />
 
+      <ParentTopBar palette={theme} title="Guru" />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         <SchoolSidebarNav palette={theme} className="hidden lg:block" />
 
         <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
-          <PageHeader theme={theme} />
+          <PageHeader
+            theme={theme}
+            onImportClick={() => setOpenImport(true)}
+            onAddClick={() => setOpenAdd(true)}
+          />
 
           <StatsGrid stats={stats} theme={theme} />
 

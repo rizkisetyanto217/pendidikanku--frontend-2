@@ -41,8 +41,7 @@ export default function TodayScheduleCard({
     <SectionCard palette={palette}>
       <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
         <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
-          <CalendarDays size={20} color={palette.quaternary} /> Jadwal 3 Hari
-          Kedepan
+          <CalendarDays size={20} color={palette.quaternary} /> Jadwal Hari Ini
         </h3>
 
         {addHref ? (

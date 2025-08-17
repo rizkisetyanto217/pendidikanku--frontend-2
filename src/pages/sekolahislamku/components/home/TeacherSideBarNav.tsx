@@ -39,12 +39,7 @@ const DEFAULT_NAVS: NavItem[] = [
 ];
 
 const DEFAULT_ACTIONS: QuickAction[] = [
-  {
-    label: "Mulai Absen",
-    icon: CheckSquare,
-    onClick: () => alert("Mulai Absen"),
-    variant: "secondary",
-  },
+
   {
     label: "Buat Pengumuman",
     icon: Megaphone,

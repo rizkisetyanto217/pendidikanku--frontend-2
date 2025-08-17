@@ -1,14 +1,12 @@
-// src/pages/sekolahislamku/school/SchoolClasses.tsx
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   BookOpen,
   Users,
   UserCog,
   Clock4,
   Filter as FilterIcon,
-  Upload,
   Plus,
   Eye,
   Pencil,
@@ -24,10 +22,11 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "../../components/home/SchoolSideBarNav";
+import TambahKelas, { type ClassRow as NewClassRow } from "./components/TambahKelas";
 
 /* =============== Types =============== */
-type ClassStatus = "active" | "inactive";
-type ClassRow = {
+export type ClassStatus = "active" | "inactive";
+export type ClassRow = {
   id: string;
   code: string;
   name: string;
@@ -38,14 +37,14 @@ type ClassRow = {
   status: ClassStatus;
 };
 
-type ClassStats = {
+export type ClassStats = {
   total: number;
   active: number;
   students: number;
   homerooms: number;
 };
 
-type ClassesPayload = {
+export type ClassesPayload = {
   dateISO: string;
   stats: ClassStats;
   items: ClassRow[];
@@ -60,7 +59,7 @@ const dateLong = (iso: string) =>
     year: "numeric",
   });
 
-/* =============== Dummy API =============== */
+/* =============== Dummy API (with localStorage extras) =============== */
 const DUMMY: ClassRow[] = [
   {
     id: "c-3a",
@@ -144,6 +143,18 @@ const DUMMY: ClassRow[] = [
   },
 ];
 
+function getLocalExtras(): ClassRow[] {
+  try {
+    const raw = localStorage.getItem("sis_extras_classes");
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr as ClassRow[];
+  } catch {
+    return [];
+  }
+}
+
 async function fetchClasses({
   q,
   grade,
@@ -155,7 +166,10 @@ async function fetchClasses({
   status?: ClassStatus | "all";
   shift?: "Pagi" | "Sore" | "all";
 }): Promise<ClassesPayload> {
-  const items = DUMMY.filter((r) => {
+  // Gabungkan DUMMY dengan data tambahan dari localStorage
+  const ALL: ClassRow[] = [...DUMMY, ...getLocalExtras()];
+
+  const items = ALL.filter((r) => {
     const okQ = q
       ? [r.name, r.code, r.homeroom].join(" ").toLowerCase().includes(q)
       : true;
@@ -166,10 +180,10 @@ async function fetchClasses({
   });
 
   const stats: ClassStats = {
-    total: DUMMY.length,
-    active: DUMMY.filter((x) => x.status === "active").length,
-    students: DUMMY.reduce((a, b) => a + b.studentCount, 0),
-    homerooms: new Set(DUMMY.map((x) => x.homeroom)).size,
+    total: ALL.length,
+    active: ALL.filter((x) => x.status === "active").length,
+    students: ALL.reduce((a, b) => a + b.studentCount, 0),
+    homerooms: new Set(ALL.map((x) => x.homeroom)).size,
   };
 
   return {
@@ -184,8 +198,7 @@ export default function SchoolClasses() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
   const [sp, setSp] = useSearchParams();
-  const navigate = useNavigate();
-
+  const [openTambah, setOpenTambah] = useState(false);
   const q = (sp.get("q") ?? "").trim().toLowerCase();
   const grade = sp.get("grade") ?? "all";
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
@@ -197,13 +210,23 @@ export default function SchoolClasses() {
     staleTime: 60_000,
   });
 
+  // Refetch saat modal ditutup (setelah create)
+  useEffect(() => {
+    if (!openTambah) {
+      refetch();
+    }
+  }, [openTambah, refetch]);
+
   const items = data?.items ?? [];
 
   const grades = useMemo(
     () =>
-      Array.from(new Set(DUMMY.map((x) => x.grade))).sort(
-        (a, b) => Number(a) - Number(b)
-      ),
+      Array.from(
+        new Set([
+          ...DUMMY.map((x) => x.grade),
+          ...getLocalExtras().map((x) => x.grade),
+        ])
+      ).sort((a, b) => Number(a) - Number(b)),
     []
   );
 
@@ -229,10 +252,8 @@ export default function SchoolClasses() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri */}
           <SchoolSidebarNav palette={palette} />
 
-          {/* Konten kanan */}
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header + actions */}
             <section className="flex items-start justify-between gap-3">
@@ -255,18 +276,7 @@ export default function SchoolClasses() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Btn
-                  palette={palette}
-                  variant="outline"
-                  onClick={() => alert("Import CSV kelas")}
-                >
-                  <Upload className="mr-2" size={16} />
-                  Import CSV
-                </Btn>
-                <Btn
-                  palette={palette}
-                  onClick={() => navigate("/school/classes/new")}
-                >
+                <Btn palette={palette} onClick={() => setOpenTambah(true)}>
                   <Plus className="mr-2" size={16} />
                   Tambah Kelas
                 </Btn>
@@ -319,7 +329,7 @@ export default function SchoolClasses() {
                     placeholder="Cari nama kelas / kode / wali…"
                     defaultValue={sp.get("q") ?? ""}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                      if ((e as any).key === "Enter") {
                         setParam("q", (e.target as HTMLInputElement).value);
                       }
                     }}
@@ -502,11 +512,22 @@ export default function SchoolClasses() {
           </div>
         </div>
       </main>
+
+      {/* Modal Tambah Kelas */}
+      <TambahKelas
+        open={openTambah}
+        onClose={() => setOpenTambah(false)}
+        palette={palette}
+        onCreated={(row: NewClassRow) => {
+          // Optional: bisa tambahkan notifikasi/telemetry di sini
+          console.log("Kelas baru dibuat:", row);
+        }}
+      />
     </div>
   );
 }
 
-/* =============== Small UI =============== */
+/* =============== Small UI (unchanged) =============== */
 function MiniKPI({
   palette,
   icon,

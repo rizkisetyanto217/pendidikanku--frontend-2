@@ -130,7 +130,7 @@ async function fetchSchedule(
     id: cls.class_id,
     time: "07:30", // default jam, bisa disesuaikan kalau API punya field jam
     title: cls.class_name,
-    room: "Kelas Online",
+    room: "Kelas offline",
     teacher: "-", // isi jika API ada data pengajar
     type: "class",
     description: cls.class_description,

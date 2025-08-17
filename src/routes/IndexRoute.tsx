@@ -162,9 +162,9 @@ import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/T
 import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
-import SemuaJadwal from "@/pages/sekolahislamku/dashboard-school/components/dashboard/SemuaJadwal";
-import SemuaTagihan from "@/pages/sekolahislamku/dashboard-school/components/dashboard/SemuaTagihan";
 import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/components/routes";
+
+// import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";  
 
 export default function AppRoutes() {
   return (
