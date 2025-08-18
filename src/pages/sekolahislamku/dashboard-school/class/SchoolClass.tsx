@@ -22,19 +22,22 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "../../components/home/SchoolSideBarNav";
-import TambahKelas, { type ClassRow as NewClassRow } from "./components/TambahKelas";
+import TambahKelas, {
+  type ClassRow as NewClassRow,
+} from "./components/TambahKelas";
 
 /* =============== Types =============== */
 export type ClassStatus = "active" | "inactive";
+
 export type ClassRow = {
   id: string;
   code: string;
   name: string;
-  grade: string; // misal: "1", "2", "3", ... atau "A", "B"
-  homeroom: string;
-  studentCount: number;
-  schedule: string; // "Pagi", "Sore", dst
-  status: ClassStatus;
+  grade: string; // diturunkan dari code/name (jika ada angka), fallback "-"
+  homeroom: string; // dari teacher.user_name
+  studentCount: number; // belum ada di API → 0 dulu
+  schedule: string; // render dari schedule JSON
+  status: ClassStatus; // dari class_sections_is_active
 };
 
 export type ClassStats = {
@@ -50,185 +53,180 @@ export type ClassesPayload = {
   items: ClassRow[];
 };
 
+/* ======== API Shapes (sesuai contoh respons) ========= */
+type ApiSchedule = {
+  start?: string;
+  end?: string;
+  days?: string[];
+  location?: string;
+};
+
+type ApiTeacherLite = {
+  id: string;
+  user_name: string;
+  email: string;
+  is_active: boolean;
+};
+
+type ApiClassSection = {
+  class_sections_id: string;
+  class_sections_class_id: string;
+  class_sections_masjid_id: string;
+  class_sections_teacher_id?: string | null;
+  class_sections_slug: string;
+  class_sections_name: string;
+  class_sections_code?: string | null;
+  class_sections_capacity?: number | null;
+  class_sections_schedule?: ApiSchedule | null;
+  class_sections_is_active: boolean;
+  class_sections_created_at: string;
+  class_sections_updated_at: string;
+  teacher?: ApiTeacherLite | null;
+};
+
+type ApiListResponse = {
+  data: ApiClassSection[];
+  message: string;
+};
+
 /* =============== Helpers =============== */
-const dateLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+const dateLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
 
-/* =============== Dummy API (with localStorage extras) =============== */
-const DUMMY: ClassRow[] = [
-  {
-    id: "c-3a",
-    code: "3A",
-    name: "Kelas 3A",
-    grade: "3",
-    homeroom: "Ust. Farid",
-    studentCount: 28,
-    schedule: "Pagi",
-    status: "active",
-  },
-  {
-    id: "c-3b",
-    code: "3B",
-    name: "Kelas 3B",
-    grade: "3",
-    homeroom: "Ustdz. Salma",
-    studentCount: 27,
-    schedule: "Pagi",
-    status: "active",
-  },
-  {
-    id: "c-4a",
-    code: "4A",
-    name: "Kelas 4A",
-    grade: "4",
-    homeroom: "Ust. Rafi",
-    studentCount: 30,
-    schedule: "Pagi",
-    status: "active",
-  },
-  {
-    id: "c-4b",
-    code: "4B",
-    name: "Kelas 4B",
-    grade: "4",
-    homeroom: "Ustdz. Nisa",
-    studentCount: 26,
-    schedule: "Sore",
-    status: "active",
-  },
-  {
-    id: "c-5a",
-    code: "5A",
-    name: "Kelas 5A",
-    grade: "5",
-    homeroom: "Ust. Rendy",
-    studentCount: 25,
-    schedule: "Sore",
-    status: "active",
-  },
-  {
-    id: "c-2a",
-    code: "2A",
-    name: "Kelas 2A",
-    grade: "2",
-    homeroom: "Ustdz. Hana",
-    studentCount: 29,
-    schedule: "Pagi",
-    status: "active",
-  },
-  {
-    id: "c-6a",
-    code: "6A",
-    name: "Kelas 6A",
-    grade: "6",
-    homeroom: "Ust. Damar",
-    studentCount: 24,
-    schedule: "Sore",
-    status: "inactive",
-  },
-  {
-    id: "c-1a",
-    code: "1A",
-    name: "Kelas 1A",
-    grade: "1",
-    homeroom: "Ustdz. Maryam",
-    studentCount: 31,
-    schedule: "Pagi",
-    status: "active",
-  },
-];
+const parseGrade = (code?: string | null, name?: string): string => {
+  const from = (code ?? name ?? "").toString();
+  const m = from.match(/\d+/);
+  return m ? m[0] : "-";
+};
 
-function getLocalExtras(): ClassRow[] {
-  try {
-    const raw = localStorage.getItem("sis_extras_classes");
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return [];
-    return arr as ClassRow[];
-  } catch {
-    return [];
-  }
-}
+const scheduleToText = (sch?: ApiSchedule | null): string => {
+  if (!sch) return "-";
+  const days = (sch.days ?? []).join(", ");
+  const time = [sch.start, sch.end].every(Boolean)
+    ? `${sch.start}–${sch.end}`
+    : sch.start || sch.end || "";
+  const loc = sch.location ? ` @${sch.location}` : "";
+  const left = [days, time].filter(Boolean).join(" ");
+  return left ? `${left}${loc}` : "-";
+};
 
-async function fetchClasses({
+const getShiftFromSchedule = (
+  sch?: ApiSchedule | null
+): "Pagi" | "Sore" | "-" => {
+  if (!sch?.start) return "-";
+  const [hh] = sch.start.split(":").map((x) => parseInt(x, 10));
+  if (Number.isNaN(hh)) return "-";
+  return hh < 12 ? "Pagi" : "Sore";
+};
+
+/* =============== Fetcher =============== */
+import axios from "@/lib/axios";
+
+async function fetchClassSections({
   q,
-  grade,
   status,
-  shift,
 }: {
   q?: string;
-  grade?: string;
   status?: ClassStatus | "all";
-  shift?: "Pagi" | "Sore" | "all";
-}): Promise<ClassesPayload> {
-  // Gabungkan DUMMY dengan data tambahan dari localStorage
-  const ALL: ClassRow[] = [...DUMMY, ...getLocalExtras()];
-
-  const items = ALL.filter((r) => {
-    const okQ = q
-      ? [r.name, r.code, r.homeroom].join(" ").toLowerCase().includes(q)
-      : true;
-    const okGrade = grade && grade !== "all" ? r.grade === grade : true;
-    const okStatus = status && status !== "all" ? r.status === status : true;
-    const okShift = shift && shift !== "all" ? r.schedule === shift : true;
-    return okQ && okGrade && okStatus && okShift;
+}): Promise<ApiClassSection[]> {
+  const params: Record<string, any> = {};
+  if (q && q.trim().length > 0) params.search = q.trim();
+  if (status && status !== "all") params.active_only = status === "active";
+  // sort default dari server: created_at desc
+  const res = await axios.get<ApiListResponse>("/api/a/class-sections", {
+    params,
   });
-
-  const stats: ClassStats = {
-    total: ALL.length,
-    active: ALL.filter((x) => x.status === "active").length,
-    students: ALL.reduce((a, b) => a + b.studentCount, 0),
-    homerooms: new Set(ALL.map((x) => x.homeroom)).size,
-  };
-
-  return {
-    dateISO: new Date().toISOString(),
-    stats,
-    items,
-  };
+  return res.data?.data ?? [];
 }
 
 /* =============== Page =============== */
 export default function SchoolClasses() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
+
   const [sp, setSp] = useSearchParams();
   const [openTambah, setOpenTambah] = useState(false);
-  const q = (sp.get("q") ?? "").trim().toLowerCase();
+
+  // Query params (UI)
+  const q = (sp.get("q") ?? "").trim();
   const grade = sp.get("grade") ?? "all";
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["school-classes", q, grade, status, shift],
-    queryFn: () => fetchClasses({ q, grade, status, shift }),
+  // Fetch dari API
+  const {
+    data: apiItems,
+    isLoading,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["class-sections", q, status],
+    queryFn: () => fetchClassSections({ q, status }),
     staleTime: 60_000,
   });
 
-  // Refetch saat modal ditutup (setelah create)
+  // Refetch ketika modal tambah ditutup (misal habis create)
   useEffect(() => {
     if (!openTambah) {
       refetch();
     }
   }, [openTambah, refetch]);
 
-  const items = data?.items ?? [];
+  // Map API → UI rows
+  const mappedRows: ClassRow[] = useMemo(() => {
+    const arr = apiItems ?? [];
+    return arr.map((it) => ({
+      id: it.class_sections_id,
+      code: it.class_sections_code ?? "-",
+      name: it.class_sections_name,
+      grade: parseGrade(it.class_sections_code, it.class_sections_name),
+      homeroom: it.teacher?.user_name ?? "-",
+      studentCount: 0, // Belum tersedia di API
+      schedule: scheduleToText(it.class_sections_schedule),
+      status: it.class_sections_is_active ? "active" : "inactive",
+    }));
+  }, [apiItems]);
 
-  const grades = useMemo(
-    () =>
-      Array.from(
-        new Set([
-          ...DUMMY.map((x) => x.grade),
-          ...getLocalExtras().map((x) => x.grade),
-        ])
-      ).sort((a, b) => Number(a) - Number(b)),
-    []
-  );
+  // Filter client-side untuk grade & shift (karena API belum support)
+  const filteredRows = useMemo(() => {
+    return mappedRows.filter((r) => {
+      const okGrade = grade === "all" ? true : r.grade === grade;
+      const rowShift = (() => {
+        const apiItem = (apiItems ?? []).find(
+          (x) => x.class_sections_id === r.id
+        );
+        return getShiftFromSchedule(apiItem?.class_sections_schedule);
+      })();
+      const okShift = shift === "all" ? true : rowShift === shift;
+      return okGrade && okShift;
+    });
+  }, [mappedRows, grade, shift, apiItems]);
+
+  // Stats (disusun dari hasil filter server + client)
+  const stats: ClassStats = useMemo(() => {
+    const total = mappedRows.length;
+    const active = mappedRows.filter((x) => x.status === "active").length;
+    const students = mappedRows.reduce((a, b) => a + (b.studentCount || 0), 0); // 0
+    const homerooms = new Set(mappedRows.map((x) => x.homeroom).filter(Boolean))
+      .size;
+    return { total, active, students, homerooms };
+  }, [mappedRows]);
+
+  // Opsi grade dinamis (dari hasil map)
+  const grades = useMemo(() => {
+    const set = new Set<string>();
+    mappedRows.forEach((x) => {
+      if (x.grade && x.grade !== "-") set.add(x.grade);
+    });
+    return Array.from(set).sort((a, b) => Number(a) - Number(b));
+  }, [mappedRows]);
 
   const setParam = (k: string, v: string) => {
     const next = new URLSearchParams(sp);
@@ -236,6 +234,8 @@ export default function SchoolClasses() {
     else next.delete(k);
     setSp(next, { replace: true });
   };
+
+  const items = filteredRows;
 
   return (
     <div
@@ -245,7 +245,7 @@ export default function SchoolClasses() {
       <ParentTopBar
         palette={palette}
         title="Kelas"
-        gregorianDate={data?.dateISO}
+        gregorianDate={new Date().toISOString()}
         hijriDate={undefined}
         dateFmt={dateLong}
       />
@@ -289,26 +289,26 @@ export default function SchoolClasses() {
                 palette={palette}
                 icon={<Users size={16} />}
                 label="Total Siswa"
-                value={data?.stats.students ?? 0}
+                value={stats.students} // 0 untuk sekarang (belum ada di API)
               />
               <MiniKPI
                 palette={palette}
                 icon={<BookOpen size={16} />}
                 label="Total Kelas"
-                value={data?.stats.total ?? 0}
+                value={stats.total}
               />
               <MiniKPI
                 palette={palette}
                 icon={<Clock4 size={16} />}
                 label="Aktif"
-                value={data?.stats.active ?? 0}
+                value={stats.active}
                 tone="success"
               />
               <MiniKPI
                 palette={palette}
                 icon={<UserCog size={16} />}
                 label="Wali Kelas"
-                value={data?.stats.homerooms ?? 0}
+                value={stats.homerooms}
               />
             </section>
 
@@ -326,7 +326,7 @@ export default function SchoolClasses() {
                     Pencarian
                   </div>
                   <input
-                    placeholder="Cari nama kelas / kode / wali…"
+                    placeholder="Cari slug/nama/kode…"
                     defaultValue={sp.get("q") ?? ""}
                     onKeyDown={(e) => {
                       if ((e as any).key === "Enter") {
@@ -343,7 +343,7 @@ export default function SchoolClasses() {
                     className="text-xs mb-1"
                     style={{ color: palette.silver2 }}
                   >
-                    Tingkat
+                    Tingkat (estimasi)
                   </div>
                   <select
                     value={grade}
@@ -365,7 +365,7 @@ export default function SchoolClasses() {
                     className="text-xs mb-1"
                     style={{ color: palette.silver2 }}
                   >
-                    Shift
+                    Shift (dari jam mulai)
                   </div>
                   <select
                     value={shift}
@@ -519,8 +519,8 @@ export default function SchoolClasses() {
         onClose={() => setOpenTambah(false)}
         palette={palette}
         onCreated={(row: NewClassRow) => {
-          // Optional: bisa tambahkan notifikasi/telemetry di sini
           console.log("Kelas baru dibuat:", row);
+          // Opsional: refetch di useEffect setelah modal close
         }}
       />
     </div>
@@ -541,7 +541,7 @@ function MiniKPI({
   value: number | string;
   tone?: "success" | "normal";
 }) {
-  const bg = tone === "success" ? "#0EA5A222" : undefined; // pakai transparan ringan
+  const bg = tone === "success" ? "#0EA5A222" : undefined;
   return (
     <SectionCard palette={palette}>
       <div className="p-4 flex items-center gap-3">

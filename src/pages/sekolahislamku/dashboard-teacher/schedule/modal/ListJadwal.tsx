@@ -50,7 +50,7 @@ export default function ListJadwal({
       </div>
 
       {/* List Items */}
-      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 space-y-3">
+      <div className="p-4 pt-2 sm:p-4 lg:px-3 lg:py-0 space-y-3 mb-5">
         {items.length > 0 ? (
           items.map((s, i) => {
             const slug = s.slug || generateSlug(s.title);
@@ -58,7 +58,7 @@ export default function ListJadwal({
               <Link key={`${s.title}-${i}`} to={`/jadwal/${slug}`}>
                 <SectionCard
                   palette={palette}
-                  className="p-3 flex items-center justify-between hover:bg-gray-50 transition rounded-xl"
+                  className="p-3 flex items-center justify-between hover:bg-gray-50 transition rounded-xl mb-3"
                   style={{ background: palette.white2 }}
                 >
                   <div>

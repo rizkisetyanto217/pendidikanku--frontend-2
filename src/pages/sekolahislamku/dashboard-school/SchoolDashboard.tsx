@@ -1,14 +1,14 @@
+// src/pages/sekolahislamku/pages/SchoolDashboard.tsx
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { NavLink, useParams } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { Outlet } from "react-router-dom";
+import axios from "@/lib/axios";
 
 import {
   SectionCard,
   Badge,
-  Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
@@ -17,22 +17,7 @@ import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodaySched
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 
-import {
-  LayoutDashboard,
-  Users,
-  UserCog,
-  BookOpen,
-  CheckSquare,
-  Wallet,
-  Megaphone,
-  BarChart2,
-  Settings,
-  CalendarDays,
-  Plus,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
-import StudentSideBarNav from "../components/home/StudentSideBarNav";
+import { Users, UserCog, BookOpen, CheckSquare, BarChart2 } from "lucide-react";
 import SchoolSidebarNav from "../components/home/SchoolSideBarNav";
 
 /* ================= Types ================ */
@@ -55,12 +40,6 @@ type SchoolHome = {
   schoolName: string;
   hijriDate: string;
   gregorianDate: string;
-  kpis: {
-    students: number;
-    teachers: number;
-    classes: number;
-    attendanceRateToday: number;
-  };
   finance: {
     unpaidCount: number;
     unpaidTotal: number;
@@ -72,15 +51,25 @@ type SchoolHome = {
   attendanceTodayByStatus: Record<AttendanceStatus, number>;
 };
 
-/* ============ Fake API layer (replace with axios) ============ */
+type LembagaStats = {
+  lembaga_stats_lembaga_id: string;
+  lembaga_stats_active_classes: number;
+  lembaga_stats_active_sections: number;
+  lembaga_stats_active_students: number;
+  lembaga_stats_active_teachers: number;
+  lembaga_stats_created_at: string;
+  lembaga_stats_updated_at: string;
+};
+type LembagaStatsResponse = { data: LembagaStats; found: boolean };
+
+/* ============ Fake API (school home dummy) ============ */
 async function fetchSchoolHome(): Promise<SchoolHome> {
   const now = new Date();
   const iso = now.toISOString();
-  return Promise.resolve({
+  return {
     schoolName: "Sekolah Islamku",
     hijriDate: "16 Muharram 1447 H",
     gregorianDate: iso,
-    kpis: { students: 320, teachers: 24, classes: 12, attendanceRateToday: 92 },
     finance: {
       unpaidCount: 18,
       unpaidTotal: 7_500_000,
@@ -137,6 +126,72 @@ async function fetchSchoolHome(): Promise<SchoolHome> {
       izin: 9,
       alpa: 7,
     },
+  };
+}
+
+/* ============ Query: Lembaga Stats ============ */
+function useLembagaStats() {
+  return useQuery({
+    queryKey: ["lembaga-stats"],
+    queryFn: async () => {
+      const res = await axios.get<LembagaStatsResponse>("/api/a/lembaga-stats");
+      if (!res.data?.found) return null;
+      return res.data.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: "always",
+    retry: 1,
+  });
+}
+
+/* ============ Query: Today Sessions (API) ============ */
+type SessionsItem = {
+  class_attendance_sessions_id: string;
+  class_attendance_sessions_date: string; // YYYY-MM-DDT00:00:00Z
+  class_attendance_sessions_title: string;
+  class_attendance_sessions_general_info?: string;
+  class_attendance_sessions_note?: string;
+};
+type SessionsResponse = {
+  message: string;
+  data: {
+    limit: number;
+    offset: number;
+    count: number;
+    items: SessionsItem[];
+  };
+};
+
+const yyyyMmDdLocal = (d = new Date()) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  return `${y}-${m}-${day}`;
+};
+
+function useTodaySessions() {
+  return useQuery({
+    queryKey: ["class-attendance-sessions", "today"],
+    queryFn: async () => {
+      const today = yyyyMmDdLocal();
+      const res = await axios.get<SessionsResponse>(
+        "/api/u/class-attendance-sessions",
+        {
+          params: {
+            date_from: today,
+            date_to: today, // hanya hari ini
+            limit: 50,
+            offset: 0,
+          },
+        }
+      );
+      return res.data?.data?.items ?? [];
+    },
+    staleTime: 60_000,
   });
 }
 
@@ -161,18 +216,38 @@ const dateFmt = (iso?: string) =>
 export default function SchoolDashboard() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
-    const { slug } = useParams<{ slug: string }>();
 
-
-  const { data, isLoading } = useQuery({
+  // Dummy home (UI layout)
+  const homeQ = useQuery({
     queryKey: ["school-home"],
     queryFn: fetchSchoolHome,
     staleTime: 60_000,
   });
-  const scheduleItems = useMemo(
-    () => data?.todaySchedule ?? [],
-    [data?.todaySchedule]
-  );
+
+  // Real APIs
+  const statsQ = useLembagaStats();
+  const todaySessionsQ = useTodaySessions();
+
+  // KPI dari lembaga_stats
+  const kpis = {
+    students: statsQ.data?.lembaga_stats_active_students ?? 0,
+    teachers: statsQ.data?.lembaga_stats_active_teachers ?? 0,
+    program: statsQ.data?.lembaga_stats_active_classes ?? 0,
+    class: statsQ.data?.lembaga_stats_active_sections ?? 0, // dipakai sebagai "Kehadiran Hari Ini" (sesuai request sebelumnya)
+  };
+
+  // Jadwal hari ini: ambil dari API; fallback ke dummy
+  const scheduleItems = useMemo(() => {
+    const apiItems = todaySessionsQ.data ?? [];
+    if (apiItems.length > 0) {
+      return apiItems.map((it) => ({
+        time: "Hari ini", // API hanya punya tanggal; tampilkan sebagai all-day
+        title: it.class_attendance_sessions_title || "Sesi Kehadiran",
+        // room: undefined,
+      }));
+    }
+    return homeQ.data?.todaySchedule ?? [];
+  }, [todaySessionsQ.data, homeQ.data?.todaySchedule]);
 
   return (
     <div
@@ -182,8 +257,8 @@ export default function SchoolDashboard() {
       <ParentTopBar
         palette={palette}
         title="Dashboard Sekolah"
-        gregorianDate={data?.gregorianDate}
-        hijriDate={data?.hijriDate}
+        gregorianDate={homeQ.data?.gregorianDate}
+        hijriDate={homeQ.data?.hijriDate}
         dateFmt={(iso) => dateFmt(iso)}
       />
 
@@ -200,25 +275,25 @@ export default function SchoolDashboard() {
               <KpiTile
                 palette={palette}
                 label="Total Siswa"
-                value={data?.kpis.students ?? 0}
+                value={kpis.students}
                 icon={<Users size={18} />}
               />
               <KpiTile
                 palette={palette}
                 label="Total Guru"
-                value={data?.kpis.teachers ?? 0}
+                value={kpis.teachers}
                 icon={<UserCog size={18} />}
               />
               <KpiTile
                 palette={palette}
                 label="Kelas Aktif"
-                value={data?.kpis.classes ?? 0}
+                value={kpis.program}
                 icon={<BookOpen size={18} />}
               />
               <KpiTile
                 palette={palette}
                 label="Kehadiran Hari Ini"
-                value={`${data?.kpis.attendanceRateToday ?? 0}%`}
+                value={kpis.class}
                 icon={<CheckSquare size={18} />}
                 tone="success"
               />
@@ -226,16 +301,21 @@ export default function SchoolDashboard() {
 
             {/* Jadwal • Keuangan • Pengumuman */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              {/* Jadwal (row 1, kiri) */}
+              {/* Jadwal (kiri) */}
               <div className="lg:col-span-6">
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
                   seeAllPath="semua-jadwal"
                 />
+                {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
+                  <div className="px-4 pt-2 text-xs opacity-70">
+                    Memuat jadwal hari ini…
+                  </div>
+                )}
               </div>
 
-              {/* Keuangan (row 1, kanan) */}
+              {/* Keuangan (kanan) */}
               <div className="lg:col-span-6 space-y-4 min-w-0">
                 <SectionCard palette={palette}>
                   <div className="p-4 pb-1 font-medium">Snapshot Keuangan</div>
@@ -243,13 +323,13 @@ export default function SchoolDashboard() {
                     <MiniStat
                       palette={palette}
                       label="Tertagih Bulan Ini"
-                      value={formatIDR(data?.finance.paidThisMonth ?? 0)}
+                      value={formatIDR(homeQ.data?.finance.paidThisMonth ?? 0)}
                     />
                     <MiniStat
                       palette={palette}
                       label="Tunggakan"
-                      value={`${data?.finance.unpaidCount ?? 0} tagihan`}
-                      sub={formatIDR(data?.finance.unpaidTotal ?? 0)}
+                      value={`${homeQ.data?.finance.unpaidCount ?? 0} tagihan`}
+                      sub={formatIDR(homeQ.data?.finance.unpaidTotal ?? 0)}
                       tone="warning"
                     />
                   </div>
@@ -257,7 +337,7 @@ export default function SchoolDashboard() {
 
                 <BillsSectionCard
                   palette={palette}
-                  bills={data?.finance.outstandingBills ?? []}
+                  bills={homeQ.data?.finance.outstandingBills ?? []}
                   dateFmt={dateFmt}
                   formatIDR={formatIDR}
                   seeAllPath="semua-tagihan"
@@ -266,22 +346,27 @@ export default function SchoolDashboard() {
                 />
               </div>
 
-              {/* Pengumuman (row 2, full width) */}
+              {/* Pengumuman (full width) */}
               <div className="lg:col-span-12">
                 <div className="px-4 pb-4">
                   <AnnouncementsList
                     palette={palette}
-                    items={data?.announcements ?? []}
+                    items={homeQ.data?.announcements ?? []}
                     dateFmt={dateFmt}
-                    seeAllPath="semua-pengumuman" // halaman list
-                    getDetailHref={(a) => `tryout-ujian-tahfizh`} // detail per item
+                    seeAllPath="semua-pengumuman"
+                    getDetailHref={(a) => `tryout-ujian-tahfizh`}
                   />
                 </div>
               </div>
             </section>
 
-            {isLoading && (
+            {(homeQ.isLoading || statsQ.isLoading) && (
               <div className="text-sm opacity-70">Memuat data dashboard…</div>
+            )}
+            {statsQ.isError && (
+              <div className="text-xs opacity-70">
+                Gagal memuat statistik lembaga. Menampilkan data sementara.
+              </div>
             )}
           </div>
         </div>
@@ -339,6 +424,7 @@ function KpiTile({
     </SectionCard>
   );
 }
+
 function MiniStat({
   palette,
   label,
@@ -358,7 +444,6 @@ function MiniStat({
       className="p-3 rounded-xl border w-full"
       style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
-      {/* Header: Label + Badge */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
         <div
           className="text-xs font-medium leading-tight md:flex-1 truncate"
@@ -374,13 +459,9 @@ function MiniStat({
           {label.includes("Tunggakan") ? "Perlu perhatian" : "OK"}
         </Badge>
       </div>
-
-      {/* Value */}
       <div className="text-lg md:text-xl font-semibold leading-tight mb-1">
         {value}
       </div>
-
-      {/* Subtext */}
       {sub && (
         <div
           className="text-xs leading-relaxed"

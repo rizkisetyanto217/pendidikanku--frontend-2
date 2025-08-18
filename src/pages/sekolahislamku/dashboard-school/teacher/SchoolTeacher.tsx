@@ -5,6 +5,7 @@ import axios from "@/lib/axios";
 
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 import {
   SectionCard,
@@ -30,30 +31,18 @@ import {
 import TambahGuru from "../components/Guru/modal/TambahGuru";
 import UploadFileGuru from "../components/Guru/modal/UploadFileGuru";
 
-
-// ⬇️ Import modal yang dipisah
-
-
 /* ================= Types ================= */
 export type TeacherStatus = "aktif" | "nonaktif" | "alumni";
 
 export interface TeacherItem {
-  id: string;
+  id: string; // masjid_teachers_id
   nip?: string;
-  name: string;
+  name: string; // user_name
   subject?: string;
   gender?: "L" | "P";
   phone?: string;
   email?: string;
-  status: TeacherStatus;
-}
-
-interface TeachersApiResponse {
-  list: TeacherItem[];
-  total: number;
-  byGender?: { L?: number; P?: number };
-  aktifCount?: number;
-  subjects?: string[];
+  status: TeacherStatus; // default "aktif" (endpoint belum kirim)
 }
 
 interface TeacherStats {
@@ -62,6 +51,24 @@ interface TeacherStats {
   P: number;
   aktif: number;
 }
+
+/** Response: GET /api/a/masjid-teachers/by-masjid */
+type TeachersByMasjidResponse = {
+  code: number;
+  status: string;
+  message: string;
+  data: {
+    total: number;
+    teachers: Array<{
+      masjid_teachers_id: string;
+      masjid_teachers_masjid_id: string;
+      masjid_teachers_user_id: string;
+      user_name: string;
+      masjid_teachers_created_at: string;
+      masjid_teachers_updated_at: string;
+    }>;
+  };
+};
 
 /* ================= Helpers ================= */
 const genderLabel = (gender?: "L" | "P"): string =>
@@ -507,56 +514,104 @@ export default function TeachersPage() {
   const { isDark } = useHtmlDarkMode();
   const theme: Palette = isDark ? colors.dark : colors.light;
 
-  // Modal tambah guru
+  // Modal
   const [openAdd, setOpenAdd] = useState(false);
-  // upload file
   const [openImport, setOpenImport] = useState(false);
-
 
   // Filter states
   const [q, setQ] = useState("");
   const [mapel, setMapel] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<TeacherStatus | "semua">("semua");
 
-  // API query
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["teachers", { q, mapel, status }],
-    queryFn: async (): Promise<TeachersApiResponse> => {
-      const params: Record<string, string> = {};
-      if (q) params.q = q;
-      if (mapel) params.subject = mapel;
-      if (status !== "semua") params.status = status;
-      const response = await axios.get("/api/a/teachers", { params });
-      return response.data;
+  // Current user → ambil masjidId
+  const { user } = useCurrentUser();
+  const masjidId = useMemo(() => {
+    const u: any = user || {};
+    return (
+      u.masjid_id ||
+      u.lembaga_id ||
+      u.mosque_id ||
+      u?.masjid?.id ||
+      u?.lembaga?.id ||
+      (Array.isArray(u?.masjid_teacher_ids) && u.masjid_teacher_ids[0]) ||
+      ""
+    );
+  }, [user]);
+
+  // Fetch: /api/a/masjid-teachers/by-masjid
+  const {
+    data: resp,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["masjid-teachers", masjidId],
+    enabled: !!masjidId, // tunggu masjidId siap
+    staleTime: 2 * 60 * 1000,
+    queryFn: async (): Promise<TeachersByMasjidResponse> => {
+      const res = await axios.get("/api/a/masjid-teachers/by-masjid", {
+        params: masjidId ? { masjid_id: masjidId } : undefined,
+      });
+      return res.data;
     },
   });
 
-  const teachers = data?.list ?? [];
-  const subjects = data?.subjects ?? DEFAULT_SUBJECTS;
+  // Mapping & filter lokal
+  const teachersRaw = resp?.data?.teachers ?? [];
+  const teachersAll: TeacherItem[] = useMemo(
+    () =>
+      teachersRaw.map((t) => ({
+        id: t.masjid_teachers_id,
+        name: t.user_name,
+        status: "aktif", // default sampai endpoint kirim status
+      })),
+    [teachersRaw]
+  );
 
+  const teachers = useMemo(() => {
+    let list = teachersAll;
+    if (q.trim()) {
+      const needle = q.trim().toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.name.toLowerCase().includes(needle) ||
+          (t.nip ?? "").toLowerCase().includes(needle) ||
+          (t.email ?? "").toLowerCase().includes(needle)
+      );
+    }
+    if (status !== "semua") {
+      list = list.filter((t) => t.status === status);
+    }
+    // mapel filter di-skip sementara (subject belum ada di API ini)
+    return list;
+  }, [teachersAll, q, status]);
+
+  const subjects = DEFAULT_SUBJECTS; // placeholder sampai backend kirim subjects
+
+  // Stats
   const stats: TeacherStats = useMemo(() => {
-    const total = data?.total ?? teachers.length;
-    const L =
-      data?.byGender?.L ?? teachers.filter((t) => t.gender === "L").length;
-    const P =
-      data?.byGender?.P ?? teachers.filter((t) => t.gender === "P").length;
-    const aktif =
-      data?.aktifCount ?? teachers.filter((t) => t.status === "aktif").length;
+    const total = resp?.data?.total ?? teachersAll.length;
+    const aktif = teachers.filter((t) => t.status === "aktif").length;
+    // gender belum tersedia → 0 (atau hitung jika nanti ada)
+    const L = teachers.filter((t) => t.gender === "L").length;
+    const P = teachers.filter((t) => t.gender === "P").length;
     return { total, L, P, aktif };
-  }, [data, teachers]);
+  }, [resp, teachers, teachersAll]);
 
   return (
     <>
-   
       <TambahGuru
         open={openAdd}
         onClose={() => setOpenAdd(false)}
         palette={theme}
         subjects={subjects}
+        masjidId={masjidId}
+        onCreated={() => refetch()}
       />
       <UploadFileGuru
-        open={openImport} // was: false
-        onClose={() => setOpenImport(false)} // was: () => {}
+        open={openImport}
+        onClose={() => setOpenImport(false)}
         palette={theme}
       />
 
@@ -588,7 +643,7 @@ export default function TeachersPage() {
           <TeachersTable
             theme={theme}
             teachers={teachers}
-            isLoading={isLoading}
+            isLoading={isLoading && !!masjidId}
             isError={isError}
             isFetching={isFetching}
             onRefetch={refetch}

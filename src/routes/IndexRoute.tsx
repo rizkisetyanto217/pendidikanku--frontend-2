@@ -151,8 +151,8 @@ import TeacherClass from "@/pages/sekolahislamku/dashboard-teacher/class/Teacher
 import TeacherAttendance from "@/pages/sekolahislamku/dashboard-teacher/attendance/TeacherAttendance";
 import TeacherGrading from "@/pages/sekolahislamku/dashboard-teacher/grade/TeacherGrade";
 import TeacherAnnouncements from "@/pages/sekolahislamku/dashboard-teacher/announcement/TeacherAnnouncement";
-import SchoolStudent from "@/pages/sekolahislamku/dashboard-school/student/SchoolStudent";
-import SchoolTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/StudentTeacher";
+import SchoolStudent from "@/pages/sekolahislamku/dashboard-school/student-(pending)/SchoolStudent";
+import SchoolTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/SchoolTeacher";
 import SchoolClasses from "@/pages/sekolahislamku/dashboard-school/class/SchoolClass";
 import SchoolAttendance from "@/pages/sekolahislamku/dashboard-school/attendance/SchoolAttendance";
 import SchoolFinance from "@/pages/sekolahislamku/dashboard-school/finance/SchoolFinance";
