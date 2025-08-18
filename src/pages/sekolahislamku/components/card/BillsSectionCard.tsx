@@ -25,9 +25,6 @@ interface BillsSectionCardProps {
   className?: string;
 }
 
-// Jika Btn belum memiliki variant "ghost", tambahkan di type
-type BtnVariant = "primary" | "secondary" | "success" | "destructive" | "ghost";
-
 // Mapping status ke variant Badge
 const badgeVariants = {
   unpaid: "secondary",
@@ -99,7 +96,7 @@ const BillCard = ({
         >
           <Btn
             size="sm"
-            variant="primary"
+            variant="outline"
             palette={palette}
             className="w-full md:w-auto md:px-6 md:mt-2"
           >
