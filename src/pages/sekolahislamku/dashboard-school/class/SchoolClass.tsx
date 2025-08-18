@@ -1,5 +1,6 @@
+// src/pages/sekolahislamku/pages/classes/SchoolClasses.tsx
 import { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
 import {
   BookOpen,
@@ -10,6 +11,7 @@ import {
   Plus,
   Eye,
   Pencil,
+  Layers,
 } from "lucide-react";
 
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -24,20 +26,24 @@ import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "../../components/home/SchoolSideBarNav";
 import TambahKelas, {
   type ClassRow as NewClassRow,
-} from "./components/TambahKelas";
+} from "./components/AddClass";
+import TambahLevel from "./components/AddLevel";
+import axios from "@/lib/axios";
 
 /* =============== Types =============== */
 export type ClassStatus = "active" | "inactive";
 
+// UI row = section
 export type ClassRow = {
   id: string;
   code: string;
   name: string;
-  grade: string; // diturunkan dari code/name (jika ada angka), fallback "-"
-  homeroom: string; // dari teacher.user_name
-  studentCount: number; // belum ada di API → 0 dulu
-  schedule: string; // render dari schedule JSON
-  status: ClassStatus; // dari class_sections_is_active
+  grade: string;
+  homeroom: string;
+  studentCount: number;
+  schedule: string;
+  status: ClassStatus;
+  classId?: string; // parent level id
 };
 
 export type ClassStats = {
@@ -47,30 +53,21 @@ export type ClassStats = {
   homerooms: number;
 };
 
-export type ClassesPayload = {
-  dateISO: string;
-  stats: ClassStats;
-  items: ClassRow[];
-};
-
-/* ======== API Shapes (sesuai contoh respons) ========= */
 type ApiSchedule = {
   start?: string;
   end?: string;
   days?: string[];
   location?: string;
 };
-
 type ApiTeacherLite = {
   id: string;
   user_name: string;
   email: string;
   is_active: boolean;
 };
-
 type ApiClassSection = {
   class_sections_id: string;
-  class_sections_class_id: string;
+  class_sections_class_id: string; // LEVEL ID
   class_sections_masjid_id: string;
   class_sections_teacher_id?: string | null;
   class_sections_slug: string;
@@ -83,10 +80,29 @@ type ApiClassSection = {
   class_sections_updated_at: string;
   teacher?: ApiTeacherLite | null;
 };
+type ApiListSections = { data: ApiClassSection[]; message: string };
 
-type ApiListResponse = {
-  data: ApiClassSection[];
-  message: string;
+// ===== LEVEL (sesuai API: class_*) =====
+type ApiLevel = {
+  class_id: string;
+  class_masjid_id: string;
+  class_name: string;
+  class_slug: string;
+  class_description?: string | null;
+  class_level?: string | null;
+  class_fee_monthly_idr?: number | null;
+  class_is_active: boolean;
+  class_created_at: string;
+};
+type ApiListLevels = { data: ApiLevel[]; message: string };
+
+type Level = {
+  id: string;
+  name: string;
+  slug: string;
+  level?: string | null;
+  fee?: number | null;
+  is_active: boolean;
 };
 
 /* =============== Helpers =============== */
@@ -126,24 +142,41 @@ const getShiftFromSchedule = (
   return hh < 12 ? "Pagi" : "Sore";
 };
 
-/* =============== Fetcher =============== */
-import axios from "@/lib/axios";
-
+/* =============== Fetchers =============== */
 async function fetchClassSections({
   q,
   status,
+  classId,
 }: {
   q?: string;
   status?: ClassStatus | "all";
+  classId?: string; // filter by level
 }): Promise<ApiClassSection[]> {
   const params: Record<string, any> = {};
   if (q && q.trim().length > 0) params.search = q.trim();
   if (status && status !== "all") params.active_only = status === "active";
-  // sort default dari server: created_at desc
-  const res = await axios.get<ApiListResponse>("/api/a/class-sections", {
+  if (classId) params.class_id = classId; // server-side filter by level
+  const res = await axios.get<ApiListSections>("/api/a/class-sections", {
     params,
   });
   return res.data?.data ?? [];
+}
+
+function mapLevelRow(x: ApiLevel): Level {
+  return {
+    id: x.class_id,
+    name: x.class_name,
+    slug: x.class_slug,
+    level: x.class_level ?? null,
+    fee: x.class_fee_monthly_idr ?? null,
+    is_active: x.class_is_active,
+  };
+}
+
+async function fetchLevels(): Promise<Level[]> {
+  const res = await axios.get<ApiListLevels>("/api/a/classes");
+  const rows = Array.isArray(res.data?.data) ? res.data.data : [];
+  return rows.map(mapLevelRow);
 }
 
 /* =============== Page =============== */
@@ -152,31 +185,40 @@ export default function SchoolClasses() {
   const palette: Palette = isDark ? colors.dark : colors.light;
 
   const [sp, setSp] = useSearchParams();
+  const qc = useQueryClient();
+
   const [openTambah, setOpenTambah] = useState(false);
+  const [openTambahLevel, setOpenTambahLevel] = useState(false);
 
   // Query params (UI)
   const q = (sp.get("q") ?? "").trim();
-  const grade = sp.get("grade") ?? "all";
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
+  const levelId = sp.get("level_id") ?? ""; // filter berdasarkan LEVEL
 
-  // Fetch dari API
+  // Fetch LEVELS
+  const levelsQ = useQuery({
+    queryKey: ["levels"],
+    queryFn: fetchLevels,
+    staleTime: 60_000,
+  });
+
+  // Fetch SECTIONS
   const {
     data: apiItems,
     isLoading,
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["class-sections", q, status],
-    queryFn: () => fetchClassSections({ q, status }),
+    queryKey: ["class-sections", q, status, levelId],
+    queryFn: () =>
+      fetchClassSections({ q, status, classId: levelId || undefined }),
     staleTime: 60_000,
   });
 
-  // Refetch ketika modal tambah ditutup (misal habis create)
+  // Refetch sections setelah modal tambah kelas ditutup
   useEffect(() => {
-    if (!openTambah) {
-      refetch();
-    }
+    if (!openTambah) refetch();
   }, [openTambah, refetch]);
 
   // Map API → UI rows
@@ -184,48 +226,51 @@ export default function SchoolClasses() {
     const arr = apiItems ?? [];
     return arr.map((it) => ({
       id: it.class_sections_id,
+      classId: it.class_sections_class_id,
       code: it.class_sections_code ?? "-",
       name: it.class_sections_name,
       grade: parseGrade(it.class_sections_code, it.class_sections_name),
       homeroom: it.teacher?.user_name ?? "-",
-      studentCount: 0, // Belum tersedia di API
+      studentCount: 0,
       schedule: scheduleToText(it.class_sections_schedule),
       status: it.class_sections_is_active ? "active" : "inactive",
     }));
   }, [apiItems]);
 
-  // Filter client-side untuk grade & shift (karena API belum support)
+  // Filter client-side: Shift (level sudah difilter di server jika levelId ada)
   const filteredRows = useMemo(() => {
     return mappedRows.filter((r) => {
-      const okGrade = grade === "all" ? true : r.grade === grade;
-      const rowShift = (() => {
-        const apiItem = (apiItems ?? []).find(
-          (x) => x.class_sections_id === r.id
-        );
-        return getShiftFromSchedule(apiItem?.class_sections_schedule);
-      })();
+      const apiItem = (apiItems ?? []).find(
+        (x) => x.class_sections_id === r.id
+      );
+      const rowShift = getShiftFromSchedule(apiItem?.class_sections_schedule);
       const okShift = shift === "all" ? true : rowShift === shift;
-      return okGrade && okShift;
+      return okShift;
     });
-  }, [mappedRows, grade, shift, apiItems]);
+  }, [mappedRows, shift, apiItems]);
 
-  // Stats (disusun dari hasil filter server + client)
+  // Stats
   const stats: ClassStats = useMemo(() => {
-    const total = mappedRows.length;
-    const active = mappedRows.filter((x) => x.status === "active").length;
-    const students = mappedRows.reduce((a, b) => a + (b.studentCount || 0), 0); // 0
-    const homerooms = new Set(mappedRows.map((x) => x.homeroom).filter(Boolean))
-      .size;
+    const total = filteredRows.length;
+    const active = filteredRows.filter((x) => x.status === "active").length;
+    const students = filteredRows.reduce(
+      (a, b) => a + (b.studentCount || 0),
+      0
+    );
+    const homerooms = new Set(
+      filteredRows.map((x) => x.homeroom).filter(Boolean)
+    ).size;
     return { total, active, students, homerooms };
-  }, [mappedRows]);
+  }, [filteredRows]);
 
-  // Opsi grade dinamis (dari hasil map)
-  const grades = useMemo(() => {
-    const set = new Set<string>();
-    mappedRows.forEach((x) => {
-      if (x.grade && x.grade !== "-") set.add(x.grade);
+  // Aggregasi jumlah section per level (untuk badge di chip level)
+  const sectionCountByLevel = useMemo(() => {
+    const m = new Map<string, number>();
+    mappedRows.forEach((r) => {
+      if (!r.classId) return;
+      m.set(r.classId, (m.get(r.classId) ?? 0) + 1);
     });
-    return Array.from(set).sort((a, b) => Number(a) - Number(b));
+    return m;
   }, [mappedRows]);
 
   const setParam = (k: string, v: string) => {
@@ -236,6 +281,7 @@ export default function SchoolClasses() {
   };
 
   const items = filteredRows;
+  const levels = levelsQ.data ?? [];
 
   return (
     <div
@@ -255,33 +301,80 @@ export default function SchoolClasses() {
           <SchoolSidebarNav palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
-            {/* Header + actions */}
-            <section className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span
-                  className="h-10 w-10 grid place-items-center rounded-xl"
-                  style={{
-                    background: palette.primary2,
-                    color: palette.primary,
-                  }}
-                >
-                  <BookOpen size={18} />
-                </span>
-                <div>
-                  <div className="text-lg font-semibold">Kelas</div>
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
-                    Kelola data kelas, wali, dan kapasitas.
-                  </div>
+            {/* Header (tanpa tombol aksi) */}
+            <section className="flex items-start gap-3">
+              <span
+                className="h-10 w-10 grid place-items-center rounded-xl"
+                style={{
+                  background: palette.primary2,
+                  color: palette.primary,
+                }}
+              >
+                <BookOpen size={18} />
+              </span>
+              <div>
+                <div className="text-lg font-semibold">Kelas & Tingkat</div>
+                <div className="text-sm" style={{ color: palette.silver2 }}>
+                  Kelola level (tingkat) dan kelas/section di bawahnya.
                 </div>
               </div>
+            </section>
 
-              <div className="flex items-center gap-2">
-                <Btn palette={palette} onClick={() => setOpenTambah(true)}>
-                  <Plus className="mr-2" size={16} />
-                  Tambah Kelas
+            {/* Panel Tingkat (Level) — tombol Tambah Level dipindah ke header kartu ini */}
+            <SectionCard palette={palette}>
+              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
+                <div className="font-medium flex items-center gap-2">
+                  <Layers size={18} /> Tingkat
+                </div>
+                <Btn
+                  palette={palette}
+                  variant="outline"
+                  onClick={() => setOpenTambahLevel(true)}
+                >
+                  <Layers size={16} className="mr-2" />
+                  Tambah Level
                 </Btn>
               </div>
-            </section>
+
+              <div className="px-4 md:px-5 pb-4 flex flex-wrap gap-2">
+                <button
+                  className={`px-3 py-1.5 rounded-lg border text-sm ${!levelId ? "font-semibold" : ""}`}
+                  style={{
+                    borderColor: palette.silver1,
+                    background: !levelId ? palette.primary2 : palette.white1,
+                    color: !levelId ? palette.primary : palette.quaternary,
+                  }}
+                  onClick={() => setParam("level_id", "")}
+                >
+                  Semua Tingkat
+                </button>
+                {(levels ?? []).map((lv) => {
+                  const cnt = sectionCountByLevel.get(lv.id) ?? 0;
+                  const active = levelId === lv.id;
+                  return (
+                    <button
+                      key={lv.id}
+                      className={`px-3 py-1.5 rounded-lg border text-sm ${active ? "font-semibold" : ""}`}
+                      style={{
+                        borderColor: palette.silver1,
+                        background: active ? palette.primary2 : palette.white1,
+                        color: active ? palette.primary : palette.quaternary,
+                      }}
+                      onClick={() => setParam("level_id", lv.id)}
+                      title={`Kelas: ${cnt}`}
+                    >
+                      {lv.name}{" "}
+                      <span style={{ color: palette.silver2 }}>({cnt})</span>
+                    </button>
+                  );
+                })}
+                {levelsQ.isLoading && (
+                  <span className="text-sm" style={{ color: palette.silver2 }}>
+                    Memuat tingkat…
+                  </span>
+                )}
+              </div>
+            </SectionCard>
 
             {/* KPI mini */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -289,7 +382,7 @@ export default function SchoolClasses() {
                 palette={palette}
                 icon={<Users size={16} />}
                 label="Total Siswa"
-                value={stats.students} // 0 untuk sekarang (belum ada di API)
+                value={stats.students}
               />
               <MiniKPI
                 palette={palette}
@@ -343,28 +436,6 @@ export default function SchoolClasses() {
                     className="text-xs mb-1"
                     style={{ color: palette.silver2 }}
                   >
-                    Tingkat (estimasi)
-                  </div>
-                  <select
-                    value={grade}
-                    onChange={(e) => setParam("grade", e.target.value)}
-                    className="w-full rounded-lg border px-3 py-2 bg-transparent"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    <option value="all">Semua</option>
-                    {grades.map((g) => (
-                      <option key={g} value={g}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
-                  >
                     Shift (dari jam mulai)
                   </div>
                   <select
@@ -400,9 +471,16 @@ export default function SchoolClasses() {
               </div>
             </SectionCard>
 
-            {/* Tabel */}
+            {/* Tabel Kelas (Sections) — tombol Tambah Kelas dipindah ke header kartu ini */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 font-medium">Daftar Kelas</div>
+              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
+                <div className="font-medium">Daftar Kelas</div>
+                <Btn palette={palette} onClick={() => setOpenTambah(true)}>
+                  <Plus className="mr-2" size={16} />
+                  Tambah Kelas
+                </Btn>
+              </div>
+
               <div className="px-4 md:px-5 pb-4 overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead
@@ -423,7 +501,6 @@ export default function SchoolClasses() {
                       <th className="py-2 pr-2 text-right">Aksi</th>
                     </tr>
                   </thead>
-
                   <tbody
                     style={{ borderColor: palette.silver1 }}
                     className="divide-y"
@@ -513,14 +590,23 @@ export default function SchoolClasses() {
         </div>
       </main>
 
-      {/* Modal Tambah Kelas */}
+      {/* Modal */}
+      <TambahLevel
+        open={openTambahLevel}
+        onClose={() => setOpenTambahLevel(false)}
+        onCreated={() => {
+          // refresh list level setelah create
+          qc.invalidateQueries({ queryKey: ["levels"] });
+          setOpenTambahLevel(false);
+        }}
+        palette={palette}
+      />
       <TambahKelas
         open={openTambah}
         onClose={() => setOpenTambah(false)}
         palette={palette}
         onCreated={(row: NewClassRow) => {
           console.log("Kelas baru dibuat:", row);
-          // Opsional: refetch di useEffect setelah modal close
         }}
       />
     </div>

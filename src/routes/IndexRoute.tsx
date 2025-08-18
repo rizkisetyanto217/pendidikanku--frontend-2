@@ -163,8 +163,9 @@ import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/cla
 
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/components/routes";
+import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/manage/SchoolManageClass";
 
-// import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";  
+// import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
 export default function AppRoutes() {
   return (
@@ -555,14 +556,12 @@ export default function AppRoutes() {
       </Route>
       <Route path=":slug/sekolah" element={<StudentLayout />}>
         <Route index element={<SchoolDashboard />} />
-
-        {schoolRoutes.map((route) => (
-          <Route key={route.path} path={route.path} element={route.element} />
-        ))}
-
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="guru" element={<SchoolTeacher />} />
-        <Route path="kelas" element={<SchoolClasses />} />
+        <Route path="kelas">
+          <Route index element={<SchoolClasses />} />
+          <Route path="detail/:id" element={<SchoolManageClass />} />
+        </Route>
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
         <Route path="pengumuman" element={<SchoolAnnouncement />} />

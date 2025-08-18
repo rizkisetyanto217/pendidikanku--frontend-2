@@ -42,7 +42,7 @@ export interface TeacherItem {
   gender?: "L" | "P";
   phone?: string;
   email?: string;
-  status: TeacherStatus; // default "aktif" (endpoint belum kirim)
+  status: TeacherStatus; // default "aktif"
 }
 
 interface TeacherStats {
@@ -96,21 +96,21 @@ const PageHeader = ({
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
     <div className="flex items-center gap-3">
       <div
-        className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: theme.white3, color: theme.quaternary }}
+        className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl grid place-items-center flex-shrink-0"
+        style={{ background: theme.primary2, color: theme.primary }}
       >
         <UserCog size={16} className="sm:w-5 sm:h-5" />
       </div>
       <div className="min-w-0 flex-1">
         <h1
           className="text-lg sm:text-xl font-semibold truncate"
-          style={{ color: theme.quaternary }}
+          style={{ color: theme.black1 }}
         >
           Guru
         </h1>
         <p
           className="text-xs sm:text-sm line-clamp-1"
-          style={{ color: theme.secondary }}
+          style={{ color: theme.silver2 }}
         >
           Kelola data pengajar, filter, dan tindakan cepat.
         </p>
@@ -123,6 +123,7 @@ const PageHeader = ({
         className="flex items-center gap-1.5 text-xs sm:text-sm"
         size="sm"
         palette={theme}
+        variant="outline"
       >
         <Upload size={14} />
         <span className="hidden sm:inline">Import CSV</span>
@@ -158,12 +159,12 @@ const StatCard = ({
   <SectionCard palette={theme} className="p-3 sm:p-4">
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-xs sm:text-sm" style={{ color: theme.secondary }}>
+        <p className="text-xs sm:text-sm" style={{ color: theme.silver2 }}>
           {title}
         </p>
         <p
           className="text-lg sm:text-2xl font-semibold"
-          style={{ color: theme.quaternary }}
+          style={{ color: theme.black1 }}
         >
           {value}
         </p>
@@ -247,15 +248,19 @@ const FiltersSection = ({
     <div className="space-y-3">
       <div
         className="flex items-center gap-2 rounded-xl px-3 py-2.5 sm:py-2 border"
-        style={{ borderColor: theme.white3, background: theme.white1 }}
+        style={{ borderColor: theme.silver1, background: theme.white1 }}
       >
-        <Search size={16} className="flex-shrink-0" />
+        <Search
+          size={16}
+          className="flex-shrink-0"
+          style={{ color: theme.silver2 }}
+        />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Cari nama, NIP, email…"
           className="w-full bg-transparent outline-none text-sm"
-          style={{ color: theme.quaternary }}
+          style={{ color: theme.black1 }}
         />
       </div>
 
@@ -264,12 +269,12 @@ const FiltersSection = ({
           <div
             className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
             style={{
-              borderColor: theme.white3,
+              borderColor: theme.silver1,
               background: theme.white1,
-              color: theme.quaternary,
+              color: theme.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: theme.secondary }}>
+            <div className="text-xs mb-1" style={{ color: theme.silver2 }}>
               Mapel
             </div>
             <select
@@ -289,12 +294,12 @@ const FiltersSection = ({
           <div
             className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
             style={{
-              borderColor: theme.white3,
+              borderColor: theme.silver1,
               background: theme.white1,
-              color: theme.quaternary,
+              color: theme.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: theme.secondary }}>
+            <div className="text-xs mb-1" style={{ color: theme.silver2 }}>
               Status
             </div>
             <select
@@ -332,38 +337,42 @@ const TeacherTableRow = ({
   teacher: TeacherItem;
   theme: Palette;
 }) => (
-  <tr className="border-t" style={{ borderColor: theme.white3 }}>
+  <tr
+    className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+    style={{ borderColor: theme.silver1 }}
+  >
     <td className="py-3 align-top">
-      <div className="font-medium" style={{ color: theme.quaternary }}>
+      <div className="font-medium" style={{ color: theme.black1 }}>
         {teacher.nip ?? "-"}
       </div>
     </td>
     <td className="py-3 align-top">
-      <div className="font-medium" style={{ color: theme.quaternary }}>
+      <div className="font-medium" style={{ color: theme.black1 }}>
         {teacher.name}
       </div>
       {teacher.email && (
-        <div className="text-xs" style={{ color: theme.secondary }}>
+        <div className="text-xs" style={{ color: theme.silver2 }}>
           {teacher.email}
         </div>
       )}
     </td>
-    <td className="py-3 align-top" style={{ color: theme.primary }}>
+    <td className="py-3 align-top" style={{ color: theme.black1 }}>
       {teacher.subject ?? "-"}
     </td>
-    <td className="py-3 align-top" style={{ color: theme.quaternary }}>
+    <td className="py-3 align-top" style={{ color: theme.black1 }}>
       {genderLabel(teacher.gender)}
     </td>
     <td className="py-3 align-top">
       <div
         className="flex items-center gap-3 text-sm"
-        style={{ color: theme.quaternary }}
+        style={{ color: theme.black1 }}
       >
         {teacher.phone && (
           <a
             href={`tel:${teacher.phone}`}
             className="flex items-center gap-1 hover:underline"
             title={`Telepon ${teacher.phone}`}
+            style={{ color: theme.primary }}
           >
             <Phone size={14} /> {teacher.phone}
           </a>
@@ -373,6 +382,7 @@ const TeacherTableRow = ({
             href={`mailto:${teacher.email}`}
             className="flex items-center gap-1 hover:underline"
             title={`Email ${teacher.email}`}
+            style={{ color: theme.primary }}
           >
             <Mail size={14} /> Email
           </a>
@@ -399,12 +409,17 @@ const TeacherTableRow = ({
     <td className="py-3 align-top">
       <div className="flex items-center gap-2 justify-end">
         <NavLink to={`/sekolah/guru/${teacher.id}`}>
-          <Btn size="sm" palette={theme} className="flex items-center gap-1">
+          <Btn
+            size="sm"
+            palette={theme}
+            variant="quaternary"
+            className="flex items-center gap-1"
+          >
             Detail <ChevronRight size={14} />
           </Btn>
         </NavLink>
         <NavLink to={`/sekolah/absensi?guru=${teacher.id}`}>
-          <Btn size="sm" palette={theme}>
+          <Btn size="sm" palette={theme} variant="outline">
             Absensi
           </Btn>
         </NavLink>
@@ -435,7 +450,10 @@ const TeachersTable = ({
     <div className="overflow-auto">
       <table className="min-w-[800px] w-full">
         <thead>
-          <tr className="text-left text-sm" style={{ color: theme.secondary }}>
+          <tr
+            className="text-left text-sm border-b"
+            style={{ color: theme.silver2, borderColor: theme.silver1 }}
+          >
             <th className="py-3">NIP</th>
             <th>Nama</th>
             <th>Mapel</th>
@@ -451,7 +469,7 @@ const TeachersTable = ({
               <td
                 colSpan={7}
                 className="py-8 text-center"
-                style={{ color: theme.secondary }}
+                style={{ color: theme.silver2 }}
               >
                 Memuat data…
               </td>
@@ -478,7 +496,7 @@ const TeachersTable = ({
               <td
                 colSpan={7}
                 className="py-10 text-center"
-                style={{ color: theme.secondary }}
+                style={{ color: theme.silver2 }}
               >
                 Belum ada data guru.
               </td>
@@ -495,7 +513,7 @@ const TeachersTable = ({
 
     <div
       className="p-3 sm:mt-3 text-xs flex items-center justify-between border-t"
-      style={{ color: theme.secondary, borderColor: theme.white3 }}
+      style={{ color: theme.silver2, borderColor: theme.silver1 }}
     >
       <div>
         {isFetching ? "Memuat ulang…" : `Menampilkan ${teachers.length} data`}
@@ -547,7 +565,7 @@ export default function TeachersPage() {
     isFetching,
   } = useQuery({
     queryKey: ["masjid-teachers", masjidId],
-    enabled: !!masjidId, // tunggu masjidId siap
+    enabled: !!masjidId,
     staleTime: 2 * 60 * 1000,
     queryFn: async (): Promise<TeachersByMasjidResponse> => {
       const res = await axios.get("/api/a/masjid-teachers/by-masjid", {
@@ -564,7 +582,7 @@ export default function TeachersPage() {
       teachersRaw.map((t) => ({
         id: t.masjid_teachers_id,
         name: t.user_name,
-        status: "aktif", // default sampai endpoint kirim status
+        status: "aktif", // default
       })),
     [teachersRaw]
   );
@@ -583,17 +601,16 @@ export default function TeachersPage() {
     if (status !== "semua") {
       list = list.filter((t) => t.status === status);
     }
-    // mapel filter di-skip sementara (subject belum ada di API ini)
+    // mapel filter di-skip sementara
     return list;
   }, [teachersAll, q, status]);
 
-  const subjects = DEFAULT_SUBJECTS; // placeholder sampai backend kirim subjects
+  const subjects = DEFAULT_SUBJECTS;
 
   // Stats
   const stats: TeacherStats = useMemo(() => {
     const total = resp?.data?.total ?? teachersAll.length;
     const aktif = teachers.filter((t) => t.status === "aktif").length;
-    // gender belum tersedia → 0 (atau hitung jika nanti ada)
     const L = teachers.filter((t) => t.gender === "L").length;
     const P = teachers.filter((t) => t.gender === "P").length;
     return { total, L, P, aktif };

@@ -355,6 +355,10 @@ export default function SchoolDashboard() {
                     dateFmt={dateFmt}
                     seeAllPath="semua-pengumuman"
                     getDetailHref={(a) => `tryout-ujian-tahfizh`}
+                    getEditHref={(a) => `/pengumuman/${a.slug ?? a.id}/edit`} // ⬅️ tambahkan ini
+                    onDelete={(a) => {
+                      /* panggil API hapus */
+                    }}
                   />
                 </div>
               </div>

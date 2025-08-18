@@ -100,8 +100,8 @@ export default function AnnouncementsListCard({
                   </div>
                 </Link>
 
-                {/* Right: actions (disembunyikan jika showActions = false) */}
-                {showActions && (onEdit || onDelete || getEditHref) && (
+                {/* Right: actions */}
+                {showActions && (
                   <div className="flex items-center gap-2 mt-3 md:mt-0 md:ml-4">
                     {onEdit ? (
                       <Btn
