@@ -42,32 +42,32 @@ const DEFAULT_NAVS: NavItem[] = [
   { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
 
-const DEFAULT_ACTIONS: QuickAction[] = [
-  {
-    label: "Pengumuman Baru",
-    icon: Megaphone,
-    onClick: () => alert("Buat Pengumuman"),
-    variant: "secondary",
-  },
-  {
-    label: "Tambah Event",
-    icon: Plus,
-    onClick: () => alert("Tambah Event"),
-    variant: "quaternary",
-  },
-  {
-    label: "Buat Tagihan",
-    icon: Wallet,
-    onClick: () => alert("Buat Tagihan"),
-    variant: "outline",
-  },
-];
+// const DEFAULT_ACTIONS: QuickAction[] = [
+//   {
+//     label: "Pengumuman Baru",
+//     icon: Megaphone,
+//     onClick: () => alert("Buat Pengumuman"),
+//     variant: "secondary",
+//   },
+//   {
+//     label: "Tambah Event",
+//     icon: Plus,
+//     onClick: () => alert("Tambah Event"),
+//     variant: "quaternary",
+//   },
+//   {
+//     label: "Buat Tagihan",
+//     icon: Wallet,
+//     onClick: () => alert("Buat Tagihan"),
+//     variant: "outline",
+//   },
+// ];
 
 export default function SchoolSidebarNav({
   palette,
   navs = DEFAULT_NAVS,
   showQuickActions = true,
-  quickActions = DEFAULT_ACTIONS,
+  // quickActions = DEFAULT_ACTIONS,
   className = "",
 }: {
   palette: Palette;
@@ -135,27 +135,7 @@ export default function SchoolSidebarNav({
         </ul>
       </SectionCard>
 
-      {showQuickActions && (
-        <SectionCard palette={palette} className="mt-3 p-3">
-          <div className="font-medium mb-2">Aksi Cepat</div>
-          <div className="grid grid-cols-1 gap-2">
-            {quickActions.map((a, i) => {
-              const Icon = a.icon;
-              return (
-                <Btn
-                  key={i}
-                  palette={palette}
-                  variant={a.variant ?? "outline"}
-                  onClick={a.onClick}
-                >
-                  <Icon className="mr-2" size={16} />
-                  {a.label}
-                </Btn>
-              );
-            })}
-          </div>
-        </SectionCard>
-      )}
+      
     </nav>
   );
 }

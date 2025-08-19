@@ -18,6 +18,7 @@ import TeacherTopBar from "../components/home/TeacherTopBar";
 
 import { Users } from "lucide-react";
 import ListJadwal from "./schedule/modal/ListJadwal";
+import TambahJadwal from "./components/dashboard/TambahJadwal";
 
 /* ================= Types ================ */
 interface Announcement {
@@ -200,6 +201,9 @@ export default function TeacherDashboard() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
 
+  // state tambah jadwal
+  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
+
   const { data, isLoading } = useQuery({
     queryKey: ["teacher-home"],
     queryFn: fetchTeacherHome,
@@ -263,6 +267,17 @@ export default function TeacherDashboard() {
         dateFmt={(iso) => dateFmtLong(iso)}
       />
 
+      <TambahJadwal
+        open={showTambahJadwal}
+        onClose={() => setShowTambahJadwal(false)}
+        palette={palette}
+        onSubmit={(item) => {
+          setScheduleItems((prev) =>
+            [...prev, item].sort((a, b) => a.time.localeCompare(b.time))
+          );
+        }}
+      />
+
       {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
@@ -274,24 +289,13 @@ export default function TeacherDashboard() {
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
               {/* Jadwal Hari Ini */}
               <div className="lg:col-span-6 xl:col-span-6">
+                {" "}
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
                   seeAllPath="/guru/kelas/jadwal"
                   addLabel="Tambah Jadwal"
-                  onAdd={() => {
-                    // UI only: contoh tambah item cepat
-                    const jam = prompt("Jam (HH:MM)?", "10:00") || "";
-                    const judul = prompt("Judul?", "Kegiatan Tambahan") || "";
-                    const ruang =
-                      prompt("Ruangan (opsional)?", "") || undefined;
-                    if (!jam || !judul) return;
-                    setScheduleItems((prev) =>
-                      [...prev, { time: jam, title: judul, room: ruang }].sort(
-                        (a, b) => a.time.localeCompare(b.time)
-                      )
-                    );
-                  }}
+                  onAdd={() => setShowTambahJadwal(true)}
                 />
               </div>
 
@@ -328,22 +332,12 @@ export default function TeacherDashboard() {
 
             {/* ================= Row 2: List Jadwal (semua) ================= */}
             <section>
+              {" "}
               <ListJadwal
                 palette={palette}
                 items={scheduleItems}
                 title="Daftar Jadwal"
-                onAdd={() => {
-                  // UI only: aksi sama seperti di kartu atas
-                  const jam = prompt("Jam (HH:MM)?", "13:00") || "";
-                  const judul = prompt("Judul?", "Kegiatan Baru") || "";
-                  const ruang = prompt("Ruangan (opsional)?", "") || undefined;
-                  if (!jam || !judul) return;
-                  setScheduleItems((prev) =>
-                    [...prev, { time: jam, title: judul, room: ruang }].sort(
-                      (a, b) => a.time.localeCompare(b.time)
-                    )
-                  );
-                }}
+                onAdd={() => setShowTambahJadwal(true)}
               />
             </section>
 
