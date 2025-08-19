@@ -1,5 +1,5 @@
-// src/pages/sekolahislamku/components/home/ParentTopBar.tsx
-import { Link, NavLink } from "react-router-dom";
+// src/pages/sekolahislamku/components/home/SchoolTopBar.tsx
+import { Link, NavLink, useParams } from "react-router-dom";
 import {
   CalendarDays,
   Bell,
@@ -7,22 +7,23 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  ClipboardCheck,
-  FileSpreadsheet,
+  UserCog,
+  BookOpen,
+  CheckSquare,
   Wallet,
-  CalendarDays as CalendarIcon,
+  Megaphone,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import { colors } from "@/constants/colorsThema";
 import { useEffect, useState } from "react";
 
-interface ParentTopBarProps {
+interface SchoolTopBarProps {
   palette: typeof colors.light;
   parentName?: string;
   hijriDate?: string;
   gregorianDate?: string;
   dateFmt?: (iso: string) => string;
-  title?: React.ReactNode; // custom title; jika ada, ikon brand disembunyikan
+  title?: React.ReactNode;
 }
 
 /* ===== Small Primitives (local) ===== */
@@ -68,19 +69,21 @@ function Btn({
 }
 
 /* ===== NAV items (sinkron dengan sidebar) ===== */
-type Item = {
-  to: string;
+type NavItem = {
+  path: string; // relatif terhadap /:slug
   label: string;
   icon: React.ComponentType<any>;
   end?: boolean;
 };
-const NAVS: Item[] = [
-  { to: "/sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/sekolah/progress", label: "Progress Anak", icon: ClipboardCheck },
-  { to: "/sekolah/finance", label: "Pembayaran", icon: Wallet },
-  { to: "/sekolah/jadwal", label: "Jadwal", icon: CalendarIcon },
-  { to: "/sekolah/pengumuman", label: "Pengumuman", icon: Bell },
-  { to: "/sekolah/rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
+
+// samakan dengan DEFAULT_NAVS di SchoolSidebarNav
+const MOBILE_NAVS: NavItem[] = [
+  { path: "sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "sekolah/guru", label: "Guru", icon: UserCog },
+  { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
+  { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
+  { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
+  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
 
 export default function SchoolTopBar({
@@ -89,8 +92,9 @@ export default function SchoolTopBar({
   gregorianDate,
   dateFmt,
   title,
-}: ParentTopBarProps) {
+}: SchoolTopBarProps) {
   const [open, setOpen] = useState(false);
+  const { slug } = useParams(); // << ambil slug
 
   useEffect(() => {
     if (open) {
@@ -105,6 +109,9 @@ export default function SchoolTopBar({
   // Ikon tampil hanya saat pakai brand default
   const isDefaultBrand = title == null;
   const brand = isDefaultBrand ? "SekolahIslamku" : title;
+
+  // helper buat bikin URL absolut dari path relatif
+  const withSlug = (path: string) => `/${slug}/${path}`;
 
   return (
     <>
@@ -156,7 +163,7 @@ export default function SchoolTopBar({
             </span>
             {hijriDate && <Badge palette={palette}>{hijriDate}</Badge>}
 
-            <Link to="/notifikasi">
+            <Link to={withSlug("notifikasi")}>
               <Btn palette={palette}>
                 <Bell className="mr-2" size={16} /> Notifikasi
               </Btn>
@@ -237,34 +244,20 @@ export default function SchoolTopBar({
           {/* nav list */}
           <nav className="px-2 pb-4" aria-label="Navigasi">
             <ul className="space-y-2">
-              {NAVS.map(({ to, label, icon: Icon, end }) => (
-                <li key={to}>
-                  <NavLink
-                    to={to}
-                    end={!!end}
-                    className="block focus:outline-none"
-                    onClick={() => setOpen(false)}
-                  >
-                    {({ isActive }) => (
-                      <div
-                        className={[
-                          "flex items-center gap-3 rounded-xl px-3 py-2 border transition-all",
-                        ].join(" ")}
-                        style={{
-                          background: isActive
-                            ? palette.primary2
-                            : palette.white1,
-                          borderColor: isActive
-                            ? palette.primary
-                            : palette.silver1,
-                          boxShadow: isActive
-                            ? `0 0 0 1px ${palette.primary} inset`
-                            : "none",
-                          color: isActive ? palette.primary : palette.black1,
-                        }}
-                      >
-                        <span
-                          className="h-7 w-7 grid place-items-center rounded-lg border"
+              {MOBILE_NAVS.map(({ path, label, icon: Icon, end }) => {
+                // FIXED: Gunakan withSlug untuk konsistensi dengan desktop
+                const to = withSlug(path);
+                return (
+                  <li key={to}>
+                    <NavLink
+                      to={to}
+                      end={!!end}
+                      className="block focus:outline-none"
+                      onClick={() => setOpen(false)}
+                    >
+                      {({ isActive }) => (
+                        <div
+                          className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all"
                           style={{
                             background: isActive
                               ? palette.primary2
@@ -272,24 +265,42 @@ export default function SchoolTopBar({
                             borderColor: isActive
                               ? palette.primary
                               : palette.silver1,
-                            color: isActive ? palette.primary : palette.silver2,
+                            boxShadow: isActive
+                              ? `0 0 0 1px ${palette.primary} inset`
+                              : "none",
+                            color: isActive ? palette.primary : palette.black1,
                           }}
                         >
-                          <Icon size={16} />
-                        </span>
-                        <span className="truncate">{label}</span>
-                      </div>
-                    )}
-                  </NavLink>
-                </li>
-              ))}
+                          <span
+                            className="h-7 w-7 grid place-items-center rounded-lg border"
+                            style={{
+                              background: isActive
+                                ? palette.primary2
+                                : palette.white1,
+                              borderColor: isActive
+                                ? palette.primary
+                                : palette.silver1,
+                              color: isActive
+                                ? palette.primary
+                                : palette.silver2,
+                            }}
+                          >
+                            <Icon size={16} />
+                          </span>
+                          <span className="truncate">{label}</span>
+                        </div>
+                      )}
+                    </NavLink>
+                  </li>
+                );
+              })}
             </ul>
 
             {/* Notifikasi shortcut */}
             <div className="mt-3 px-1">
-              <Link to="/notifikasi" onClick={() => setOpen(false)}>
+              <Link to={withSlug("notifikasi")} onClick={() => setOpen(false)}>
                 <div
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 border"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all hover:bg-opacity-50"
                   style={{
                     background: palette.white1,
                     borderColor: palette.silver1,

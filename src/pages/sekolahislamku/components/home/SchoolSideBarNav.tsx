@@ -39,7 +39,7 @@ const DEFAULT_NAVS: NavItem[] = [
   { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
   { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
   { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
-  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone }
+  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
 
 const DEFAULT_ACTIONS: QuickAction[] = [
@@ -78,6 +78,9 @@ export default function SchoolSidebarNav({
 }) {
   const { slug } = useParams(); // ambil slug dari URL
 
+  // helper function untuk membuat URL dengan slug
+  const withSlug = (path: string) => `/${slug}/${path}`;
+
   return (
     <nav
       className={`hidden lg:block w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto ${className}`}
@@ -86,7 +89,7 @@ export default function SchoolSidebarNav({
       <SectionCard palette={palette} className="p-2">
         <ul className="space-y-2">
           {navs.map(({ path, label, icon: Icon, end }) => {
-            const to = `/${slug}/${path}`; // inject slug
+            const to = withSlug(path); // gunakan helper function
             return (
               <li key={to}>
                 <NavLink

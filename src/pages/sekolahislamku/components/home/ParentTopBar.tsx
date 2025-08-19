@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/components/home/ParentTopBar.tsx
-import { Link, NavLink, useParams } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   CalendarDays,
   Bell,
@@ -7,43 +7,23 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  Users,
-  CheckSquare,
-  ClipboardList,
-  NotebookPen,
-  Megaphone,
+  ClipboardCheck,
+  FileSpreadsheet,
+  Wallet,
+  CalendarDays as CalendarIcon,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import { colors } from "@/constants/colorsThema";
 import { useEffect, useState } from "react";
 
-/* ============ Types ============ */
-type NavItem = {
-  to: string; // absolute path TANPA slug, contoh: "/guru/kelas"
-  label: string;
-  icon: React.ComponentType<any>;
-  end?: boolean;
-};
-
-interface TeacherTopBarProps {
+interface ParentTopBarProps {
   palette: typeof colors.light;
   parentName?: string;
   hijriDate?: string;
   gregorianDate?: string;
   dateFmt?: (iso: string) => string;
-  title?: React.ReactNode;
-  navs?: NavItem[]; // default = TEACHER_NAVS
+  title?: React.ReactNode; // custom title; jika ada, ikon brand disembunyikan
 }
-
-/* ============ Default NAV: GURU ============ */
-const TEACHER_NAVS: NavItem[] = [
-  { to: "/guru", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/guru/kelas", label: "Kelas Saya", icon: Users },
-  { to: "/guru/kehadiran", label: "Kehadiran", icon: CheckSquare },
-  { to: "/guru/penilaian", label: "Penilaian", icon: ClipboardList },
-  { to: "/guru/materials", label: "Materi & Tugas", icon: NotebookPen },
-  { to: "/guru/pengumuman", label: "Pengumuman", icon: Megaphone },
-];
 
 /* ===== Small Primitives (local) ===== */
 function Badge({
@@ -87,36 +67,43 @@ function Btn({
   );
 }
 
-/* ============ Component ============ */
-export default function TeacherTopBar({
+/* ===== NAV items (sinkron dengan sidebar) ===== */
+type Item = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  end?: boolean;
+};
+const NAVS: Item[] = [
+  { to: "/sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/sekolah/guru", label: "Guru", icon: ClipboardCheck },
+  { to: "/sekolah/finance", label: "Kelas", icon: Wallet },
+  { to: "/sekolah/jadwal", label: "Absensi", icon: CalendarIcon },
+  { to: "/sekolah/pengumuman", label: "Keuangan", icon: Bell },
+  { to: "/sekolah/rapor", label: "Pengumuman", icon: FileSpreadsheet },
+];
+
+// ✅ Ubah nama function agar sesuai dengan nama file
+export default function ParentTopBar({
   palette,
   hijriDate,
   gregorianDate,
   dateFmt,
   title,
-  navs,
-}: TeacherTopBarProps) {
+}: ParentTopBarProps) {
   const [open, setOpen] = useState(false);
-  const NAVS: NavItem[] = navs ?? TEACHER_NAVS;
-
-  // 👉 ambil slug & helper pembuat URL ber‑slug
-  const { slug } = useParams();
-  const withSlug = (path: string) => {
-    // path di sini adalah absolute tanpa slug, contoh: "/guru/kelas"
-    const prefix = slug ? `/${slug}` : "";
-    // hindari double slash
-    return `${prefix}${path.startsWith("/") ? path : `/${path}`}`;
-  };
 
   useEffect(() => {
-    if (!open) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = original;
-    };
+    if (open) {
+      const original = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = original;
+      };
+    }
   }, [open]);
 
+  // Ikon tampil hanya saat pakai brand default
   const isDefaultBrand = title == null;
   const brand = isDefaultBrand ? "SekolahIslamku" : title;
 
@@ -133,6 +120,7 @@ export default function TeacherTopBar({
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3">
           {/* kiri: brand + (mobile) menu button */}
           <div className="flex items-center gap-2">
+            {/* tombol menu (mobile) */}
             <button
               className="md:hidden -ml-1 mr-1 grid place-items-center h-9 w-9 rounded-xl"
               onClick={() => setOpen(true)}
@@ -169,8 +157,7 @@ export default function TeacherTopBar({
             </span>
             {hijriDate && <Badge palette={palette}>{hijriDate}</Badge>}
 
-            {/* ➜ notifikasi juga pakai slug */}
-            <Link to={withSlug("/notifikasi")}>
+            <Link to="/notifikasi">
               <Btn palette={palette}>
                 <Bell className="mr-2" size={16} /> Notifikasi
               </Btn>
@@ -188,20 +175,20 @@ export default function TeacherTopBar({
 
       {/* Mobile Drawer */}
       <div
-        className="md:hidden"
+        className={`md:hidden fixed inset-0 z-50 ${open ? "pointer-events-auto" : "pointer-events-none"}`}
         aria-hidden={!open}
-        style={{ pointerEvents: open ? "auto" : "none" }}
       >
         {/* overlay */}
         <div
-          className={`fixed inset-0 z-50 transition-opacity ${open ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-black bg-opacity-60 transition-opacity duration-300 ${
+            open ? "opacity-100" : "opacity-0"
+          }`}
           onClick={() => setOpen(false)}
-          style={{ background: "#0006" }}
         />
 
         {/* panel */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform transition-transform ${
+          className={`absolute inset-y-0 left-0 w-72 max-w-[85vw] transform transition-transform duration-300 ease-in-out ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
@@ -251,19 +238,37 @@ export default function TeacherTopBar({
           {/* nav list */}
           <nav className="px-2 pb-4" aria-label="Navigasi">
             <ul className="space-y-2">
-              {(navs ?? TEACHER_NAVS).map(({ to, label, icon: Icon, end }) => {
-                const abs = withSlug(to); // ➜ inject slug di sini
-                return (
-                  <li key={abs}>
-                    <NavLink
-                      to={abs}
-                      end={!!end}
-                      className="block focus:outline-none"
-                      onClick={() => setOpen(false)}
-                    >
-                      {({ isActive }) => (
-                        <div
-                          className="flex items-center gap-3 rounded-xl px-3 py-2 border transition-all"
+              {NAVS.map(({ to, label, icon: Icon, end }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={!!end}
+                    className={({ isActive }) =>
+                      `block focus:outline-none rounded-xl border transition-all ${
+                        isActive ? "bg-opacity-100" : "hover:bg-opacity-50"
+                      }`
+                    }
+                    style={({ isActive }) => ({
+                      background: isActive ? palette.primary2 : palette.white1,
+                      borderColor: isActive ? palette.primary : palette.silver1,
+                      boxShadow: isActive
+                        ? `0 0 0 1px ${palette.primary} inset`
+                        : "none",
+                    })}
+                    onClick={() => {
+                      console.log("Navigating to:", to); // Debug log
+                      setOpen(false);
+                    }}
+                  >
+                    {({ isActive }) => (
+                      <div
+                        className="flex items-center gap-3 px-3 py-2 cursor-pointer"
+                        style={{
+                          color: isActive ? palette.primary : palette.black1,
+                        }}
+                      >
+                        <span
+                          className="h-7 w-7 grid place-items-center rounded-lg border flex-shrink-0"
                           style={{
                             background: isActive
                               ? palette.primary2
@@ -271,42 +276,31 @@ export default function TeacherTopBar({
                             borderColor: isActive
                               ? palette.primary
                               : palette.silver1,
-                            boxShadow: isActive
-                              ? `0 0 0 1px ${palette.primary} inset`
-                              : "none",
-                            color: isActive ? palette.primary : palette.black1,
+                            color: isActive ? palette.primary : palette.silver2,
                           }}
                         >
-                          <span
-                            className="h-7 w-7 grid place-items-center rounded-lg border"
-                            style={{
-                              background: isActive
-                                ? palette.primary2
-                                : palette.white1,
-                              borderColor: isActive
-                                ? palette.primary
-                                : palette.silver1,
-                              color: isActive
-                                ? palette.primary
-                                : palette.silver2,
-                            }}
-                          >
-                            <Icon size={16} />
-                          </span>
-                          <span className="truncate">{label}</span>
-                        </div>
-                      )}
-                    </NavLink>
-                  </li>
-                );
-              })}
+                          <Icon size={16} />
+                        </span>
+                        <span className="truncate font-medium">{label}</span>
+                      </div>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
 
             {/* Notifikasi shortcut */}
             <div className="mt-3 px-1">
-              <Link to={withSlug("/notifikasi")} onClick={() => setOpen(false)}>
+              <Link
+                to="/notifikasi"
+                className="block focus:outline-none"
+                onClick={() => {
+                  console.log("Navigating to: /notifikasi"); // Debug log
+                  setOpen(false);
+                }}
+              >
                 <div
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 border"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2 border cursor-pointer hover:bg-opacity-50 transition-all"
                   style={{
                     background: palette.white1,
                     borderColor: palette.silver1,
@@ -314,7 +308,7 @@ export default function TeacherTopBar({
                   }}
                 >
                   <span
-                    className="h-7 w-7 grid place-items-center rounded-lg border"
+                    className="h-7 w-7 grid place-items-center rounded-lg border flex-shrink-0"
                     style={{
                       background: palette.white1,
                       borderColor: palette.silver1,
@@ -323,7 +317,7 @@ export default function TeacherTopBar({
                   >
                     <Bell size={16} />
                   </span>
-                  <span className="truncate">Notifikasi</span>
+                  <span className="truncate font-medium">Notifikasi</span>
                 </div>
               </Link>
             </div>
