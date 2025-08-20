@@ -28,8 +28,8 @@ import {
   Phone,
   Briefcase,
 } from "lucide-react";
-import TambahGuru from "../components/Guru/modal/TambahGuru";
-import UploadFileGuru from "../components/Guru/modal/UploadFileGuru";
+import TambahGuru from "../components/guru/modal/TambahGuru";
+import UploadFileGuru from "../components/guru/modal/UploadFileGuru";
 
 /* ================= Types ================= */
 export type TeacherStatus = "aktif" | "nonaktif" | "alumni";

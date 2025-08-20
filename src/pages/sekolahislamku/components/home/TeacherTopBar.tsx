@@ -169,12 +169,7 @@ export default function TeacherTopBar({
             </span>
             {hijriDate && <Badge palette={palette}>{hijriDate}</Badge>}
 
-            {/* ➜ notifikasi juga pakai slug */}
-            <Link to={withSlug("/notifikasi")}>
-              <Btn palette={palette}>
-                <Bell className="mr-2" size={16} /> Notifikasi
-              </Btn>
-            </Link>
+           
 
             <PublicUserDropdown variant="icon" withBg={false} />
           </div>

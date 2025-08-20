@@ -1,4 +1,4 @@
-// src/pages/sekolahislamku/pengumuman/SemuaPengumuman.tsx
+// src/pages/sekolahislamku/pengumuman/AllAnnouncement.tsx
 import React, { useState, useMemo } from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -481,7 +481,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
 };
 
 // Komponen utama
-const SemuaPengumuman: React.FC = () => {
+const AllAnnouncement: React.FC = () => {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
 
@@ -960,4 +960,4 @@ const SemuaPengumuman: React.FC = () => {
   );
 };
 
-export default SemuaPengumuman;
+export default AllAnnouncement;

@@ -1,4 +1,4 @@
-// src/pages/sekolahislamku/jadwal/SemuaJadwal.tsx
+// src/pages/sekolahislamku/jadwal/AllSchedule.tsx
 import { useState } from "react";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -72,7 +72,7 @@ const formatTanggal = (iso: string) =>
     month: "long",
   });
 
-export default function SemuaJadwal() {
+export default function AllSchedule() {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
 

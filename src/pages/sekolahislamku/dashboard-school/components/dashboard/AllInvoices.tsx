@@ -1,4 +1,4 @@
-// src/pages/sekolahislamku/tagihan/SemuaTagihan.tsx
+// src/pages/sekolahislamku/tagihan/AllInvoices.tsx
 import React from "react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -168,7 +168,7 @@ const TotalTagihan: React.FC<TotalTagihanProps> = ({
 
 
 // Komponen utama
-const SemuaTagihan: React.FC = () => {
+const AllInvoices: React.FC = () => {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
 
@@ -305,4 +305,4 @@ const SemuaTagihan: React.FC = () => {
   );
 };
 
-export default SemuaTagihan;
+export default AllInvoices;

@@ -161,9 +161,16 @@ import StudentDetailAnnouncement from "@/pages/sekolahislamku/dashboard-student/
 import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/TeacherSchedule";
 import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
+// School Routes
+import AllSchedule from "@/pages/sekolahislamku/dashboard-school/components/dashboard/AllSchedule";
+import AllAnnouncement from "@/pages/sekolahislamku/dashboard-school/components/dashboard/AllAnnouncement";
+import AllInvoices from "@/pages/sekolahislamku/dashboard-school/components/dashboard/AllInvoices";
+import TryoutTahfizhExam from "@/pages/sekolahislamku/dashboard-school/components/dashboard/TryoutTahfizhExam";
+
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
-import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/components/routes";
 import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/manage/SchoolManageClass";
+import SchoolBooks from "@/pages/sekolahislamku/dashboard-school/books/SchoolBooks";
+import SchoolDetailBook from "@/pages/sekolahislamku/dashboard-school/books/detail/SchoolDetailBook";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -557,6 +564,10 @@ export default function AppRoutes() {
       <Route path=":slug/sekolah" element={<StudentLayout />}>
         <Route index element={<SchoolDashboard />} />
         <Route path="murid" element={<SchoolStudent />} />
+        <Route path="all-schedule" element={<AllSchedule />} />
+        <Route path="all-invoices" element={<AllInvoices />} />
+        <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
+        <Route path="all-announcement" element={<AllAnnouncement />} />
         <Route path="guru" element={<SchoolTeacher />} />
         <Route path="kelas">
           <Route index element={<SchoolClasses />} />
@@ -565,6 +576,10 @@ export default function AppRoutes() {
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
         <Route path="pengumuman" element={<SchoolAnnouncement />} />
+        <Route path="buku">
+          <Route index element={<SchoolBooks />} />
+          <Route path="detail/:id" element={<SchoolDetailBook />} />
+        </Route>
       </Route>
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />

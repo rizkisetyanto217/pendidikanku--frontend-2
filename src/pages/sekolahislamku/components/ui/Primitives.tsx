@@ -3,31 +3,28 @@ import { colors } from "@/constants/colorsThema";
 
 export type Palette = typeof colors.light;
 
-/* ---- SectionCard ---- */
+type SectionCardProps = React.HTMLAttributes<HTMLDivElement> & {
+  palette: Palette;
+  /** Paksa bg di semua mode: "white1" | "black1" | "auto" (default) */
+  bg?: "auto" | "white1" | "black1";
+  /** Override bg khusus saat dark mode: "white1" | "black1" */
+  bgOnDark?: "white1" | "black1";
+};
+
 export function SectionCard({
   children,
   palette,
   className = "",
   style,
-  bg = "auto", // <--- NEW
-  bgOnDark, // <--- NEW
-}: {
-  children: React.ReactNode;
-  palette: Palette;
-  className?: string;
-  style?: React.CSSProperties;
-  /** Paksa bg di semua mode: "white1" | "black1" | "auto" (default) */
-  bg?: "auto" | "white1" | "black1";
-  /** Override bg khusus saat dark mode: "white1" | "black1" */
-  bgOnDark?: "white1" | "black1";
-}) {
-  // Coba deteksi dark mode dari palette yang dikirim
+  bg = "auto",
+  bgOnDark,
+  ...rest // <- tampung onClick, id, role, dsb
+}: React.PropsWithChildren<SectionCardProps>) {
+  // Deteksi dark mode dari palette yang dikirim
   const isDark =
     palette === (colors as any).dark ||
-    // fallback: heuristik sederhana (bila white1 cenderung gelap)
     (typeof palette.white1 === "string" &&
       /^#/.test(palette.white1) &&
-      // nilai luminance kira-kira; ambil dua digit pertama saja untuk cepat
       parseInt(palette.white1.slice(1, 3), 16) < 0x66);
 
   // Tentukan background final
@@ -47,6 +44,7 @@ export function SectionCard({
 
   return (
     <div
+      {...rest} // <- forward semua atribut/handler (onClick, onMouseEnter, dll)
       className={`rounded-2xl border shadow-sm ${className}`}
       style={{
         background,
@@ -59,7 +57,6 @@ export function SectionCard({
     </div>
   );
 }
-
 /* ---- Badge ---- */
 /* ---- Badge ---- */
 export function Badge({

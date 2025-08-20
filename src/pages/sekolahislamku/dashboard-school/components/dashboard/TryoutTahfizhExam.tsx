@@ -1,4 +1,4 @@
-// src/pages/sekolahislamku/tryout/TryoutUjianTahfiz.tsx
+// src/pages/sekolahislamku/tryout/TryoutTahfizhExam.tsx
 import React, { useState } from 'react';
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -272,7 +272,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 };
 
 // Komponen utama
-const TryoutUjianTahfiz: React.FC = () => {
+const TryoutTahfizhExam: React.FC = () => {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
   
@@ -470,4 +470,4 @@ const TryoutUjianTahfiz: React.FC = () => {
   );
 };
 
-export default TryoutUjianTahfiz;
+export default TryoutTahfizhExam;
