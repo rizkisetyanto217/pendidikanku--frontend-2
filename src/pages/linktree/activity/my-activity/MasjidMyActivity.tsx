@@ -1,3 +1,5 @@
+// src/pages/linktree/activity/my-activity/MasjidMyActivity.tsx
+import React, { useMemo } from "react";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
@@ -9,50 +11,157 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
+import type { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
 
+/* ===================== Types ===================== */
+type AnyUser = Partial<{
+  id: string;
+  user_name: string;
+  name: string;
+  role: string;
+  created_at: string;
+  createdAt: string;
+  created_at_unix: number; // seconds
+  first_seen_at: string;
+}>;
+
+type NormalizedUser = {
+  displayName: string;
+  role?: string;
+  joinedAt?: Date; // optional
+};
+
+type LectureSessionApi = {
+  lecture_session_id: string;
+  lecture_session_slug?: string | null;
+  lecture_id?: string | null; // kemungkinan snake_case
+  lectureId?: string | null; // kemungkinan camelCase
+  lecture_session_image_url?: string | null;
+  lecture_session_title?: string | null;
+  lecture_session_teacher_name?: string | null;
+  lecture_session_place?: string | null;
+  lecture_session_start_time: string;
+  user_attendance_status?: number | null; // ⬅️ gunakan number agar cocok dengan komponen
+  user_grade_result?: number | null;
+};
+
+/* ===================== Utils ===================== */
+function pickJoinDate(u?: AnyUser): Date | undefined {
+  if (!u) return undefined;
+  const iso =
+    u.created_at ??
+    u.createdAt ??
+    u.first_seen_at ??
+    (typeof u.created_at_unix === "number"
+      ? new Date(u.created_at_unix * 1000).toISOString()
+      : undefined);
+
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? undefined : d;
+}
+
+function normalizeUser(u?: AnyUser): NormalizedUser | undefined {
+  if (!u) return undefined;
+  return {
+    displayName: u.user_name || u.name || "Pengguna",
+    role: u.role || undefined,
+    joinedAt: pickJoinDate(u),
+  };
+}
+
+/* ===================== Page ===================== */
 export default function MasjidMyActivity() {
   const { isDark } = useHtmlDarkMode();
   const themeColors = isDark ? colors.dark : colors.light;
   const navigate = useNavigate();
-  const { slug } = useParams();
-  const { data: currentUser } = useCurrentUser();
+  const { slug } = useParams<{ slug: string }>();
+  const { data: currentUserRaw } = useCurrentUser();
 
-  // Tetap panggil hook, meskipun tidak fetch data kalau belum login
+  // Normalisasi user agar aman dipakai komponen anak
+  const user = useMemo(
+    () => normalizeUser(currentUserRaw as AnyUser | undefined),
+    [currentUserRaw]
+  );
+
   const {
     data: lectureSessions = [],
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["kajianListBySlug", slug, currentUser?.id],
+  } = useQuery<LectureSessionApi[]>({
+    queryKey: [
+      "kajianListBySlug",
+      slug,
+      (currentUserRaw as AnyUser | undefined)?.id,
+    ],
     queryFn: async () => {
-      const headers = currentUser?.id ? { "X-User-Id": currentUser.id } : {};
+      const u = currentUserRaw as AnyUser | undefined;
+      const headers = u?.id ? { "X-User-Id": u.id } : {};
       const res = await axios.get(
         `/public/lecture-sessions-u/soal-materi/${slug}?attendance_only=true`,
         { headers }
       );
-      return res.data?.data ?? [];
+      return (res.data?.data as LectureSessionApi[] | undefined) ?? [];
     },
-    enabled: !!slug && !!currentUser?.id,
+    enabled:
+      Boolean(slug) && Boolean((currentUserRaw as AnyUser | undefined)?.id),
   });
 
-  const mappedSessions = lectureSessions.map((sesi: any) => ({
-    id: sesi.lecture_session_id,
-    imageUrl: sesi.lecture_session_image_url,
-    title: sesi.lecture_session_title?.trim() || "-",
-    teacher: sesi.lecture_session_teacher_name?.trim() || "-",
-    masjidName: "-",
-    location: sesi.lecture_session_place || "-",
-    time: new Date(sesi.lecture_session_start_time).toLocaleString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    attendanceStatus: sesi.user_attendance_status,
-    gradeResult: sesi.user_grade_result,
-    status: sesi.user_grade_result !== undefined ? "tersedia" : "proses",
-  }));
+  // ⬇️ Map KE tipe yang diminta komponen (LectureMaterialItem)
+  const mappedSessions: LectureMaterialItem[] = useMemo(
+    () =>
+      lectureSessions.map((sesi) => {
+        const slug = sesi.lecture_session_slug ?? sesi.lecture_session_id;
+        const lectureId =
+          sesi.lecture_id ?? sesi.lectureId ?? sesi.lecture_session_id;
+
+        // Normalisasi -> undefined (bukan null)
+        const attendance =
+          typeof sesi.user_attendance_status === "number"
+            ? sesi.user_attendance_status
+            : undefined;
+
+        const grade =
+          typeof sesi.user_grade_result === "number"
+            ? sesi.user_grade_result
+            : undefined;
+
+        // Susun objek dasar (field wajib)
+        const base = {
+          id: sesi.lecture_session_id,
+          lecture_session_slug: slug,
+          lectureId,
+          title: sesi.lecture_session_title?.trim() || "-",
+          teacher: sesi.lecture_session_teacher_name?.trim() || "-",
+          masjidName: "-",
+          location: sesi.lecture_session_place || "-",
+          time: new Date(sesi.lecture_session_start_time).toLocaleString(
+            "id-ID",
+            {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          ),
+          status: grade !== undefined ? "tersedia" : "proses",
+        } as const;
+
+        // Tambahkan field optional hanya jika ada nilainya
+        const item: LectureMaterialItem = {
+          ...base,
+          ...(sesi.lecture_session_image_url
+            ? { imageUrl: sesi.lecture_session_image_url }
+            : {}),
+          ...(attendance !== undefined ? { attendanceStatus: attendance } : {}),
+          ...(grade !== undefined ? { gradeResult: grade } : {}),
+        };
+
+        return item;
+      }),
+    [lectureSessions]
+  );
 
   const displayedSessions = mappedSessions.slice(0, 5);
 
@@ -60,14 +169,14 @@ export default function MasjidMyActivity() {
     <>
       <PublicNavbar masjidName="Aktivitas Saya" />
 
-      {!currentUser ? (
+      {!currentUserRaw ? (
         <GuestView
           themeColors={themeColors}
           onLogin={() => navigate("/login")}
         />
       ) : (
         <UserActivityView
-          user={currentUser}
+          user={user}
           themeColors={themeColors}
           isDark={isDark}
           slug={slug || ""}
@@ -82,6 +191,7 @@ export default function MasjidMyActivity() {
   );
 }
 
+/* ===================== Subcomponents ===================== */
 function GuestView({
   themeColors,
   onLogin,
@@ -119,11 +229,11 @@ function UserActivityView({
   isLoading,
   isError,
 }: {
-  user: { user_name: string; created_at: string; role?: string };
+  user?: NormalizedUser;
   themeColors: typeof colors.light;
   isDark: boolean;
   slug: string;
-  sessions: any[];
+  sessions: LectureMaterialItem[]; // ⬅️ pakai tipe yang benar
   isLoading: boolean;
   isError: boolean;
 }) {
@@ -173,12 +283,12 @@ function UserProfileCard({
   themeColors,
   isDark,
 }: {
-  user: { user_name: string; created_at: string; role?: string };
+  user?: NormalizedUser;
   themeColors: typeof colors.light;
   isDark: boolean;
 }) {
-  const joinDate = new Date(user.created_at);
-  const isValidDate = !isNaN(joinDate.getTime());
+  const joinDate = user?.joinedAt;
+  const isValidDate = !!joinDate && !isNaN(joinDate.getTime());
 
   return (
     <div
@@ -189,10 +299,10 @@ function UserProfileCard({
         className="text-base font-semibold"
         style={{ color: themeColors.black1 }}
       >
-        {user.user_name || "Nama tidak tersedia"}
+        {user?.displayName || "Nama tidak tersedia"}
       </h1>
 
-      {user.role && (
+      {user?.role && (
         <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
           Role: {user.role}
         </p>
@@ -201,7 +311,7 @@ function UserProfileCard({
       <p className="text-sm mt-1" style={{ color: themeColors.black1 }}>
         Bergabung pada{" "}
         {isValidDate
-          ? joinDate.toLocaleDateString("id-ID", {
+          ? joinDate!.toLocaleDateString("id-ID", {
               day: "numeric",
               month: "long",
               year: "numeric",

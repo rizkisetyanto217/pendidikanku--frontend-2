@@ -143,7 +143,7 @@ export default function StudentDashboard() {
     >
       <ParentTopBar
         palette={palette}
-        parentName={data?.parentName}
+        title={data?.parentName}
         hijriDate={data?.hijriDate}
         gregorianDate={data?.gregorianDate}
         dateFmt={dateFmt}
