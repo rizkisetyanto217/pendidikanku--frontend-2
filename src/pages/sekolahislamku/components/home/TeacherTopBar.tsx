@@ -163,10 +163,10 @@ export default function TeacherTopBar({
             className="hidden md:flex items-center gap-3"
             style={{ fontSize: 14, color: palette.silver2 }}
           >
-            <CalendarDays size={16} />
+            {/* <CalendarDays size={16} />
             <span className="hidden sm:inline">
               {gregorianDate && dateFmt ? dateFmt(gregorianDate) : ""}
-            </span>
+            </span> */}
             {hijriDate && <Badge palette={palette}>{hijriDate}</Badge>}
 
            

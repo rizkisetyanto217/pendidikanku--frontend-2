@@ -31,6 +31,10 @@ import MiniBar from "../../components/ui/MiniBar";
 import StatPill from "../../components/ui/StatPill";
 import StudentsTable from "./components/StudentTable";
 import TeacherTopBar from "../../components/home/TeacherTopBar";
+import ModalAddStudent, {
+  AddStudentPayload,
+} from "./components/ModalAddStudent";
+import ModalExport from "./components/ModalExport";
 
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -256,6 +260,13 @@ function ClassSelector({
 
 /* ================= Page ================= */
 export default function TeacherClass() {
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+
+  const handleAddStudent = async (payload: AddStudentPayload) => {
+    // di sini bisa POST API, atau sementara push ke data
+    alert(`Siswa baru: ${payload.name}`);
+  };
+
   const params = useParams<{ id: string }>();
   const classId = params.id ?? "tpa-a";
   // di dalam komponen:
@@ -305,6 +316,14 @@ export default function TeacherClass() {
       : byStatus;
   }, [data?.students, q, statusFilter]);
 
+  const [exportOpen, setExportOpen] = useState(false);
+
+  const handleExport = (file: File) => {
+    // sementara, demo upload
+    alert(`File diupload: ${file.name}`);
+    setExportOpen(false);
+  };
+
   return (
     <div
       className="min-h-screen w-full"
@@ -317,6 +336,20 @@ export default function TeacherClass() {
         hijriDate={data?.hijriDate}
         dateFmt={(iso) => dateLong(iso)}
       />
+      <ModalAddStudent
+        open={addStudentOpen}
+        onClose={() => setAddStudentOpen(false)}
+        palette={palette}
+        onSubmit={handleAddStudent}
+      />
+
+      <ModalExport
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        onSubmit={handleExport}
+        palette={palette}
+      />
+
       {/* ===== Content + Sidebar ===== */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
@@ -360,7 +393,7 @@ export default function TeacherClass() {
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
               <SectionCard palette={palette} className="lg:col-span-7">
                 <div className="p-4 md:p-5">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
                       <div
                         className="text-sm"
@@ -389,22 +422,6 @@ export default function TeacherClass() {
                       </Badge>
                     </div>
                   </div>
-
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <Btn
-                      palette={palette}
-                      onClick={() => navigate("/guru/kelas/kehadiran")}
-                    >
-                      <CheckSquare className="mr-2" size={16} /> Mulai Absen
-                    </Btn>
-                    <Btn
-                      palette={palette}
-                      variant="secondary"
-                      onClick={() => alert("Buat Pengumuman")}
-                    >
-                      <Megaphone className="mr-2" size={16} /> Buat Pengumuman
-                    </Btn>
-                  </div>
                 </div>
               </SectionCard>
 
@@ -412,7 +429,7 @@ export default function TeacherClass() {
                 <TodayScheduleCard
                   palette={palette}
                   items={data?.scheduleToday ?? []}
-                  seeAllPath="/teacher/jadwal"
+                  seeAllPath="all-today-schedule"
                   addLabel="Tambah Jadwal"
                   addHref="/teacher/jadwal/tambah"
                 />
@@ -707,14 +724,15 @@ export default function TeacherClass() {
                         palette={palette}
                         size="sm"
                         variant="ghost"
-                        onClick={() => alert("Export CSV")}
+                        onClick={() => setExportOpen(true)}
                       >
                         Export CSV
                       </Btn>
+
                       <Btn
                         palette={palette}
                         size="sm"
-                        onClick={() => alert("Tambah Siswa")}
+                        onClick={() => setAddStudentOpen(true)}
                       >
                         <Plus className="mr-1" size={16} /> Tambah Siswa
                       </Btn>

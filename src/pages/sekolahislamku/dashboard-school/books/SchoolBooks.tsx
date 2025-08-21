@@ -1,3 +1,4 @@
+// src/pages/sekolahislamku/dashboard-school/books/SchoolBooks.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
@@ -23,9 +24,9 @@ import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
-import BookModal from "./components/BookModal"; // <-- komponen baru
+import BookModal from "./components/BookModal";
 
-/* ============== Types API Baru ============== */
+/* ============== Types API ============== */
 export type SectionLite = {
   class_sections_id: string;
   class_sections_name: string;
@@ -76,7 +77,7 @@ const dateLong = (iso?: string) =>
       })
     : "";
 
-/* ============== Data Hook: ambil dari /api/a/books ============== */
+/* ============== Data Hook: /api/a/books ============== */
 function useBooksList(params: { limit: number; offset: number }) {
   const { limit, offset } = params;
   return useQuery<BooksResponse>({
@@ -94,6 +95,37 @@ function useBooksList(params: { limit: number; offset: number }) {
     refetchOnReconnect: "always",
     retry: 1,
   });
+}
+
+/* ============== Skeletons ============== */
+function CardSkeleton({ palette }: { palette: Palette }) {
+  return (
+    <div
+      className="rounded-xl border p-4 animate-pulse"
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
+    >
+      <div className="flex gap-3">
+        <div
+          className="w-10 h-14 rounded-md"
+          style={{ background: palette.white2 }}
+        />
+        <div className="flex-1 space-y-2">
+          <div
+            className="h-4 w-2/3 rounded"
+            style={{ background: palette.white2 }}
+          />
+          <div
+            className="h-3 w-1/2 rounded"
+            style={{ background: palette.white2 }}
+          />
+          <div
+            className="h-3 w-full rounded"
+            style={{ background: palette.white2 }}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ============== Page ============== */
@@ -165,6 +197,7 @@ export default function SchoolBooks() {
         const p = new URLSearchParams(prev);
         p.set("limit", String(limit));
         p.set("offset", String(nextOffset));
+        if (q) p.set("q", q);
         return p;
       },
       { replace: true }
@@ -172,26 +205,34 @@ export default function SchoolBooks() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // rows
+  // table rows (md+)
   const rows = useMemo(() => {
     return items.map((b, idx): React.ReactNode[] => {
       const cover = b.books_image_url ? (
         <img
           src={b.books_image_url}
           alt={b.books_title}
-          className="w-10 h-14 object-cover rounded-md bg-gray-100"
+          className="w-10 h-14 object-cover rounded-md"
           loading="lazy"
+          style={{ background: palette.white2 }}
         />
       ) : (
-        <span className="w-10 h-14 grid place-items-center rounded-md bg-gray-100">
+        <span
+          className="w-10 h-14 grid place-items-center rounded-md"
+          style={{ background: palette.white2 }}
+        >
           <ImageOff size={16} />
         </span>
       );
 
       const titleBlock = (
         <div className="min-w-0">
-          <div className="font-medium">{b.books_title || "(Tanpa judul)"}</div>
-          <div className="text-xs opacity-70">{b.books_author || "-"}</div>
+          <div className="font-medium truncate">
+            {b.books_title || "(Tanpa judul)"}
+          </div>
+          <div className="text-xs opacity-70 truncate">
+            {b.books_author || "-"}
+          </div>
           {!!b.books_desc && (
             <div className="text-[11px] opacity-60 mt-1 line-clamp-2">
               {b.books_desc}
@@ -264,6 +305,111 @@ export default function SchoolBooks() {
     });
   }, [items, palette, offset, isDark, deleteBook.isPending]);
 
+  // mobile cards (<md)
+  const MobileCards = () => (
+    <div className="grid grid-cols-1 gap-3">
+      {items.map((b) => {
+        const sectionsFlat = b.usages.flatMap((u) => u.sections ?? []);
+        return (
+          <div
+            key={b.books_id}
+            className="rounded-xl border p-3 flex gap-3"
+            style={{ borderColor: palette.silver1, background: palette.white1 }}
+            onClick={() => {
+              const qs = sp.toString();
+              nav(
+                `${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`
+              );
+            }}
+          >
+            <div className="shrink-0">
+              {b.books_image_url ? (
+                <img
+                  src={b.books_image_url}
+                  alt={b.books_title}
+                  className="w-12 h-16 object-cover rounded-md"
+                  style={{ background: palette.white2 }}
+                  loading="lazy"
+                />
+              ) : (
+                <span
+                  className="w-12 h-16 grid place-items-center rounded-md"
+                  style={{ background: palette.white2 }}
+                >
+                  <ImageOff size={16} />
+                </span>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-medium truncate">
+                {b.books_title || "(Tanpa judul)"}
+              </div>
+              <div className="text-xs opacity-70 truncate">
+                {b.books_author || "-"}
+              </div>
+              {!!b.books_desc && (
+                <div className="text-[11px] opacity-60 mt-1 line-clamp-2">
+                  {b.books_desc}
+                </div>
+              )}
+              {sectionsFlat.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {sectionsFlat.slice(0, 4).map((s) => (
+                    <span
+                      key={s.class_sections_id}
+                      className="px-2 py-[2px] rounded-full text-[11px] border"
+                      style={{
+                        borderColor: palette.silver1,
+                        background: isDark
+                          ? colors.dark.white2
+                          : colors.light.white2,
+                      }}
+                    >
+                      {s.class_sections_name}
+                    </span>
+                  ))}
+                  {sectionsFlat.length > 4 && (
+                    <span className="text-[11px] opacity-60">
+                      +{sectionsFlat.length - 4} lagi
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-3 flex items-center gap-2">
+                {b.books_url && (
+                  <a
+                    href={b.books_url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex items-center gap-1 text-xs underline"
+                    style={{ color: palette.primary }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink size={14} /> Kunjungi
+                  </a>
+                )}
+                <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+                  <ActionEditDelete
+                    onEdit={() => setBookModal({ mode: "edit", book: b })}
+                    onDelete={() => {
+                      if (deleteBook.isPending) return;
+                      const ok = confirm(
+                        `Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`
+                      );
+                      if (!ok) return;
+                      deleteBook.mutate(b.books_id);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div
       className="min-h-screen w-full"
@@ -277,13 +423,17 @@ export default function SchoolBooks() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <SchoolSidebarNav palette={palette} />
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6">
+        <div className="lg:flex lg:items-start lg:gap-6">
+          {/* Sidebar kiri (sticky di desktop) */}
+          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
+            <SchoolSidebarNav palette={palette} />
+          </aside>
 
-          <div className="flex-1 space-y-6 min-w-0 lg:p-4">
+          {/* Konten utama */}
+          <div className="flex-1 space-y-6 min-w-0">
             {/* Header */}
-            <section className="flex items-start justify-between gap-3">
+            <section className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div className="flex items-start gap-3">
                 <span
                   className="h-10 w-10 grid place-items-center rounded-xl"
@@ -301,7 +451,7 @@ export default function SchoolBooks() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:self-start">
                 <Btn
                   palette={palette}
                   onClick={() => setBookModal({ mode: "create" })}
@@ -313,9 +463,9 @@ export default function SchoolBooks() {
 
             {/* Toolbar */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 font-medium">Filter</div>
-              <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-5 gap-3">
-                <div className="md:col-span-2">
+              <div className="p-4 md:p-5 pb-3 font-medium">Filter</div>
+              <div className="px-4 md:px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div className="lg:col-span-2">
                   <div
                     className="text-xs mb-1"
                     style={{ color: palette.silver2 }}
@@ -345,30 +495,56 @@ export default function SchoolBooks() {
               {booksQ.isFetching ? "memuat…" : `${total} total`}
             </div>
 
-            {/* TABEL */}
-            <SimpleTable
-              columns={[
-                "No",
-                "Cover",
-                "Judul & Penulis",
-                "Dipakai di (Section)",
-                "Slug/ID",
-                "Aksi",
-              ]}
-              rows={rows}
-              onRowClick={(rowIndex) => {
-                const book = items[rowIndex];
-                if (!book) return;
-                const qs = sp.toString();
-                nav(
-                  `${base}/sekolah/buku/detail/${book.books_id}${qs ? `?${qs}` : ""}`
-                );
-              }}
-              emptyText={booksQ.isLoading ? "Memuat…" : "Belum ada buku."}
-            />
+            {/* List: Mobile Cards vs Desktop Table */}
+            {/* Mobile */}
+            <div className="md:hidden">
+              {booksQ.isLoading ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <CardSkeleton key={i} palette={palette} />
+                  ))}
+                </div>
+              ) : items.length === 0 ? (
+                <SectionCard palette={palette} className="p-10 text-center">
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    {q
+                      ? "Tidak ada hasil untuk pencarianmu."
+                      : "Belum ada buku."}
+                  </div>
+                </SectionCard>
+              ) : (
+                <MobileCards />
+              )}
+            </div>
+
+            {/* Desktop */}
+            <div className="hidden md:block">
+              <SimpleTable
+                columns={[
+                  "No",
+                  "Cover",
+                  "Judul & Penulis",
+                  "Dipakai di (Section)",
+                  "Slug/ID",
+                  "Aksi",
+                ]}
+                rows={rows}
+                onRowClick={(rowIndex) => {
+                  const book = items[rowIndex];
+                  if (!book) return;
+                  const qs = sp.toString();
+                  nav(
+                    `${base}/sekolah/buku/detail/${book.books_id}${
+                      qs ? `?${qs}` : ""
+                    }`
+                  );
+                }}
+                emptyText={booksQ.isLoading ? "Memuat…" : "Belum ada buku."}
+              />
+            </div>
 
             {/* Pagination */}
-            <div className="mt-2 flex items-center justify-between">
+            <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="text-xs" style={{ color: palette.silver2 }}>
                 Menampilkan {showing} dari {total}
               </div>
@@ -406,7 +582,6 @@ export default function SchoolBooks() {
           setBookModal(null);
           booksQ.refetch();
         }}
-        // showBindingOnEdit // aktifkan kalau ingin binding juga saat edit
       />
     </div>
   );

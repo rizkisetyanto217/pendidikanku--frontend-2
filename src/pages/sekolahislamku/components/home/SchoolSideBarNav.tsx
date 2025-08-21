@@ -1,86 +1,58 @@
 import React from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams, useMatch } from "react-router-dom";
 import {
   SectionCard,
-  Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import {
   LayoutDashboard,
-  Users,
   UserCog,
   BookOpen,
   CheckSquare,
   Wallet,
   Megaphone,
-  BarChart2,
-  Settings,
-  Plus,
   Book,
 } from "lucide-react";
 
+/* ================= Types ================= */
 export type NavItem = {
-  path: string; // relatif, bukan absolute
+  /** path relatif dari base "/:slug/sekolah" */
+  path: "." | string;
   label: string;
   icon: React.ComponentType<any>;
   end?: boolean;
 };
 
-export type QuickAction = {
-  label: string;
-  icon: React.ComponentType<any>;
-  onClick: () => void;
-  variant?: "default" | "secondary" | "quaternary" | "outline" | "ghost";
-};
-
 const DEFAULT_NAVS: NavItem[] = [
-  { path: "sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { path: "sekolah/guru", label: "Guru", icon: UserCog },
-  { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
-  { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
-  { path: "sekolah/buku", label: "Buku", icon: Book },
-  { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
-  { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
+  { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "guru", label: "Guru", icon: UserCog },
+  { path: "kelas", label: "Kelas", icon: BookOpen },
+  { path: "kehadiran", label: "Absensi", icon: CheckSquare },
+  { path: "buku", label: "Buku", icon: Book },
+  { path: "keuangan", label: "Keuangan", icon: Wallet },
+  { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
-
-// const DEFAULT_ACTIONS: QuickAction[] = [
-//   {
-//     label: "Pengumuman Baru",
-//     icon: Megaphone,
-//     onClick: () => alert("Buat Pengumuman"),
-//     variant: "secondary",
-//   },
-//   {
-//     label: "Tambah Event",
-//     icon: Plus,
-//     onClick: () => alert("Tambah Event"),
-//     variant: "quaternary",
-//   },
-//   {
-//     label: "Buat Tagihan",
-//     icon: Wallet,
-//     onClick: () => alert("Buat Tagihan"),
-//     variant: "outline",
-//   },
-// ];
 
 export default function SchoolSidebarNav({
   palette,
   navs = DEFAULT_NAVS,
-  showQuickActions = true,
-  // quickActions = DEFAULT_ACTIONS,
   className = "",
 }: {
   palette: Palette;
   navs?: NavItem[];
-  showQuickActions?: boolean;
-  quickActions?: QuickAction[];
   className?: string;
 }) {
-  const { slug } = useParams(); // ambil slug dari URL
+  // Ambil slug dari URL (cocokkan fallback jika komponen dipakai di nested route)
+  const params = useParams<{ slug?: string }>();
+  const match = useMatch("/:slug/*");
+  const slug = params.slug ?? match?.params.slug ?? "";
 
-  // helper function untuk membuat URL dengan slug
-  const withSlug = (path: string) => `/${slug}/${path}`;
+  // base absolute "/:slug/sekolah"
+  const base = slug ? `/${slug}/sekolah` : "/sekolah";
+
+  // builder tujuan final
+  const buildTo = (p: string) =>
+    p === "." ? base : `${base}/${p.replace(/^\/+/, "")}`;
 
   return (
     <nav
@@ -90,7 +62,7 @@ export default function SchoolSidebarNav({
       <SectionCard palette={palette} className="p-2">
         <ul className="space-y-2">
           {navs.map(({ path, label, icon: Icon, end }) => {
-            const to = withSlug(path); // gunakan helper function
+            const to = buildTo(path);
             return (
               <li key={to}>
                 <NavLink

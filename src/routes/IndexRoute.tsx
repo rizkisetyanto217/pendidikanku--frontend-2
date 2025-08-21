@@ -171,6 +171,8 @@ import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/detail/SchoolDetailClass";
 import SchoolBooks from "@/pages/sekolahislamku/dashboard-school/books/SchoolBooks";
 import SchoolDetailBook from "@/pages/sekolahislamku/dashboard-school/books/detail/SchoolDetailBook";
+import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/components/dashboard/AllAnnouncementTeacher";
+import AllTodaySchedule from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedhule";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -554,10 +556,16 @@ export default function AppRoutes() {
         <Route path="kehadiran" element={<TeacherAttendance />} />
         <Route path="penilaian" element={<TeacherGrading />} />
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
-
+        <Route path="all-today-schedule" element={<AllTodaySchedule />} />
+        <Route path="jadwal" element={<TeacherSchedule />} />
+        <Route
+          path="all-announcement-teacher"
+          element={<AllAnnouncementTeacher />}
+        />
         <Route path="kelas">
           <Route index element={<TeacherClass />} />
           <Route path="jadwal" element={<TeacherSchedule />} />
+          <Route path="all-today-schedule" element={<AllTodaySchedule />} />
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
         </Route>
       </Route>
