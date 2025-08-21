@@ -168,7 +168,7 @@ import AllInvoices from "@/pages/sekolahislamku/dashboard-school/components/dash
 import TryoutTahfizhExam from "@/pages/sekolahislamku/dashboard-school/components/dashboard/TryoutTahfizhExam";
 
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
-import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/manage/SchoolManageClass";
+import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/detail/SchoolDetailClass";
 import SchoolBooks from "@/pages/sekolahislamku/dashboard-school/books/SchoolBooks";
 import SchoolDetailBook from "@/pages/sekolahislamku/dashboard-school/books/detail/SchoolDetailBook";
 

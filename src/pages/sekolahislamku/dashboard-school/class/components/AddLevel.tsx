@@ -15,7 +15,7 @@ type Props = {
   onCreated?: () => void; // refetch setelah sukses
 };
 
-export default function TambahLevel({
+export default function AddLevel({
   open,
   palette,
   onClose,

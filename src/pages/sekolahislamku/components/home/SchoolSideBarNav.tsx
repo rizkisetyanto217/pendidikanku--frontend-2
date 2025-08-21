@@ -16,6 +16,7 @@ import {
   BarChart2,
   Settings,
   Plus,
+  Book,
 } from "lucide-react";
 
 export type NavItem = {
@@ -34,10 +35,10 @@ export type QuickAction = {
 
 const DEFAULT_NAVS: NavItem[] = [
   { path: "sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { path: "sekolah/murid", label: "Siswa", icon: Users },
   { path: "sekolah/guru", label: "Guru", icon: UserCog },
   { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
   { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
+  { path: "sekolah/buku", label: "Buku", icon: Book },
   { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
   { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
@@ -134,8 +135,6 @@ export default function SchoolSidebarNav({
           })}
         </ul>
       </SectionCard>
-
-      
     </nav>
   );
 }

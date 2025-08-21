@@ -12,6 +12,7 @@ import {
   CheckSquare,
   Wallet,
   Megaphone,
+  Book,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import { colors } from "@/constants/colorsThema";
@@ -82,6 +83,7 @@ const MOBILE_NAVS: NavItem[] = [
   { path: "sekolah/guru", label: "Guru", icon: UserCog },
   { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
   { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
+  { path: "sekolah/buku", label: "Buku", icon: Book },
   { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
   { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },
 ];

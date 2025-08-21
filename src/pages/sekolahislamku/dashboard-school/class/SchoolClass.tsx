@@ -1,7 +1,7 @@
 // src/pages/sekolahislamku/pages/classes/SchoolClasses.tsx
 import { useMemo, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useParams } from "react-router-dom";
 import {
   BookOpen,
   Users,
@@ -189,6 +189,7 @@ export default function SchoolClasses() {
 
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
+  const { slug = "" } = useParams<{ slug: string }>();
 
   // Query params (UI)
   const q = (sp.get("q") ?? "").trim();
@@ -546,16 +547,9 @@ export default function SchoolClasses() {
                           </td>
                           <td className="py-3 pr-2">
                             <div className="flex justify-end gap-2">
-                              <Link to={`/school/classes/${r.id}`}>
-                                <Btn
-                                  palette={palette}
-                                  variant="quaternary"
-                                  size="sm"
-                                >
-                                  <Eye size={14} className="mr-1" /> Lihat
-                                </Btn>
-                              </Link>
-                              <Link to={`/school/classes/${r.id}/edit`}>
+                              <Link
+                                to={`/${slug}/sekolah/kelas/detail/${r.id}`}
+                              >
                                 <Btn
                                   palette={palette}
                                   variant="outline"
