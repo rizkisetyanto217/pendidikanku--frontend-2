@@ -3,13 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { Users } from "lucide-react";
-import { useMatch, useParams } from "react-router-dom";
 
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import {
   SectionCard,
-  Badge,
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -33,14 +31,11 @@ import {
 } from "../../../pages/sekolahislamku/dashboard-teacher/class/teacher";
 
 /* ================= Helpers ================ */
-const fmtLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
+const startOfDay = (d = new Date()) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+};
 const fmtShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -49,62 +44,100 @@ const fmtShort = (iso?: string) =>
       })
     : "-";
 
-/* ================= Types (UI lokal) ================ */
-type ScheduleItem = {
-  time: string;
-  title: string;
-  room?: string;
+const fmtLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+/* ================= Local Types (UI) ================ */
+type UIScheduleItem = {
+  time: string; // "07:30"
+  title: string; // "TPA A — Tahsin"
+  room?: string; // "Aula 1" atau "22 Agu • Aula 1"
   slug?: string;
+};
+
+/** Perkiraan bentuk data dari API (ketat secukupnya untuk UI) */
+type APITodayClass = {
+  time: string;
+  className: string;
+  subject: string;
+  room?: string;
+  studentCount?: number;
+};
+
+type APIUpcomingClass = APITodayClass & {
+  dateISO: string; // yyyy-mm-dd atau ISO full
+};
+
+type APITeacherHome = {
+  gregorianDate?: string;
+  hijriDate?: string;
+  todayClasses?: APITodayClass[];
+  upcomingClasses?: APIUpcomingClass[];
+  announcements?: Announcement[];
 };
 
 /* ================= Page ================= */
 export default function TeacherDashboard() {
-  // URL awareness (optional, untuk compose path jika diperlukan)
-  const params = useParams<{ slug?: string }>();
-  const match = useMatch("/:slug/*");
-  const slug = params.slug ?? match?.params.slug ?? "";
-  const withSlug = (p: string) => (slug ? `/${slug}/${p}` : `/${p}`);
-
   // Thema
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
 
   // Query data utama (API bersama)
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<APITeacherHome>({
     queryKey: TEACHER_HOME_QK,
     queryFn: fetchTeacherHome,
     staleTime: 60_000,
   });
 
-  /* -------- Jadwal Hari Ini (map dari API) -------- */
-  const scheduleItems = useMemo<ScheduleItem[]>(
-    () =>
-      (data?.todayClasses ?? []).map((c) => ({
-        time: c.time,
-        title: `${c.className} — ${c.subject}`,
-        room: c.room,
-      })),
-    [data?.todayClasses]
-  );
+  /* -------- Jadwal 3 HARI KE DEPAN (fallback: hari ini) -------- */
+const scheduleItemsNext3Days = useMemo<UIScheduleItem[]>(() => {
+  const upcoming = data?.upcomingClasses ?? [];
 
-  /* -------- Daftar Jadwal (list terpisah) --------
-     Tetap mock lokal agar berbeda dari "hari ini".
-     Nanti bisa diganti ke endpoint list jadwal. */
-  const [listScheduleItems, setListScheduleItems] = useState<ScheduleItem[]>(
+  const start = startOfDay(new Date());
+  const end = startOfDay(new Date());
+  end.setDate(end.getDate() + 2); // +2 = total 3 hari
+
+  const within3Days = upcoming.filter((c) => {
+    if (!c.dateISO) return false;
+    const d = startOfDay(new Date(c.dateISO));
+    return d >= start && d <= end;
+  });
+
+  const src: (APIUpcomingClass | APITodayClass)[] =
+    within3Days.length > 0 ? within3Days : (data?.todayClasses ?? []);
+
+  return src.map((c: any) => ({
+    time: c.time,
+    title: `${c.className} — ${c.subject}`,
+    room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
+  }));
+}, [data?.upcomingClasses, data?.todayClasses]);
+
+
+  /* -------- Daftar Jadwal (mock terpisah untuk demo) -------- */
+  const [listScheduleItems, setListScheduleItems] = useState<UIScheduleItem[]>(
     []
   );
   useEffect(() => {
-    const daftar: ScheduleItem[] = [
+    const daftar: UIScheduleItem[] = [
       { time: "10:30", title: "TPA C — Fiqih Ibadah", room: "R. 2" },
       { time: "13:00", title: "TPA D — Tahfiz Juz 29", room: "Aula 2" },
       { time: "15:30", title: "TPA A — Mentoring Guru", room: "R. Meeting" },
     ];
-    // Jangan duplikasi dengan jadwal hari ini
-    const todayKeys = new Set(scheduleItems.map((t) => `${t.time}|${t.title}`));
-    setListScheduleItems(
-      daftar.filter((d) => !todayKeys.has(`${d.time}|${d.title}`))
+    const key3Hari = new Set(
+      scheduleItemsNext3Days.map((t) => `${t.time}|${t.title}`)
     );
-  }, [scheduleItems]);
+    setListScheduleItems(
+      daftar.filter((d) => !key3Hari.has(`${d.time}|${d.title}`))
+    );
+  }, [scheduleItemsNext3Days]);
 
   /* -------- Pengumuman (seed dari API, lalu local mutate) -------- */
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -206,13 +239,14 @@ export default function TeacherDashboard() {
   /* -------- Modal: Tambah Jadwal -------- */
   const [showTambahJadwal, setShowTambahJadwal] = useState(false);
 
-  /* -------- Kelas yang dikelola (diambil dari todayClasses) -------- */
+  /* -------- Kelas yang dikelola (ambil dari todayClasses) -------- */
   type ManagedClass = {
     id: string;
     name: string;
     students?: number;
     lastSubject?: string;
   };
+
   const managedClasses = useMemo<ManagedClass[]>(() => {
     const map = new Map<string, ManagedClass>();
     (data?.todayClasses ?? []).forEach((c) => {
@@ -249,8 +283,7 @@ export default function TeacherDashboard() {
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
         onSubmit={(item) => {
-          // Tambah ke dua list supaya demo terasa realtime (lokal)
-          // Nanti ganti ke POST lalu invalidateQueries(TEACHER_HOME_QK)
+          // Demo realtime lokal; nantinya POST + invalidateQueries(TEACHER_HOME_QK)
           setListScheduleItems((prev) =>
             [...prev, item].sort((a, b) => a.time.localeCompare(b.time))
           );
@@ -280,13 +313,15 @@ export default function TeacherDashboard() {
           <div className="flex-1 space-y-6">
             {/* ===== Row 1 ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              {/* Jadwal Hari Ini */}
+              {/* Jadwal 3 Hari Kedepan */}
               <div className="lg:col-span-6">
                 <TodayScheduleCard
                   palette={palette}
-                  items={scheduleItems}
-                  seeAllPath="all-today-schedule" // ✅ konsisten ke halaman list
+                  items={scheduleItemsNext3Days.slice(0, 3)} // ⬅️ tampilkan 3 saja
+                  seeAllPath="schedule-3-hari" // ⬅️ route ke komponen baru
+                  seeAllState={{ items: scheduleItemsNext3Days }} // ⬅️ lempar semua 3 hari
                   addLabel="Tambah Jadwal"
+                  title="Jadwal 3 Hari Kedepan"
                   onAdd={() => setShowTambahJadwal(true)}
                 />
               </div>

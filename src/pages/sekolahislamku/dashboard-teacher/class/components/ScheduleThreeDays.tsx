@@ -1,7 +1,7 @@
-// src/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedule.tsx
+// src/pages/sekolahislamku/teacher/ScheduleThreeDays.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
@@ -9,21 +9,13 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import { CalendarDays, Plus } from "lucide-react";
 import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import { fetchTeacherHome, type TodayClass } from "../../class/teacher";
-import TambahJadwal from "../../components/dashboard/TambahJadwal";
+import { CalendarDays } from "lucide-react";
+import { fetchTeacherHome } from "../../class/teacher"; // sesuaikan path API-mu
 
-type ScheduleItem = {
-  id?: string;
-  time: string;
-  title: string;
-  room?: string;
-  dateISO?: string; // optional, dipakai untuk subteks tanggal
-};
+type Item = { time: string; title: string; room?: string; dateISO?: string };
 
-/* ========= Helpers ========= */
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -42,37 +34,29 @@ const fmtShort = (iso?: string) =>
       })
     : "-";
 
-export default function AllTodaySchedule() {
+export default function ScheduleThreeDays() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
 
-  const qc = useQueryClient();
   const location = useLocation();
-  const preload = (location.state as any)?.upcoming as
-    | ScheduleItem[]
-    | undefined;
+  const preload = (location.state as any)?.items as Item[] | undefined;
 
-  // Ambil data yang sama dengan dashboard (shared cache)
   const { data } = useQuery({
     queryKey: ["teacher-home"],
     queryFn: fetchTeacherHome,
     staleTime: 60_000,
   });
 
-  // Bangun list dasar:
-  // 1) jika ada preload dari router state → gunakan itu
-  // 2) jika tidak, ambil upcomingClasses API yang berada dalam 7 hari (hari ini s/d +6)
-  const baseItems: ScheduleItem[] = useMemo(() => {
+  const baseItems = useMemo<Item[]>(() => {
     if (Array.isArray(preload) && preload.length) {
-      // diasumsikan sudah terurut dari halaman asal
       return preload;
     }
-
-    const start = startOfDay(new Date());
-    const end = startOfDay(addDays(new Date(), 6));
-
+    // fallback: ambil dari upcomingClasses 3 hari ke depan (hari ini s/d +2)
     const upcoming = (data as any)?.upcomingClasses ?? [];
-    const within7 = Array.isArray(upcoming)
+    const start = startOfDay(new Date());
+    const end = startOfDay(addDays(new Date(), 2));
+
+    const within3 = Array.isArray(upcoming)
       ? upcoming.filter((c: any) => {
           if (!c?.dateISO) return false;
           const d = startOfDay(new Date(c.dateISO));
@@ -80,8 +64,7 @@ export default function AllTodaySchedule() {
         })
       : [];
 
-    const src = within7.length ? within7 : (data?.todayClasses ?? []);
-
+    const src = within3.length ? within3 : (data?.todayClasses ?? []);
     return src
       .slice()
       .sort((a: any, b: any) => {
@@ -92,7 +75,6 @@ export default function AllTodaySchedule() {
         return a.time.localeCompare(b.time);
       })
       .map((c: any) => ({
-        id: c.id,
         time: c.time,
         title: `${c.className} — ${c.subject}`,
         dateISO: c.dateISO,
@@ -100,65 +82,15 @@ export default function AllTodaySchedule() {
       }));
   }, [preload, data?.todayClasses, (data as any)?.upcomingClasses]);
 
-  // State lokal agar bisa nambah item tanpa reload
-  const [items, setItems] = useState<ScheduleItem[]>(baseItems);
+  const [items, setItems] = useState<Item[]>(baseItems);
   useEffect(() => setItems(baseItems), [baseItems]);
-
-  // Modal tambah
-  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
-
-  // Ketika submit modal
-  const handleAddSchedule = (item: {
-    time: string;
-    title: string;
-    room?: string;
-  }) => {
-    // Update list lokal (urut berdasarkan waktu)
-    setItems((prev) =>
-      [...prev, item].sort((a, b) => a.time.localeCompare(b.time))
-    );
-
-    // (Opsional) Sinkronkan cache "teacher-home" untuk todayClasses
-    // Catatan: item dari modal belum punya dateISO (karena hanya jam/titel/ruang),
-    // jadi di halaman ini tetap muncul dari state lokal.
-    qc.setQueryData(["teacher-home"], (prev: any) => {
-      if (!prev) return prev;
-      const [classNameRaw = "", subjectRaw = ""] = item.title.split(" — ");
-      const newTc: TodayClass = {
-        id: `temp-${Date.now()}`,
-        time: item.time,
-        className: classNameRaw || "Kelas",
-        subject: subjectRaw || "Pelajaran",
-        room: item.room,
-        status: "upcoming",
-        studentCount: undefined,
-      };
-      return {
-        ...prev,
-        todayClasses: [...(prev.todayClasses ?? []), newTc].sort(
-          (a: TodayClass, b: TodayClass) => a.time.localeCompare(b.time)
-        ),
-      };
-    });
-
-    setShowTambahJadwal(false);
-  };
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar palette={palette} title="Semua Jadwal 7 Hari Kedepan" />
-
-      {/* Modal: Tambah Jadwal */}
-      <TambahJadwal
-        open={showTambahJadwal}
-        onClose={() => setShowTambahJadwal(false)}
-        palette={palette}
-        onSubmit={handleAddSchedule}
-      />
-
+      <TeacherTopBar palette={palette} title="Jadwal 3 Hari Kedepan" />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
@@ -166,29 +98,18 @@ export default function AllTodaySchedule() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            {/* Header actions */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2 font-semibold text-lg">
                 <CalendarDays size={20} color={palette.primary} />
-                <span>Jadwal 7 Hari Kedepan</span>
+                <span>Semua Jadwal 3 Hari Kedepan</span>
               </div>
-              <div className="flex gap-2">
-                <Link to="../jadwal">
-                  <Btn palette={palette} size="sm" variant="ghost">
-                    Kembali
-                  </Btn>
-                </Link>
-                <Btn
-                  palette={palette}
-                  size="sm"
-                  onClick={() => setShowTambahJadwal(true)}
-                >
-                  <Plus size={16} className="mr-1" /> Tambah Jadwal
+              <Link to="../jadwal">
+                <Btn palette={palette} size="sm" variant="ghost">
+                  Kembali
                 </Btn>
-              </div>
+              </Link>
             </div>
 
-            {/* List semua item (tanpa slice) */}
             <SectionCard palette={palette}>
               <div
                 className="divide-y"
@@ -199,12 +120,12 @@ export default function AllTodaySchedule() {
                     className="p-5 text-sm text-center"
                     style={{ color: palette.silver2 }}
                   >
-                    Belum ada jadwal untuk 7 hari ke depan.
+                    Belum ada jadwal untuk 3 hari ke depan.
                   </div>
                 ) : (
-                  items.map((s) => (
+                  items.map((s, idx) => (
                     <div
-                      key={s.id ?? `${s.time}-${s.title}`}
+                      key={`${s.time}-${s.title}-${idx}`}
                       className="p-4 flex items-center justify-between gap-4"
                     >
                       <div className="min-w-0">

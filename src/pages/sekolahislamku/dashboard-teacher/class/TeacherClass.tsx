@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/TeacherClassDetail.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -12,7 +12,6 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
@@ -20,7 +19,6 @@ import {
   Users,
   CheckSquare,
   ClipboardList,
-  Megaphone,
   BookOpen,
   Plus,
   Filter,
@@ -35,6 +33,7 @@ import ModalAddStudent, {
   AddStudentPayload,
 } from "./components/ModalAddStudent";
 import ModalExport from "./components/ModalExport";
+import ModalAddMateri from "./components/ModalAddMateri";
 
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -46,10 +45,10 @@ type StudentRow = {
   avatarUrl?: string;
   statusToday?: AttendanceStatus | null;
   mode?: AttendanceMode;
-  time?: string; // "07:28"
+  time?: string;
   iqraLevel?: string;
-  juzProgress?: number; // 0..30 (boleh desimal)
-  lastScore?: number; // 0..100
+  juzProgress?: number;
+  lastScore?: number;
 };
 
 type Assignment = {
@@ -68,6 +67,14 @@ type MaterialItem = {
   attachments?: number;
 };
 
+/** Item jadwal untuk beberapa hari ke depan */
+type UpcomingItem = {
+  dateISO: string;
+  time: string;
+  title: string;
+  room?: string;
+};
+
 type ClassDetail = {
   id: string;
   name: string;
@@ -75,7 +82,10 @@ type ClassDetail = {
   homeroom: string;
   assistants?: string[];
   studentsCount: number;
+  /** jadwal khusus “hari ini” (untuk komponen lain jika dibutuhkan) */
   scheduleToday: { time: string; title: string; room?: string }[];
+  /** jadwal mendatang, dipakai untuk kartu 7 hari ke depan */
+  upcomingSchedule: UpcomingItem[];
   attendanceToday: { byStatus: Record<AttendanceStatus, number> };
   students: StudentRow[];
   assignments: Assignment[];
@@ -84,10 +94,56 @@ type ClassDetail = {
   hijriDate: string;
 };
 
+/* ================= Helpers ================ */
+const startOfDay = (d = new Date()) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+};
+const addDays = (d: Date, n: number) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+};
+const dateLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
+const dateShort = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "short",
+      })
+    : "-";
+const percent = (a: number, b: number) =>
+  b > 0 ? Math.round((a / b) * 100) : 0;
+
 /* ============ Fake API (ganti dgn axios) ============ */
 async function fetchClassDetail(classId: string): Promise<ClassDetail> {
   const now = new Date();
-  const iso = now.toISOString();
+  const todayISO = now.toISOString();
+
+  const scheduleToday: ClassDetail["scheduleToday"] = [
+    { time: "07:30", title: "Tahsin — Tajwid & Makhraj", room: "Aula 1" },
+    { time: "09:30", title: "Hafalan Juz 30", room: "R. Tahfiz" },
+  ];
+
+  // Generate upcoming 7 hari (termasuk hari ini) dari baseline scheduleToday
+  const upcomingSchedule: UpcomingItem[] = Array.from({ length: 7 }).flatMap(
+    (_, i) =>
+      scheduleToday.map((s) => ({
+        dateISO: addDays(startOfDay(now), i).toISOString(),
+        time: s.time,
+        title: s.title,
+        room: s.room,
+      }))
+  );
 
   const students: StudentRow[] = [
     {
@@ -138,15 +194,13 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
 
   return Promise.resolve({
     id: classId,
-    name: classId.toUpperCase().replace("-", " "), // contoh kecil biar terasa dinamis
+    name: classId.toUpperCase().replace("-", " "),
     room: classId === "tpa-b" ? "R. Tahfiz" : "Aula 1",
     homeroom: "Ustadz Abdullah",
     assistants: ["Ustadzah Amina"],
     studentsCount: 22,
-    scheduleToday: [
-      { time: "07:30", title: "Tahsin — Tajwid & Makhraj", room: "Aula 1" },
-      { time: "09:30", title: "Hafalan Juz 30", room: "R. Tahfiz" },
-    ],
+    scheduleToday,
+    upcomingSchedule,
     attendanceToday: {
       byStatus: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 },
     },
@@ -155,7 +209,7 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
       {
         id: "t1",
         title: "Evaluasi Wudhu",
-        dueDate: new Date(now.getTime() + 864e5).toISOString(),
+        dueDate: addDays(now, 1).toISOString(),
         submitted: 18,
         total: 22,
         graded: 10,
@@ -163,7 +217,7 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
       {
         id: "t2",
         title: "Setoran Hafalan An-Naba 1–10",
-        dueDate: new Date(now.getTime() + 2 * 864e5).toISOString(),
+        dueDate: addDays(now, 2).toISOString(),
         submitted: 12,
         total: 22,
         graded: 0,
@@ -173,12 +227,12 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
       {
         id: "m1",
         title: "Materi: Mad Thabi'i (contoh & latihan)",
-        date: iso,
+        date: todayISO,
         attachments: 2,
       },
-      { id: "m2", title: "Latihan Makhraj (ba, ta, tha)", date: iso },
+      { id: "m2", title: "Latihan Makhraj (ba, ta, tha)", date: todayISO },
     ],
-    gregorianDate: iso,
+    gregorianDate: todayISO,
     hijriDate: "16 Muharram 1447 H",
   });
 }
@@ -192,26 +246,6 @@ async function fetchClassOptions(): Promise<ClassOption[]> {
     { id: "tpa-c", name: "TPA C", room: "Aula 2" },
   ]);
 }
-
-/* ================= Helpers ================ */
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
-const dateShort = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-      })
-    : "-";
-const percent = (a: number, b: number) =>
-  b > 0 ? Math.round((a / b) * 100) : 0;
 
 /* ============ Small inline component ============ */
 function ClassSelector({
@@ -261,16 +295,12 @@ function ClassSelector({
 /* ================= Page ================= */
 export default function TeacherClass() {
   const [addStudentOpen, setAddStudentOpen] = useState(false);
-
   const handleAddStudent = async (payload: AddStudentPayload) => {
-    // di sini bisa POST API, atau sementara push ke data
     alert(`Siswa baru: ${payload.name}`);
   };
 
   const params = useParams<{ id: string }>();
   const classId = params.id ?? "tpa-a";
-  // di dalam komponen:
-  const navigate = useNavigate();
 
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
@@ -284,20 +314,40 @@ export default function TeacherClass() {
 
   // State kelas terpilih, default dari URL param
   const [selectedClassId, setSelectedClassId] = useState<string>(classId);
-  useEffect(() => {
-    setSelectedClassId(classId);
-  }, [classId]);
-
-  // Id efektif yang dipakai untuk query detail
-  const effectiveClassId = selectedClassId || classId;
+  useEffect(() => setSelectedClassId(classId), [classId]);
 
   // Detail kelas
   const { data } = useQuery({
-    queryKey: ["teacher-class-detail", effectiveClassId],
-    queryFn: () => fetchClassDetail(effectiveClassId),
+    queryKey: ["teacher-class-detail", selectedClassId || classId],
+    queryFn: () => fetchClassDetail(selectedClassId || classId),
     staleTime: 60_000,
-    enabled: !!effectiveClassId,
+    enabled: !!(selectedClassId || classId),
   });
+
+  // === Jadwal 7 hari ke depan (hari ini s/d +6) ===
+  const next7DaysItems = useMemo(() => {
+    const start = startOfDay(new Date());
+    const end = startOfDay(addDays(new Date(), 6));
+    const src = data?.upcomingSchedule ?? [];
+
+    return src
+      .filter((it) => {
+        const d = startOfDay(new Date(it.dateISO));
+        return d >= start && d <= end;
+      })
+      .sort((a, b) => {
+        const ad =
+          new Date(a.dateISO).getTime() - new Date(b.dateISO).getTime();
+        if (ad !== 0) return ad;
+        return a.time.localeCompare(b.time);
+      })
+      .map((it) => ({
+        time: it.time,
+        title: it.title,
+        // subteks: tgl singkat • room
+        room: `${dateShort(it.dateISO)}${it.room ? ` • ${it.room}` : ""}`,
+      }));
+  }, [data?.upcomingSchedule]);
 
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<AttendanceStatus | "all">(
@@ -317,12 +367,14 @@ export default function TeacherClass() {
   }, [data?.students, q, statusFilter]);
 
   const [exportOpen, setExportOpen] = useState(false);
-
   const handleExport = (file: File) => {
-    // sementara, demo upload
     alert(`File diupload: ${file.name}`);
     setExportOpen(false);
   };
+
+  // state ModalAddMateri
+    const [openModal, setOpenModal] = useState(false);
+
 
   return (
     <div
@@ -336,6 +388,7 @@ export default function TeacherClass() {
         hijriDate={data?.hijriDate}
         dateFmt={(iso) => dateLong(iso)}
       />
+
       <ModalAddStudent
         open={addStudentOpen}
         onClose={() => setAddStudentOpen(false)}
@@ -350,6 +403,16 @@ export default function TeacherClass() {
         palette={palette}
       />
 
+      <ModalAddMateri
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        palette={palette}
+        onSubmit={(form) => {
+          console.log("Materi baru:", form);
+          // TODO: API POST ke backend
+        }}
+      />
+
       {/* ===== Content + Sidebar ===== */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
@@ -359,7 +422,7 @@ export default function TeacherClass() {
           <div className="flex-1 min-w-0 space-y-6">
             <ClassSelector
               palette={palette}
-              value={effectiveClassId}
+              value={selectedClassId || classId}
               options={classOptions}
               onChange={(nextId) => setSelectedClassId(nextId)}
             />
@@ -389,30 +452,45 @@ export default function TeacherClass() {
                 siswa
               </div>
             </div>
+
             {/* ===== Header info + Actions ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-7">
-                <div className="p-4 md:p-5">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
+              <div className="lg:col-span-7">
+                <TodayScheduleCard
+                  palette={palette}
+                  items={next7DaysItems.slice(0, 3)}
+                  seeAllPath="all-today-schedule"
+                  addLabel="Tambah Jadwal"
+                  title="Jadwal 7 Hari Kedepan"
+                  seeAllState={{ upcoming: next7DaysItems }}
+                  addHref="/teacher/jadwal/tambah"
+                />
+              </div>
+
+              {/* Wali kelas card (rapi & ada jarak) */}
+              <SectionCard palette={palette} className="lg:col-span-5">
+                <div className="p-4 md:p-6 flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+                    <div className="space-y-1.5">
                       <div
                         className="text-sm"
                         style={{ color: palette.silver2 }}
                       >
                         Wali Kelas
                       </div>
-                      <div className="font-semibold">{data?.homeroom}</div>
+                      <div className="font-semibold text-lg leading-snug break-words">
+                        {data?.homeroom}
+                      </div>
                       {data?.assistants?.length ? (
                         <div
-                          className="text-sm mt-0.5"
+                          className="text-sm leading-relaxed"
                           style={{ color: palette.silver2 }}
                         >
                           Pendamping: {data.assistants.join(", ")}
                         </div>
                       ) : null}
                     </div>
-
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 sm:self-start mt-2 sm:mt-0">
                       <Badge palette={palette} variant="outline">
                         {data?.room ?? "-"}
                       </Badge>
@@ -424,16 +502,6 @@ export default function TeacherClass() {
                   </div>
                 </div>
               </SectionCard>
-
-              <div className="lg:col-span-5">
-                <TodayScheduleCard
-                  palette={palette}
-                  items={data?.scheduleToday ?? []}
-                  seeAllPath="all-today-schedule"
-                  addLabel="Tambah Jadwal"
-                  addHref="/teacher/jadwal/tambah"
-                />
-              </div>
             </section>
 
             {/* ===== Assignments ===== */}
@@ -539,7 +607,7 @@ export default function TeacherClass() {
                       palette={palette}
                       size="sm"
                       variant="ghost"
-                      onClick={() => alert("Tambah Materi")}
+                      onClick={() => setOpenModal(true)}
                     >
                       <Plus className="mr-1" size={16} /> Tambah
                     </Btn>

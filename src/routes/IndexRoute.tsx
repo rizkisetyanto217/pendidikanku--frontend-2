@@ -173,6 +173,7 @@ import SchoolBooks from "@/pages/sekolahislamku/dashboard-school/books/SchoolBoo
 import SchoolDetailBook from "@/pages/sekolahislamku/dashboard-school/books/detail/SchoolDetailBook";
 import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/components/dashboard/AllAnnouncementTeacher";
 import AllTodaySchedule from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedhule";
+import ScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleThreeDays";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -558,6 +559,7 @@ export default function AppRoutes() {
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
         <Route path="all-today-schedule" element={<AllTodaySchedule />} />
         <Route path="jadwal" element={<TeacherSchedule />} />
+        <Route path="schedule-3-hari" element={<ScheduleThreeDays />} />
         <Route
           path="all-announcement-teacher"
           element={<AllAnnouncementTeacher />}
@@ -567,6 +569,7 @@ export default function AppRoutes() {
           <Route path="jadwal" element={<TeacherSchedule />} />
           <Route path="all-today-schedule" element={<AllTodaySchedule />} />
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
+          <Route path="schedule-3-hari" element={<ScheduleThreeDays />} />
         </Route>
       </Route>
       <Route path=":slug/sekolah" element={<StudentLayout />}>
