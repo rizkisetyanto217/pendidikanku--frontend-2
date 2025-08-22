@@ -22,13 +22,20 @@ import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectio
 import { Users, UserCog, BookOpen, CheckSquare, BarChart2 } from "lucide-react";
 import SchoolSidebarNav from "../components/home/SchoolSideBarNav";
 
+// ✅ import type + helper + mock jadwal
+import {
+  TodayScheduleItem,
+  mapSessionsToTodaySchedule,
+  mockTodaySchedule,
+} from "./types/TodaySchedule";
+
 /* ================= Types (API & UI) ================ */
 export type AnnouncementUI = {
   id: string;
   title: string;
   date: string; // ISO
   body: string;
-  themeId?: string | null; // <— NEW for editing
+  themeId?: string | null;
   type?: "info" | "warning" | "success";
   slug?: string;
 };
@@ -53,7 +60,8 @@ type SchoolHome = {
     paidThisMonth: number;
     outstandingBills: BillItem[];
   };
-  todaySchedule: { time: string; title: string; room?: string }[];
+  // ❌ (tidak dipakai lagi untuk sumber data jadwal UI, tapi tetap ada untuk kompatibilitas)
+  todaySchedule: TodayScheduleItem[];
   announcements: AnnouncementUI[];
   attendanceTodayByStatus: Record<AttendanceStatus, number>;
 };
@@ -77,7 +85,7 @@ type AnnouncementAPI = {
   announcement_class_section_id?: string | null;
   announcement_created_by_user_id?: string | null;
   announcement_title: string;
-  announcement_date: string; // ISO or YYYY-MM-DD
+  announcement_date: string;
   announcement_content: string;
   announcement_attachment_url?: string | null;
   announcement_is_active: boolean;
@@ -92,7 +100,7 @@ type AnnouncementsAPIResponse = {
 
 type SessionsItem = {
   class_attendance_sessions_id: string;
-  class_attendance_sessions_date: string; // YYYY-MM-DDT00:00:00Z
+  class_attendance_sessions_date: string;
   class_attendance_sessions_title: string;
   class_attendance_sessions_general_info?: string;
   class_attendance_sessions_note?: string;
@@ -119,7 +127,6 @@ const slugify = (text: string) =>
     .trim()
     .replace(/[_—–]/g, "-")
     .replace(/\s+/g, "-")
-    // .replace([^\w-]+/g as any, "")
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
 
@@ -174,10 +181,7 @@ function useAnnouncements() {
     queryFn: async () => {
       const res = await axios.get<AnnouncementsAPIResponse>(
         "/api/u/announcements",
-        {
-          params: { limit: 20, offset: 0 },
-          withCredentials: true,
-        }
+        { params: { limit: 20, offset: 0 }, withCredentials: true }
       );
       const items = res.data?.data ?? [];
       return items.map<AnnouncementUI>((a) => ({
@@ -240,6 +244,7 @@ function useTodaySessions() {
 }
 
 /* ============ Dummy Home (fallback layout) ============ */
+// 👉 now uses mockTodaySchedule for todaySchedule default
 async function fetchSchoolHome(): Promise<SchoolHome> {
   const now = new Date();
   const iso = now.toISOString();
@@ -275,11 +280,7 @@ async function fetchSchoolHome(): Promise<SchoolHome> {
         },
       ],
     },
-    todaySchedule: [
-      { time: "07:15", title: "Upacara & Doa Pagi", room: "Lapangan" },
-      { time: "08:00", title: "Observasi Tahsin Kelas 3", room: "Aula 1" },
-      { time: "13:00", title: "Rapat Kurikulum", room: "R. Meeting" },
-    ],
+    todaySchedule: mockTodaySchedule, // ✅ pakai mock dari TodaySchedule.ts
     announcements: [],
     attendanceTodayByStatus: {
       hadir: 286,
@@ -349,7 +350,6 @@ function EditAnnouncementModal({
   }, [open, initial]);
 
   if (!open) return null;
-
   const disabled = saving || !title.trim() || !dateYmd;
 
   return (
@@ -628,9 +628,9 @@ export default function SchoolDashboard() {
     }
   }, [flash]);
 
-  useEffectiveMasjidId(); // currently not used directly here, but ensures guards are evaluated
+  useEffectiveMasjidId();
 
-  // Dummy home (UI layout)
+  // Dummy home (layout & finance snapshot)
   const homeQ = useQuery({
     queryKey: QK.HOME,
     queryFn: fetchSchoolHome,
@@ -646,7 +646,7 @@ export default function SchoolDashboard() {
   const [editItem, setEditItem] = useState<AnnouncementUI | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
-  // Optimistic update helper (ringan)
+  // Optimistic update helper
   const applyOptimistic = useCallback(
     (form: EditAnnouncementForm) => {
       qc.setQueryData<AnnouncementUI[] | undefined>(QK.ANNOUNCEMENTS, (prev) =>
@@ -688,7 +688,6 @@ export default function SchoolDashboard() {
     },
     onSuccess: async (_, variables) => {
       setFlash({ type: "success", msg: "Pengumuman berhasil ditambah." });
-      // Optimistic add (optional)
       qc.setQueryData<AnnouncementUI[]>(QK.ANNOUNCEMENTS, (prev = []) => [
         {
           id: `temp-${Date.now()}`,
@@ -704,12 +703,11 @@ export default function SchoolDashboard() {
       await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
       setCreateOpen(false);
     },
-    onError: (err: any) => {
+    onError: (err: any) =>
       setFlash({
         type: "error",
         msg: err?.response?.data?.message ?? "Gagal menambah pengumuman.",
-      });
-    },
+      }),
   });
 
   const updateMutation = useMutation({
@@ -721,10 +719,7 @@ export default function SchoolDashboard() {
         announcement_content: form.body,
       };
       if (form.themeId) payload.announcement_theme_id = form.themeId;
-
-      // optimistik
       applyOptimistic({ ...form, date: dateOnly });
-
       await axios.put(`/api/u/announcements/${form.id}`, payload, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
@@ -769,17 +764,12 @@ export default function SchoolDashboard() {
     class: statsQ.data?.lembaga_stats_active_sections ?? 0,
   };
 
-  // Jadwal hari ini: ambil dari API; fallback dummy
-  const scheduleItems = useMemo(() => {
+  // Jadwal hari ini: gunakan API sessions; fallback ke mockTodaySchedule
+  const scheduleItems: TodayScheduleItem[] = useMemo(() => {
     const apiItems = todaySessionsQ.data ?? [];
-    if (apiItems.length > 0) {
-      return apiItems.map((it) => ({
-        time: "Hari ini",
-        title: it.class_attendance_sessions_title || "Sesi Kehadiran",
-      }));
-    }
-    return homeQ.data?.todaySchedule ?? [];
-  }, [todaySessionsQ.data, homeQ.data?.todaySchedule]);
+    if (apiItems.length > 0) return mapSessionsToTodaySchedule(apiItems);
+    return mockTodaySchedule;
+  }, [todaySessionsQ.data]);
 
   return (
     <div
@@ -798,7 +788,6 @@ export default function SchoolDashboard() {
 
       {/* ====== CONTAINER ====== */}
       <main className="mx-auto max-w-6xl px-4 py-6">
-        {/* ====== GRID LAYOUT: sidebar + main ====== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -845,8 +834,15 @@ export default function SchoolDashboard() {
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
-                  seeAllPath="all-schedule"
+                  title="Jadwal Hari Ini"
+                  maxItems={3} // tampil hanya 3 item
+                  seeAllPath="all-schedule" // arahkan ke route AllSchedule
+                  seeAllState={{
+                    items: scheduleItems, // lempar semua data
+                    heading: "Semua Jadwal Hari Ini",
+                  }}
                 />
+
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
                     Memuat jadwal hari ini…

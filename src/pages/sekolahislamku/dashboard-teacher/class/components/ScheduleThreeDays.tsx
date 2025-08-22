@@ -7,12 +7,13 @@ import { colors } from "@/constants/colorsThema";
 import {
   SectionCard,
   Btn,
+  Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import { CalendarDays } from "lucide-react";
-import { fetchTeacherHome } from "../../class/teacher"; // sesuaikan path API-mu
+import { CalendarDays, MapPin, Clock } from "lucide-react";
+import { fetchTeacherHome } from "../../class/teacher"; // sesuaikan jika path berbeda
 
 type Item = { time: string; title: string; room?: string; dateISO?: string };
 
@@ -34,6 +35,8 @@ const fmtShort = (iso?: string) =>
       })
     : "-";
 
+const isTime = (t?: string) => !!t && /^\d{2}:\d{2}$/.test(t);
+
 export default function ScheduleThreeDays() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
@@ -47,11 +50,10 @@ export default function ScheduleThreeDays() {
     staleTime: 60_000,
   });
 
+  // sumber data (state router jika ada; fallback ambil 3 hari dari API)
   const baseItems = useMemo<Item[]>(() => {
-    if (Array.isArray(preload) && preload.length) {
-      return preload;
-    }
-    // fallback: ambil dari upcomingClasses 3 hari ke depan (hari ini s/d +2)
+    if (Array.isArray(preload) && preload.length) return preload;
+
     const upcoming = (data as any)?.upcomingClasses ?? [];
     const start = startOfDay(new Date());
     const end = startOfDay(addDays(new Date(), 2));
@@ -78,6 +80,7 @@ export default function ScheduleThreeDays() {
         time: c.time,
         title: `${c.className} — ${c.subject}`,
         dateISO: c.dateISO,
+        // subteks: kalau ada tanggal, tetap tampilkan singkat • room (boleh dihapus jika benar2 tak perlu)
         room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
       }));
   }, [preload, data?.todayClasses, (data as any)?.upcomingClasses]);
@@ -91,6 +94,7 @@ export default function ScheduleThreeDays() {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <TeacherTopBar palette={palette} title="Jadwal 3 Hari Kedepan" />
+
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
@@ -98,6 +102,7 @@ export default function ScheduleThreeDays() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
+            {/* Header actions */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2 font-semibold text-lg">
                 <CalendarDays size={20} color={palette.primary} />
@@ -110,43 +115,54 @@ export default function ScheduleThreeDays() {
               </Link>
             </div>
 
-            <SectionCard palette={palette}>
-              <div
-                className="divide-y"
-                style={{ borderColor: palette.silver1 }}
-              >
-                {items.length === 0 ? (
+            {/* List “perkotak” seperti AllSchedule */}
+            {items.length === 0 ? (
+              <SectionCard palette={palette} className="p-6 text-center">
+                <div className="text-sm" style={{ color: palette.silver2 }}>
+                  Belum ada jadwal untuk 3 hari ke depan.
+                </div>
+              </SectionCard>
+            ) : (
+              <div className="grid gap-3">
+                {items.map((s, idx) => (
                   <div
-                    className="p-5 text-sm text-center"
-                    style={{ color: palette.silver2 }}
+                    key={`${s.time}-${s.title}-${idx}`}
+                    className="rounded-2xl border p-3 md:p-4 transition hover:shadow-sm"
+                    style={{
+                      background: palette.white1,
+                      borderColor: palette.silver1,
+                    }}
                   >
-                    Belum ada jadwal untuk 3 hari ke depan.
-                  </div>
-                ) : (
-                  items.map((s, idx) => (
-                    <div
-                      key={`${s.time}-${s.title}-${idx}`}
-                      className="p-4 flex items-center justify-between gap-4"
-                    >
+                    <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="font-medium truncate">{s.title}</div>
+                        <div className="font-semibold leading-snug truncate">
+                          {s.title}
+                        </div>
+
                         <div
-                          className="text-sm mt-1"
+                          className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm"
                           style={{ color: palette.silver2 }}
                         >
-                          {s.time} {s.room && `• ${s.room}`}
+                          {s.room && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin size={16} /> {s.room}
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-1">
+                            <Clock size={16} />{" "}
+                            {isTime(s.time) ? "Terjadwal" : s.time}
+                          </span>
                         </div>
                       </div>
-                      <div className="shrink-0">
-                        <Btn palette={palette} size="sm" variant="white1">
-                          Detail
-                        </Btn>
-                      </div>
+
+                      <Badge variant="white1" palette={palette}>
+                        {s.time}
+                      </Badge>
                     </div>
-                  ))
-                )}
+                  </div>
+                ))}
               </div>
-            </SectionCard>
+            )}
           </div>
         </div>
       </main>

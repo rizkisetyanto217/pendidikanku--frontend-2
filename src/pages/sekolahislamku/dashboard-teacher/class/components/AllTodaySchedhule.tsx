@@ -7,9 +7,10 @@ import { colors } from "@/constants/colorsThema";
 import {
   SectionCard,
   Btn,
+  Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import { CalendarDays, Plus } from "lucide-react";
+import { CalendarDays, Plus, Calendar, Clock, MapPin } from "lucide-react";
 import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 import { fetchTeacherHome, type TodayClass } from "../../class/teacher";
@@ -19,8 +20,8 @@ type ScheduleItem = {
   id?: string;
   time: string;
   title: string;
-  room?: string;
-  dateISO?: string; // optional, dipakai untuk subteks tanggal
+  room?: string; // bisa “22 Agu • Aula 1” atau hanya “Aula 1”
+  dateISO?: string; // untuk label tanggal
 };
 
 /* ========= Helpers ========= */
@@ -41,6 +42,26 @@ const fmtShort = (iso?: string) =>
         month: "short",
       })
     : "-";
+
+const fmtLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    : new Date().toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      });
+
+/** Ekstrak nama lokasi murni dari field room yang mungkin “DD Mon • Ruang” */
+const getPureLocation = (room?: string) => {
+  if (!room) return "";
+  const parts = room.split("•").map((s) => s.trim());
+  return parts.length > 1 ? parts.slice(1).join(" • ") : parts[0];
+};
 
 export default function AllTodaySchedule() {
   const { isDark } = useHtmlDarkMode();
@@ -64,7 +85,6 @@ export default function AllTodaySchedule() {
   // 2) jika tidak, ambil upcomingClasses API yang berada dalam 7 hari (hari ini s/d +6)
   const baseItems: ScheduleItem[] = useMemo(() => {
     if (Array.isArray(preload) && preload.length) {
-      // diasumsikan sudah terurut dari halaman asal
       return preload;
     }
 
@@ -96,13 +116,37 @@ export default function AllTodaySchedule() {
         time: c.time,
         title: `${c.className} — ${c.subject}`,
         dateISO: c.dateISO,
+        // subteks: tgl singkat • room (jika ada dateISO)
         room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
       }));
   }, [preload, data?.todayClasses, (data as any)?.upcomingClasses]);
 
-  // State lokal agar bisa nambah item tanpa reload
-  const [items, setItems] = useState<ScheduleItem[]>(baseItems);
-  useEffect(() => setItems(baseItems), [baseItems]);
+  // ====== UI State: search & filter lokasi (selaras AllSchedule) ======
+  const [search, setSearch] = useState("");
+  const [locFilter, setLocFilter] = useState<string | "semua">("semua");
+
+  const lokasiOptions = useMemo(() => {
+    const set = new Set(
+      baseItems
+        .map((x) => getPureLocation(x.room))
+        .map((s) => s.trim())
+        .filter(Boolean)
+    );
+    return ["semua", ...Array.from(set)];
+  }, [baseItems]);
+
+  const items = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return baseItems.filter((j) => {
+      const location = getPureLocation(j.room);
+      const matchSearch =
+        j.title.toLowerCase().includes(s) ||
+        location.toLowerCase().includes(s) ||
+        (j.time ?? "").toLowerCase().includes(s);
+      const matchLoc = locFilter === "semua" || location === locFilter;
+      return matchSearch && matchLoc;
+    });
+  }, [baseItems, search, locFilter]);
 
   // Modal tambah
   const [showTambahJadwal, setShowTambahJadwal] = useState(false);
@@ -113,14 +157,7 @@ export default function AllTodaySchedule() {
     title: string;
     room?: string;
   }) => {
-    // Update list lokal (urut berdasarkan waktu)
-    setItems((prev) =>
-      [...prev, item].sort((a, b) => a.time.localeCompare(b.time))
-    );
-
     // (Opsional) Sinkronkan cache "teacher-home" untuk todayClasses
-    // Catatan: item dari modal belum punya dateISO (karena hanya jam/titel/ruang),
-    // jadi di halaman ini tetap muncul dari state lokal.
     qc.setQueryData(["teacher-home"], (prev: any) => {
       if (!prev) return prev;
       const [classNameRaw = "", subjectRaw = ""] = item.title.split(" — ");
@@ -166,7 +203,7 @@ export default function AllTodaySchedule() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            {/* Header actions */}
+            {/* Header actions — selaras AllSchedule */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2 font-semibold text-lg">
                 <CalendarDays size={20} color={palette.primary} />
@@ -188,44 +225,95 @@ export default function AllTodaySchedule() {
               </div>
             </div>
 
-            {/* List semua item (tanpa slice) */}
-            <SectionCard palette={palette}>
-              <div
-                className="divide-y"
-                style={{ borderColor: palette.silver1 }}
-              >
-                {items.length === 0 ? (
-                  <div
-                    className="p-5 text-sm text-center"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Belum ada jadwal untuk 7 hari ke depan.
-                  </div>
-                ) : (
-                  items.map((s) => (
-                    <div
-                      key={s.id ?? `${s.time}-${s.title}`}
-                      className="p-4 flex items-center justify-between gap-4"
+            {/* Search & Filter (meniru AllSchedule) */}
+            <SectionCard palette={palette} className="p-3 md:p-4">
+              <div className="flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Cari kelas/materi/lokasi…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-10 w-full rounded-2xl px-3 text-sm"
+                    style={{
+                      background: palette.white1,
+                      color: palette.black1,
+                      border: `1px solid ${palette.silver1}`,
+                    }}
+                  />
+                </div>
+
+                {lokasiOptions.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Badge palette={palette} variant="outline">
+                      Lokasi
+                    </Badge>
+                    <select
+                      value={locFilter}
+                      onChange={(e) => setLocFilter(e.target.value as any)}
+                      className="h-10 rounded-xl px-3 text-sm outline-none"
+                      style={{
+                        background: palette.white1,
+                        color: palette.black1,
+                        border: `1px solid ${palette.silver1}`,
+                      }}
                     >
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{s.title}</div>
-                        <div
-                          className="text-sm mt-1"
-                          style={{ color: palette.silver2 }}
-                        >
-                          {s.time} {s.room && `• ${s.room}`}
-                        </div>
-                      </div>
-                      <div className="shrink-0">
-                        <Btn palette={palette} size="sm" variant="white1">
-                          Detail
-                        </Btn>
-                      </div>
-                    </div>
-                  ))
+                      {lokasiOptions.map((o) => (
+                        <option key={o} value={o}>
+                          {o === "semua" ? "Semua" : o}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 )}
               </div>
             </SectionCard>
+
+            {/* List semua item (tanpa slice) — UI kartu seperti AllSchedule */}
+            <div className="grid gap-3">
+              {items.length === 0 ? (
+                <SectionCard palette={palette} className="p-6 text-center">
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    Belum ada jadwal untuk 7 hari ke depan.
+                  </div>
+                </SectionCard>
+              ) : (
+                items.map((s) => (
+                  <SectionCard
+                    key={s.id ?? `${s.time}-${s.title}`}
+                    palette={palette}
+                    className="p-3 md:p-4"
+                    style={{ background: palette.white1 }}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center">
+                        <h2 className="font-semibold">{s.title}</h2>
+                        <Badge variant="white1" palette={palette}>
+                          {s.time}
+                        </Badge>
+                      </div>
+
+                      <div
+                        className="flex flex-wrap gap-3 text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Calendar size={16} /> {fmtLong(s.dateISO)}
+                        </span>
+                        {getPureLocation(s.room) && (
+                          <span className="flex items-center gap-1">
+                            <MapPin size={16} /> {getPureLocation(s.room)}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Clock size={16} /> {s.time}
+                        </span>
+                      </div>
+                    </div>
+                  </SectionCard>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </main>

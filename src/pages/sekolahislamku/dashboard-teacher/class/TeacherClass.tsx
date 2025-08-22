@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/TeacherClassDetail.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -25,15 +25,20 @@ import {
   Search,
   GraduationCap,
 } from "lucide-react";
+
 import MiniBar from "../../components/ui/MiniBar";
 import StatPill from "../../components/ui/StatPill";
 import StudentsTable from "./components/StudentTable";
 import TeacherTopBar from "../../components/home/TeacherTopBar";
 import ModalAddStudent, {
-  AddStudentPayload,
+  type AddStudentPayload,
 } from "./components/ModalAddStudent";
 import ModalExport from "./components/ModalExport";
 import ModalAddMateri from "./components/ModalAddMateri";
+import TambahJadwal from "../components/dashboard/TambahJadwal";
+
+// 🔹 Pakai modal TambahJadwal dari pages/schedule/modal
+
 
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -82,9 +87,7 @@ type ClassDetail = {
   homeroom: string;
   assistants?: string[];
   studentsCount: number;
-  /** jadwal khusus “hari ini” (untuk komponen lain jika dibutuhkan) */
   scheduleToday: { time: string; title: string; room?: string }[];
-  /** jadwal mendatang, dipakai untuk kartu 7 hari ke depan */
   upcomingSchedule: UpcomingItem[];
   attendanceToday: { byStatus: Record<AttendanceStatus, number> };
   students: StudentRow[];
@@ -134,7 +137,6 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
     { time: "09:30", title: "Hafalan Juz 30", room: "R. Tahfiz" },
   ];
 
-  // Generate upcoming 7 hari (termasuk hari ini) dari baseline scheduleToday
   const upcomingSchedule: UpcomingItem[] = Array.from({ length: 7 }).flatMap(
     (_, i) =>
       scheduleToday.map((s) => ({
@@ -294,10 +296,16 @@ function ClassSelector({
 
 /* ================= Page ================= */
 export default function TeacherClass() {
+  // Top-level UI states
   const [addStudentOpen, setAddStudentOpen] = useState(false);
-  const handleAddStudent = async (payload: AddStudentPayload) => {
-    alert(`Siswa baru: ${payload.name}`);
-  };
+  const [exportOpen, setExportOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false); // Add materi
+
+  // Tambah Jadwal modal
+  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
+  const [listScheduleItems, setListScheduleItems] = useState<
+    { time: string; title: string; room?: string; slug?: string }[]
+  >([]);
 
   const params = useParams<{ id: string }>();
   const classId = params.id ?? "tpa-a";
@@ -344,11 +352,11 @@ export default function TeacherClass() {
       .map((it) => ({
         time: it.time,
         title: it.title,
-        // subteks: tgl singkat • room
         room: `${dateShort(it.dateISO)}${it.room ? ` • ${it.room}` : ""}`,
       }));
   }, [data?.upcomingSchedule]);
 
+  // ====== Students filter/search ======
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<AttendanceStatus | "all">(
     "all"
@@ -366,15 +374,20 @@ export default function TeacherClass() {
       : byStatus;
   }, [data?.students, q, statusFilter]);
 
-  const [exportOpen, setExportOpen] = useState(false);
+  // Handlers
+  const handleAddStudent = async (payload: AddStudentPayload) => {
+    alert(`Siswa baru: ${payload.name}`);
+  };
   const handleExport = (file: File) => {
     alert(`File diupload: ${file.name}`);
     setExportOpen(false);
   };
 
-  // state ModalAddMateri
-    const [openModal, setOpenModal] = useState(false);
-
+  // Gabungkan jadwal API + manual
+  const combinedUpcoming = useMemo(
+    () => [...next7DaysItems, ...listScheduleItems],
+    [next7DaysItems, listScheduleItems]
+  );
 
   return (
     <div
@@ -389,6 +402,7 @@ export default function TeacherClass() {
         dateFmt={(iso) => dateLong(iso)}
       />
 
+      {/* ===== Modals ===== */}
       <ModalAddStudent
         open={addStudentOpen}
         onClose={() => setAddStudentOpen(false)}
@@ -410,6 +424,17 @@ export default function TeacherClass() {
         onSubmit={(form) => {
           console.log("Materi baru:", form);
           // TODO: API POST ke backend
+        }}
+      />
+
+      <TambahJadwal
+        open={showTambahJadwal}
+        onClose={() => setShowTambahJadwal(false)}
+        palette={palette}
+        onSubmit={(item) => {
+          setListScheduleItems((prev) =>
+            [...prev, item].sort((a, b) => a.time.localeCompare(b.time))
+          );
         }}
       />
 
@@ -455,19 +480,20 @@ export default function TeacherClass() {
 
             {/* ===== Header info + Actions ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+              {/* Jadwal 7 hari ke depan */}
               <div className="lg:col-span-7">
                 <TodayScheduleCard
                   palette={palette}
-                  items={next7DaysItems.slice(0, 3)}
-                  seeAllPath="all-today-schedule"
-                  addLabel="Tambah Jadwal"
+                  items={combinedUpcoming.slice(0, 3)}
                   title="Jadwal 7 Hari Kedepan"
-                  seeAllState={{ upcoming: next7DaysItems }}
-                  addHref="/teacher/jadwal/tambah"
+                  addLabel="Tambah Jadwal"
+                  onAdd={() => setShowTambahJadwal(true)}
+                  seeAllPath="all-today-schedule"
+                  seeAllState={{ upcoming: combinedUpcoming }}
                 />
               </div>
 
-              {/* Wali kelas card (rapi & ada jarak) */}
+              {/* Wali kelas card */}
               <SectionCard palette={palette} className="lg:col-span-5">
                 <div className="p-4 md:p-6 flex flex-col gap-3">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
@@ -512,14 +538,11 @@ export default function TeacherClass() {
                     <div className="font-medium flex items-center gap-2">
                       <ClipboardList size={16} /> Tugas Kelas
                     </div>
-                    <Btn
-                      palette={palette}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => alert("Lihat semua tugas")}
-                    >
-                      Lihat semua
-                    </Btn>
+                    <Link to="../assignments">
+                      <Btn palette={palette} size="sm" variant="ghost">
+                        Lihat semua
+                      </Btn>
+                    </Link>
                   </div>
 
                   <div className="mt-3 grid gap-3">
