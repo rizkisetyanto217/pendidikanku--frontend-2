@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 
+
 import {
   SectionCard,
   Badge,
@@ -301,6 +302,11 @@ export default function TeacherClass() {
   const [exportOpen, setExportOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false); // Add materi
 
+  // materi
+const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:id
+// const classId = selectedClassId || idFromUrl;
+
+
   // Tambah Jadwal modal
   const [showTambahJadwal, setShowTambahJadwal] = useState(false);
   const [listScheduleItems, setListScheduleItems] = useState<
@@ -538,7 +544,14 @@ export default function TeacherClass() {
                     <div className="font-medium flex items-center gap-2">
                       <ClipboardList size={16} /> Tugas Kelas
                     </div>
-                    <Link to="../assignments">
+                    <Link
+                      to="../assignments"
+                      state={{
+                        assignments: data?.assignments ?? [],
+                        className: data?.name ?? "",
+                        heading: `Tugas ${data?.name ?? ""}`,
+                      }}
+                    >
                       <Btn palette={palette} size="sm" variant="ghost">
                         Lihat semua
                       </Btn>
@@ -658,9 +671,16 @@ export default function TeacherClass() {
                               : ""}
                           </div>
                         </div>
-                        <Btn palette={palette} variant="white1" size="sm">
-                          Buka
-                        </Btn>
+
+                        {/* Pastikan menyertakan :id */}
+                        <Link
+                          to={`${classId}/material/${m.id}`} // hasil: /:slug/guru/kelas/:id/material/:materialId
+                          state={{ material: m, className: data?.name }}
+                        >
+                          <Btn palette={palette} variant="white1" size="sm">
+                            Buka
+                          </Btn>
+                        </Link>
                       </div>
                     ))}
                     {(!data?.materials || data.materials.length === 0) && (

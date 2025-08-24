@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/ScheduleThreeDays.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -10,13 +10,22 @@ import {
   Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
+import { CalendarDays, Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
 import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import { CalendarDays, MapPin, Clock } from "lucide-react";
-import { fetchTeacherHome } from "../../class/teacher"; // sesuaikan jika path berbeda
+import TambahJadwal from "../../components/dashboard/TambahJadwal";
+// Pakai API yang sama seperti AllTodaySchedule
+import { fetchTeacherHome } from "../../class/teacher";
 
-type Item = { time: string; title: string; room?: string; dateISO?: string };
+type ScheduleItem = {
+  id?: string;
+  time: string;
+  title: string; // "TPA A — Tahsin"
+  room?: string; // bisa "22 Agu • Aula 1" atau "Aula 1"
+  dateISO: string; // ISO tanggal (00:00)
+};
 
+/* ========= Helpers ========= */
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -27,6 +36,8 @@ const addDays = (d: Date, n: number) => {
   x.setDate(x.getDate() + n);
   return x;
 };
+const toISODate = (d: Date) => startOfDay(d).toISOString();
+
 const fmtShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -35,14 +46,42 @@ const fmtShort = (iso?: string) =>
       })
     : "-";
 
-const isTime = (t?: string) => !!t && /^\d{2}:\d{2}$/.test(t);
+const fmtLong = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+/** Ekstrak nama lokasi murni dari field room yang mungkin “DD Mon • Ruang” */
+const getPureLocation = (room?: string) => {
+  if (!room) return "";
+  const parts = room.split("•").map((s) => s.trim());
+  return parts.length > 1 ? parts.slice(1).join(" • ") : parts[0];
+};
+
+/** Normalisasi from API object → UI ScheduleItem */
+const normalizeItem = (c: any, fallback: Date): ScheduleItem => {
+  const dateISO = c.dateISO
+    ? toISODate(new Date(c.dateISO))
+    : toISODate(fallback);
+  return {
+    id: c.id,
+    time: c.time,
+    title: `${c.className} — ${c.subject}`,
+    dateISO,
+    // subteks: tgl singkat • room (jika punya date)
+    room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
+  };
+};
 
 export default function ScheduleThreeDays() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
-
+  const navigate = useNavigate();
+  // optional preload dari router state
   const location = useLocation();
-  const preload = (location.state as any)?.items as Item[] | undefined;
+  const preload = (location.state as any)?.items as ScheduleItem[] | undefined;
 
   const { data } = useQuery({
     queryKey: ["teacher-home"],
@@ -50,50 +89,193 @@ export default function ScheduleThreeDays() {
     staleTime: 60_000,
   });
 
-  // sumber data (state router jika ada; fallback ambil 3 hari dari API)
-  const baseItems = useMemo<Item[]>(() => {
-    if (Array.isArray(preload) && preload.length) return preload;
+  // Ambil 3 hari ke depan (hari ini s/d +2)
+  const DAYS = 3;
+  const today = startOfDay(new Date());
+  const end = startOfDay(addDays(today, DAYS - 1));
 
-    const upcoming = (data as any)?.upcomingClasses ?? [];
-    const start = startOfDay(new Date());
-    const end = startOfDay(addDays(new Date(), 2));
+  // Susun sumber data: upcoming dalam 3 hari → fallback todayClasses (jadikan hari ini)
+  const rawItems: ScheduleItem[] = useMemo(() => {
+    if (Array.isArray(preload) && preload.length) {
+      return preload
+        .map((p) => ({
+          ...p,
+          dateISO: p.dateISO
+            ? toISODate(new Date(p.dateISO))
+            : toISODate(today),
+        }))
+        .sort((a, b) => {
+          const da = new Date(a.dateISO).getTime();
+          const db = new Date(b.dateISO).getTime();
+          if (da !== db) return da - db;
+          return a.time.localeCompare(b.time);
+        });
+    }
 
-    const within3 = Array.isArray(upcoming)
-      ? upcoming.filter((c: any) => {
-          if (!c?.dateISO) return false;
-          const d = startOfDay(new Date(c.dateISO));
-          return d >= start && d <= end;
+    const upcoming = (data?.upcomingClasses ?? []).filter((u: any) => {
+      const d = startOfDay(new Date(u.dateISO));
+      return d >= today && d <= end;
+    });
+
+    const fromUpcoming = upcoming.map((u: any) => normalizeItem(u, today));
+    const fromToday =
+      fromUpcoming.length > 0
+        ? []
+        : (data?.todayClasses ?? []).map((t: any) => normalizeItem(t, today));
+
+    return [...fromUpcoming, ...fromToday].sort((a, b) => {
+      const da = new Date(a.dateISO).getTime();
+      const db = new Date(b.dateISO).getTime();
+      if (da !== db) return da - db;
+      return a.time.localeCompare(b.time);
+    });
+  }, [preload, data?.upcomingClasses, data?.todayClasses]);
+
+  /* ====== Lokal state supaya bisa Add/Edit/Delete tanpa reload ====== */
+  const [localItems, setLocalItems] = useState<ScheduleItem[]>(rawItems);
+  useEffect(() => setLocalItems(rawItems), [rawItems]);
+
+  /* ====== Search & Filter lokasi (selaras AllTodaySchedule/AllSchedule) ====== */
+  const [search, setSearch] = useState("");
+  const [locFilter, setLocFilter] = useState<string | "semua">("semua");
+
+  const lokasiOptions = useMemo(() => {
+    const set = new Set(
+      localItems
+        .map((x) => getPureLocation(x.room))
+        .map((s) => s.trim())
+        .filter(Boolean)
+    );
+    return ["semua", ...Array.from(set)];
+  }, [localItems]);
+
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return localItems.filter((j) => {
+      const location = getPureLocation(j.room);
+      const matchSearch =
+        j.title.toLowerCase().includes(s) ||
+        location.toLowerCase().includes(s) ||
+        j.time.toLowerCase().includes(s);
+      const matchLoc = locFilter === "semua" || location === locFilter;
+      return matchSearch && matchLoc;
+    });
+  }, [localItems, search, locFilter]);
+
+  /* ====== Bucket per hari (3 kotak) ====== */
+  const dayBuckets = useMemo(() => {
+    return Array.from({ length: DAYS }).map((_, i) => {
+      const dISO = toISODate(addDays(today, i));
+      const items = filtered
+        .filter((it) => it.dateISO === dISO)
+        .sort((a, b) => a.time.localeCompare(b.time));
+      return { dateISO: dISO, items };
+    });
+  }, [filtered]);
+
+  /* ---------- Tambah / Edit / Hapus ---------- */
+  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [targetDateISO, setTargetDateISO] = useState<string | null>(null);
+
+  const openAdd = (dateISO?: string) => {
+    setEditingId(null);
+    setTargetDateISO(dateISO ?? toISODate(today));
+    setShowTambahJadwal(true);
+  };
+
+  const openEdit = (it: ScheduleItem) => {
+    setEditingId(it.id ?? `${it.dateISO}-${it.time}-${it.title}`);
+    setTargetDateISO(it.dateISO);
+    setShowTambahJadwal(true);
+  };
+
+  const handleSubmitSchedule = (payload: {
+    time: string;
+    title: string;
+    room?: string;
+  }) => {
+    const baseDateISO = targetDateISO ?? toISODate(today);
+    if (editingId) {
+      // Edit: replace item yang cocok
+      setLocalItems((prev) =>
+        prev
+          .map((x) =>
+            (x.id ?? `${x.dateISO}-${x.time}-${x.title}`) === editingId
+              ? {
+                  ...x,
+                  time: payload.time,
+                  title: payload.title,
+                  room: payload.room
+                    ? `${fmtShort(baseDateISO)} • ${payload.room}`
+                    : x.room,
+                }
+              : x
+          )
+          .sort((a, b) => {
+            const da = new Date(a.dateISO).getTime();
+            const db = new Date(b.dateISO).getTime();
+            if (da !== db) return da - db;
+            return a.time.localeCompare(b.time);
+          })
+      );
+    } else {
+      // Add: masuk ke tanggal target (default: hari ini)
+      const newItem: ScheduleItem = {
+        id: `local-${Date.now()}`,
+        dateISO: baseDateISO,
+        time: payload.time,
+        title: payload.title,
+        room: payload.room
+          ? `${fmtShort(baseDateISO)} • ${payload.room}`
+          : undefined,
+      };
+      setLocalItems((prev) =>
+        [...prev, newItem].sort((a, b) => {
+          const da = new Date(a.dateISO).getTime();
+          const db = new Date(b.dateISO).getTime();
+          if (da !== db) return da - db;
+          return a.time.localeCompare(b.time);
         })
-      : [];
+      );
+    }
+    setShowTambahJadwal(false);
+  };
 
-    const src = within3.length ? within3 : (data?.todayClasses ?? []);
-    return src
-      .slice()
-      .sort((a: any, b: any) => {
-        const ad =
-          new Date(a.dateISO ?? start).getTime() -
-          new Date(b.dateISO ?? start).getTime();
-        if (ad !== 0) return ad;
-        return a.time.localeCompare(b.time);
-      })
-      .map((c: any) => ({
-        time: c.time,
-        title: `${c.className} — ${c.subject}`,
-        dateISO: c.dateISO,
-        // subteks: kalau ada tanggal, tetap tampilkan singkat • room (boleh dihapus jika benar2 tak perlu)
-        room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
-      }));
-  }, [preload, data?.todayClasses, (data as any)?.upcomingClasses]);
-
-  const [items, setItems] = useState<Item[]>(baseItems);
-  useEffect(() => setItems(baseItems), [baseItems]);
+  const handleDelete = (it: ScheduleItem) => {
+    const key = it.id ?? `${it.dateISO}-${it.time}-${it.title}`;
+    setLocalItems((prev) =>
+      prev.filter((x) => (x.id ?? `${x.dateISO}-${x.time}-${x.title}`) !== key)
+    );
+  };
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar palette={palette} title="Jadwal 3 Hari Kedepan" />
+      <TeacherTopBar
+        palette={palette}
+        gregorianDate={new Date().toISOString()}
+        title="Jadwal 3 Hari Kedepan"
+        dateFmt={(iso) =>
+          new Date(iso).toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        }
+      />
+
+      {/* Modal Tambah/Edit Jadwal */}
+      <TambahJadwal
+        open={showTambahJadwal}
+        onClose={() => setShowTambahJadwal(false)}
+        palette={palette}
+        // Komponen ini tidak punya prefill judul/ruang; defaultTime bisa ditambah kalau perlu
+        onSubmit={handleSubmitSchedule}
+      />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
@@ -102,67 +284,157 @@ export default function ScheduleThreeDays() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            {/* Header actions */}
+            {/* Header actions — selaras AllTodaySchedule */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2 font-semibold text-lg">
-                <CalendarDays size={20} color={palette.primary} />
+                <ArrowLeft
+                  onClick={() => navigate(-1)}
+                  className="cursor-pointer"
+                />
                 <span>Semua Jadwal 3 Hari Kedepan</span>
               </div>
-              <Link to="../jadwal">
-                <Btn palette={palette} size="sm" variant="ghost">
-                  Kembali
-                </Btn>
-              </Link>
             </div>
 
-            {/* List “perkotak” seperti AllSchedule */}
-            {items.length === 0 ? (
-              <SectionCard palette={palette} className="p-6 text-center">
-                <div className="text-sm" style={{ color: palette.silver2 }}>
-                  Belum ada jadwal untuk 3 hari ke depan.
-                </div>
-              </SectionCard>
-            ) : (
-              <div className="grid gap-3">
-                {items.map((s, idx) => (
-                  <div
-                    key={`${s.time}-${s.title}-${idx}`}
-                    className="rounded-2xl border p-3 md:p-4 transition hover:shadow-sm"
+            {/* Search & Filter */}
+            <SectionCard palette={palette} className="p-3 md:p-4">
+              <div className="flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Cari kelas/materi/lokasi…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-10 w-full rounded-2xl px-3 text-sm"
                     style={{
                       background: palette.white1,
+                      color: palette.black1,
+                      border: `1px solid ${palette.silver1}`,
+                    }}
+                  />
+                </div>
+
+                {lokasiOptions.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Badge palette={palette} variant="outline">
+                      Lokasi
+                    </Badge>
+                    <select
+                      value={locFilter}
+                      onChange={(e) => setLocFilter(e.target.value as any)}
+                      className="h-10 rounded-xl px-3 text-sm outline-none"
+                      style={{
+                        background: palette.white1,
+                        color: palette.black1,
+                        border: `1px solid ${palette.silver1}`,
+                      }}
+                    >
+                      {lokasiOptions.map((o) => (
+                        <option key={o} value={o}>
+                          {o === "semua" ? "Semua" : o}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+
+            {/* Per hari (3 kotak) */}
+            <div className="grid gap-3">
+              {dayBuckets.map(({ dateISO, items }) => (
+                <SectionCard
+                  key={dateISO}
+                  palette={palette}
+                  className="p-0 overflow-hidden"
+                >
+                  {/* Header tanggal */}
+                  <div
+                    className="px-4 py-3 border-b font-semibold flex items-center justify-between"
+                    style={{
                       borderColor: palette.silver1,
+                      background: palette.white1,
                     }}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="font-semibold leading-snug truncate">
-                          {s.title}
-                        </div>
-
-                        <div
-                          className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm"
-                          style={{ color: palette.silver2 }}
-                        >
-                          {s.room && (
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin size={16} /> {s.room}
-                            </span>
-                          )}
-                          <span className="inline-flex items-center gap-1">
-                            <Clock size={16} />{" "}
-                            {isTime(s.time) ? "Terjadwal" : s.time}
-                          </span>
-                        </div>
-                      </div>
-
-                      <Badge variant="white1" palette={palette}>
-                        {s.time}
-                      </Badge>
-                    </div>
+                    {fmtLong(dateISO)}
+                    <Btn
+                      palette={palette}
+                      size="sm"
+                      variant="white1"
+                      onClick={() => openAdd(dateISO)}
+                    >
+                      <Plus size={16} className="mr-1" /> Tambah di Hari Ini
+                    </Btn>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {/* Isi hari */}
+                  {items.length === 0 ? (
+                    <div
+                      className="px-4 py-3 text-sm"
+                      style={{
+                        color: palette.silver2,
+                        background: palette.white1,
+                      }}
+                    >
+                      Belum ada jadwal pada hari ini.
+                    </div>
+                  ) : (
+                    <div
+                      className="divide-y"
+                      style={{ borderColor: palette.silver1 }}
+                    >
+                      {items.map((s, i) => (
+                        <div
+                          key={`${s.id ?? i}-${s.time}`}
+                          className="px-4 py-3 flex items-center justify-between gap-4"
+                          style={{ background: palette.white1 }}
+                        >
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">
+                              {s.title}
+                            </div>
+                            <div
+                              className="text-sm mt-1 flex flex-wrap gap-3"
+                              style={{ color: palette.black2 }}
+                            >
+                              <span className="flex items-center gap-1">
+                                <Calendar size={16} /> {fmtLong(dateISO)}
+                              </span>
+                              {getPureLocation(s.room) && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin size={16} /> {getPureLocation(s.room)}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Clock size={16} /> {s.time}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openEdit(s)}
+                            >
+                              Edit
+                            </Btn>
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="quaternary"
+                              onClick={() => handleDelete(s)}
+                            >
+                              Hapus
+                            </Btn>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </SectionCard>
+              ))}
+            </div>
           </div>
         </div>
       </main>

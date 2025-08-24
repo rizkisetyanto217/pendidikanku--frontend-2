@@ -175,6 +175,9 @@ import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/com
 import AllTodaySchedule from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedhule";
 import ScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleThreeDays";
 import AllAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllAssignment";
+import PendaftaranPage from "@/pages/sekolahislamku/pages/Register";
+import DetailMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailMateri";
+
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -568,6 +571,10 @@ export default function AppRoutes() {
         />
         <Route path="kelas">
           <Route index element={<TeacherClass />} />
+          <Route
+            path=":id/material/:materialId"
+            element={<DetailMateri />}
+          />
           <Route path="jadwal" element={<TeacherSchedule />} />
           <Route path="all-today-schedule" element={<AllTodaySchedule />} />
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
@@ -586,6 +593,7 @@ export default function AppRoutes() {
           <Route index element={<SchoolClasses />} />
           <Route path="detail/:id" element={<SchoolManageClass />} />
         </Route>
+
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
         <Route path="pengumuman" element={<SchoolAnnouncement />} />
@@ -594,6 +602,7 @@ export default function AppRoutes() {
           <Route path="detail/:id" element={<SchoolDetailBook />} />
         </Route>
       </Route>
+      <Route path=":slug/register" element={<PendaftaranPage />} />
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />
     </Routes>

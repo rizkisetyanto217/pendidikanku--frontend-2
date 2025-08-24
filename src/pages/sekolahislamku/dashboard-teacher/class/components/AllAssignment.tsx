@@ -1,4 +1,5 @@
 // src/pages/sekolahislamku/assignment/AllAssignment.tsx
+import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import {
   Calendar,
@@ -6,7 +7,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Search,
+  ArrowLeft,
+  Plus,
 } from "lucide-react";
+
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
@@ -15,55 +19,51 @@ import {
   Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
+
 import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
 
+import ModalAddAssignment, {
+  type AddAssignmentPayload,
+} from "./ModalAddAssignment";
+import ModalEditAssignment from "./ModalEditAssignment";
+import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
+import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+
+/* =========================
+   Types
+========================= */
 type AssignmentStatus = "terbuka" | "selesai" | "terlambat";
+
+type IncomingAssignment = {
+  id: string;
+  title: string;
+  dueDate: string; // ISO dari TeacherClassDetail
+  submitted: number;
+  total: number;
+  graded?: number;
+  kelas?: string;
+};
 
 type AssignmentItem = {
   id: string;
   title: string;
   kelas?: string;
-  dueDateISO: string; // batas pengumpulan
-  createdISO: string; // tanggal dibuat
+  dueDateISO: string;
+  createdISO?: string;
   submitted: number;
   total: number;
   status: AssignmentStatus;
 };
 
-const mockAssignments: AssignmentItem[] = [
-  {
-    id: "a-101",
-    title: "Evaluasi Wudhu",
-    kelas: "TPA A",
-    dueDateISO: new Date(Date.now() + 2 * 864e5).toISOString(),
-    createdISO: new Date().toISOString(),
-    submitted: 18,
-    total: 22,
-    status: "terbuka",
-  },
-  {
-    id: "a-102",
-    title: "Setoran Hafalan An-Naba 1–10",
-    kelas: "TPA B",
-    dueDateISO: new Date(Date.now() - 1 * 864e5).toISOString(),
-    createdISO: new Date(Date.now() - 3 * 864e5).toISOString(),
-    submitted: 12,
-    total: 22,
-    status: "terlambat",
-  },
-  {
-    id: "a-103",
-    title: "Kuis Tajwid Bab 2",
-    kelas: "TPA C",
-    dueDateISO: new Date(Date.now() - 5 * 864e5).toISOString(),
-    createdISO: new Date(Date.now() - 10 * 864e5).toISOString(),
-    submitted: 22,
-    total: 22,
-    status: "selesai",
-  },
-];
+type LocationState = {
+  assignments?: IncomingAssignment[];
+  heading?: string;
+};
 
+/* =========================
+   Helpers
+========================= */
 const dateShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -72,23 +72,66 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
+const computeStatus = (a: {
+  dueDateISO: string;
+  submitted: number;
+  total: number;
+}): AssignmentStatus => {
+  const now = new Date();
+  const due = new Date(a.dueDateISO);
+  if (a.submitted >= a.total) return "selesai";
+  if (due < now) return "terlambat";
+  return "terbuka";
+};
+
+/* =========================
+   Page
+========================= */
 export default function AllAssignment() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const navigate = useNavigate();
 
+  // Ambil data dari TeacherClassDetail via router state
+  const { state } = useLocation();
+  const { assignments = [], heading } = (state ?? {}) as LocationState;
+
+  // Normalisasi state → item lokal (sekali di awal)
+  const initialItems = useMemo<AssignmentItem[]>(
+    () =>
+      (assignments ?? []).map((x) => {
+        const base: AssignmentItem = {
+          id: x.id,
+          title: x.title,
+          kelas: x.kelas,
+          dueDateISO: x.dueDate,
+          createdISO: undefined, // isi jika ada field created dari API
+          submitted: x.submitted,
+          total: x.total,
+          status: "terbuka",
+        };
+        return { ...base, status: computeStatus(base) };
+      }),
+    [assignments]
+  );
+
+  // Data lokal (agar bisa edit/hapus/tambah tanpa fetch)
+  const [items, setItems] = useState<AssignmentItem[]>(initialItems);
+
+  // Search & Filter
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<AssignmentStatus | "semua">("semua");
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return mockAssignments.filter((a) => {
+    return items.filter((a) => {
       const byStatus = status === "semua" ? true : a.status === status;
       const bySearch =
         a.title.toLowerCase().includes(s) ||
         (a.kelas ?? "").toLowerCase().includes(s);
       return byStatus && bySearch;
     });
-  }, [q, status]);
+  }, [q, status, items]);
 
   const statusBadgeTone = (st: AssignmentStatus) => {
     if (st === "terbuka")
@@ -98,26 +141,173 @@ export default function AllAssignment() {
     return { text: palette.error1, bg: palette.error2 };
   };
 
+  //  state handle submit
+  const [showTambah, setShowTambah] = useState(false);
+
+  // state modal edit
+  const [showEdit, setShowEdit] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // cari item yang sedang diedit
+  const editingItem = useMemo(
+    () => items.find((it) => it.id === editingId) || null,
+    [items, editingId]
+  );
+
+  // buka modal edit
+  const handleEdit = (a: AssignmentItem) => {
+    setEditingId(a.id);
+    setShowEdit(true);
+  };
+
+  // submit dari modal edit
+  const handleEditSubmit = (p: {
+    title: string;
+    kelas?: string;
+    dueDate: string; // ISO
+    total: number;
+    submitted?: number;
+  }) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.id === editingId
+          ? {
+              ...it,
+              title: p.title,
+              kelas: p.kelas,
+              dueDateISO: p.dueDate,
+              total: p.total,
+              submitted: p.submitted ?? it.submitted,
+              // status dihitung ulang:
+              status:
+                (p.submitted ?? it.submitted) >= p.total
+                  ? "selesai"
+                  : new Date(p.dueDate) < new Date()
+                    ? "terlambat"
+                    : "terbuka",
+            }
+          : it
+      )
+    );
+    setShowEdit(false);
+    setEditingId(null);
+  };
+
+  // hapus dari modal edit
+  const handleEditDelete = () => {
+    if (!editingItem) return;
+    if (!confirm(`Hapus tugas "${editingItem.title}"?`)) return;
+    setItems((prev) => prev.filter((x) => x.id !== editingItem.id));
+    setShowEdit(false);
+    setEditingId(null);
+  };
+
+  const handleAddSubmit = (payload: AddAssignmentPayload) => {
+    const newItem: AssignmentItem = {
+      id: `local-${Date.now()}`,
+      title: payload.title,
+      kelas: payload.kelas,
+      dueDateISO: payload.dueDate,
+      createdISO: new Date().toISOString(),
+      submitted: 0,
+      total: payload.total,
+      status: "terbuka",
+    };
+    setItems((prev) => [newItem, ...prev]);
+    setShowTambah(false);
+  };
+
+  // Actions
+  const handleDetail = (a: AssignmentItem) => {
+    alert(
+      `Detail Tugas:\n${a.title}\nKelas: ${a.kelas ?? "-"}\nDibuat: ${
+        a.createdISO ? dateShort(a.createdISO) : "-"
+      }\nBatas: ${dateShort(a.dueDateISO)}\nStatus: ${a.status}\nTerkumpul: ${
+        a.submitted
+      }/${a.total}`
+    );
+  };
+
+  const handleDelete = (a: AssignmentItem) => {
+    if (!confirm(`Hapus tugas "${a.title}"?`)) return;
+    setItems((prev) => prev.filter((x) => x.id !== a.id));
+  };
+
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Top Bar */}
-      <ParentTopBar
+      <TeacherTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
-        title="Semua Tugas"
+        title={heading || "Semua Tugas"}
+      />
+
+      {/* Modals */}
+      <ModalAddAssignment
+        open={showTambah}
+        onClose={() => setShowTambah(false)}
+        palette={palette}
+        onSubmit={handleAddSubmit}
+      />
+      <ModalEditAssignment
+        open={showEdit}
+        onClose={() => {
+          setShowEdit(false);
+          setEditingId(null);
+        }}
+        palette={palette}
+        defaultValues={
+          editingItem
+            ? {
+                title: editingItem.title,
+                kelas: editingItem.kelas,
+                dueDate: editingItem.dueDateISO, // ISO string
+                total: editingItem.total,
+                submitted: editingItem.submitted,
+              }
+            : undefined
+        }
+        onSubmit={handleEditSubmit}
+        onDelete={editingItem ? handleEditDelete : undefined}
       />
 
       {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri */}
-          <SchoolSidebarNav palette={palette} />
+          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
+            <TeacherSidebarNav palette={palette} />
+          </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 min-w-0 space-y-4">
+            {/* Header actions (Back + Tambah) */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2 font-semibold text-lg">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center justify-center rounded-full p-1 hover:opacity-80"
+                  aria-label="Kembali"
+                  title="Kembali"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <span>{heading || "Semua Tugas"}</span>
+              </div>
+              <div className="flex gap-2">
+                <Btn
+                  palette={palette}
+                  size="sm"
+                  onClick={() => setShowTambah(true)}
+                >
+                  <Plus size={16} className="mr-1" /> Tambah Tugas
+                </Btn>
+              </div>
+            </div>
+
             {/* Search & Filter */}
             <SectionCard palette={palette} className="p-3 md:p-4">
               <div className="flex flex-col md:flex-row md:items-center gap-3">
@@ -136,14 +326,12 @@ export default function AllAssignment() {
                     placeholder="Cari tugas atau kelas…"
                     className="bg-transparent outline-none text-sm w-full"
                     style={{ color: palette.black1 }}
+                    aria-label="Cari tugas"
                   />
                 </div>
 
                 {/* Filter status */}
                 <div className="flex items-center gap-2">
-                  <Badge palette={palette} variant="outline">
-                    Status
-                  </Badge>
                   <select
                     value={status}
                     onChange={(e) =>
@@ -155,6 +343,7 @@ export default function AllAssignment() {
                       color: palette.black1,
                       border: `1px solid ${palette.silver1}`,
                     }}
+                    aria-label="Filter status"
                   >
                     {["semua", "terbuka", "selesai", "terlambat"].map((s) => (
                       <option key={s} value={s}>
@@ -202,24 +391,24 @@ export default function AllAssignment() {
                             className="mt-1 text-sm flex flex-wrap gap-3"
                             style={{ color: palette.black2 }}
                           >
-                            <span className="flex items-center gap-1">
-                              <Calendar size={16} /> Dibuat{" "}
-                              {dateShort(a.createdISO)}
-                            </span>
+                            {a.createdISO && (
+                              <span className="flex items-center gap-1">
+                                <Calendar size={16} /> Dibuat{" "}
+                                {dateShort(a.createdISO)}
+                              </span>
+                            )}
                             <span className="flex items-center gap-1">
                               <Clock size={16} /> Batas{" "}
                               {dateShort(a.dueDateISO)}
                             </span>
-                            {typeof a.submitted === "number" && (
-                              <span className="flex items-center gap-1">
-                                {a.submitted}/{a.total} terkumpul
-                                {a.status === "selesai" ? (
-                                  <CheckCircle2 size={16} />
-                                ) : a.status === "terlambat" ? (
-                                  <AlertTriangle size={16} />
-                                ) : null}
-                              </span>
-                            )}
+                            <span className="flex items-center gap-1">
+                              {a.submitted}/{a.total} terkumpul
+                              {a.status === "selesai" ? (
+                                <CheckCircle2 size={16} />
+                              ) : a.status === "terlambat" ? (
+                                <AlertTriangle size={16} />
+                              ) : null}
+                            </span>
                             {a.kelas && (
                               <Badge palette={palette} variant="outline">
                                 {a.kelas}
@@ -228,12 +417,32 @@ export default function AllAssignment() {
                           </div>
                         </div>
 
-                        <div className="shrink-0 flex gap-2">
-                          <Btn palette={palette} size="sm" variant="white1">
+                        {/* Aksi: Detail / Edit / Hapus */}
+                        <div className="shrink-0 flex items-center gap-2">
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="white1"
+                            onClick={() => handleDetail(a)}
+                          >
                             Detail
                           </Btn>
-                          <Btn palette={palette} size="sm" variant="ghost">
-                            Nilai
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEdit(a)}
+                          >
+                            Edit
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="quaternary"
+                            onClick={() => handleDelete(a)}
+                          >
+                            Hapus
                           </Btn>
                         </div>
                       </div>
