@@ -11,6 +11,7 @@ import {
   Badge,
   Btn,
   type Palette,
+  LinkBtn,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
@@ -611,9 +612,15 @@ const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:
                             >
                               Nilai
                             </Btn>
-                            <Btn palette={palette} size="sm" variant="ghost">
+                            <LinkBtn
+                              palette={palette}
+                              size="sm"
+                              variant="ghost"
+                              to={`${classId}/assignment/${t.id}`}
+                              state={{ assignment: t }}
+                            >
                               Detail
-                            </Btn>
+                            </LinkBtn>
                           </div>
                         </div>
                       );

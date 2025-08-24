@@ -254,19 +254,20 @@ export default function ScheduleThreeDays() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
-        palette={palette}
-        gregorianDate={new Date().toISOString()}
-        title="Jadwal 3 Hari Kedepan"
-        dateFmt={(iso) =>
-          new Date(iso).toLocaleDateString("id-ID", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })
-        }
-      />
+     <TeacherTopBar
+  palette={palette}
+  gregorianDate={new Date().toISOString()}
+  title="Jadwal 3 Hari Kedepan"
+  dateFmt={(iso) =>
+    new Date(iso).toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+  }
+/>
+
 
       {/* Modal Tambah/Edit Jadwal */}
       <TambahJadwal

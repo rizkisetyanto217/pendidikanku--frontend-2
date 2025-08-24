@@ -5,15 +5,12 @@ import {
   CalendarDays,
   Users,
   CheckCircle2,
-  Wifi,
   Thermometer,
   FileCheck2,
   XCircle,
   Search,
   Save,
   Check,
-  RotateCcw,
-  NotebookPen,
   GraduationCap,
 } from "lucide-react";
 
@@ -26,7 +23,6 @@ import {
   ProgressBar,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 import TeacherTopBar from "../../components/home/TeacherTopBar";
 
@@ -40,13 +36,11 @@ type Student = { id: string; name: string };
 
 type Entry = {
   studentId: string;
-
-  // Wajib
-  status: AttendanceStatus;
+  status: AttendanceStatus; // WAJIB
   infoUmum?: string;
 
-  // Opsional
-  time?: string; // jam jika hadir/online
+  // OPSIONAL
+  time?: string; // jam hadir
   score?: number; // 0..100
   materiPersonal?: string;
   penilaianPersonal?: string;
@@ -218,7 +212,7 @@ function StatusSelector({
   palette: Palette;
 }) {
   return (
-    <div className="flex gap-1 overflow-x-auto">
+    <div className="flex gap-1 overflow-x-auto" aria-label="Pilih status">
       {STATUS_OPTIONS.map((o) => {
         const active = value === o.key;
         return (
@@ -231,6 +225,7 @@ function StatusSelector({
               color: active ? palette.primary : palette.black1,
               borderColor: active ? palette.primary : palette.silver1,
             }}
+            aria-pressed={active}
           >
             {o.label}
           </button>
@@ -255,6 +250,8 @@ function StatChip({
     <div
       className="px-3 py-2 rounded-xl border text-sm flex items-center gap-2"
       style={{ borderColor: palette.silver1, background: palette.white2 }}
+      role="status"
+      aria-label={`${label}: ${value}`}
     >
       {icon}
       <span className="text-xs" style={{ color: palette.silver2 }}>
@@ -265,7 +262,7 @@ function StatChip({
   );
 }
 
-/* ====== Modal editor siswa (WAJIB/OPSIONAL) ====== */
+/* ====== Modal editor siswa ====== */
 function StudentDetailEditor({
   open,
   onClose,
@@ -303,7 +300,6 @@ function StudentDetailEditor({
 }) {
   const [data, setData] = useState(value);
 
-  // open/close + restore
   useEffect(() => {
     if (!open) return;
     setData(value);
@@ -341,7 +337,7 @@ function StudentDetailEditor({
       >
         {/* Header (sticky) */}
         <div
-          className="p-4 md:p-5 border-b"
+          className="p-4 md:p-5 border-b sticky top-0 bg-inherit"
           style={{ borderColor: palette.silver1 }}
         >
           <div className="font-semibold">Absensi & Detail — {name}</div>
@@ -496,7 +492,7 @@ function StudentDetailEditor({
 
         {/* Footer (sticky) */}
         <div
-          className="p-4 md:p-5 pt-0 flex items-center justify-end gap-2 border-t"
+          className="p-4 md:p-5 pt-0 flex items-center justify-end gap-2 border-t bg-inherit sticky bottom-0"
           style={{ borderColor: palette.silver1 }}
         >
           <Btn variant="white1" size="sm" palette={palette} onClick={onClose}>
@@ -593,36 +589,19 @@ export default function TeacherAttendancePage({
     [doc]
   );
 
-  const markAll = useCallback(
-    (status: AttendanceCore) => {
-      if (!doc) return;
-      const t = nowHHMM();
-      setDoc({
-        ...doc,
-        entries: doc.entries.map((e) => ({
-          ...e,
-        })),
-      });
-    },
-    [doc]
-  );
-
-  const broadcastInfoUmum = useCallback(
-    (text: string, mode: "kosong" | "semua") => {
-      if (!doc) return;
-      const val = text.trim();
-      if (!val) return;
-      setDoc({
-        ...doc,
-        entries: doc.entries.map((e) => {
-          if (mode === "semua") return { ...e, infoUmum: val };
-          if (!e.infoUmum || !e.infoUmum.trim()) return { ...e, infoUmum: val };
-          return e;
-        }),
-      });
-    },
-    [doc]
-  );
+  // (optional util) tandai semua hadir — *tidak dipakai UI*, tapi rapi
+  const markAll = useCallback(() => {
+    if (!doc) return;
+    const t = nowHHMM();
+    setDoc({
+      ...doc,
+      entries: doc.entries.map((e) => ({
+        ...e,
+        status: "hadir",
+        time: e.time ?? t,
+      })),
+    });
+  }, [doc]);
 
   const clearAll = useCallback(() => {
     if (!doc) return;
@@ -641,7 +620,7 @@ export default function TeacherAttendancePage({
   const counts = useMemo(() => {
     const base = {
       hadir: 0,
-      online: 0,
+      online: 0, // disimpan utk kompatibilitas UI lama
       sakit: 0,
       izin: 0,
       alpa: 0,
@@ -729,12 +708,13 @@ export default function TeacherAttendancePage({
 
           <div className="flex-1 space-y-6">
             {/* ===== Filter bar (kelas + tanggal + search + status) ===== */}
-            <SectionCard palette={palette} className="p-3">
-              <div className="flex flex-wrap items-center gap-2">
+            <SectionCard palette={palette} className="p-3 md:p-4">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3">
                 {/* Kelas */}
-                <div className="flex items-center gap-2">
+                <div className="md:col-span-5 flex items-center gap-2">
                   <GraduationCap size={18} color={palette.quaternary} />
                   <select
+                    aria-label="Pilih kelas"
                     value={classId}
                     onChange={(e) => setClassId(e.target.value)}
                     className="h-9 min-w-[11rem] rounded-xl px-3 text-sm"
@@ -752,7 +732,7 @@ export default function TeacherAttendancePage({
                   </select>
 
                   {/* Info kelas (sembunyikan di layar kecil jika sempit) */}
-                  <div className="hidden sm:flex items-center gap-2">
+                  <div className="hidden md:flex items-center gap-2">
                     <Badge variant="outline" palette={palette}>
                       {currentClass?.room ?? "-"}
                     </Badge>
@@ -764,9 +744,10 @@ export default function TeacherAttendancePage({
                 </div>
 
                 {/* Tanggal */}
-                <div className="flex items-center gap-2">
+                <div className="md:col-span-3 flex items-center gap-2">
                   <CalendarDays size={18} color={palette.quaternary} />
                   <input
+                    aria-label="Pilih tanggal"
                     type="date"
                     value={dateISO}
                     onChange={(e) => setDateISO(e.target.value)}
@@ -780,27 +761,56 @@ export default function TeacherAttendancePage({
                 </div>
 
                 {/* Search */}
+                <div className="md:col-span-4">
+                  <div
+                    className="flex items-center gap-2 rounded-xl border px-3 h-9 w-full"
+                    style={{
+                      borderColor: palette.silver1,
+                      background: palette.white1,
+                    }}
+                  >
+                    <Search size={16} />
+                    <input
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                      placeholder="Cari siswa…"
+                      className="bg-transparent outline-none text-sm w-full"
+                      aria-label="Cari siswa"
+                      style={{ color: palette.black1 }}
+                    />
+                  </div>
+                </div>
+
+                {/* Info mini (mobile) */}
                 <div
-                  className="ml-0 md:ml-2 flex items-center gap-2 rounded-xl border px-3 h-9 flex-1 min-w-[200px]"
-                  style={{
-                    borderColor: palette.silver1,
-                    background: palette.white1,
-                  }}
+                  className="md:hidden text-xs flex flex-wrap items-center gap-2 pl-7"
+                  style={{ color: palette.silver2 }}
                 >
-                  <Search size={16} />
-                  <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Cari siswa…"
-                    className="bg-transparent outline-none text-sm w-full"
-                    style={{ color: palette.black1 }}
-                  />
+                  <span>
+                    Kelas:{" "}
+                    <span
+                      className="font-medium"
+                      style={{ color: palette.black1 }}
+                    >
+                      {currentClass?.name ?? "-"}
+                    </span>
+                  </span>
+                  {currentClass?.room && <span>• {currentClass.room}</span>}
+                  <span>
+                    • {currentClass?.studentsCount ?? roster?.length ?? 0} siswa
+                  </span>
                 </div>
 
                 {/* Filter status */}
-                <div className="flex items-center gap-1 md:ml-auto w-full md:w-auto">
-                  {(["all", ...STATUS_OPTIONS.map((s) => s.key)] as const).map(
-                    (s) => (
+                <div className="md:col-span-12">
+                  <div
+                    className="flex items-center gap-1 overflow-x-auto pt-1"
+                    role="tablist"
+                    aria-label="Filter status"
+                  >
+                    {(
+                      ["all", ...STATUS_OPTIONS.map((s) => s.key)] as const
+                    ).map((s) => (
                       <button
                         key={s as string}
                         onClick={() => setFilter(s as any)}
@@ -813,35 +823,17 @@ export default function TeacherAttendancePage({
                           borderColor:
                             filter === s ? palette.primary : palette.silver1,
                         }}
+                        aria-pressed={filter === s}
                       >
                         {(s as string).toUpperCase()}
                       </button>
-                    )
-                  )}
+                    ))}
+                  </div>
                 </div>
               </div>
-
-              {/* Info mini (mobile) */}
-              <div
-                className="sm:hidden mt-2 text-xs flex flex-wrap gap-2"
-                style={{ color: palette.silver2 }}
-              >
-                <span>
-                  Kelas:{" "}
-                  <span
-                    className="font-medium"
-                    style={{ color: palette.black1 }}
-                  >
-                    {currentClass?.name ?? "-"}
-                  </span>
-                </span>
-                {currentClass?.room && <span>• {currentClass.room}</span>}
-                <span>
-                  • {currentClass?.studentsCount ?? roster?.length ?? 0} siswa
-                </span>
-              </div>
             </SectionCard>
-            {/* ===== Ringkasan + Aksi cepat ===== */}
+
+            {/* ===== Ringkasan ===== */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -910,227 +902,127 @@ export default function TeacherAttendancePage({
                 </div>
               </div>
             </SectionCard>
+
             {/* ===== Daftar Siswa (desktop table + mobile cards) ===== */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-3">
-                <div className="text-sm" style={{ color: palette.silver2 }}>
-                  Klik <b>Aksi</b> untuk mengisi/ubah absensi & progress. Tabel
-                  hanya menampilkan status & ringkasan.
+            {/* ===== Filter & Aksi (rapi mobile & desktop) ===== */}
+            <SectionCard palette={palette} className="p-4">
+              <div className="text-sm font-medium mb-3 flex items-center gap-2">
+                <span
+                  className="inline-block h-2 w-2 rounded-full"
+                  style={{ background: palette.quaternary }}
+                />
+                Filter & Aksi
+              </div>
+
+              {/* GRID 12 kolom di md+, stack di mobile */}
+              <div className="grid gap-2 sm:gap-3 md:grid-cols-12 items-center">
+                {/* Search – paling lebar */}
+                <div className="md:col-span-5">
+                  <div
+                    className="flex items-center gap-2 rounded-xl border px-3 h-10"
+                    style={{
+                      borderColor: palette.silver1,
+                      background: palette.white1,
+                    }}
+                  >
+                    <Search size={16} />
+                    <input
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                      placeholder="Cari penilaian / siswa…"
+                      className="bg-transparent outline-none text-sm w-full"
+                      style={{ color: palette.black1 }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Desktop */}
-              <div className="px-4 md:px-5 pb-5 hidden md:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr style={{ color: palette.silver2 }}>
-                      <th className="text-left py-2 pr-3 font-medium">Nama</th>
-                      <th className="text-left py-2 px-3 font-medium">
-                        Status
-                      </th>
-                      <th className="text-left py-2 px-3 font-medium">
-                        Ringkasan
-                      </th>
-                      <th className="text-right py-2 pl-3 font-medium">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((e) => {
-                      const infoDone = !!(e.infoUmum && e.infoUmum.trim());
-                      const extrasCount = [
-                        e.score != null,
-                        !!e.materiPersonal,
-                        !!e.penilaianPersonal,
-                        !!e.hafalan,
-                        !!e.pr,
-                      ].filter(Boolean).length;
+                {/* Label 'Kelas' + Select */}
+                <div className="md:col-span-3 flex items-center gap-2">
+                  <span
+                    className="text-xs sm:text-sm"
+                    style={{ color: palette.silver2 }}
+                  >
+                    Kelas
+                  </span>
+                  <select
+                    value={classId}
+                    onChange={(e) => setClassId(e.target.value)}
+                    className="h-10 rounded-xl px-3 text-sm w-full"
+                    style={{
+                      background: palette.white1,
+                      color: palette.black1,
+                      border: `1px solid ${palette.silver1}`,
+                    }}
+                  >
+                    {(classList ?? []).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                      return (
-                        <tr
-                          key={e.studentId}
-                          className="border-t"
-                          style={{ borderColor: palette.silver1 }}
-                        >
-                          <td className="py-3 pr-3">
-                            <div className="font-medium">{e.name}</div>
-                          </td>
-
-                          <td className="py-3 px-3">
-                            {e.status ? (
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <StatusBadge
-                                  s={e.status as AttendanceCore}
-                                  palette={palette}
-                                />
-                                {e.time && (
-                                  <Badge variant="outline" palette={palette}>
-                                    {e.time}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <Badge variant="outline" palette={palette}>
-                                Belum
-                              </Badge>
-                            )}
-                          </td>
-
-                          <td className="py-3 px-3">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge
-                                palette={palette}
-                                variant={infoDone ? "success" : "outline"}
-                              >
-                                Info {infoDone ? "✓" : "—"}
-                              </Badge>
-
-                              {typeof e.score === "number" && (
-                                <Badge palette={palette} variant="secondary">
-                                  Nilai {e.score}
-                                </Badge>
-                              )}
-
-                              {extrasCount > 0 && (
-                                <Badge palette={palette} variant="info">
-                                  {extrasCount} opsional
-                                </Badge>
-                              )}
-                            </div>
-                          </td>
-
-                          <td className="py-3 pl-3 text-right">
-                            <Btn
-                              palette={palette}
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                setEditing({ id: e.studentId, name: e.name })
-                              }
-                            >
-                              Aksi / Detail
-                            </Btn>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                    {filtered.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          className="py-6 text-center"
-                          style={{ color: palette.silver2 }}
-                        >
-                          Tidak ada siswa yang cocok dengan filter.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile */}
-              <div className="px-3 md:px-5 pb-5 md:hidden">
-                <div role="list" className="grid gap-2">
-                  {filtered.map((e) => {
-                    const infoDone = !!(e.infoUmum && e.infoUmum.trim());
-                    const extrasCount = [
-                      e.score != null,
-                      !!e.materiPersonal,
-                      !!e.penilaianPersonal,
-                      !!e.hafalan,
-                      !!e.pr,
-                    ].filter(Boolean).length;
-
-                    return (
-                      <div
-                        role="listitem"
-                        key={e.studentId}
-                        className="rounded-xl border p-3"
+                {/* Tabs status ringkas */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-2 overflow-x-auto md:overflow-visible">
+                    {["Semua", "Belum dinilai", "Progress"].map((t, i) => (
+                      <button
+                        key={t}
+                        className="px-4 h-10 rounded-xl border text-sm whitespace-nowrap"
                         style={{
-                          borderColor: palette.silver1,
-                          background: palette.white1,
+                          background:
+                            i === 0 ? palette.primary2 : palette.white1,
+                          color: i === 0 ? palette.primary : palette.black1,
+                          borderColor:
+                            i === 0 ? palette.primary : palette.silver1,
                         }}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="font-medium truncate">{e.name}</div>
-                            <div className="mt-1 flex items-center gap-2 flex-wrap">
-                              {e.status ? (
-                                <StatusBadge
-                                  s={e.status as AttendanceCore}
-                                  palette={palette}
-                                />
-                              ) : (
-                                <Badge variant="outline" palette={palette}>
-                                  Belum
-                                </Badge>
-                              )}
-                              {e.time && (
-                                <Badge variant="outline" palette={palette}>
-                                  {e.time}
-                                </Badge>
-                              )}
-                              <Badge
-                                palette={palette}
-                                variant={infoDone ? "success" : "outline"}
-                              >
-                                Info {infoDone ? "✓" : "—"}
-                              </Badge>
-                              {typeof e.score === "number" && (
-                                <Badge palette={palette} variant="secondary">
-                                  Nilai {e.score}
-                                </Badge>
-                              )}
-                              {extrasCount > 0 && (
-                                <Badge palette={palette} variant="info">
-                                  {extrasCount} opsional
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                        <button
-                          onClick={() =>
-                            setEditing({ id: e.studentId, name: e.name })
-                          }
-                          className="mt-2 w-full text-left rounded-lg px-3 py-2"
-                          style={{
-                            background: palette.white2,
-                            border: `1px dashed ${palette.silver1}`,
-                            color: palette.silver2,
-                          }}
-                        >
-                          Ketuk untuk ubah absensi & progress
-                        </button>
-                      </div>
-                    );
-                  })}
-
-                  {filtered.length === 0 && (
-                    <div
-                      className="rounded-xl border p-4 text-center text-sm"
-                      style={{
-                        borderColor: palette.silver1,
-                        color: palette.silver2,
-                      }}
-                    >
-                      Tidak ada siswa yang cocok dengan filter.
-                    </div>
-                  )}
+                {/* Aksi (kanan di desktop, bawah di mobile) */}
+                <div className="md:col-span-2 md:justify-self-end flex gap-2">
+                  <Btn palette={palette} size="sm">
+                    <span className="mr-1">＋</span> Buat Penilaian
+                  </Btn>
+                  <Btn palette={palette} size="sm" variant="white1">
+                    ⤓ Export
+                  </Btn>
                 </div>
               </div>
+
+              {/* baris info kecil (khusus mobile) */}
+              <div
+                className="mt-3 md:hidden text-xs flex flex-wrap gap-2"
+                style={{ color: palette.silver2 }}
+              >
+                <span>
+                  Kelas:{" "}
+                  <span
+                    className="font-medium"
+                    style={{ color: palette.black1 }}
+                  >
+                    {currentClass?.name ?? "-"}
+                  </span>
+                </span>
+                {currentClass?.room && <span>• {currentClass.room}</span>}
+                <span>
+                  • {currentClass?.studentsCount ?? roster?.length ?? 0} siswa
+                </span>
+              </div>
             </SectionCard>
-            {/* ===== Footer actions (compact, full-width) ===== */}
+
+            {/* ===== Footer actions (sticky) ===== */}
             <div className="sticky bottom-0 z-30">
-              {/* full-width di mobile, center + rounded di desktop */}
               <div className="-mx-4 md:mx-0">
                 <div
                   className="px-3 md:px-4 py-2 md:py-2.5 border-t md:border md:rounded-xl md:shadow-sm backdrop-blur"
                   style={{
                     borderColor: palette.silver1,
-                    // sedikit transparan agar tidak terasa “berat”
-                    background: `${palette.white1}D9`,
+                    background: `${palette.white1}D9`, // transparan halus
                   }}
                 >
                   <div className="flex flex-col md:flex-row md:items-center gap-2">
@@ -1158,7 +1050,6 @@ export default function TeacherAttendancePage({
                         <Save className="mr-1" size={14} /> Simpan Draft
                       </Btn>
 
-                      {/* CTA lebih ramping tapi tetap dominan */}
                       <Btn
                         palette={palette}
                         variant="default"

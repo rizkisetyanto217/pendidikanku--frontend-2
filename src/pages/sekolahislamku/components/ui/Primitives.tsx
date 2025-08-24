@@ -1,5 +1,6 @@
 import React from "react";
 import { colors } from "@/constants/colorsThema";
+import { Link, To } from "react-router-dom";
 
 export type Palette = typeof colors.light;
 
@@ -293,5 +294,130 @@ export function ProgressBar({
         style={{ width: `${v}%`, background: palette.black1 }}
       />
     </div>
+  );
+}
+
+export function LinkBtn({
+  to,
+  children,
+  palette,
+  variant = "default",
+  size = "md",
+  className = "",
+  style,
+  tone = "normal",
+  block = false,
+  state,
+  replace,
+  disabled = false,
+  ...rest
+}: {
+  to: To;
+  children: React.ReactNode;
+  palette: Palette;
+  variant?:
+    | "default"
+    | "secondary"
+    | "outline"
+    | "quaternary"
+    | "ghost"
+    | "destructive"
+    | "success"
+    | "black1"
+    | "white1";
+  size?: "sm" | "md" | "lg" | "icon";
+  tone?: "normal" | "inverted";
+  block?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  state?: any;
+  replace?: boolean;
+  disabled?: boolean;
+} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href">) {
+  const sizeCls =
+    size === "sm"
+      ? "h-8 px-3 text-sm"
+      : size === "lg"
+        ? "h-12 px-5 text-base"
+        : size === "icon"
+          ? "h-10 w-10 p-0"
+          : "h-10 px-4 text-sm";
+
+  // pakai helper style yang sama dengan Btn:
+  const btnStyle = {
+    borderRadius: 16,
+    fontWeight: 600,
+    ...(variant === "ghost"
+      ? {
+          background: palette.primary2,
+          color: palette.black1,
+          border: `1px solid ${palette.primary2}`,
+        }
+      : variant === "outline"
+        ? {
+            background: "transparent",
+            color: palette.black1,
+            border: `1px solid ${palette.silver1}`,
+          }
+        : variant === "secondary"
+          ? {
+              background: palette.white2,
+              color: palette.black1,
+              border: `1px solid ${palette.silver1}`,
+            }
+          : variant === "quaternary"
+            ? {
+                background: palette.quaternary,
+                color: palette.white1,
+                border: `1px solid ${palette.silver1}`,
+              }
+            : variant === "destructive"
+              ? {
+                  background: palette.error1,
+                  color: palette.white1,
+                  border: `1px solid ${palette.error1}`,
+                }
+              : variant === "success"
+                ? {
+                    background: palette.success1,
+                    color: palette.white1,
+                    border: `1px solid ${palette.success1}`,
+                  }
+                : variant === "black1"
+                  ? {
+                      background: palette.black1,
+                      color: palette.white1,
+                      border: `1px solid ${palette.white3}`,
+                    }
+                  : variant === "white1"
+                    ? {
+                        background: palette.white1,
+                        color: palette.black1,
+                        border: `1px solid ${palette.silver1}`,
+                      }
+                    : {
+                        background: palette.primary,
+                        color: palette.white1,
+                        border: `1px solid ${palette.primary}`,
+                      }),
+    ...(tone === "inverted" && variant === "outline"
+      ? { color: palette.white1, border: `1px solid ${palette.white3}` }
+      : {}),
+    ...(disabled ? { opacity: 0.6, cursor: "not-allowed" } : {}),
+    ...style,
+  } as React.CSSProperties;
+
+  return (
+    <Link
+      to={to}
+      state={state}
+      replace={replace}
+      aria-disabled={disabled || undefined}
+      className={`${block ? "w-full" : ""} inline-flex items-center justify-center gap-1.5 font-medium transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 ${sizeCls} ${className}`}
+      style={btnStyle}
+      {...rest}
+    >
+      {children}
+    </Link>
   );
 }

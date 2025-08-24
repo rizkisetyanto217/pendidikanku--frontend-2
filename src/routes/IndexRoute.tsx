@@ -177,6 +177,7 @@ import ScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/co
 import AllAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllAssignment";
 import PendaftaranPage from "@/pages/sekolahislamku/pages/Register";
 import DetailMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailMateri";
+import DetailAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignment";
 
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
@@ -571,10 +572,8 @@ export default function AppRoutes() {
         />
         <Route path="kelas">
           <Route index element={<TeacherClass />} />
-          <Route
-            path=":id/material/:materialId"
-            element={<DetailMateri />}
-          />
+          <Route path=":id/material/:materialId" element={<DetailMateri />} />
+          <Route path=":id/assignment/:id" element={<DetailAssignment />} />
           <Route path="jadwal" element={<TeacherSchedule />} />
           <Route path="all-today-schedule" element={<AllTodaySchedule />} />
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
