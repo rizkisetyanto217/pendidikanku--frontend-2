@@ -25,7 +25,7 @@ import AuthorHome from "@/pages/dashboard/author/home/AuthorHome";
 
 // Halaman Auth
 import Login from "@/pages/dashboard/auth/Login";
-import Register from "@/pages/dashboard/auth/Register";
+// import Register from "@/pages/dashboard/auth/Register";
 
 // Not Found
 import NotFound from "@/pages/NotFound";
@@ -178,6 +178,8 @@ import AllAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/compon
 import PendaftaranPage from "@/pages/sekolahislamku/pages/Register";
 import DetailMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailMateri";
 import DetailAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignment";
+import Register from "@/pages/dashboard/auth/RegisterAdminMasjid";
+import MasjidkuWebHome from "@/pages/masjidku/website/MasjidkuWebHome";
 
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
@@ -191,6 +193,7 @@ export default function AppRoutes() {
         <Route path="finansial" element={<MasjidkuFinancial />} />
         <Route path="masjid" element={<MasjidkuListMasjid />} />
         <Route path="profil" element={<MasjidkuProfil />} />
+        <Route path="website"  element={<MasjidkuWebHome />}/>
         <Route path="program" element={<MasjidkuProgram />} />
         {financeRoutes.map((route, index) => (
           <Route

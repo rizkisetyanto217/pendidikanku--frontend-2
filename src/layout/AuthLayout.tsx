@@ -1,58 +1,94 @@
 // src/components/layout/AuthLayout.tsx
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { colors } from '@/constants/colorsThema'
-import useHtmlDarkMode from '@/hooks/userHTMLDarkMode'
+import React, { useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { colors } from "@/constants/colorsThema";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+
+// ⬇️ Import modal pilihan pendaftaran (bukan role)
+import RegisterChoiceModal from "@/pages/dashboard/auth/components/RegisterModalChoice";
 
 type AuthLayoutProps = {
-  children: React.ReactNode
-  mode?: 'login' | 'register'
-}
+  children: React.ReactNode;
+  mode?: "login" | "register";
+  fullWidth?: boolean;
+  contentClassName?: string;
+};
 
-export default function AuthLayout({ children, mode = 'login' }: AuthLayoutProps) {
-  const { isDark } = useHtmlDarkMode()
-  const themeColors = isDark ? colors.dark : colors.light
+export default function AuthLayout({
+  children,
+  mode = "login",
+  fullWidth = false,
+  contentClassName = "",
+}: AuthLayoutProps) {
+  const { isDark } = useHtmlDarkMode();
+  const theme = isDark ? colors.dark : colors.light;
+  const isLogin = mode === "login";
 
-  const isLogin = mode === 'login'
+  const navigate = useNavigate();
+  const [openChoice, setOpenChoice] = useState(false);
+
+  const handleOpenChoice = useCallback((e: React.MouseEvent) => {
+    e.preventDefault(); // cegah Link langsung pindah halaman
+    setOpenChoice(true);
+  }, []);
+
+  // ⬇️ Handler netral: map pilihan ke rute register
+  const handleSelectChoice = useCallback(
+    (choice: "school" | "user") => {
+      setOpenChoice(false);
+      if (choice === "school") {
+        navigate("/register/school");
+      } else {
+        navigate("/register/user");
+      }
+    },
+    [navigate]
+  );
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: themeColors.white2 }}
+      className="min-h-screen flex items-center justify-center w-full"
+      style={{
+        background: isDark
+          ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
+          : `linear-gradient(180deg, ${theme.white2} 0%, ${theme.white1} 100%)`,
+        color: theme.black1,
+      }}
     >
       <div
-        className="p-8 rounded-xl shadow-md w-full max-w-md"
-        style={{ backgroundColor: themeColors.white1, color: themeColors.black1 }}
+        className={[
+          "rounded-xl shadow-md w-full border",
+          fullWidth ? "max-w-none px-4 sm:px-6 lg:px-8 py-8" : "max-w-md p-8",
+          contentClassName,
+        ].join(" ")}
+        style={{ backgroundColor: theme.white1, borderColor: theme.white3 }}
       >
-        {/* Header */}
-        <div className="mb-6 text-center">
-          <h2 className="text-3xl font-semibold" style={{ color: themeColors.primary }}>
-            MasjidKu
-          </h2>
-          <p className="text-sm mt-2" style={{ color: themeColors.silver2 }}>
-            {isLogin
-              ? 'Login atau Register untuk melanjutkan'
-              : 'Silakan lengkapi form untuk mendaftar'}
-          </p>
-        </div>
-
         {/* Konten Halaman */}
         {children}
 
         {/* Footer Link */}
         <div className="mt-6 text-center">
-          <p className="text-sm" style={{ color: themeColors.silver2 }}>
+          <p className="text-sm" style={{ color: theme.silver2 }}>
             {isLogin ? (
               <>
-                Belum punya akun?{' '}
-                <Link to="/register" className="hover:underline" style={{ color: themeColors.primary }}>
+                Belum punya akun?{" "}
+                <Link
+                  to="/register"
+                  onClick={handleOpenChoice}
+                  className="hover:underline"
+                  style={{ color: theme.primary }}
+                >
                   Daftar
                 </Link>
               </>
             ) : (
               <>
-                Sudah punya akun?{' '}
-                <Link to="/login" className="hover:underline" style={{ color: themeColors.primary }}>
+                Sudah punya akun?{" "}
+                <Link
+                  to="/login"
+                  className="hover:underline"
+                  style={{ color: theme.primary }}
+                >
                   Login
                 </Link>
               </>
@@ -60,6 +96,15 @@ export default function AuthLayout({ children, mode = 'login' }: AuthLayoutProps
           </p>
         </div>
       </div>
+
+      {/* Modal pilihan pendaftaran (school/user) */}
+      {isLogin && (
+        <RegisterChoiceModal
+          open={openChoice}
+          onClose={() => setOpenChoice(false)}
+          onSelect={handleSelectChoice}
+        />
+      )}
     </div>
-  )
+  );
 }

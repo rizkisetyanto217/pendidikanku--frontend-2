@@ -5,7 +5,6 @@ import { colors } from "@/constants/colorsThema";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import CartLink from "@/components/common/main/CardLink";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
-import SocialMediaModal from "@/components/pages/home/SocialMediaModal";
 import {
   MapPin,
   BookOpen,
@@ -16,13 +15,92 @@ import {
   X,
   Copy,
   MessageCircle,
+  ExternalLink,
+  ChevronRight,
 } from "lucide-react";
-import SholatScheduleCard from "@/components/pages/home/SholatSchedule";
 import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
+import LinktreeNavbar from "@/components/common/public/LintreeNavbar";
 
+
+/* =========================================================
+   Helpers
+========================================================= */
+const isMobileUA = () =>
+  /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
+async function robustCopy(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {}
+
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-999999px";
+    ta.style.top = "-999999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    if (ok) return true;
+  } catch {}
+
+  try {
+    const result = window.prompt("Salin teks berikut:", text);
+    return result !== null;
+  } catch {
+    return false;
+  }
+}
+
+function openWhatsAppNumber(phoneDigits: string, message?: string) {
+  const digits = phoneDigits.replace(/[^\d]/g, "");
+  const txt = message ? `&text=${encodeURIComponent(message)}` : "";
+
+  if (isMobileUA()) {
+    // native app (fallback ke web jika gagal)
+    const deep = `whatsapp://send?phone=${digits}${txt}`;
+    try {
+      window.location.href = deep;
+    } catch {
+      window.open(
+        `https://web.whatsapp.com/send?phone=${digits}${txt}`,
+        "_blank"
+      );
+    }
+  } else {
+    window.open(
+      `https://web.whatsapp.com/send?phone=${digits}${txt}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+}
+
+async function shareViaNative(title: string, text: string, url: string) {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+/* =========================================================
+   Component
+========================================================= */
 export default function MasjidkuHome() {
   const { slug } = useParams();
-  const [showSocialModal, setShowSocialModal] = useState(false);
   const [openShare, setOpenShare] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -30,6 +108,7 @@ export default function MasjidkuHome() {
   const { isDark } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
 
+  // Demo data — gantikan dari API jika sudah tersedia
   const masjidku = {
     masjidku_name: "MasjidKu",
     masjidku_description:
@@ -38,6 +117,8 @@ export default function MasjidkuHome() {
     masjidku_instagram_url: "https://instagram.com/masjidbaitussalam",
     masjidku_whatsapp_url: "https://wa.me/6281234567890",
     masjidku_youtube_url: "https://youtube.com/@masjidbaitussalam",
+    // Optional
+    masjidku_donation_url: "",
   };
 
   const shareUrl = useMemo(
@@ -45,129 +126,55 @@ export default function MasjidkuHome() {
     []
   );
 
+  const shareTitle = masjidku.masjidku_name;
   const shareText = useMemo(
-    () =>
-      `${masjidku.masjidku_name} — ${masjidku.masjidku_description}\n${shareUrl}`,
-    [masjidku.masjidku_name, masjidku.masjidku_description, shareUrl]
+    () => `${masjidku.masjidku_name} — ${masjidku.masjidku_description}`,
+    [masjidku.masjidku_name, masjidku.masjidku_description]
   );
 
-  // Handler untuk membuka WhatsApp dengan nomor langsung
-  const handleWhatsAppContact = () => {
-    const phoneNumber = "6281234567890"; // nomor tanpa +
-    const isMobile =
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
+  // ====== Share handlers ======
+  const onShareClick = async () => {
+    const ok = await shareViaNative(shareTitle, shareText, shareUrl);
+    if (!ok) setOpenShare(true);
+  };
 
-    if (isMobile) {
-      // Untuk mobile, coba buka app WhatsApp dulu
+  const onShareCopyText = async () => {
+    const ok = await robustCopy(`${shareText}\n${shareUrl}`);
+    if (ok) {
+      setCopiedText(true);
+      setTimeout(() => setCopiedText(false), 1800);
+    }
+  };
+
+  const onShareCopyLink = async () => {
+    const ok = await robustCopy(shareUrl);
+    if (ok) {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 1800);
+    }
+  };
+
+  const onShareViaWA = () => {
+    const text = `${shareText}\n${shareUrl}`;
+    if (isMobileUA()) {
       try {
-        window.location.href = `whatsapp://send?phone=${phoneNumber}`;
-      } catch (error) {
-        // Fallback ke WhatsApp Web
+        window.location.href = `whatsapp://send?text=${encodeURIComponent(text)}`;
+      } catch {
         window.open(
-          `https://web.whatsapp.com/send?phone=${phoneNumber}`,
+          `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`,
           "_blank"
         );
       }
     } else {
-      // Untuk desktop, langsung ke WhatsApp Web
       window.open(
-        `https://web.whatsapp.com/send?phone=${phoneNumber}`,
+        `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`,
         "_blank",
         "noopener,noreferrer"
       );
     }
   };
 
-  // Handler untuk share via WhatsApp
-  const handleWhatsAppShare = () => {
-    const text = encodeURIComponent(shareText);
-    const isMobile =
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
-
-    if (isMobile) {
-      // Untuk mobile, coba buka app WhatsApp dulu
-      try {
-        window.location.href = `whatsapp://send?text=${text}`;
-      } catch (error) {
-        // Fallback ke WhatsApp Web
-        window.open(`https://web.whatsapp.com/send?text=${text}`, "_blank");
-      }
-    } else {
-      // Untuk desktop, langsung ke WhatsApp Web
-      window.open(
-        `https://web.whatsapp.com/send?text=${text}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
-  };
-
-  const robustCopy = async (text: string) => {
-    try {
-      // Cek apakah browser mendukung clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-    } catch (error) {
-      console.warn("Clipboard API gagal:", error);
-    }
-
-    // Fallback method untuk browser lama
-    try {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.left = "-999999px";
-      textarea.style.top = "-999999px";
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
-
-      const success = document.execCommand("copy");
-      document.body.removeChild(textarea);
-
-      if (success) {
-        return true;
-      }
-    } catch (error) {
-      console.warn("Fallback copy gagal:", error);
-    }
-
-    // Jika semua method gagal, tampilkan prompt
-    try {
-      const result = window.prompt(
-        "Tidak dapat menyalin otomatis. Silakan salin teks berikut:",
-        text
-      );
-      return result !== null; // User menekan OK
-    } catch (error) {
-      console.error("Prompt copy gagal:", error);
-      return false;
-    }
-  };
-
-  const handleCopyText = async () => {
-    const success = await robustCopy(shareText);
-    if (success) {
-      setCopiedText(true);
-      setTimeout(() => setCopiedText(false), 2000);
-    }
-  };
-
-  const handleCopyLink = async () => {
-    const success = await robustCopy(shareUrl);
-    if (success) {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    }
-  };
-
-  // UX: lock scroll + esc to close modal
+  // UX: lock scroll & ESC close ketika modal share terbuka
   useEffect(() => {
     if (!openShare) return;
     const prev = document.body.style.overflow;
@@ -183,60 +190,156 @@ export default function MasjidkuHome() {
 
   return (
     <>
-      <PublicNavbar masjidName="MasjidKu ini" showLogin={false} />
-
-      <div className="pt-20"></div>
-      <MasjidkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} />
-
-      <div className="w-full max-w-2xl mx-auto min-h-screen pb-28 pt-8">
-        <div className="flex flex-col items-center text-center">
-          <ShimmerImage
-            src="/image/Gambar-Masjid.jpeg"
-            alt="Foto Masjid"
-            className="w-32 h-32 rounded-full object-cover mb-4"
+      <LinktreeNavbar
+      // title={masjidku.masjidku_name}
+      // subtitle={masjidku.masjidku_description}
+      // coverOverlap
+      // showBack
+      // onShare={() => setOpenShare(true)} // kalau mau pakai modal share kamu sendiri
+      />
+      {/* ===== HERO ===== */}
+      <section className="relative w-full mt-24">
+        {/* cover */}
+        <div className="h-44 sm:h-56 w-full overflow-hidden">
+          <div
+            className="h-full w-full bg-center bg-cover"
+            style={{ backgroundImage: `url(${masjidku.masjidku_image_url})` }}
           />
+        </div>
+        {/* overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent" />
 
-          <h1 className="text-xl font-semibold" style={{ color: theme.black1 }}>
-            {masjidku.masjidku_name}
-          </h1>
-          <p className="text-sm mt-1 mb-2" style={{ color: theme.black2 }}>
-            {masjidku.masjidku_description}
-          </p>
-
-          {/* CTA: WhatsApp + Bagikan (modal) */}
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              onClick={handleWhatsAppContact}
-              className="inline-flex items-center justify-center rounded-full p-2 hover:opacity-90 transition"
-              style={{ backgroundColor: theme.success1 }}
-              aria-label="Hubungi via WhatsApp"
+        {/* avatar card — dark-mode aware */}
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="-mt-10 sm:-mt-14 flex items-end gap-3">
+            {/* bungkus gambar dengan border dinamis, bukan ring-white statis */}
+            <div
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 shadow-md"
+              style={{
+                borderColor: isDark ? theme.black1 : theme.white1, // terang di dark-mode, putih di light
+                backgroundColor: isDark ? theme.white3 : theme.white1, // fallback bg kalau gambar belum load
+              }}
             >
-              <img
-                src="/icons/whatsapp.svg"
-                alt="WhatsApp"
-                className="w-5 h-5"
-                style={{
-                  filter: isDark ? "" : "none",
-                }}
+              <ShimmerImage
+                src={masjidku.masjidku_image_url}
+                alt="Logo / Foto Masjid"
+                className="w-full h-full object-cover"
               />
+            </div>
+
+            <div className="pb-1">
+              <h1
+                className="text-xl sm:text-2xl font-semibold drop-shadow"
+                style={{
+                  // teks terang di atas cover: gunakan warna terang di kedua mode
+                  color: isDark ? theme.black1 : theme.black1,
+                }}
+              >
+                {masjidku.masjidku_name}
+              </h1>
+
+              <p
+                className="text-xs sm:text-sm line-clamp-2 drop-shadow"
+                style={{
+                  // sedikit lebih redup dari title
+                  color: isDark ? theme.black2 : theme.black1,
+                  opacity: 0.9,
+                }}
+              >
+                {masjidku.masjidku_description}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* quick actions */}
+        <div className="max-w-2xl mx-auto px-4 mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              onClick={() =>
+                openWhatsAppNumber(
+                  "6281234567890",
+                  `Assalamualaikum, saya ingin bertanya tentang kegiatan di ${masjidku.masjidku_name}.`
+                )
+              }
+              className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
+              style={{
+                backgroundColor: theme.success1,
+                color: theme.white1,
+                borderColor: theme.success1,
+              }}
+            >
+              <img src="/icons/whatsapp.svg" alt="WA" className="w-4 h-4" />
+              WhatsApp
             </button>
 
             <button
-              onClick={() => setOpenShare(true)}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium hover:opacity-90 transition"
-              style={{ backgroundColor: theme.primary, color: theme.white1 }}
-              aria-label="Bagikan halaman ini"
+              onClick={onShareClick}
+              className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
+              style={{
+                backgroundColor: theme.primary,
+                color: theme.white1,
+                borderColor: theme.primary,
+              }}
             >
-              <Share2 size={16} />
-              <span>Bagikan</span>
+              <Share2 size={16} /> Bagikan
             </button>
-          </div>
 
-          <div className="w-full mt-6 space-y-3">
+            <a
+              href="/masjid"
+              className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
+              style={{
+                backgroundColor: theme.white1,
+                color: theme.black1,
+                borderColor: theme.white3,
+              }}
+            >
+              <ExternalLink size={16} /> Eksplor Masjid
+            </a>
+
+            <a
+              href={masjidku.masjidku_instagram_url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium shadow-sm hover:shadow transition ring-1"
+              style={{
+                backgroundColor: theme.white1,
+                color: theme.black1,
+                borderColor: theme.white3,
+              }}
+            >
+              <img src="/icons/instagram.svg" alt="IG" className="w-4 h-4" /> IG
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CONTENT ===== */}
+      <main className="w-full max-w-2xl mx-auto pb-28 px-4">
+        {/* spacing from navbar */}
+        <div className="pt-6" />
+
+        {/* Prayer schedule */}
+        <MasjidkuHomePrayerCard location="DKI Jakarta" slug={slug || ""} />
+
+        {/* Menu Utama */}
+        <section className="mt-6">
+          <h2
+            className="text-lg font-semibold mb-3"
+            style={{ color: theme.black1 }}
+          >
+            Menu Utama
+          </h2>
+          <div className="space-y-2">
             <CartLink
               label="Profil Kami"
               icon={<MapPin size={18} />}
               href="/profil"
+            />
+            <CartLink
+              label="Website"
+              icon={<MapPin size={18} />}
+              href="/website"
             />
             <CartLink
               label="Masjid yang telah bekerjasama"
@@ -256,16 +359,41 @@ export default function MasjidkuHome() {
             <CartLink
               label="Kontak Kami"
               icon={<Phone size={18} />}
-              onClick={() => setShowSocialModal(true)}
+              onClick={() => openWhatsAppNumber("6281234567890")}
             />
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* ===== Modal Bagikan ===== */}
+        {/* Optional: Donasi */}
+        {masjidku.masjidku_donation_url && (
+          <section className="mt-6">
+            <a
+              href={masjidku.masjidku_donation_url}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full inline-flex items-center justify-between gap-3 rounded-xl px-4 py-3 ring-1 transition hover:shadow"
+              style={{
+                backgroundColor: theme.white1,
+                borderColor: theme.white3,
+                color: theme.black1,
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <CreditCard size={18} />
+                <div>
+                  <div className="font-semibold">Dukung Program</div>
+                  <div className="text-sm opacity-80">Klik untuk berdonasi</div>
+                </div>
+              </div>
+              <ChevronRight size={18} />
+            </a>
+          </section>
+        )}
+      </main>
+
+      {/* ===== SHARE MODAL ===== */}
       {openShare && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center">
-          {/* overlay */}
           <div
             className="absolute inset-0"
             style={{
@@ -274,7 +402,6 @@ export default function MasjidkuHome() {
             }}
             onClick={() => setOpenShare(false)}
           />
-          {/* dialog */}
           <div
             role="dialog"
             aria-modal="true"
@@ -302,7 +429,6 @@ export default function MasjidkuHome() {
               </button>
             </div>
 
-            {/* preview teks */}
             <div
               className="rounded-md p-3 text-sm ring-1 max-h-60 overflow-auto whitespace-pre-wrap"
               style={{
@@ -311,12 +437,12 @@ export default function MasjidkuHome() {
                 color: theme.black1,
               }}
             >
-              {shareText}
+              {shareText}\n{shareUrl}
             </div>
 
             <div className="space-y-2">
               <button
-                onClick={handleCopyText}
+                onClick={onShareCopyText}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium hover:opacity-90 transition"
                 style={{ backgroundColor: theme.primary, color: theme.white1 }}
               >
@@ -325,7 +451,7 @@ export default function MasjidkuHome() {
               </button>
 
               <button
-                onClick={handleCopyLink}
+                onClick={onShareCopyLink}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium ring-1 hover:opacity-90 transition"
                 style={{
                   backgroundColor: theme.white2,
@@ -338,7 +464,7 @@ export default function MasjidkuHome() {
               </button>
 
               <button
-                onClick={handleWhatsAppShare}
+                onClick={onShareViaWA}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md font-medium hover:opacity-90 transition"
                 style={{
                   backgroundColor: theme.secondary,
@@ -352,17 +478,6 @@ export default function MasjidkuHome() {
           </div>
         </div>
       )}
-
-      {/* Modal sosmed */}
-      {/* {showSocialModal && (
-        <SocialMediaModal
-          show={showSocialModal}
-          onClose={() => setShowSocialModal(false)}
-          instagramUrl={masjidku.masjidku_instagram_url}
-          youtubeUrl={masjidku.masjidku_youtube_url}
-          whatsappUrl={masjidku.masjidku_whatsapp_url}
-        />
-      )} */}
     </>
   );
 }
