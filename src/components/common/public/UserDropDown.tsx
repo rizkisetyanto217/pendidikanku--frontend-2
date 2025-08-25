@@ -12,10 +12,11 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import api from "@/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "./SharePopover";
 import { useResponsive } from "@/hooks/isResponsive";
+// ⬇️ pakai helper logout dari axios
+import { apiLogout } from "@/lib/axios";
 
 interface PublicUserDropdownProps {
   variant?: "default" | "icon";
@@ -25,7 +26,7 @@ interface PublicUserDropdownProps {
 
 export default function PublicUserDropdown({
   variant = "default",
-  withBg = true, // ⬅️ default pakai background silver
+  withBg = true,
 }: PublicUserDropdownProps) {
   const { isDark, setDarkMode } = useHtmlDarkMode();
   const theme = isDark ? colors.dark : colors.light;
@@ -43,26 +44,22 @@ export default function PublicUserDropdown({
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    setOpen(false); // tutup dropdown biar responsif
+
     try {
-      const t = localStorage.getItem("access_token") || "";
-      await api.post(
-        "/api/auth/logout",
-        null,
-        { headers: { Authorization: `Bearer ${t}` } } // fallback kalau interceptor gagal
-      );
+      // ✅ cukup panggil helper; dia akan call /api/logout (GET/POST sesuai ENV)
+      // dan tetap membersihkan token meski server balas 401/403.
+      await apiLogout();
 
-      // bersih-bersih
+      // Bersihkan cache user agar UI langsung ter-update
       queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
-      sessionStorage.clear();
-      localStorage.clear();
 
-      navigate(slug ? `/masjid/${slug}/login` : "/login");
+      // Arahkan ke halaman login publik/umum
+      navigate(slug ? `${base}/login` : "/login", { replace: true });
     } catch (err: any) {
-      console.error("Logout error:", {
-        status: err?.response?.status,
-        data: err?.response?.data,
-        headers: err?.config?.headers, // cek apakah Authorization terkirim
-      });
+      // Kalau backend blokir CORS/CSRF, helper sudah best-effort clear token.
+      console.error("Logout error (diabaikan):", err?.response ?? err);
+      navigate(slug ? `${base}/login` : "/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
@@ -70,10 +67,7 @@ export default function PublicUserDropdown({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
@@ -99,7 +93,7 @@ export default function PublicUserDropdown({
         aria-haspopup="menu"
         aria-expanded={open}
         style={{
-          backgroundColor: withBg ? theme.white3 : "transparent", // ⬅️ kontrol bg
+          backgroundColor: withBg ? theme.white3 : "transparent",
           color: theme.black1,
         }}
       >
@@ -191,11 +185,7 @@ export default function PublicUserDropdown({
 
             <li>
               <div className="px-4 py-2">
-                <SharePopover
-                  title={document.title}
-                  url={window.location.href}
-                  forceCustom
-                />
+                <SharePopover title={document.title} url={window.location.href} forceCustom />
               </div>
             </li>
 

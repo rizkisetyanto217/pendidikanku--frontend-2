@@ -27,7 +27,7 @@ const DEFAULT_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "guru", label: "Guru", icon: UserCog },
   { path: "kelas", label: "Kelas", icon: BookOpen },
-  { path: "kehadiran", label: "Absensi", icon: CheckSquare },
+  // { path: "kehadiran", label: "Absensi", icon: CheckSquare },
   { path: "buku", label: "Buku", icon: Book },
   { path: "keuangan", label: "Keuangan", icon: Wallet },
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },

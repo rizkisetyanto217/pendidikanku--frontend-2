@@ -42,7 +42,7 @@ type FormState = {
 /* =======================
    Component
 ======================= */
-export default function Register() {
+export default function RegisterAdminMasjid() {
   const [form, setForm] = useState<FormState>({
     user_name: "",
     email: "",
@@ -139,8 +139,8 @@ export default function Register() {
   };
 
   /* =======================
-     Google Sign Up / Sign In
-  ======================= */
+   Google Sign Up / Sign In
+======================= */
   const handleGoogleSignup = async (credential: string) => {
     setLoading(true);
     setError("");
@@ -158,7 +158,8 @@ export default function Register() {
       if (token) localStorage.setItem("access_token", token);
 
       setSuccess("Berhasil menggunakan Google. Mengarahkan…");
-      setTimeout(() => navigate("/"), 800);
+      // 👉 arahkan ke halaman registrasi lembaga
+      setTimeout(() => navigate("/register-lembaga"), 800);
     } catch (err: any) {
       if (err?.response?.status === 403) {
         setError(
@@ -197,8 +198,9 @@ export default function Register() {
 
       const res = await api.post("/auth/register", payload);
       if (res.data?.status === "success") {
-        setSuccess("Registrasi berhasil! Mengarahkan ke halaman login…");
-        setTimeout(() => navigate("/login"), 1200);
+        setSuccess("Registrasi berhasil! Silakan lengkapi data lembaga…");
+        // 👉 arahkan ke halaman registrasi lembaga
+        setTimeout(() => navigate("/register-lembaga"), 1200);
       } else {
         setError(res.data?.message || "Registrasi gagal, coba lagi.");
       }

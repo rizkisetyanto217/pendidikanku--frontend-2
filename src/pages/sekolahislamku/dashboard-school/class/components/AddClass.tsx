@@ -31,7 +31,7 @@ function saveNewClassToLocalStorage(row: ClassRow) {
   localStorage.setItem(key, JSON.stringify(prev));
 }
 
-export default function AddKelas({
+export default function AddClass({
   open,
   onClose,
   palette,

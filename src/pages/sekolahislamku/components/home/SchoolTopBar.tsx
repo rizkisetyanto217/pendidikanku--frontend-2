@@ -82,7 +82,7 @@ const MOBILE_NAVS: NavItem[] = [
   { path: "sekolah", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "sekolah/guru", label: "Guru", icon: UserCog },
   { path: "sekolah/kelas", label: "Kelas", icon: BookOpen },
-  { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
+  // { path: "sekolah/kehadiran", label: "Absensi", icon: CheckSquare },
   { path: "sekolah/buku", label: "Buku", icon: Book },
   { path: "sekolah/keuangan", label: "Keuangan", icon: Wallet },
   { path: "sekolah/pengumuman", label: "Pengumuman", icon: Megaphone },

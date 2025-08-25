@@ -33,6 +33,9 @@ const isTime = (t?: string) => !!t && /^\d{2}:\d{2}$/.test(t);
 const keyOf = (it: TodayScheduleItem) =>
   `${it.title}__${it.time || ""}__${it.room || ""}`;
 
+// detailschedule
+const makeScheduleId = (it: TodayScheduleItem) => encodeURIComponent(keyOf(it));
+
 export default function AllSchedule() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
@@ -156,13 +159,9 @@ export default function AllSchedule() {
   };
 
   const handleDetail = (it: TodayScheduleItem) => {
-    alert(
-      `Detail Jadwal:\n${it.title}\nWaktu: ${it.time || "-"}\nLokasi: ${
-        it.room || "-"
-      }`
-    );
+    const id = makeScheduleId(it);
+    navigate(`detail/${id}`, { state: { item: it } }); // relative ke /jadwal
   };
-
   return (
     <div
       className="min-h-screen w-full"
@@ -317,6 +316,7 @@ export default function AllSchedule() {
                           >
                             Detail
                           </Btn>
+
                           <Btn
                             palette={palette}
                             size="sm"

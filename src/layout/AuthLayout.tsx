@@ -37,9 +37,9 @@ export default function AuthLayout({
     (choice: "school" | "user") => {
       setOpenChoice(false);
       if (choice === "school") {
-        navigate("/register/school");
+        navigate("/register-sekolah");
       } else {
-        navigate("/register/user");
+        navigate("/register-user");
       }
     },
     [navigate]

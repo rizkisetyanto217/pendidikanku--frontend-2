@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/pages/SchoolDashboard.tsx
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Outlet } from "react-router-dom";
@@ -40,6 +39,34 @@ export type AnnouncementUI = {
   slug?: string;
 };
 
+// ✅ API shape dari backend
+type AnnouncementThemeAPI = {
+  announcement_themes_id: string;
+  announcement_themes_masjid_id: string;
+  announcement_themes_name: string;
+  announcement_themes_slug: string;
+  announcement_themes_color?: string | null;
+  announcement_themes_description?: string | null;
+  announcement_themes_is_active: boolean;
+  announcement_themes_created_at: string;
+};
+
+type AnnouncementThemesListResponse = {
+  data: AnnouncementThemeAPI[];
+  pagination: { limit: number; offset: number; total: number };
+};
+
+// ✅ UI shape yang dipakai di komponen
+type AnnouncementTheme = {
+  id: string;
+  name: string;
+  color?: string | null;
+  description?: string | null;
+  slug?: string | null;
+  isActive?: boolean;
+  createdAt?: string;
+};
+
 type BillItem = {
   id: string;
   title: string;
@@ -60,7 +87,6 @@ type SchoolHome = {
     paidThisMonth: number;
     outstandingBills: BillItem[];
   };
-  // ❌ (tidak dipakai lagi untuk sumber data jadwal UI, tapi tetap ada untuk kompatibilitas)
   todaySchedule: TodayScheduleItem[];
   announcements: AnnouncementUI[];
   attendanceTodayByStatus: Record<AttendanceStatus, number>;
@@ -118,6 +144,7 @@ const QK = {
   TODAY_SESSIONS: (d: string) =>
     ["class-attendance-sessions", "today", d] as const,
   ANNOUNCEMENTS: ["announcements", "u"] as const,
+  THEMES: ["announcement-themes"] as const,
 };
 
 /* ================= Utils ================ */
@@ -180,7 +207,7 @@ function useAnnouncements() {
     queryKey: QK.ANNOUNCEMENTS,
     queryFn: async () => {
       const res = await axios.get<AnnouncementsAPIResponse>(
-        "/api/u/announcements",
+        "/api/a/announcements",
         { params: { limit: 20, offset: 0 }, withCredentials: true }
       );
       const items = res.data?.data ?? [];
@@ -198,6 +225,32 @@ function useAnnouncements() {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: "always",
+    retry: 1,
+  });
+}
+
+function useAnnouncementThemes() {
+  return useQuery<AnnouncementTheme[]>({
+    queryKey: QK.THEMES,
+    queryFn: async () => {
+      const res = await axios.get<AnnouncementThemesListResponse>(
+        "/api/a/announcement-themes",
+        { params: { limit: 50, offset: 0 }, withCredentials: true }
+      );
+      const items = res.data?.data ?? [];
+      return items.map<AnnouncementTheme>((t) => ({
+        id: t.announcement_themes_id,
+        name: t.announcement_themes_name,
+        color: t.announcement_themes_color ?? undefined,
+        description: t.announcement_themes_description ?? undefined,
+        slug: t.announcement_themes_slug,
+        isActive: t.announcement_themes_is_active,
+        createdAt: t.announcement_themes_created_at,
+      }));
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
     retry: 1,
   });
 }
@@ -244,7 +297,6 @@ function useTodaySessions() {
 }
 
 /* ============ Dummy Home (fallback layout) ============ */
-// 👉 now uses mockTodaySchedule for todaySchedule default
 async function fetchSchoolHome(): Promise<SchoolHome> {
   const now = new Date();
   const iso = now.toISOString();
@@ -280,7 +332,7 @@ async function fetchSchoolHome(): Promise<SchoolHome> {
         },
       ],
     },
-    todaySchedule: mockTodaySchedule, // ✅ pakai mock dari TodaySchedule.ts
+    todaySchedule: mockTodaySchedule,
     announcements: [],
     attendanceTodayByStatus: {
       hadir: 286,
@@ -310,19 +362,19 @@ const dateFmt = (iso?: string) =>
       })
     : "-";
 
-/* ============ Edit & Add Announcement Modals ============ */
-export type EditAnnouncementForm = {
-  id: string;
+/* ============ Forms ============ */
+export type UpsertAnnouncementForm = {
+  id?: string; // kalau ada → edit, kalau tidak → create
   title: string;
-  date: string;
+  date: string; // ISO
   body: string;
   themeId?: string | null;
 };
 
-function EditAnnouncementModal({
+/* ============ Add Theme Modal (unchanged) ============ */
+function AddThemeModal({
   open,
   onClose,
-  initial,
   onSubmit,
   saving,
   error,
@@ -330,101 +382,88 @@ function EditAnnouncementModal({
 }: {
   open: boolean;
   onClose: () => void;
-  initial: EditAnnouncementForm | null;
-  onSubmit: (v: EditAnnouncementForm) => void;
+  onSubmit: (v: {
+    name: string;
+    color?: string | null;
+    description?: string | null;
+  }) => void;
   saving?: boolean;
   error?: string | null;
   palette: Palette;
 }) {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [dateYmd, setDateYmd] = useState("");
-  const [themeId, setThemeId] = useState("");
+  const [name, setName] = useState("");
+  const [color, setColor] = useState("#007074");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
-    if (!open || !initial) return;
-    setTitle(initial.title ?? "");
-    setBody(initial.body ?? "");
-    setDateYmd(isoToInputDate(initial.date));
-    setThemeId(initial.themeId ?? "");
-  }, [open, initial]);
+    if (open) {
+      setName("");
+      setColor("#007074");
+      setDescription("");
+    }
+  }, [open]);
 
   if (!open) return null;
-  const disabled = saving || !title.trim() || !dateYmd;
+  const disabled = saving || !name.trim();
 
   return (
     <div
-      className="fixed inset-0 z-[60] grid place-items-center"
+      className="fixed inset-0 z-[70] grid place-items-center"
       style={{ background: "rgba(0,0,0,.35)" }}
     >
-      <SectionCard
-        palette={palette}
-        className="w-[min(720px,94vw)] p-4 md:p-5 rounded-2xl shadow-xl"
-        style={{ background: palette.white1, color: palette.black1 }}
+      <div
+        className="w-[min(520px,92vw)] rounded-2xl p-4 shadow-xl ring-1"
+        style={{
+          background: palette.white1,
+          color: palette.black1,
+          borderColor: palette.silver1,
+        }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold">Edit Pengumuman</h3>
-        </div>
+        <div className="mb-3 text-lg font-semibold">Tambah Tema Pengumuman</div>
 
         <div className="grid gap-3">
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Judul</label>
+          <label className="grid gap-1 text-sm">
+            <span className="opacity-80">Nama Tema</span>
             <input
               className="w-full rounded-lg border px-3 py-2 text-sm"
               style={{
                 borderColor: palette.silver2,
                 background: palette.white2,
               }}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Judul pengumuman"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Mis. 'Pengumuman', 'Peringatan', 'Sukses'"
             />
-          </div>
+          </label>
 
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Tanggal</label>
-            <input
-              type="date"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={dateYmd}
-              onChange={(e) => setDateYmd(e.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">
-              Tema (theme_id, opsional)
-            </label>
-            <input
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={themeId}
-              onChange={(e) => setThemeId(e.target.value)}
-              placeholder="UUID tema (opsional)"
-            />
-          </div>
-
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Isi</label>
+          <label className="grid gap-1 text-sm">
+            <span className="opacity-80">Deskripsi (opsional)</span>
             <textarea
-              rows={5}
+              rows={3}
               className="w-full rounded-lg border px-3 py-2 text-sm"
               style={{
                 borderColor: palette.silver2,
                 background: palette.white2,
               }}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Konten pengumuman"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Penjelasan singkat tema"
             />
-          </div>
+          </label>
+
+          <label className="grid gap-1 text-sm">
+            <span className="opacity-80">Warna (opsional)</span>
+            <input
+              type="color"
+              className="h-9 w-16 rounded border"
+              style={{
+                borderColor: palette.silver2,
+                background: palette.white2,
+              }}
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+            />
+          </label>
 
           {!!error && (
             <div className="text-sm" style={{ color: palette.error1 }}>
@@ -444,59 +483,65 @@ function EditAnnouncementModal({
           </Btn>
           <Btn
             palette={palette}
-            onClick={() => {
-              if (!initial) return;
+            onClick={() =>
               onSubmit({
-                id: initial.id,
-                title: title.trim(),
-                body: body.trim(),
-                date: inputDateToIsoUTC(dateYmd),
-                themeId: themeId?.trim() || undefined,
-              });
-            }}
+                name: name.trim(),
+                color,
+                description: description.trim() || undefined,
+              })
+            }
             disabled={disabled}
           >
-            {saving ? "Menyimpan…" : "Simpan"}
+            {saving ? "Menyimpan…" : "Tambah"}
           </Btn>
         </div>
-      </SectionCard>
+      </div>
     </div>
   );
 }
 
-function AddAnnouncementModal({
+/* ============ Unified Announcement Modal (Add + Edit) ============ */
+function AnnouncementModal({
   open,
   onClose,
+  initial,
   onSubmit,
   saving,
   error,
   palette,
+  themes,
+  onAddTheme,
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmit: (v: {
-    title: string;
-    date: string;
-    body: string;
-    themeId?: string | null;
-  }) => void;
+  initial: AnnouncementUI | null; // kalau null → create, ada → edit
+  onSubmit: (v: UpsertAnnouncementForm) => void;
   saving?: boolean;
   error?: string | null;
   palette: Palette;
+  themes: AnnouncementTheme[];
+  onAddTheme: () => void;
 }) {
+  const isEdit = !!initial;
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [dateYmd, setDateYmd] = useState("");
   const [themeId, setThemeId] = useState("");
 
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    if (initial) {
+      setTitle(initial.title ?? "");
+      setBody(initial.body ?? "");
+      setDateYmd(isoToInputDate(initial.date));
+      setThemeId(initial.themeId ?? "");
+    } else {
       setTitle("");
       setBody("");
       setDateYmd("");
       setThemeId("");
     }
-  }, [open]);
+  }, [open, initial]);
 
   if (!open) return null;
   const disabled = saving || !title.trim() || !dateYmd;
@@ -512,7 +557,9 @@ function AddAnnouncementModal({
         style={{ background: palette.white1, color: palette.black1 }}
       >
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold">Tambah Pengumuman</h3>
+          <h3 className="text-lg font-semibold">
+            {isEdit ? "Edit Pengumuman" : "Tambah Pengumuman"}
+          </h3>
         </div>
 
         <div className="grid gap-3">
@@ -544,20 +591,30 @@ function AddAnnouncementModal({
             />
           </div>
 
+          {/* Tema: Select + Tambah */}
           <div className="grid gap-1">
-            <label className="text-sm opacity-80">
-              Tema (theme_id, opsional)
-            </label>
-            <input
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={themeId}
-              onChange={(e) => setThemeId(e.target.value)}
-              placeholder="UUID tema (opsional)"
-            />
+            <label className="text-sm opacity-80">Tema (opsional)</label>
+            <div className="flex items-center gap-2">
+              <select
+                className="w-full rounded-lg border px-3 py-2 text-sm"
+                style={{
+                  borderColor: palette.silver2,
+                  background: palette.white2,
+                }}
+                value={themeId}
+                onChange={(e) => setThemeId(e.target.value)}
+              >
+                <option value="">— Tanpa Tema —</option>
+                {themes.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <Btn palette={palette} variant="ghost" onClick={onAddTheme}>
+                + Tema
+              </Btn>
+            </div>
           </div>
 
           <div className="grid gap-1">
@@ -595,15 +652,16 @@ function AddAnnouncementModal({
             palette={palette}
             onClick={() =>
               onSubmit({
+                id: initial?.id,
                 title: title.trim(),
                 body: body.trim(),
-                date: new Date(`${dateYmd}T00:00:00.000Z`).toISOString(),
+                date: inputDateToIsoUTC(dateYmd),
                 themeId: themeId?.trim() || undefined,
               })
             }
             disabled={disabled}
           >
-            {saving ? "Menyimpan…" : "Tambah"}
+            {saving ? "Menyimpan…" : isEdit ? "Simpan" : "Tambah"}
           </Btn>
         </div>
       </SectionCard>
@@ -641,14 +699,49 @@ export default function SchoolDashboard() {
   const statsQ = useLembagaStats();
   const todaySessionsQ = useTodaySessions();
   const announcementsQ = useAnnouncements();
+  const themesQ = useAnnouncementThemes(); // <-- tambahkan ini
+  // $1;
 
-  // Edit modal state
-  const [editItem, setEditItem] = useState<AnnouncementUI | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
+  // Add Theme modal state
+  const [createThemeOpen, setCreateThemeOpen] = useState(false);
 
-  // Optimistic update helper
+  // Create Theme mutation
+  const createThemeMutation = useMutation({
+    mutationFn: async (form: {
+      name: string;
+      color?: string | null;
+      description?: string | null;
+    }) => {
+      await axios.post(
+        "/api/a/announcement-themes",
+        {
+          announcement_themes_name: form.name,
+          announcement_themes_description: form.description ?? null,
+          announcement_themes_color: form.color ?? null,
+        },
+        { withCredentials: true }
+      );
+    },
+    onSuccess: async () => {
+      setFlash({ type: "success", msg: "Tema berhasil ditambah." });
+      setCreateThemeOpen(false);
+      await qc.invalidateQueries({ queryKey: QK.THEMES });
+    },
+    onError: (err: any) =>
+      setFlash({
+        type: "error",
+        msg: err?.response?.data?.message ?? "Gagal menambah tema.",
+      }),
+  });
+
+  // Modal state (unified)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalInitial, setModalInitial] = useState<AnnouncementUI | null>(null);
+
+  // Optimistic update helper khusus edit
   const applyOptimistic = useCallback(
-    (form: EditAnnouncementForm) => {
+    (form: UpsertAnnouncementForm & { date: string }) => {
+      if (!form.id) return; // hanya untuk edit
       qc.setQueryData<AnnouncementUI[] | undefined>(QK.ANNOUNCEMENTS, (prev) =>
         (prev ?? [])?.map((a) =>
           a.id === form.id
@@ -657,7 +750,7 @@ export default function SchoolDashboard() {
                 title: form.title,
                 body: form.body,
                 date: form.date,
-                themeId: form.themeId,
+                themeId: form.themeId ?? undefined,
               }
             : a
         )
@@ -666,15 +759,9 @@ export default function SchoolDashboard() {
     [qc]
   );
 
-  type CreateAnnouncementForm = {
-    title: string;
-    date: string;
-    body: string;
-    themeId?: string | null;
-  };
-
-  const createMutation = useMutation({
-    mutationFn: async (form: CreateAnnouncementForm) => {
+  // Upsert mutation (POST + PUT dalam satu)
+  const upsertMutation = useMutation({
+    mutationFn: async (form: UpsertAnnouncementForm) => {
       const dateOnly = form.date.slice(0, 10);
       const payload: any = {
         announcement_title: form.title,
@@ -682,58 +769,56 @@ export default function SchoolDashboard() {
         announcement_content: form.body,
       };
       if (form.themeId) payload.announcement_theme_id = form.themeId;
-      await axios.post(`/api/u/announcements`, payload, {
-        withCredentials: true,
-      });
-    },
-    onSuccess: async (_, variables) => {
-      setFlash({ type: "success", msg: "Pengumuman berhasil ditambah." });
-      qc.setQueryData<AnnouncementUI[]>(QK.ANNOUNCEMENTS, (prev = []) => [
-        {
-          id: `temp-${Date.now()}`,
-          title: variables.title,
-          date: variables.date,
-          body: variables.body,
-          themeId: variables.themeId,
-          type: "info",
-          slug: slugify(variables.title),
-        },
-        ...(prev || []),
-      ]);
-      await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
-      setCreateOpen(false);
-    },
-    onError: (err: any) =>
-      setFlash({
-        type: "error",
-        msg: err?.response?.data?.message ?? "Gagal menambah pengumuman.",
-      }),
-  });
 
-  const updateMutation = useMutation({
-    mutationFn: async (form: EditAnnouncementForm) => {
-      const dateOnly = form.date?.slice(0, 10);
-      const payload: any = {
-        announcement_title: form.title,
-        announcement_date: dateOnly,
-        announcement_content: form.body,
-      };
-      if (form.themeId) payload.announcement_theme_id = form.themeId;
-      applyOptimistic({ ...form, date: dateOnly });
-      await axios.put(`/api/u/announcements/${form.id}`, payload, {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      });
+      if (form.id) {
+        // EDIT
+        applyOptimistic({ ...form, date: dateOnly });
+        await axios.put(`/api/a/announcements/${form.id}`, payload, {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        });
+      } else {
+        // CREATE
+        await axios.post(`/api/a/announcements`, payload, {
+          withCredentials: true,
+        });
+      }
     },
-    onSuccess: async () => {
-      setFlash({ type: "success", msg: "Pengumuman berhasil disimpan." });
+    onSuccess: async (_data, variables) => {
+      setFlash({
+        type: "success",
+        msg: variables.id
+          ? "Pengumuman berhasil disimpan."
+          : "Pengumuman berhasil ditambah.",
+      });
+
+      // Untuk create, bisa tambahkan item sementara (optional)
+      if (!variables.id) {
+        qc.setQueryData<AnnouncementUI[]>(QK.ANNOUNCEMENTS, (prev = []) => [
+          {
+            id: `temp-${Date.now()}`,
+            title: variables.title,
+            date: variables.date,
+            body: variables.body,
+            themeId: variables.themeId,
+            type: "info",
+            slug: slugify(variables.title),
+          },
+          ...(prev || []),
+        ]);
+      }
+
       await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
-      setEditItem(null);
+      setModalOpen(false);
+      setModalInitial(null);
     },
     onError: async (err: any) => {
       setFlash({
         type: "error",
-        msg: err?.response?.data?.message ?? "Gagal menyimpan pengumuman.",
+        msg:
+          err?.response?.data?.message ??
+          err?.message ??
+          "Gagal menyimpan pengumuman.",
       });
       await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
     },
@@ -741,10 +826,11 @@ export default function SchoolDashboard() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`/api/u/announcements/${id}`, {
+      await axios.delete(`/api/a/announcements/${id}`, {
         withCredentials: true,
       });
     },
+
     onSuccess: async () => {
       setFlash({ type: "success", msg: "Pengumuman dihapus." });
       await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
@@ -764,7 +850,7 @@ export default function SchoolDashboard() {
     class: statsQ.data?.lembaga_stats_active_sections ?? 0,
   };
 
-  // Jadwal hari ini: gunakan API sessions; fallback ke mockTodaySchedule
+  // Jadwal hari ini
   const scheduleItems: TodayScheduleItem[] = useMemo(() => {
     const apiItems = todaySessionsQ.data ?? [];
     if (apiItems.length > 0) return mapSessionsToTodaySchedule(apiItems);
@@ -835,10 +921,10 @@ export default function SchoolDashboard() {
                   palette={palette}
                   items={scheduleItems}
                   title="Jadwal Hari Ini"
-                  maxItems={3} // tampil hanya 3 item
-                  seeAllPath="all-schedule" // arahkan ke route AllSchedule
+                  maxItems={3}
+                  seeAllPath="all-schedule"
                   seeAllState={{
-                    items: scheduleItems, // lempar semua data
+                    items: scheduleItems,
                     heading: "Semua Jadwal Hari Ini",
                   }}
                 />
@@ -891,8 +977,14 @@ export default function SchoolDashboard() {
                   getDetailHref={(a) => `/pengumuman/${a.slug ?? a.id}`}
                   showActions
                   canAdd={true}
-                  onAdd={() => setCreateOpen(true)}
-                  onEdit={(a) => setEditItem(a)}
+                  onAdd={() => {
+                    setModalInitial(null);
+                    setModalOpen(true);
+                  }}
+                  onEdit={(a) => {
+                    setModalInitial(a);
+                    setModalOpen(true);
+                  }}
                   onDelete={(a) => {
                     if (deleteMutation.isPending) return;
                     const ok = confirm(`Hapus pengumuman "${a.title}"?`);
@@ -914,28 +1006,23 @@ export default function SchoolDashboard() {
             </section>
 
             {/* ===== Modals & states ===== */}
-            <EditAnnouncementModal
-              open={!!editItem}
-              onClose={() => setEditItem(null)}
+            <AnnouncementModal
+              open={modalOpen}
+              onClose={() => {
+                setModalOpen(false);
+                setModalInitial(null);
+              }}
               palette={palette}
-              initial={
-                editItem
-                  ? {
-                      id: editItem.id,
-                      title: editItem.title,
-                      date: editItem.date,
-                      body: editItem.body,
-                      themeId: editItem.themeId,
-                    }
-                  : null
-              }
-              onSubmit={(form) => updateMutation.mutate(form)}
-              saving={updateMutation.isPending}
+              initial={modalInitial}
+              onSubmit={(form) => upsertMutation.mutate(form)}
+              saving={upsertMutation.isPending}
               error={
-                (updateMutation.error as any)?.response?.data?.message ??
-                (updateMutation.error as any)?.message ??
+                (upsertMutation.error as any)?.response?.data?.message ??
+                (upsertMutation.error as any)?.message ??
                 null
               }
+              themes={themesQ.data ?? []}
+              onAddTheme={() => setCreateThemeOpen(true)}
             />
 
             {(homeQ.isLoading || statsQ.isLoading) && (
@@ -948,16 +1035,16 @@ export default function SchoolDashboard() {
             )}
           </section>
 
-          {/* Add modal ditempatkan di luar flow agar overlay full */}
-          <AddAnnouncementModal
-            open={createOpen}
-            onClose={() => setCreateOpen(false)}
+          {/* Add Theme Modal */}
+          <AddThemeModal
+            open={createThemeOpen}
+            onClose={() => setCreateThemeOpen(false)}
             palette={palette}
-            onSubmit={(form) => createMutation.mutate(form)}
-            saving={createMutation.isPending}
+            onSubmit={(v) => createThemeMutation.mutate(v)}
+            saving={createThemeMutation.isPending}
             error={
-              (createMutation.error as any)?.response?.data?.message ??
-              (createMutation.error as any)?.message ??
+              (createThemeMutation.error as any)?.response?.data?.message ??
+              (createThemeMutation.error as any)?.message ??
               null
             }
           />

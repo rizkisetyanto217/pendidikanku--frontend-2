@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { LogOut, Settings, User, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import api from "@/lib/axios";
+// ⬇️ ganti import: pakai helper logout dari axios
+import { apiLogout } from "@/lib/axios";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -20,23 +21,18 @@ export default function UserDropdown() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    setOpen(false); // tutup dropdown lebih cepat untuk UX
+
     try {
-      await api.post("/api/auth/logout", null, {
-        withCredentials: true,
-      });
-
-      withCredentials: true;
-      console.log("✅ Logout berhasil");
+      // ⬇️ ini saja cukup; helper akan coba call /api/logout dan tetap clear token meski 403
+      await apiLogout();
+      console.log("✅ Logout selesai (best-effort)");
     } catch (err) {
-      console.error("Logout gagal:", err);
+      console.error("Logout error (diabaikan, token sudah dibersihkan):", err);
     } finally {
-      // Bersihkan local/session storage hanya jika kamu masih menyimpan data lain
-      localStorage.clear();
-      sessionStorage.clear();
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 500);
+      // ⛔️ tidak perlu `localStorage.clear()`/`sessionStorage.clear()` (terlalu agresif)
+      // apiLogout() sudah membersihkan token & broadcast event.
+      navigate("/login", { replace: true });
     }
   };
 
@@ -58,9 +54,7 @@ export default function UserDropdown() {
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 p-2 rounded-md transition"
-        style={{
-          backgroundColor: open ? theme.white2 : "transparent",
-        }}
+        style={{ backgroundColor: open ? theme.white2 : "transparent" }}
       >
         <img
           src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='16' fill='%23CCCCCC' /></svg>"
@@ -137,10 +131,7 @@ export default function UserDropdown() {
                 onClick={handleLogout}
                 disabled={isLoggingOut}
                 className="w-full flex items-center gap-2 px-4 py-2 text-left transition disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  color: theme.error1,
-                  backgroundColor: "transparent",
-                }}
+                style={{ color: theme.error1, backgroundColor: "transparent" }}
                 onMouseOver={(e) =>
                   (e.currentTarget.style.backgroundColor = theme.error2)
                 }

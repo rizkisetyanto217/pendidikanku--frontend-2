@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+// src/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedule.tsx
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
@@ -9,21 +10,35 @@ import {
   Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
+import { Plus, Calendar, Clock, MapPin, ArrowLeft } from "lucide-react";
 import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
 import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import TambahJadwal from "../../components/dashboard/TambahJadwal";
-import { fetchTeacherHome } from "../../class/teacher";
 
+// API & Types
+import {
+  fetchTeacherHome,
+  TEACHER_HOME_QK,
+  type TeacherHomeResponse,
+  type TodayClass,
+  type UpcomingClass,
+} from "../teacher";
+
+import TambahJadwal from "../../components/dashboard/TambahJadwal";
+
+/* =========================
+   Types (UI normalized)
+========================= */
 type ScheduleItem = {
   id?: string;
-  time: string;
+  time: string; // "07:30"
   title: string; // "TPA A — Tahsin"
-  room?: string; // bisa "22 Agu • Aula 1" atau "Aula 1"
+  room?: string; // "22 Agu • Aula 1" atau "Aula 1"
   dateISO: string; // ISO tanggal (00:00)
 };
 
-/* ========= Helpers ========= */
+/* =========================
+   Helpers
+========================= */
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -51,7 +66,7 @@ const fmtLong = (iso: string) =>
     month: "long",
   });
 
-/** Ekstrak nama lokasi murni dari field room yang mungkin “DD Mon • Ruang” */
+/** Ambil nama lokasi murni dari "DD Mon • Aula 1" → "Aula 1" */
 const getPureLocation = (room?: string) => {
   if (!room) return "";
   const parts = room.split("•").map((s) => s.trim());
@@ -67,75 +82,58 @@ const makeScheduleSlug = (it: ScheduleItem) => {
   return encodeURIComponent(raw);
 };
 
-/** Normalisasi from API object → UI ScheduleItem (sertakan id fallback stabil) */
-const normalizeItem = (c: any, fallback: Date): ScheduleItem => {
-  const dateISO = c.dateISO
-    ? toISODate(new Date(c.dateISO))
+/** Normalisasi dari tipe API ke tipe UI (ScheduleItem) */
+const normalizeItem = (
+  c: UpcomingClass | TodayClass,
+  fallback: Date
+): ScheduleItem => {
+  const dateISO = (c as UpcomingClass).dateISO
+    ? toISODate(new Date((c as UpcomingClass).dateISO))
     : toISODate(fallback);
-  const title = `${c.className} — ${c.subject}`;
-  const id: string = c.id ?? `${dateISO}|${c.time}|${title}`; // fallback id stabil untuk edit/delete/navigate
 
   return {
-    id,
+    id: c.id,
     time: c.time,
-    title,
+    title: `${c.className} — ${c.subject}`,
     dateISO,
-    // subteks: tgl singkat • room (jika punya date)
-    room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
+    room: (c as UpcomingClass).dateISO
+      ? `${fmtShort((c as UpcomingClass).dateISO)} • ${c.room ?? "-"}`
+      : c.room,
   };
 };
 
-export default function ScheduleThreeDays() {
+/* =========================
+   Component
+========================= */
+export default function ScheduleSevenDays() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const qc = useQueryClient();
   const navigate = useNavigate();
 
-  // optional preload dari router state
-  const location = useLocation();
-  const preload = (location.state as any)?.items as ScheduleItem[] | undefined;
-
-  const { data } = useQuery({
-    queryKey: ["teacher-home"],
+  const { data } = useQuery<TeacherHomeResponse>({
+    queryKey: TEACHER_HOME_QK,
     queryFn: fetchTeacherHome,
     staleTime: 60_000,
   });
 
-  // Ambil 3 hari ke depan (hari ini s/d +2)
-  const DAYS = 3;
+  // Ambil 7 hari ke depan (hari ini s/d +6)
+  const DAYS = 7;
   const today = startOfDay(new Date());
   const end = startOfDay(addDays(today, DAYS - 1));
 
-  // Susun sumber data: upcoming dalam 3 hari → fallback todayClasses (jadikan hari ini)
+  // Sumber data: upcoming (7 hari) → fallback todayClasses
   const rawItems: ScheduleItem[] = useMemo(() => {
-    if (Array.isArray(preload) && preload.length) {
-      return preload
-        .map((p) => ({
-          ...p,
-          id:
-            p.id ??
-            `${toISODate(new Date(p.dateISO ?? today))}|${p.time}|${p.title}`,
-          dateISO: p.dateISO
-            ? toISODate(new Date(p.dateISO))
-            : toISODate(today),
-        }))
-        .sort((a, b) => {
-          const da = new Date(a.dateISO).getTime();
-          const db = new Date(b.dateISO).getTime();
-          if (da !== db) return da - db;
-          return a.time.localeCompare(b.time);
-        });
-    }
-
-    const upcoming = (data?.upcomingClasses ?? []).filter((u: any) => {
+    const upcoming = (data?.upcomingClasses ?? []).filter((u) => {
       const d = startOfDay(new Date(u.dateISO));
       return d >= today && d <= end;
     });
 
-    const fromUpcoming = upcoming.map((u: any) => normalizeItem(u, today));
+    const fromUpcoming = upcoming.map((u) => normalizeItem(u, today));
     const fromToday =
       fromUpcoming.length > 0
         ? []
-        : (data?.todayClasses ?? []).map((t: any) => normalizeItem(t, today));
+        : (data?.todayClasses ?? []).map((t) => normalizeItem(t, today));
 
     return [...fromUpcoming, ...fromToday].sort((a, b) => {
       const da = new Date(a.dateISO).getTime();
@@ -143,40 +141,36 @@ export default function ScheduleThreeDays() {
       if (da !== db) return da - db;
       return a.time.localeCompare(b.time);
     });
-  }, [preload, data?.upcomingClasses, data?.todayClasses]);
+  }, [data?.upcomingClasses, data?.todayClasses]);
 
-  /* ====== Lokal state supaya bisa Add/Edit/Delete tanpa reload ====== */
-  const [localItems, setLocalItems] = useState<ScheduleItem[]>(rawItems);
-  useEffect(() => setLocalItems(rawItems), [rawItems]);
-
-  /* ====== Search & Filter lokasi ====== */
+  /* ---------- UI State: search & filter lokasi ---------- */
   const [search, setSearch] = useState("");
   const [locFilter, setLocFilter] = useState<string | "semua">("semua");
 
   const lokasiOptions = useMemo(() => {
     const set = new Set(
-      localItems
+      rawItems
         .map((x) => getPureLocation(x.room))
         .map((s) => s.trim())
         .filter(Boolean)
     );
     return ["semua", ...Array.from(set)];
-  }, [localItems]);
+  }, [rawItems]);
 
   const filtered = useMemo(() => {
     const s = search.trim().toLowerCase();
-    return localItems.filter((j) => {
+    return rawItems.filter((j) => {
       const location = getPureLocation(j.room);
       const matchSearch =
         j.title.toLowerCase().includes(s) ||
         location.toLowerCase().includes(s) ||
-        j.time.toLowerCase().includes(s);
+        (j.time ?? "").toLowerCase().includes(s);
       const matchLoc = locFilter === "semua" || location === locFilter;
       return matchSearch && matchLoc;
     });
-  }, [localItems, search, locFilter]);
+  }, [rawItems, search, locFilter]);
 
-  /* ====== Bucket per hari (3 kotak) ====== */
+  /* ---------- Bucket per hari (7 kotak) ---------- */
   const dayBuckets = useMemo(() => {
     return Array.from({ length: DAYS }).map((_, i) => {
       const dISO = toISODate(addDays(today, i));
@@ -189,80 +183,76 @@ export default function ScheduleThreeDays() {
 
   /* ---------- Tambah / Edit / Hapus ---------- */
   const [showTambahJadwal, setShowTambahJadwal] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [targetDateISO, setTargetDateISO] = useState<string | null>(null);
 
   const openAdd = (dateISO?: string) => {
-    setEditingId(null);
     setTargetDateISO(dateISO ?? toISODate(today));
     setShowTambahJadwal(true);
   };
 
-  const openEdit = (it: ScheduleItem) => {
-    setEditingId(it.id ?? `${it.dateISO}|${it.time}|${it.title}`);
-    setTargetDateISO(it.dateISO);
-    setShowTambahJadwal(true);
-  };
-
-  const handleSubmitSchedule = (payload: {
+  const handleAddSchedule = (item: {
     time: string;
     title: string;
     room?: string;
   }) => {
-    const baseDateISO = targetDateISO ?? toISODate(today);
-    if (editingId) {
-      // Edit: replace item yang cocok
-      setLocalItems((prev) =>
-        prev
-          .map((x) =>
-            (x.id ?? `${x.dateISO}|${x.time}|${x.title}`) === editingId
-              ? {
-                  ...x,
-                  time: payload.time,
-                  title: payload.title,
-                  room: payload.room
-                    ? `${fmtShort(baseDateISO)} • ${payload.room}`
-                    : x.room,
-                }
-              : x
-          )
-          .sort((a, b) => {
-            const da = new Date(a.dateISO).getTime();
-            const db = new Date(b.dateISO).getTime();
-            if (da !== db) return da - db;
-            return a.time.localeCompare(b.time);
-          })
-      );
-    } else {
-      // Add: masuk ke tanggal target (default: hari ini)
-      const newItem: ScheduleItem = {
-        id: `local-${Date.now()}`,
-        dateISO: baseDateISO,
-        time: payload.time,
-        title: payload.title,
-        room: payload.room
-          ? `${fmtShort(baseDateISO)} • ${payload.room}`
-          : undefined,
+    // sinkronisasi cache "teacher-home" → todayClasses (optimistic)
+    qc.setQueryData(TEACHER_HOME_QK, (prev: any) => {
+      if (!prev) return prev;
+      const [classNameRaw = "", subjectRaw = ""] = item.title.split(" — ");
+      const newTc: TodayClass = {
+        id: `temp-${Date.now()}`,
+        time: item.time,
+        className: classNameRaw || "Kelas",
+        subject: subjectRaw || "Pelajaran",
+        room: item.room,
+        status: "upcoming",
       };
-      setLocalItems((prev) =>
-        [...prev, newItem].sort((a, b) => {
-          const da = new Date(a.dateISO).getTime();
-          const db = new Date(b.dateISO).getTime();
-          if (da !== db) return da - db;
-          return a.time.localeCompare(b.time);
-        })
-      );
-    }
+      return {
+        ...prev,
+        todayClasses: [...(prev.todayClasses ?? []), newTc].sort(
+          (a: TodayClass, b: TodayClass) => a.time.localeCompare(b.time)
+        ),
+      };
+    });
     setShowTambahJadwal(false);
   };
 
-  const handleDelete = (it: ScheduleItem) => {
-    const key = it.id ?? `${it.dateISO}|${it.time}|${it.title}`;
-    setLocalItems((prev) =>
-      prev.filter((x) => (x.id ?? `${x.dateISO}|${x.time}|${x.title}`) !== key)
-    );
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const openEdit = (it: ScheduleItem) => {
+    setEditingId(it.id ?? `${it.dateISO}-${it.time}-${it.title}`);
+    setTargetDateISO(it.dateISO);
+    setShowTambahJadwal(true);
   };
 
+  const handleDelete = (it: ScheduleItem) => {
+    if (!confirm(`Hapus jadwal "${it.title}" pada ${it.time}?`)) return;
+
+    qc.setQueryData<TeacherHomeResponse>(TEACHER_HOME_QK, (prev) => {
+      if (!prev) return prev;
+
+      const sameUpcoming = (u: UpcomingClass) =>
+        (it.id && u.id === it.id) ||
+        (toISODate(new Date(u.dateISO)) === it.dateISO &&
+          u.time === it.time &&
+          `${u.className} — ${u.subject}` === it.title);
+
+      const sameToday = (t: TodayClass) =>
+        (it.id && t.id === it.id) ||
+        (t.time === it.time && `${t.className} — ${t.subject}` === it.title);
+
+      return {
+        ...prev,
+        upcomingClasses: (prev.upcomingClasses ?? []).filter(
+          (u) => !sameUpcoming(u)
+        ),
+        todayClasses: (prev.todayClasses ?? []).filter((t) => !sameToday(t)),
+      };
+    });
+  };
+
+  /* =========================
+     UI
+  ========================= */
   return (
     <div
       className="min-h-screen w-full"
@@ -271,7 +261,7 @@ export default function ScheduleThreeDays() {
       <TeacherTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
-        title="Jadwal 3 Hari Kedepan"
+        title="Jadwal 7 Hari Kedepan"
         dateFmt={(iso) =>
           new Date(iso).toLocaleDateString("id-ID", {
             weekday: "long",
@@ -282,12 +272,12 @@ export default function ScheduleThreeDays() {
         }
       />
 
-      {/* Modal Tambah/Edit Jadwal */}
+      {/* Modal: Tambah Jadwal */}
       <TambahJadwal
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
-        onSubmit={handleSubmitSchedule}
+        onSubmit={handleAddSchedule}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
@@ -298,17 +288,17 @@ export default function ScheduleThreeDays() {
 
           <div className="flex-1 min-w-0 space-y-4">
             {/* Header actions */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <ArrowLeft
-                  size={20}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2 font-semibold text-lg">
+                <button
                   onClick={() => navigate(-1)}
-                  strokeWidth={3}
-                  className="mr-1 cursor-pointer"
-                />
-                <div className="font-semibold text-lg">
-                  Jadwal 3 Hari Kedepan
-                </div>
+                  className="inline-flex items-center justify-center rounded-full p-1 hover:opacity-80"
+                  aria-label="Kembali"
+                  title="Kembali"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <span>Jadwal 7 Hari Kedepan</span>
               </div>
             </div>
 
@@ -327,6 +317,7 @@ export default function ScheduleThreeDays() {
                       color: palette.black1,
                       border: `1px solid ${palette.silver1}`,
                     }}
+                    aria-label="Cari jadwal"
                   />
                 </div>
 
@@ -344,6 +335,7 @@ export default function ScheduleThreeDays() {
                         color: palette.black1,
                         border: `1px solid ${palette.silver1}`,
                       }}
+                      aria-label="Filter lokasi"
                     >
                       {lokasiOptions.map((o) => (
                         <option key={o} value={o}>
@@ -356,7 +348,7 @@ export default function ScheduleThreeDays() {
               </div>
             </SectionCard>
 
-            {/* Per hari (3 kotak) */}
+            {/* 7 kotak — satu per hari */}
             <div className="grid gap-3">
               {dayBuckets.map(({ dateISO, items }) => (
                 <SectionCard
@@ -403,7 +395,7 @@ export default function ScheduleThreeDays() {
                         const slug = makeScheduleSlug(s);
                         return (
                           <div
-                            key={s.id ?? `${s.dateISO}-${s.time}-${i}`}
+                            key={`${s.id ?? i}-${s.time}`}
                             className="px-4 py-3 flex items-center justify-between gap-4"
                             style={{ background: palette.white1 }}
                           >
@@ -430,6 +422,7 @@ export default function ScheduleThreeDays() {
                               </div>
                             </div>
 
+                            {/* Aksi */}
                             <div className="flex items-center gap-2 shrink-0">
                               <Btn
                                 palette={palette}
@@ -439,8 +432,7 @@ export default function ScheduleThreeDays() {
                               >
                                 Edit
                               </Btn>
-
-                              {/* Detail: Link + bawa state item */}
+                              {/* Link ke detail + kirim state item */}
                               <Link to={`./${slug}`} state={{ item: s }}>
                                 <Btn
                                   palette={palette}
@@ -450,7 +442,6 @@ export default function ScheduleThreeDays() {
                                   Detail
                                 </Btn>
                               </Link>
-
                               <Btn
                                 palette={palette}
                                 size="sm"

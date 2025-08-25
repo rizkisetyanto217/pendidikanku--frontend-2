@@ -186,7 +186,7 @@ export default function SchoolAttendance() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <SectionCard palette={theme} className="p-4">
               <p className="text-sm" style={{ color: c.muted }}>
-                Kehadiran Hari Ini
+                Kehadiran Hari Ini saja
               </p>
               <p
                 className="text-2xl font-semibold"

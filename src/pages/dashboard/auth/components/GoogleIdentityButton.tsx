@@ -1,6 +1,6 @@
 // src/components/auth/GoogleIdentityButton.tsx
 import React, { useEffect, useRef } from "react";
-import { loadGsiScript } from "@/pages/dashboard/auth/utils/loadGSIScript";
+import { loadGsiScript } from "@/pages/dashboard/auth/utils/loadGsiScript";
 
 type Props = {
   clientId: string;
