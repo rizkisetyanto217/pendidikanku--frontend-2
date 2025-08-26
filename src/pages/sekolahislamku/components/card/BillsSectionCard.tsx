@@ -7,6 +7,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
+/* ===================== Types ===================== */
 export interface BillItem {
   id: string;
   title: string;
@@ -17,15 +18,16 @@ export interface BillItem {
 
 interface BillsSectionCardProps {
   palette: Palette;
-  bills: BillItem[];
+  bills?: BillItem[]; // made optional + safe default
   dateFmt: (iso: string) => string;
   formatIDR: (n: number) => string;
-  seeAllPath?: string;
+  seeAllPath?: string; // target route "lihat semua"
+  seeAllState?: unknown; // state opsional untuk dikirim ke route tujuan
   getPayHref?: (bill: BillItem) => string;
   className?: string;
 }
 
-// Mapping status ke variant Badge
+/* ============== Mappings ============== */
 const badgeVariants = {
   unpaid: "secondary",
   overdue: "destructive",
@@ -41,15 +43,15 @@ const statusTexts = {
 const getBadgeVariant = (status: BillItem["status"]) => badgeVariants[status];
 const getStatusText = (status: BillItem["status"]) => statusTexts[status];
 
-// Empty state
+/* ============== Empty State ============== */
 const EmptyState = ({ palette }: { palette: Palette }) => (
   <div className="text-sm" style={{ color: palette.silver2 }}>
     Tidak ada tagihan yang belum dibayar. Alhamdulillah!
   </div>
 );
 
-// Single bill card
-const BillCard = ({
+/* ============== Single Bill Card ============== */
+function BillCard({
   bill,
   palette,
   dateFmt,
@@ -61,60 +63,70 @@ const BillCard = ({
   dateFmt: (iso: string) => string;
   formatIDR: (n: number) => string;
   getPayHref: (bill: BillItem) => string;
-}) => (
-  <div
-    className="rounded-xl border p-3"
-    style={{ borderColor: palette.silver1, background: palette.white2 }}
-  >
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      {/* Info Tagihan */}
-      <div className="min-w-0">
-        <div className="font-medium truncate">{bill.title}</div>
-        <div className="text-xs" style={{ color: palette.silver2 }}>
-          Jatuh tempo: {dateFmt(bill.dueDate)}
-        </div>
-      </div>
+}) {
+  const isPaid = bill.status === "paid";
 
-      {/* Amount & Actions */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
-        <div className="flex items-center gap-2 md:flex-col md:items-center md:gap-1 md:min-w-0 md:flex-1">
-          <div className="text-sm font-semibold text-center">
-            {formatIDR(bill.amount)}
+  return (
+    <div
+      className="rounded-xl border p-3"
+      style={{ borderColor: palette.silver1, background: palette.white2 }}
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        {/* Info Tagihan */}
+        <div className="min-w-0">
+          <div className="font-medium truncate">{bill.title}</div>
+          <div className="text-xs" style={{ color: palette.silver2 }}>
+            Jatuh tempo: {dateFmt(bill.dueDate)}
           </div>
-          <Badge
-            variant={getBadgeVariant(bill.status)}
-            palette={palette}
-            className="w-auto text-center"
-          >
-            {getStatusText(bill.status)}
-          </Badge>
         </div>
 
-        <Link
-          to={getPayHref(bill)}
-          className="w-full md:w-auto md:flex-shrink-0"
-        >
-          <Btn
-            size="sm"
-            variant="outline"
-            palette={palette}
-            className="w-full md:w-auto md:px-6 md:mt-2"
+        {/* Amount & Actions */}
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+          <div className="flex items-center gap-2 md:flex-col md:items-center md:gap-1 md:min-w-0 md:flex-1">
+            <div className="text-sm font-semibold text-center">
+              {formatIDR(bill.amount)}
+            </div>
+            <Badge
+              variant={getBadgeVariant(bill.status)}
+              palette={palette}
+              className="w-auto text-center"
+            >
+              {getStatusText(bill.status)}
+            </Badge>
+          </div>
+
+          <Link
+            to={getPayHref(bill)}
+            className="w-full md:w-auto md:flex-shrink-0"
+            aria-disabled={isPaid}
+            onClick={(e) => {
+              if (isPaid) e.preventDefault();
+            }}
           >
-            Bayar
-          </Btn>
-        </Link>
+            <Btn
+              size="sm"
+              variant="outline"
+              palette={palette}
+              className="w-full md:w-auto md:px-6 md:mt-2"
+              disabled={isPaid}
+            >
+              {isPaid ? "Sudah dibayar" : "Bayar"}
+            </Btn>
+          </Link>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+}
 
-// Main Section
+/* ============== Main Section ============== */
 export default function BillsSectionCard({
   palette,
-  bills,
+  bills = [],
   dateFmt,
   formatIDR,
   seeAllPath = "/tagihan",
+  seeAllState,
   getPayHref = (b) => `/tagihan/${b.id}`,
   className = "",
 }: BillsSectionCardProps) {
@@ -132,7 +144,11 @@ export default function BillsSectionCard({
           Tagihan & Pembayaran
         </h3>
 
-        <Link to={seeAllPath}>
+        <Link
+          to={seeAllPath}
+          // ✅ perbaikan: state harus berupa objek
+          state={seeAllState ?? { bills, heading: "Semua Tagihan" }}
+        >
           <Btn
             size="sm"
             variant="ghost"

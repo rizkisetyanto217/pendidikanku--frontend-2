@@ -936,6 +936,7 @@ export default function SchoolDashboard() {
               </div>
 
               {/* Keuangan */}
+              {/* Keuangan */}
               <div className="md:col-span-1 lg:col-span-6 space-y-4 min-w-0">
                 <SectionCard palette={palette}>
                   <div className="p-4 pb-1 font-medium">Snapshot Keuangan</div>
@@ -961,8 +962,10 @@ export default function SchoolDashboard() {
                   dateFmt={dateFmt}
                   formatIDR={formatIDR}
                   seeAllPath="all-invoices"
-                  getPayHref={(b) => `/finance/bill/${b.id}`}
-                  className="w-full"
+                  seeAllState={{
+                    bills: homeQ.data?.finance.outstandingBills ?? [],
+                    heading: "Semua Tagihan",
+                  }}
                 />
               </div>
 

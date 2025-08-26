@@ -1,84 +1,56 @@
 // src/pages/sekolahislamku/tagihan/AllInvoices.tsx
-import React from "react";
+import React, { useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
   SectionCard,
+  Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import axios from "@/lib/axios";
+import { ArrowLeft } from "lucide-react";
 
+/* ===== Types ===== */
+type BillItem = {
+  id: string;
+  title: string;
+  amount: number;
+  dueDate: string; // ISO
+  status: "unpaid" | "paid" | "overdue";
+};
 
-// Interface untuk data tagihan
+type LocationState = {
+  bills?: BillItem[];
+  heading?: string;
+};
+
+/* ===== Small UI ===== */
 interface Tagihan {
-  id: number;
+  id: string;
   nama: string;
   jumlah: number;
-  status?: "Lunas" | "Belum Lunas";
-  tanggalJatuhTempo?: string;
+  status: "Lunas" | "Belum Lunas";
+  tanggalJatuhTempo: string;
 }
 
-// Komponen untuk baris tabel tagihan
-interface TagihanRowProps {
-  tagihan: Tagihan;
-  index: number;
-  palette: Palette;
+function toTagihan(b: BillItem): Tagihan {
+  return {
+    id: b.id,
+    nama: b.title,
+    jumlah: b.amount,
+    status: b.status === "paid" ? "Lunas" : "Belum Lunas",
+    tanggalJatuhTempo: new Date(b.dueDate).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }),
+  };
 }
 
-const TagihanRow: React.FC<TagihanRowProps> = ({ tagihan, index, palette }) => (
-  <tr
-    style={{
-      background: index % 2 === 0 ? palette.white1 : palette.white2,
-    }}
-  >
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      {index + 1}
-    </td>
-    <td
-      className="p-3 border font-medium"
-      style={{ borderColor: palette.silver1 }}
-    >
-      {tagihan.nama}
-    </td>
-    <td
-      className="p-3 border text-right font-semibold"
-      style={{ borderColor: palette.silver1 }}
-    >
-      Rp {tagihan.jumlah.toLocaleString("id-ID")}
-    </td>
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          tagihan.status === "Lunas"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
-      >
-        {tagihan.status || "Belum Lunas"}
-      </span>
-    </td>
-    <td
-      className="p-3 border text-center"
-      style={{ borderColor: palette.silver1 }}
-    >
-      {tagihan.tanggalJatuhTempo || "-"}
-    </td>
-  </tr>
-);
-
-// Komponen untuk header tabel
-interface TableHeaderProps {
-  palette: Palette;
-}
-
-const TableHeader: React.FC<TableHeaderProps> = ({ palette }) => (
+const TableHeader = ({ palette }: { palette: Palette }) => (
   <thead>
     <tr
       style={{
@@ -120,25 +92,62 @@ const TableHeader: React.FC<TableHeaderProps> = ({ palette }) => (
   </thead>
 );
 
-// Komponen untuk menampilkan total tagihan
-interface TotalTagihanProps {
-  tagihanList: Tagihan[];
-  palette: Palette;
-}
-
-const TotalTagihan: React.FC<TotalTagihanProps> = ({
-  tagihanList,
+const Row = ({
+  tagihan,
+  index,
   palette,
-}) => {
-  const totalBelumLunas = tagihanList
-    .filter((tagihan) => tagihan.status !== "Lunas")
-    .reduce((total, tagihan) => total + tagihan.jumlah, 0);
+}: {
+  tagihan: Tagihan;
+  index: number;
+  palette: Palette;
+}) => (
+  <tr style={{ background: index % 2 === 0 ? palette.white1 : palette.white2 }}>
+    <td
+      className="p-3 border text-center"
+      style={{ borderColor: palette.silver1 }}
+    >
+      {index + 1}
+    </td>
+    <td
+      className="p-3 border font-medium"
+      style={{ borderColor: palette.silver1 }}
+    >
+      {tagihan.nama}
+    </td>
+    <td
+      className="p-3 border text-right font-semibold"
+      style={{ borderColor: palette.silver1 }}
+    >
+      Rp {tagihan.jumlah.toLocaleString("id-ID")}
+    </td>
+    <td
+      className="p-3 border text-center"
+      style={{ borderColor: palette.silver1 }}
+    >
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${
+          tagihan.status === "Lunas"
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+        }`}
+      >
+        {tagihan.status}
+      </span>
+    </td>
+    <td
+      className="p-3 border text-center"
+      style={{ borderColor: palette.silver1 }}
+    >
+      {tagihan.tanggalJatuhTempo}
+    </td>
+  </tr>
+);
 
-  const totalSemua = tagihanList.reduce(
-    (total, tagihan) => total + tagihan.jumlah,
-    0
-  );
-
+const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
+  const totalBelum = data
+    .filter((d) => d.status !== "Lunas")
+    .reduce((n, d) => n + d.jumlah, 0);
+  const totalSemua = data.reduce((n, d) => n + d.jumlah, 0);
   return (
     <SectionCard palette={palette} className="p-4">
       <h3 className="text-lg font-semibold mb-3">Ringkasan Tagihan</h3>
@@ -155,55 +164,44 @@ const TotalTagihan: React.FC<TotalTagihanProps> = ({
         <div className="text-center p-3 rounded-lg bg-red-50">
           <p className="text-sm text-red-600">Belum Lunas</p>
           <p className="text-xl font-bold text-red-700">
-            Rp {totalBelumLunas.toLocaleString("id-ID")}
+            Rp {totalBelum.toLocaleString("id-ID")}
           </p>
         </div>
         <div className="text-center p-3 rounded-lg">
           <p className="text-sm opacity-70">Jumlah Tagihan</p>
-          <p className="text-xl font-bold">{tagihanList.length} item</p>
+          <p className="text-xl font-bold">{data.length} item</p>
         </div>
       </div>
     </SectionCard>
   );
 };
 
-// Komponen utama
-const AllInvoices: React.FC = () => {
+/* ===== Page ===== */
+export default function AllInvoices() {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { state } = useLocation() as { state: LocationState };
+  const navigate = useNavigate();
 
-  // Data tagihan dengan informasi yang lebih lengkap
-  const tagihanList: Tagihan[] = [
-    {
-      id: 1,
-      nama: "SPP Bulan Agustus 2024",
-      jumlah: 150000,
-      status: "Belum Lunas",
-      tanggalJatuhTempo: "31 Agustus 2024",
-    },
-    {
-      id: 2,
-      nama: "TPA Bulan Agustus 2024",
-      jumlah: 100000,
-      status: "Belum Lunas",
-      tanggalJatuhTempo: "31 Agustus 2024",
-    },
-    {
-      id: 3,
-      nama: "Uang Kegiatan Semester",
-      jumlah: 50000,
-      status: "Lunas",
-      tanggalJatuhTempo: "15 Juli 2024",
-    },
-    {
-      id: 4,
-      nama: "Buku Paket Semester Ganjil",
-      jumlah: 75000,
-      status: "Belum Lunas",
-      tanggalJatuhTempo: "30 September 2024",
-    },
-  ];
+  // Ambil dari state (yang dikirim BillsSectionCard). Kalau kosong, boleh fetch API sendiri.
+  // NOTE: kalau butuh fetch beneran, ganti endpoint di bawah ini sesuai backend kamu.
+  const bills: BillItem[] = state?.bills ?? [];
 
+  // OPTIONAL fallback (kalau user langsung buka URL tanpa lewat dashboard)
+  // const { data: fetched } = useQuery({
+  //   queryKey: ["all-bills"],
+  //   queryFn: async () => {
+  //     const res = await axios.get<{ data: BillItem[] }>("/api/a/finance/outstanding-bills", { withCredentials: true });
+  //     return res.data?.data ?? [];
+  //   },
+  //   enabled: bills.length === 0,
+  //   staleTime: 60_000,
+  // });
+  // const source = bills.length ? bills : (fetched ?? []);
+
+  const source = bills; // pakai state dulu
+
+  const tagihanList: Tagihan[] = useMemo(() => source.map(toTagihan), [source]);
   const currentDate = new Date().toISOString();
 
   return (
@@ -211,27 +209,23 @@ const AllInvoices: React.FC = () => {
       className="min-h-screen w-full transition-colors duration-200"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
       <ParentTopBar
         palette={palette}
         gregorianDate={currentDate}
-        title="Semua Tagihan"
+        title={state?.heading ?? "Semua Tagihan"}
       />
 
-      {/* Content + Sidebar */}
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
-          {/* Sidebar kiri */}
           <div className="lg:w-64 mb-6 lg:mb-0">
             <ParentSidebar palette={palette} />
           </div>
 
-          {/* Konten utama */}
           <div className="flex-1 space-y-6">
-            {/* Ringkasan Tagihan */}
-            <TotalTagihan tagihanList={tagihanList} palette={palette} />
+            <ArrowLeft onClick={() => navigate(-1)} className="font-boldd cursor-pointer" />
 
-            {/* Tabel Tagihan */}
+            <Total data={tagihanList} palette={palette} />
+
             <SectionCard palette={palette} className="p-0 overflow-hidden">
               <div
                 className="p-4 border-b"
@@ -248,11 +242,11 @@ const AllInvoices: React.FC = () => {
                   <TableHeader palette={palette} />
                   <tbody>
                     {tagihanList.length > 0 ? (
-                      tagihanList.map((tagihan, index) => (
-                        <TagihanRow
-                          key={tagihan.id}
-                          tagihan={tagihan}
-                          index={index}
+                      tagihanList.map((t, i) => (
+                        <Row
+                          key={t.id}
+                          tagihan={t}
+                          index={i}
                           palette={palette}
                         />
                       ))
@@ -271,38 +265,9 @@ const AllInvoices: React.FC = () => {
                 </table>
               </div>
             </SectionCard>
-
-            {/* Informasi Tambahan */}
-            <SectionCard palette={palette} className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="text-blue-500 mt-1">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Informasi Pembayaran</h3>
-                  <p className="text-sm opacity-70 leading-relaxed">
-                    Untuk melakukan pembayaran, silakan hubungi bagian keuangan
-                    sekolah atau gunakan aplikasi pembayaran yang tersedia.
-                    Pastikan untuk menyimpan bukti pembayaran sebagai arsip.
-                  </p>
-                </div>
-              </div>
-            </SectionCard>
           </div>
         </div>
       </main>
     </div>
   );
-};
-
-export default AllInvoices;
+}

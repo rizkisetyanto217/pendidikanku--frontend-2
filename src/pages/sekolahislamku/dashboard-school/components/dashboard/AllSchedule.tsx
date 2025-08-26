@@ -16,11 +16,11 @@ import {
   type TodayScheduleItem,
 } from "../../types/TodaySchedule";
 
-// Tambah (buat item baru)
-import TambahJadwal from "@/pages/sekolahislamku/dashboard-teacher/components/dashboard/AddSchedule";
+
 // Edit (ubah item yang ada)
 import ModalEditSchedule from "./ModalEditSchedule";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import AddSchedule from "@/pages/sekolahislamku/dashboard-teacher/dashboard/AddSchedule";
 
 /** State yang dikirim dari komponen lain via <Link state={...}> */
 type LocationState = {
@@ -188,7 +188,7 @@ export default function AllSchedule() {
       />
 
       {/* Modal Tambah */}
-      <TambahJadwal
+      <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}

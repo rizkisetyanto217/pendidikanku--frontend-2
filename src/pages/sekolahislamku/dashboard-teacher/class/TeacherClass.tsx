@@ -36,7 +36,8 @@ import ModalExport from "./components/ModalExport";
 import ModalAddMateri from "./components/ModalAddMateri";
 import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
-import AddSchedule from "../components/dashboard/AddSchedule";
+import AddSchedule from "../dashboard/AddSchedule";
+
 
 // 🔹 Pakai modal TambahJadwal dari pages/schedule/modal
 

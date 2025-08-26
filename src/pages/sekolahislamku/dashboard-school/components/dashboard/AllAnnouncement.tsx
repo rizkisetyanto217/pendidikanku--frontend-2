@@ -507,17 +507,15 @@ const AllAnnouncement: React.FC = () => {
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
-            {/* Back button */}
-            <div>
-              <Btn
-                palette={palette}
-                size="sm"
-                variant="ghost"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft size={16} className="mr-1" /> Kembali
-              </Btn>
-            </div>
+            {/* Back button dengan ukuran yang lebih sesuai */}
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 hover:bg-black"
+              style={{ color: palette.black1 }}
+            >
+              <ArrowLeft size={24} className="font-bold" />
+              <span className=" font-semibold text-md">Kembali</span>
+            </button>
 
             {/* Header Stats */}
             <SectionCard palette={palette} className="p-6">

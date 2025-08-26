@@ -7,6 +7,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
+/* ================= Types ================= */
 export interface Announcement {
   id: string;
   title: string;
@@ -15,6 +16,25 @@ export interface Announcement {
   type?: "info" | "warning" | "success";
   slug?: string;
 }
+
+export type AnnouncementsListCardProps<TSeeAllState = unknown> = {
+  palette: Palette;
+  items: Announcement[];
+  dateFmt: (iso: string) => string;
+  seeAllPath: string;
+  /** Optional: state yang akan dikirim ke halaman “lihat semua” */
+  seeAllState?: TSeeAllState;
+  getDetailHref?: (a: Announcement) => string;
+  getEditHref?: (a: Announcement) => string;
+  onEdit?: (a: Announcement) => void;
+  onDelete?: (a: Announcement) => void;
+  showActions?: boolean;
+  canAdd?: boolean;
+  onAdd?: () => void;
+  addHref?: string;
+  deletingId?: string | null;
+  className?: string;
+};
 
 const generateSlug = (text: string) =>
   (text ?? "")
@@ -26,11 +46,13 @@ const generateSlug = (text: string) =>
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-export default function AnnouncementsListCard({
+/* ================= Component ================= */
+export default function AnnouncementsListCard<TSeeAllState = unknown>({
   palette,
   items,
   dateFmt,
   seeAllPath,
+  seeAllState,
   getDetailHref,
   getEditHref,
   onEdit,
@@ -40,25 +62,12 @@ export default function AnnouncementsListCard({
   onAdd,
   addHref,
   deletingId,
-}: {
-  palette: Palette;
-  items: Announcement[];
-  dateFmt: (iso: string) => string;
-  seeAllPath: string;
-  getDetailHref?: (a: Announcement) => string;
-  getEditHref?: (a: Announcement) => string;
-  onEdit?: (a: Announcement) => void;
-  onDelete?: (a: Announcement) => void;
-  showActions?: boolean;
-  canAdd?: boolean;
-  onAdd?: () => void;
-  addHref?: string;
-  deletingId?: string | null;
-}) {
+  className = "",
+}: AnnouncementsListCardProps<TSeeAllState>) {
   const isEmpty = !items || items.length === 0;
 
   return (
-    <SectionCard palette={palette}>
+    <SectionCard palette={palette} className={className}>
       {/* ===== Header ===== */}
       <div
         className="p-4 md:p-5 pb-3 border-b"
@@ -86,7 +95,7 @@ export default function AnnouncementsListCard({
                 </Link>
               ) : null)}
 
-            <Link to={seeAllPath}>
+            <Link to={seeAllPath} state={seeAllState as unknown}>
               <Btn variant="ghost" size="sm" palette={palette}>
                 <span className="hidden xs:inline">Lihat semua</span>
                 <ChevronRight className="xs:ml-1" size={16} />
@@ -169,7 +178,7 @@ export default function AnnouncementsListCard({
                           disabled={isDeleting}
                           aria-label="Edit pengumuman"
                         >
-                          <Edit3 className="mr-1" size={16} />
+                         
                           <span className="hidden sm:inline">Edit</span>
                         </Btn>
                       ) : (
@@ -181,7 +190,7 @@ export default function AnnouncementsListCard({
                             disabled={isDeleting}
                             aria-label="Edit pengumuman"
                           >
-                            <Edit3 className="mr-1" size={16} />
+                            
                             <span className="hidden sm:inline">Edit</span>
                           </Btn>
                         </Link>
@@ -212,7 +221,7 @@ export default function AnnouncementsListCard({
                           opacity: isDeleting ? 0.7 : 1,
                         }}
                       >
-                        <Trash2 className="mr-1" size={16} />
+                        
                         <span className="hidden sm:inline">
                           {isDeleting ? "Menghapus…" : "Hapus"}
                         </span>

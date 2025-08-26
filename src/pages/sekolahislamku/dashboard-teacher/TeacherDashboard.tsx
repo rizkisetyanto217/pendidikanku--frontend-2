@@ -14,7 +14,6 @@ import {
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import ListJadwal from "./schedule/modal/ListSchedule";
-import TambahJadwal from "./components/dashboard/AddSchedule";
 import TeacherAddEditAnnouncement, {
   type TeacherAnnouncementForm,
 } from "./announcement/TeacherAddEditAnnouncement";
@@ -27,6 +26,7 @@ import {
 } from "../../../pages/sekolahislamku/dashboard-teacher/class/teacher";
 import ParentTopBar from "../components/home/ParentTopBar";
 import ParentSidebar from "../components/home/ParentSideBar";
+import AddSchedule from "./dashboard/AddSchedule";
 
 /* ================= Helpers ================ */
 const startOfDay = (d = new Date()) => {
@@ -275,7 +275,7 @@ export default function TeacherDashboard() {
       />
 
       {/* Modal: Tambah Jadwal */}
-      <TambahJadwal
+      <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
@@ -354,16 +354,6 @@ export default function TeacherDashboard() {
               </div>
             </section>
 
-            {/* ===== Row 2: Daftar Jadwal ===== */}
-            <section>
-              <ListJadwal
-                palette={palette}
-                items={listScheduleItems}
-                title="Daftar Jadwal"
-                onAdd={() => setShowTambahJadwal(true)}
-              />
-            </section>
-
             {/* ===== Row 3: Pengumuman ===== */}
             <section>
               <div className="flex items-center justify-between mb-2">
@@ -384,6 +374,7 @@ export default function TeacherDashboard() {
                 palette={palette}
                 items={announcements}
                 dateFmt={fmtLong}
+                seeAllState={{ announcements }} // ⬅️ ini yang dibaca komponen di atas
                 seeAllPath="all-announcement-teacher"
                 getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`}
                 showActions

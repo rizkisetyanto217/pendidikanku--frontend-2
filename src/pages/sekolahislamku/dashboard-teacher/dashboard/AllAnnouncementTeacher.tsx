@@ -1,30 +1,32 @@
-// src/pages/sekolahislamku/pengumuman/AllAnnouncementTeacher.tsx
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import {
   SectionCard,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-
-
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import { ArrowLeft } from "lucide-react";
 
-// Types dan Interfaces
-type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
-type CategoryType = "Tahfidz" | "Tahsin" | "Kajian" | "Umum";
-type StatusType = "Aktif" | "Berakhir" | "Draft";
+// ⬇️ tipe API: sumber dari AnnouncementsList (TeacherDashboard)
+import type { Announcement as ApiAnnouncement } from "../class/teacher";
 
-interface Pengumuman {
-  id: number;
+/* ===================== Types (UI) ===================== */
+export type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
+export type CategoryType = "Tahfidz" | "Tahsin" | "Kajian" | "Umum";
+export type StatusType = "Aktif" | "Berakhir" | "Draft";
+
+export interface Pengumuman {
+  id: number | string;
   judul: string;
   konten: string;
   kategori: CategoryType;
   prioritas: PriorityLevel;
   status: StatusType;
-  tanggalPublish: string;
-  tanggalBerakhir?: string;
+  tanggalPublish: string; // ISO
+  tanggalBerakhir?: string; // ISO
   penulis: string;
   target: string[];
   lampiran?: string[];
@@ -40,178 +42,155 @@ interface FilterOptions {
   searchQuery: string;
 }
 
-// Komponen untuk Priority Badge
-interface PriorityBadgeProps {
-  prioritas: PriorityLevel;
+/* ===================== Mappers & Guards ===================== */
+function isApiAnnouncement(x: any): x is ApiAnnouncement {
+  return x && typeof x === "object" && "title" in x && "date" in x;
 }
 
-const PriorityBadge: React.FC<PriorityBadgeProps> = ({ prioritas }) => {
-  const getPriorityStyle = (): string => {
-    switch (prioritas) {
-      case "Urgent":
-        return "bg-red-100 text-red-800 border-red-300 animate-pulse";
-      case "Tinggi":
-        return "bg-orange-100 text-orange-800 border-orange-300";
-      case "Sedang":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "Rendah":
-        return "bg-green-100 text-green-800 border-green-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
+/** Pemetaan sederhana dari API ➜ UI dengan default aman */
+function mapApiToUI(a: ApiAnnouncement): Pengumuman {
+  const prioritas: PriorityLevel =
+    a.type === "warning"
+      ? "Tinggi"
+      : a.type === "success"
+        ? "Rendah"
+        : "Sedang";
+  return {
+    id: a.id,
+    judul: a.title,
+    konten: a.body,
+    kategori: "Umum",
+    prioritas,
+    status: "Aktif",
+    tanggalPublish: a.date,
+    penulis: "Admin",
+    target: [],
+    lampiran: [],
+    views: 0,
+    isPinned: false,
+    tags: [],
   };
+}
 
-  const getIcon = (): string => {
-    switch (prioritas) {
-      case "Urgent":
-        return "🚨";
-      case "Tinggi":
-        return "⚠️";
-      case "Sedang":
-        return "📌";
-      case "Rendah":
-        return "📝";
-      default:
-        return "📝";
-    }
-  };
+function normalizeList(
+  list: Array<ApiAnnouncement | Pengumuman>
+): Pengumuman[] {
+  return list.map((x) =>
+    isApiAnnouncement(x) ? mapApiToUI(x) : (x as Pengumuman)
+  );
+}
 
+/* ===================== Badges ===================== */
+function PriorityBadge({ prioritas }: { prioritas: PriorityLevel }) {
+  const cls =
+    prioritas === "Urgent"
+      ? "bg-red-100 text-red-800 border-red-300 animate-pulse"
+      : prioritas === "Tinggi"
+        ? "bg-orange-100 text-orange-800 border-orange-300"
+        : prioritas === "Sedang"
+          ? "bg-yellow-100 text-yellow-800 border-yellow-300"
+          : "bg-green-100 text-green-800 border-green-300";
+  const icon =
+    prioritas === "Urgent"
+      ? "🚨"
+      : prioritas === "Tinggi"
+        ? "⚠️"
+        : prioritas === "Sedang"
+          ? "📌"
+          : "📝";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${getPriorityStyle()}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${cls}`}
     >
-      <span>{getIcon()}</span>
+      <span>{icon}</span>
       {prioritas}
     </span>
   );
-};
-
-// Komponen untuk Category Badge
-interface CategoryBadgeProps {
-  kategori: CategoryType;
 }
 
-const CategoryBadge: React.FC<CategoryBadgeProps> = ({ kategori }) => {
-  const getCategoryStyle = (): string => {
-    switch (kategori) {
-      case "Tahfidz":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "Tahsin":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "Kajian":
-        return "bg-purple-100 text-purple-800 border-purple-300";
-      case "Umum":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
-  const getIcon = (): string => {
-    switch (kategori) {
-      case "Tahfidz":
-        return "📖";
-      case "Tahsin":
-        return "🎵";
-      case "Kajian":
-        return "🕌";
-      case "Umum":
-        return "📢";
-      default:
-        return "📢";
-    }
-  };
-
+function CategoryBadge({ kategori }: { kategori: CategoryType }) {
+  const cls =
+    kategori === "Tahfidz"
+      ? "bg-green-100 text-green-800 border-green-300"
+      : kategori === "Tahsin"
+        ? "bg-blue-100 text-blue-800 border-blue-300"
+        : kategori === "Kajian"
+          ? "bg-purple-100 text-purple-800 border-purple-300"
+          : "bg-gray-100 text-gray-800 border-gray-300";
+  const icon =
+    kategori === "Tahfidz"
+      ? "📖"
+      : kategori === "Tahsin"
+        ? "🎵"
+        : kategori === "Kajian"
+          ? "🕌"
+          : "📢";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${getCategoryStyle()}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${cls}`}
     >
-      <span>{getIcon()}</span>
+      <span>{icon}</span>
       {kategori}
     </span>
   );
-};
-
-// Komponen untuk Status Badge
-interface StatusBadgeProps {
-  status: StatusType;
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const getStatusStyle = (): string => {
-    switch (status) {
-      case "Aktif":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "Berakhir":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      case "Draft":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
+function StatusBadge({ status }: { status: StatusType }) {
+  const cls =
+    status === "Aktif"
+      ? "bg-green-100 text-green-800 border-green-300"
+      : status === "Draft"
+        ? "bg-yellow-100 text-yellow-800 border-yellow-300"
+        : "bg-gray-100 text-gray-800 border-gray-300";
   return (
     <span
-      className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusStyle()}`}
+      className={`px-2 py-1 rounded-full text-xs font-medium border ${cls}`}
     >
       {status}
     </span>
   );
-};
-
-// Komponen untuk Pengumuman Card
-interface PengumumanCardProps {
-  pengumuman: Pengumuman;
-  palette: Palette;
-  onDetailClick: (pengumuman: Pengumuman) => void;
 }
 
-const PengumumanCard: React.FC<PengumumanCardProps> = ({
+/* ===================== Utils ===================== */
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+const truncate = (s: string, n = 150) =>
+  s.length <= n ? s : s.slice(0, n) + "...";
+
+/* ===================== Card ===================== */
+function PengumumanCard({
   pengumuman,
   palette,
   onDetailClick,
-}) => {
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("id-ID", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const truncateContent = (
-    content: string,
-    maxLength: number = 150
-  ): string => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + "...";
-  };
-
-  const isExpiringSoon = (): boolean => {
+}: {
+  pengumuman: Pengumuman;
+  palette: Palette;
+  onDetailClick: (p: Pengumuman) => void;
+}) {
+  const expSoon = (() => {
     if (!pengumuman.tanggalBerakhir) return false;
-    const expireDate = new Date(pengumuman.tanggalBerakhir);
-    const now = new Date();
-    const diffTime = expireDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 7 && diffDays > 0;
-  };
+    const end = new Date(pengumuman.tanggalBerakhir).getTime();
+    const days = Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24));
+    return days <= 7 && days > 0;
+  })();
 
   return (
     <SectionCard
       palette={palette}
-      className={`p-0 overflow-hidden transition-all duration-200 hover:shadow-lg ${
-        pengumuman.isPinned ? "ring-2 ring-blue-200 bg-blue-50/50" : ""
-      }`}
+      className={`p-0 overflow-hidden transition-all duration-200 hover:shadow-lg ${pengumuman.isPinned ? "ring-2 ring-blue-200 bg-blue-50/50" : ""}`}
     >
       <div className="p-5">
-        {/* Header dengan Pin dan Status */}
+        {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             {pengumuman.isPinned && (
-              <div className="text-blue-600">
+              <div className="text-blue-600" aria-label="Pinned">
                 <svg
                   className="w-4 h-4"
                   fill="currentColor"
@@ -225,21 +204,26 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
             <PriorityBadge prioritas={pengumuman.prioritas} />
             <StatusBadge status={pengumuman.status} />
           </div>
-          {isExpiringSoon() && (
+          {expSoon && (
             <div className="text-orange-600 text-xs font-medium px-2 py-1 bg-orange-100 rounded">
               Akan berakhir
             </div>
           )}
         </div>
 
-        {/* Judul */}
+        {/* Title & meta */}
         <div className="mb-3">
-          <h3 className="text-lg font-semibold mb-1 line-clamp-2 ">
+          <h3 className="text-lg font-semibold mb-1 line-clamp-2">
             {pengumuman.judul}
           </h3>
           <div className="flex items-center gap-4 text-sm opacity-70">
             <div className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden
+              >
                 <path
                   fillRule="evenodd"
                   d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -249,17 +233,27 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
               <span>{pengumuman.penulis}</span>
             </div>
             <div className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden
+              >
                 <path
                   fillRule="evenodd"
                   d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
                   clipRule="evenodd"
                 />
               </svg>
-              <span>{formatDate(pengumuman.tanggalPublish)}</span>
+              <span>{fmtDate(pengumuman.tanggalPublish)}</span>
             </div>
             <div className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden
+              >
                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                 <path
                   fillRule="evenodd"
@@ -272,23 +266,23 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
           </div>
         </div>
 
-        {/* Konten */}
+        {/* Content */}
         <div className="mb-4">
           <p className="text-sm leading-relaxed opacity-90">
-            {truncateContent(pengumuman.konten)}
+            {truncate(pengumuman.konten)}
           </p>
         </div>
 
-        {/* Target dan Tags */}
+        {/* Target & Tags */}
         <div className="space-y-3 mb-4">
           <div>
             <p className="text-xs font-semibold opacity-60 mb-1">
               TARGET PESERTA
             </p>
             <div className="flex flex-wrap gap-1">
-              {pengumuman.target.map((target, index) => (
+              {pengumuman.target.map((t, i) => (
                 <span
-                  key={index}
+                  key={`${t}-${i}`}
                   className="px-2 py-1 rounded text-xs"
                   style={{
                     background: palette.white1,
@@ -296,7 +290,7 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
                     color: palette.black1,
                   }}
                 >
-                  {target}
+                  {t}
                 </span>
               ))}
             </div>
@@ -306,9 +300,9 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
             <div>
               <p className="text-xs font-semibold opacity-60 mb-1">TAGS</p>
               <div className="flex flex-wrap gap-1">
-                {pengumuman.tags.map((tag, index) => (
+                {pengumuman.tags.map((tag, i) => (
                   <span
-                    key={index}
+                    key={`${tag}-${i}`}
                     className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
                   >
                     #{tag}
@@ -319,14 +313,14 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
           )}
         </div>
 
-        {/* Lampiran */}
-        {pengumuman.lampiran && pengumuman.lampiran.length > 0 && (
+        {/* Attachments */}
+        {pengumuman.lampiran?.length ? (
           <div className="mb-4">
             <p className="text-xs font-semibold opacity-60 mb-2">LAMPIRAN</p>
             <div className="flex flex-wrap gap-2">
-              {pengumuman.lampiran.map((file, index) => (
+              {pengumuman.lampiran.map((file, i) => (
                 <div
-                  key={index}
+                  key={`${file}-${i}`}
                   className="flex items-center gap-1 px-2 py-1 rounded text-xs"
                   style={{
                     background: palette.white1,
@@ -335,8 +329,8 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
                 >
                   <svg
                     className="w-3 h-3"
-                    fill="currentColor"
                     viewBox="0 0 20 20"
+                    fill="currentColor"
                   >
                     <path
                       fillRule="evenodd"
@@ -349,25 +343,22 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Footer dengan berakhir dan aksi */}
+        {/* Footer */}
         <div
           className="flex items-center justify-between pt-4 border-t"
           style={{ borderColor: palette.silver1 }}
         >
           <div className="text-xs opacity-60">
             {pengumuman.tanggalBerakhir && (
-              <span>Berakhir: {formatDate(pengumuman.tanggalBerakhir)}</span>
+              <span>Berakhir: {fmtDate(pengumuman.tanggalBerakhir)}</span>
             )}
           </div>
           <button
             onClick={() => onDetailClick(pengumuman)}
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:opacity-80"
-            style={{
-              background: palette.black1,
-              color: palette.white1,
-            }}
+            style={{ background: palette.black1, color: palette.white1 }}
           >
             Baca Selengkapnya
           </button>
@@ -375,61 +366,58 @@ const PengumumanCard: React.FC<PengumumanCardProps> = ({
       </div>
     </SectionCard>
   );
-};
-
-// Komponen untuk Search dan Filter
-interface SearchFilterProps {
-  palette: Palette;
-  filters: FilterOptions;
-  onFiltersChange: (filters: Partial<FilterOptions>) => void;
 }
 
-const SearchFilter: React.FC<SearchFilterProps> = ({
+/* ===================== Filter ===================== */
+function SearchFilter({
   palette,
   filters,
-  onFiltersChange,
-}) => {
+  onChange,
+}: {
+  palette: Palette;
+  filters: FilterOptions;
+  onChange: (patch: Partial<FilterOptions>) => void;
+}) {
   return (
     <SectionCard palette={palette} className="p-4">
       <div className="space-y-4">
-        {/* Search Bar */}
-        <div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="h-4 w-4 opacity-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Cari pengumuman..."
-              value={filters.searchQuery}
-              onChange={(e) => onFiltersChange({ searchQuery: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{
-                background: palette.white1,
-                borderColor: palette.silver1,
-                color: palette.black1,
-              }}
-            />
+        {/* Search */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg
+              className="h-4 w-4 opacity-50"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
           </div>
+          <input
+            type="text"
+            placeholder="Cari pengumuman…"
+            value={filters.searchQuery}
+            onChange={(e) => onChange({ searchQuery: e.target.value })}
+            className="w-full pl-10 pr-4 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{
+              background: palette.white1,
+              borderColor: palette.silver1,
+              color: palette.black1,
+            }}
+          />
         </div>
 
-        {/* Filter Options */}
+        {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3">
           <select
             value={filters.kategori}
-            onChange={(e) => onFiltersChange({ kategori: e.target.value })}
+            onChange={(e) => onChange({ kategori: e.target.value })}
             className="px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{
               background: palette.white1,
@@ -446,7 +434,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
 
           <select
             value={filters.prioritas}
-            onChange={(e) => onFiltersChange({ prioritas: e.target.value })}
+            onChange={(e) => onChange({ prioritas: e.target.value })}
             className="px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{
               background: palette.white1,
@@ -463,7 +451,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
 
           <select
             value={filters.status}
-            onChange={(e) => onFiltersChange({ status: e.target.value })}
+            onChange={(e) => onChange({ status: e.target.value })}
             className="px-3 py-2 rounded-lg text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{
               background: palette.white1,
@@ -480,12 +468,65 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
       </div>
     </SectionCard>
   );
-};
+}
 
-// Komponen utama
-const AllAnnouncementTeacher: React.FC = () => {
+/* ===================== Back Button ===================== */
+function BackButton({
+  palette,
+  label = "Kembali",
+}: {
+  palette: Palette;
+  label?: string;
+}) {
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={() => navigate(-1)}
+      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:opacity-80 transition"
+      style={{
+        background: palette.white1,
+        border: `1px solid ${palette.silver1}`,
+      }}
+      aria-label="Kembali"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      <span className="hidden xs:inline">{label}</span>
+    </button>
+  );
+}
+
+/* ===================== Page =====================
+Sumber data (prioritas):
+1. props.items (boleh UI-rich Pengumuman[] atau ApiAnnouncement[])
+2. router state: location.state?.announcements (ApiAnnouncement[] dari AnnouncementsList)
+   Tidak ada fetching di sini.
+*/
+export default function AllAnnouncementTeacher({
+  // NOTE: props.items bisa berisi Pengumuman[] ATAU ApiAnnouncement[] (auto-normalize)
+  items,
+  classId,
+  title = "Semua Pengumuman",
+  onOpenDetail,
+}: {
+  items?: Array<Pengumuman | ApiAnnouncement>;
+  classId?: string;
+  title?: string;
+  onOpenDetail?: (p: Pengumuman) => void;
+}) {
   const { isDark } = useHtmlDarkMode();
   const palette = (isDark ? colors.dark : colors.light) as Palette;
+
+  const location = useLocation() as {
+    state?: { announcements?: ApiAnnouncement[] };
+  };
+  const navigate = useNavigate();
+
+  // Ambil sumber data, lalu normalize jadi Pengumuman[]
+  const list = useMemo<Pengumuman[]>(
+    () =>
+      normalizeList((items as any[]) ?? location.state?.announcements ?? []),
+    [items, location.state?.announcements]
+  );
 
   const [filters, setFilters] = useState<FilterOptions>({
     kategori: "",
@@ -494,176 +535,63 @@ const AllAnnouncementTeacher: React.FC = () => {
     searchQuery: "",
   });
 
-  // Data pengumuman sample
-  const pengumumanList: Pengumuman[] = [
-    {
-      id: 1,
-      judul: "Perubahan Jadwal Tahfidz Kelas 5-6",
-      konten:
-        "Assalamu'alaikum warahmatullahi wabarakatuh. Dengan ini kami informasikan bahwa terdapat perubahan jadwal tahfidz untuk kelas 5-6. Mulai hari Senin, 19 Agustus 2025, jadwal tahfidz akan dimulai pukul 07:00 WIB. Perubahan ini dilakukan untuk memberikan waktu persiapan yang lebih optimal bagi siswa. Mohon untuk semua wali murid dan siswa dapat menyesuaikan jadwal kehadiran.",
-      kategori: "Tahfidz",
-      prioritas: "Tinggi",
-      status: "Aktif",
-      tanggalPublish: "2025-08-15",
-      tanggalBerakhir: "2025-08-30",
-      penulis: "Ustadz Ahmad Fauzi",
-      target: ["Kelas 5", "Kelas 6", "Wali Murid"],
-      lampiran: ["Jadwal_Baru_Tahfidz.pdf"],
-      views: 245,
-      isPinned: true,
-      tags: ["jadwal", "perubahan", "penting"],
-    },
-    {
-      id: 2,
-      judul: "Pendaftaran Kelas Tahsin Intensif",
-      konten:
-        "Dibuka pendaftaran kelas tahsin intensif untuk memperbaiki bacaan Al-Qur'an. Program ini khusus untuk siswa yang ingin meningkatkan kualitas tajwid dan kelancaran membaca. Kelas akan dimulai tanggal 25 Agustus 2025 dengan durasi 2 bulan. Tempat terbatas hanya untuk 20 siswa per kelas.",
-      kategori: "Tahsin",
-      prioritas: "Sedang",
-      status: "Aktif",
-      tanggalPublish: "2025-08-14",
-      tanggalBerakhir: "2025-08-23",
-      penulis: "Ustadzah Fatimah",
-      target: ["Kelas 4-6", "Yang Berminat"],
-      lampiran: ["Form_Pendaftaran_Tahsin.pdf", "Syarat_Ketentuan.pdf"],
-      views: 189,
-      isPinned: false,
-      tags: ["pendaftaran", "tahsin", "intensif"],
-    },
-    {
-      id: 3,
-      judul: "Kajian Bulanan: Akhlak dalam Menuntut Ilmu",
-      konten:
-        "Kajian bulanan bulan Agustus akan membahas tema 'Akhlak dalam Menuntut Ilmu' yang akan dibawakan oleh Ustadz Dr. Muhammad Syafii. Kajian ini wajib diikuti oleh seluruh siswa kelas 5-6 dan terbuka untuk wali murid yang berkenan hadir. Acara akan dilaksanakan di aula utama sekolah.",
-      kategori: "Kajian",
-      prioritas: "Sedang",
-      status: "Aktif",
-      tanggalPublish: "2025-08-13",
-      tanggalBerakhir: "2025-08-25",
-      penulis: "Panitia Kajian",
-      target: ["Kelas 5-6", "Wali Murid", "Guru"],
-      views: 156,
-      isPinned: false,
-      tags: ["kajian", "akhlak", "bulanan"],
-    },
-    {
-      id: 4,
-      judul: "URGENT: Perbaikan Sistem Audio Masjid",
-      konten:
-        "Mohon perhatian seluruh civitas akademika. Sistem audio masjid sedang dalam perbaikan hari ini hingga besok. Kegiatan shalat berjamaah dan kajian sementara akan dipindahkan ke aula utama. Mohon maaf atas ketidaknyamanan ini.",
-      kategori: "Umum",
-      prioritas: "Urgent",
-      status: "Aktif",
-      tanggalPublish: "2025-08-15",
-      tanggalBerakhir: "2025-08-17",
-      penulis: "Bagian Sarana Prasarana",
-      target: ["Semua"],
-      views: 432,
-      isPinned: true,
-      tags: ["urgent", "masjid", "perbaikan"],
-    },
-    {
-      id: 5,
-      judul: "Hasil Evaluasi Tahfidz Semester Genap",
-      konten:
-        "Alhamdulillah, hasil evaluasi tahfidz semester genap telah selesai. Secara keseluruhan, 95% siswa berhasil mencapai target hafalan yang ditetapkan. Laporan detail dapat diakses melalui portal orang tua atau diminta langsung ke wali kelas masing-masing.",
-      kategori: "Tahfidz",
-      prioritas: "Rendah",
-      status: "Berakhir",
-      tanggalPublish: "2025-07-25",
-      tanggalBerakhir: "2025-08-10",
-      penulis: "Tim Evaluasi Tahfidz",
-      target: ["Semua Kelas", "Wali Murid"],
-      lampiran: ["Laporan_Evaluasi_Tahfidz.pdf"],
-      views: 312,
-      isPinned: false,
-      tags: ["evaluasi", "hasil", "semester"],
-    },
-    {
-      id: 6,
-      judul: "Workshop Metode Mengajar Tahfidz Modern",
-      konten:
-        "Akan dilaksanakan workshop metode mengajar tahfidz modern untuk para ustadz dan ustadzah. Workshop ini menghadirkan narasumber dari Pondok Pesantren Al-Qur'an terkemuka. Peserta akan mendapat sertifikat dan materi pelatihan lengkap.",
-      kategori: "Tahfidz",
-      prioritas: "Sedang",
-      status: "Aktif",
-      tanggalPublish: "2025-08-12",
-      tanggalBerakhir: "2025-08-28",
-      penulis: "Bagian Pengembangan SDM",
-      target: ["Guru Tahfidz", "Staff Akademik"],
-      lampiran: ["Rundown_Workshop.pdf"],
-      views: 87,
-      isPinned: false,
-      tags: ["workshop", "guru", "metode"],
-    },
-  ];
+  const filtered = useMemo(() => {
+    const q = filters.searchQuery.trim().toLowerCase();
+    const priorityOrder: Record<PriorityLevel, number> = {
+      Urgent: 4,
+      Tinggi: 3,
+      Sedang: 2,
+      Rendah: 1,
+    };
 
-  // Filter dan search logic
-  const filteredPengumuman = useMemo(() => {
-    return pengumumanList
-      .filter((pengumuman) => {
-        const matchesKategori =
-          !filters.kategori || pengumuman.kategori === filters.kategori;
-        const matchesPrioritas =
-          !filters.prioritas || pengumuman.prioritas === filters.prioritas;
-        const matchesStatus =
-          !filters.status || pengumuman.status === filters.status;
-        const matchesSearch =
-          !filters.searchQuery ||
-          pengumuman.judul
-            .toLowerCase()
-            .includes(filters.searchQuery.toLowerCase()) ||
-          pengumuman.konten
-            .toLowerCase()
-            .includes(filters.searchQuery.toLowerCase()) ||
-          pengumuman.tags.some((tag) =>
-            tag.toLowerCase().includes(filters.searchQuery.toLowerCase())
-          );
-
-        return (
-          matchesKategori && matchesPrioritas && matchesStatus && matchesSearch
-        );
+    return (list ?? [])
+      .filter((p) => {
+        const byKategori =
+          !filters.kategori ||
+          p.kategori === (filters.kategori as CategoryType);
+        const byPrior =
+          !filters.prioritas ||
+          p.prioritas === (filters.prioritas as PriorityLevel);
+        const byStatus =
+          !filters.status || p.status === (filters.status as StatusType);
+        const bySearch =
+          !q ||
+          p.judul.toLowerCase().includes(q) ||
+          p.konten.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.toLowerCase().includes(q));
+        return byKategori && byPrior && byStatus && bySearch;
       })
       .sort((a, b) => {
-        // Sort: pinned first, then by priority, then by date
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-
-        const priorityOrder = { Urgent: 4, Tinggi: 3, Sedang: 2, Rendah: 1 };
-        const aPriority = priorityOrder[a.prioritas] || 0;
-        const bPriority = priorityOrder[b.prioritas] || 0;
-
-        if (aPriority !== bPriority) return bPriority - aPriority;
-
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        const pa = priorityOrder[a.prioritas] ?? 0;
+        const pb = priorityOrder[b.prioritas] ?? 0;
+        if (pa !== pb) return pb - pa;
         return (
           new Date(b.tanggalPublish).getTime() -
           new Date(a.tanggalPublish).getTime()
         );
       });
-  }, [pengumumanList, filters]);
+  }, [list, filters]);
 
-  const handleFiltersChange = (newFilters: Partial<FilterOptions>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  };
+  const stats = useMemo(() => {
+    const total = list.length;
+    const aktif = list.filter((p) => p.status === "Aktif").length;
+    const tahfidz = list.filter((p) => p.kategori === "Tahfidz").length;
+    const tahsin = list.filter((p) => p.kategori === "Tahsin").length;
+    const kajian = list.filter((p) => p.kategori === "Kajian").length;
+    const urgent = list.filter((p) => p.prioritas === "Urgent").length;
+    return { total, aktif, tahfidz, tahsin, kajian, urgent };
+  }, [list]);
 
-  const handleDetailClick = (pengumuman: Pengumuman) => {
-    console.log("Detail pengumuman:", pengumuman);
-    // Navigate to detail page or open modal
+  const handleDetailClick = (p: Pengumuman) => {
+    if (onOpenDetail) return onOpenDetail(p);
+    // default: route ke detail
+    navigate(`/guru/pengumuman/detail/${p.id}`, {
+      state: { pengumuman: p, classId },
+    });
   };
 
   const currentDate = new Date().toISOString();
-
-  // Statistics
-  const stats = useMemo(() => {
-    return {
-      total: pengumumanList.length,
-      aktif: pengumumanList.filter((p) => p.status === "Aktif").length,
-      tahfidz: pengumumanList.filter((p) => p.kategori === "Tahfidz").length,
-      tahsin: pengumumanList.filter((p) => p.kategori === "Tahsin").length,
-      kajian: pengumumanList.filter((p) => p.kategori === "Kajian").length,
-      urgent: pengumumanList.filter((p) => p.prioritas === "Urgent").length,
-    };
-  }, [pengumumanList]);
 
   return (
     <div
@@ -674,7 +602,7 @@ const AllAnnouncementTeacher: React.FC = () => {
       <ParentTopBar
         palette={palette}
         gregorianDate={currentDate}
-        title="Semua Pengumuman"
+        title={title}
       />
 
       {/* Content + Sidebar */}
@@ -686,16 +614,27 @@ const AllAnnouncementTeacher: React.FC = () => {
           </div>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
-            {/* Header Section */}
+          <div className="flex-1 space-y-4">
+            {/* Header & Stats */}
+            <ArrowLeft size={22}  className=" cursor-pointer"  onClick={() => navigate(-1)}/>
             <SectionCard palette={palette} className="p-6">
               <div className="text-left">
-                <h1 className="text-2xl font-bold mb-2">Semua Pengumuman</h1>
+                {/* Back Arrow dipindah ke atas (di header) */}
+                
+
+                <h1 className="text-2xl font-bold mb-2">
+                  {title}
+                  {classId ? (
+                    <span className="text-base font-normal opacity-70">
+                      {" "}
+                      • {classId}
+                    </span>
+                  ) : null}
+                </h1>
                 <p className="opacity-70 mb-6">
                   Informasi terbaru seputar kegiatan Tahfidz, Tahsin, dan Kajian
                 </p>
 
-                {/* Statistics Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                   <div
                     className="text-left p-3 rounded-lg"
@@ -755,18 +694,17 @@ const AllAnnouncementTeacher: React.FC = () => {
               </div>
             </SectionCard>
 
-            {/* Search and Filter */}
+            {/* Search & Filter */}
             <SearchFilter
               palette={palette}
               filters={filters}
-              onFiltersChange={handleFiltersChange}
+              onChange={(patch) => setFilters((p) => ({ ...p, ...patch }))}
             />
 
-            {/* Results Info */}
+            {/* Hasil */}
             <div className="flex items-center justify-between">
               <p className="text-sm opacity-70">
-                Menampilkan {filteredPengumuman.length} dari{" "}
-                {pengumumanList.length} pengumuman
+                Menampilkan {filtered.length} dari {list.length} pengumuman
               </p>
               {(filters.kategori ||
                 filters.prioritas ||
@@ -788,13 +726,13 @@ const AllAnnouncementTeacher: React.FC = () => {
               )}
             </div>
 
-            {/* Pengumuman List */}
+            {/* List */}
             <div className="space-y-4">
-              {filteredPengumuman.length > 0 ? (
-                filteredPengumuman.map((pengumuman) => (
+              {filtered.length ? (
+                filtered.map((p) => (
                   <PengumumanCard
-                    key={pengumuman.id}
-                    pengumuman={pengumuman}
+                    key={p.id}
+                    pengumuman={p}
                     palette={palette}
                     onDetailClick={handleDetailClick}
                   />
@@ -805,8 +743,8 @@ const AllAnnouncementTeacher: React.FC = () => {
                     <svg
                       className="w-16 h-16 mx-auto mb-4"
                       fill="none"
-                      stroke="currentColor"
                       viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
                       <path
                         strokeLinecap="round"
@@ -827,8 +765,8 @@ const AllAnnouncementTeacher: React.FC = () => {
               )}
             </div>
 
-            {/* Load More Button (if needed) */}
-            {filteredPengumuman.length > 10 && (
+            {/* Load more (opsional) */}
+            {filtered.length > 10 && (
               <div className="text-center">
                 <button
                   className="px-6 py-3 rounded-lg font-medium transition-colors duration-200 hover:opacity-80"
@@ -843,7 +781,7 @@ const AllAnnouncementTeacher: React.FC = () => {
               </div>
             )}
 
-            {/* Quick Actions Panel */}
+            {/* Quick actions */}
             <SectionCard palette={palette} className="p-4">
               <h3 className="font-semibold mb-3">Aksi Cepat</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -858,8 +796,8 @@ const AllAnnouncementTeacher: React.FC = () => {
                     <div className="text-green-600">
                       <svg
                         className="w-6 h-6"
-                        fill="currentColor"
                         viewBox="0 0 20 20"
+                        fill="currentColor"
                       >
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -884,10 +822,10 @@ const AllAnnouncementTeacher: React.FC = () => {
                     <div className="text-blue-600">
                       <svg
                         className="w-6 h-6"
-                        fill="currentColor"
                         viewBox="0 0 20 20"
+                        fill="currentColor"
                       >
-                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 001 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
                       </svg>
                     </div>
                     <div>
@@ -908,8 +846,8 @@ const AllAnnouncementTeacher: React.FC = () => {
                     <div className="text-purple-600">
                       <svg
                         className="w-6 h-6"
-                        fill="currentColor"
                         viewBox="0 0 20 20"
+                        fill="currentColor"
                       >
                         <path
                           fillRule="evenodd"
@@ -927,14 +865,14 @@ const AllAnnouncementTeacher: React.FC = () => {
               </div>
             </SectionCard>
 
-            {/* Info Panel */}
+            {/* Info */}
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-start gap-3">
                 <div className="text-blue-500 mt-1">
                   <svg
                     className="w-5 h-5"
-                    fill="currentColor"
                     viewBox="0 0 20 20"
+                    fill="currentColor"
                   >
                     <path
                       fillRule="evenodd"
@@ -948,9 +886,8 @@ const AllAnnouncementTeacher: React.FC = () => {
                   <p className="text-sm opacity-70 leading-relaxed">
                     Pastikan Anda selalu memeriksa pengumuman terbaru setiap
                     hari. Pengumuman dengan prioritas "Urgent" memerlukan
-                    perhatian segera. Untuk mendapatkan notifikasi pengumuman
-                    langsung ke WhatsApp atau email, silakan hubungi bagian
-                    administrasi.
+                    perhatian segera. Untuk notifikasi ke WhatsApp/email,
+                    silakan hubungi administrasi.
                   </p>
                 </div>
               </div>
@@ -960,6 +897,4 @@ const AllAnnouncementTeacher: React.FC = () => {
       </main>
     </div>
   );
-};
-
-export default AllAnnouncementTeacher;
+}

@@ -105,24 +105,6 @@ export default function DetailSchedule() {
                 <span>Detail Jadwal</span>
               </div>
 
-              <div className="flex gap-2">
-                <Btn
-                  palette={palette}
-                  size="sm"
-                  variant="white1"
-                  onClick={() => setEditOpen(true)}
-                >
-                  <PencilLine size={16} className="mr-1" /> Edit
-                </Btn>
-                <Btn
-                  palette={palette}
-                  size="sm"
-                  variant="quaternary"
-                  onClick={handleDelete}
-                >
-                  <Trash2 size={16} className="mr-1" /> Hapus
-                </Btn>
-              </div>
             </div>
 
             {/* Card Detail */}

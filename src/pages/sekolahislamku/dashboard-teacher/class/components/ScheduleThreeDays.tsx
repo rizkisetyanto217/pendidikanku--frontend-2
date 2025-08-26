@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css"; // ⬅️ pastikan CSS swal ter-load
 import {
   SectionCard,
   Btn,
@@ -11,20 +13,82 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
 
-import TambahJadwal from "../../components/dashboard/AddSchedule";
+
 import { fetchTeacherHome } from "../../class/teacher";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import AddSchedule from "../../dashboard/AddSchedule";
 
+/* ================= Types ================= */
 type ScheduleItem = {
   id?: string;
-  time: string;
+  time: string; // "07:30"
   title: string; // "TPA A — Tahsin"
-  room?: string; // bisa "22 Agu • Aula 1" atau "Aula 1"
+  room?: string; // "22 Agu • Aula 1" | "Aula 1"
   dateISO: string; // ISO tanggal (00:00)
 };
 
-/* ========= Helpers ========= */
+/* ================ SweetAlert utilities (inline) ================ */
+const SWAL_CONTAINER_Z = "z-[2000]"; // pastikan berada paling atas
+
+async function confirmDelete({
+  title = "Yakin hapus data?",
+  text = "Tindakan ini tidak bisa dibatalkan.",
+  confirmText = "Ya, hapus",
+  cancelText = "Batal",
+}: {
+  title?: string;
+  text?: string;
+  confirmText?: string;
+  cancelText?: string;
+} = {}) {
+  const res = await Swal.fire({
+    title,
+    text,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: confirmText,
+    cancelButtonText: cancelText,
+    heightAuto: false,
+    backdrop: true,
+    buttonsStyling: false,
+    customClass: {
+      container: SWAL_CONTAINER_Z,
+      popup: "rounded-2xl",
+      confirmButton:
+        "swal2-confirm bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg",
+      cancelButton:
+        "swal2-cancel bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg ml-2",
+    },
+  });
+  return res.isConfirmed;
+}
+
+function toastSuccess(msg = "Berhasil.") {
+  return Swal.fire({
+    title: "Sukses",
+    text: msg,
+    icon: "success",
+    timer: 1400,
+    showConfirmButton: false,
+    heightAuto: false,
+    customClass: { container: SWAL_CONTAINER_Z, popup: "rounded-2xl" },
+  });
+}
+
+function toastError(msg = "Terjadi kesalahan.") {
+  return Swal.fire({
+    title: "Gagal",
+    text: msg,
+    icon: "error",
+    timer: 1800,
+    showConfirmButton: true,
+    heightAuto: false,
+    customClass: { container: SWAL_CONTAINER_Z, popup: "rounded-2xl" },
+  });
+}
+
+/* ================= Date helpers ================= */
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -74,18 +138,17 @@ const normalizeItem = (c: any, fallback: Date): ScheduleItem => {
     ? toISODate(new Date(c.dateISO))
     : toISODate(fallback);
   const title = `${c.className} — ${c.subject}`;
-  const id: string = c.id ?? `${dateISO}|${c.time}|${title}`; // fallback id stabil untuk edit/delete/navigate
-
+  const id: string = c.id ?? `${dateISO}|${c.time}|${title}`;
   return {
     id,
     time: c.time,
     title,
     dateISO,
-    // subteks: tgl singkat • room (jika punya date)
     room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
   };
 };
 
+/* ================= Component ================= */
 export default function ScheduleThreeDays() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
@@ -106,7 +169,7 @@ export default function ScheduleThreeDays() {
   const today = startOfDay(new Date());
   const end = startOfDay(addDays(today, DAYS - 1));
 
-  // Susun sumber data: upcoming dalam 3 hari → fallback todayClasses (jadikan hari ini)
+  // Susun sumber data
   const rawItems: ScheduleItem[] = useMemo(() => {
     if (Array.isArray(preload) && preload.length) {
       return preload
@@ -126,12 +189,10 @@ export default function ScheduleThreeDays() {
           return a.time.localeCompare(b.time);
         });
     }
-
     const upcoming = (data?.upcomingClasses ?? []).filter((u: any) => {
       const d = startOfDay(new Date(u.dateISO));
       return d >= today && d <= end;
     });
-
     const fromUpcoming = upcoming.map((u: any) => normalizeItem(u, today));
     const fromToday =
       fromUpcoming.length > 0
@@ -257,13 +318,33 @@ export default function ScheduleThreeDays() {
     setShowTambahJadwal(false);
   };
 
-  const handleDelete = (it: ScheduleItem) => {
-    const key = it.id ?? `${it.dateISO}|${it.time}|${it.title}`;
-    setLocalItems((prev) =>
-      prev.filter((x) => (x.id ?? `${x.dateISO}|${x.time}|${x.title}`) !== key)
-    );
+  const handleDelete = async (it: ScheduleItem) => {
+    const ok = await confirmDelete({
+      title: "Yakin hapus jadwal?",
+      text: `Jadwal "${it.title}" akan dihapus permanen.`,
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+    });
+    if (!ok) return;
+
+    try {
+      // TODO: panggil API delete bila sudah ada:
+      // await axios.delete(`/api/schedules/${encodeURIComponent(it.id!)}`);
+
+      const key = it.id ?? `${it.dateISO}|${it.time}|${it.title}`;
+      setLocalItems((prev) =>
+        prev.filter(
+          (x) => (x.id ?? `${x.dateISO}|${x.time}|${x.title}`) !== key
+        )
+      );
+
+      await toastSuccess("Jadwal berhasil dihapus.");
+    } catch (e: any) {
+      await toastError(e?.response?.data?.message ?? "Gagal menghapus jadwal.");
+    }
   };
 
+  /* ================= Render ================= */
   return (
     <div
       className="min-h-screen w-full"
@@ -284,7 +365,7 @@ export default function ScheduleThreeDays() {
       />
 
       {/* Modal Tambah/Edit Jadwal */}
-      <TambahJadwal
+      <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
@@ -302,9 +383,9 @@ export default function ScheduleThreeDays() {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <ArrowLeft
-                  size={20}
-                  onClick={() => navigate(-1)}
+                  size={24} // sedikit lebih besar
                   strokeWidth={3}
+                  onClick={() => navigate(-1)}
                   className="mr-1 cursor-pointer"
                 />
                 <div className="font-semibold text-lg">
@@ -455,7 +536,7 @@ export default function ScheduleThreeDays() {
                               <Btn
                                 palette={palette}
                                 size="sm"
-                                variant="quaternary"
+                                variant="destructive"
                                 onClick={() => handleDelete(s)}
                               >
                                 Hapus

@@ -20,7 +20,6 @@ import ModalEditSchedule from "@/pages/sekolahislamku/dashboard-school/component
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
-
 type ThreeDaysScheduleItem = {
   title: string;
   time?: string;
@@ -113,17 +112,12 @@ export default function DetailScheduleThreeDays() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center font-semibold text-lg gap-2">
-                <ArrowLeft
-                  onClick={() => navigate(-1)}
-                  size={16}
-                  className="mr-1"
-                />
-
-                <div className="font-semibold text-lg">Detail Jadwal</div>
-              </div>
-            </div>
+            <ArrowLeft
+              size={20}
+              onClick={() => navigate(-1)}
+              strokeWidth={3}
+              className="mr-1 cursor-pointer"
+            />
 
             <SectionCard palette={palette} className="p-4 md:p-5">
               {item ? (

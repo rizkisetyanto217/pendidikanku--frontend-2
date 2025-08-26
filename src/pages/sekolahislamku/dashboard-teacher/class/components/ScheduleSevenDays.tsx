@@ -21,9 +21,10 @@ import {
   type UpcomingClass,
 } from "../teacher";
 
-import TambahJadwal from "../../components/dashboard/AddSchedule";
+
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import AddSchedule from "../../dashboard/AddSchedule";
 
 /* =========================
    Types (UI normalized)
@@ -273,7 +274,7 @@ export default function ScheduleSevenDays() {
       />
 
       {/* Modal: Tambah Jadwal */}
-      <TambahJadwal
+      <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
@@ -445,7 +446,7 @@ export default function ScheduleSevenDays() {
                               <Btn
                                 palette={palette}
                                 size="sm"
-                                variant="quaternary"
+                                variant="destructive"
                                 onClick={() => handleDelete(s)}
                               >
                                 Hapus

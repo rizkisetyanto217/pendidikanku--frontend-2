@@ -171,7 +171,7 @@ import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/detail/SchoolDetailClass";
 import SchoolBooks from "@/pages/sekolahislamku/dashboard-school/books/SchoolBooks";
 import SchoolDetailBook from "@/pages/sekolahislamku/dashboard-school/books/detail/SchoolDetailBook";
-import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/components/dashboard/AllAnnouncementTeacher";
+import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/dashboard/AllAnnouncementTeacher";
 import AllTodaySchedule from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedhule";
 import ScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleThreeDays";
 import AllAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllAssignment";
@@ -182,10 +182,11 @@ import MasjidkuWebHome from "@/pages/masjidku/website/MasjidkuWebHome";
 import RegisterAdminMasjid from "@/pages/dashboard/auth/register/RegisterAdminMasjid";
 import RegisterUser from "@/pages/dashboard/auth/register/RegisterUser";
 import RegisterDetailAdminMasjid from "@/pages/dashboard/auth/register/RegisterDetailAdminMasjid";
-import DetailScheduleThreeDays from "@/pages/sekolahislamku/dashboard-school/components/dashboard/DetailScheduleTreeDays";
+import DetailScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailScheduleThreeDays";
 import ScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleSevenDays";
 import DetailScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailScheduleSevenDays";
 import RegisterDetailUser from "@/pages/dashboard/auth/register/RegisterDetailUser";
+import DetailSchedule from "@/pages/sekolahislamku/dashboard-school/components/dashboard/DetailSchedule";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -571,80 +572,80 @@ export default function AppRoutes() {
         <Route path="catatan" element={<StudentNotesSummary />} />
       </Route>
       {/* ==== Protected Routes - Guru (teacher only) ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
-        <Route path=":slug/guru" element={<StudentLayout />}>
-          <Route index element={<TeacherDashboard />} />
-          <Route path="kehadiran" element={<TeacherAttendance />} />
-          <Route path="penilaian" element={<TeacherGrading />} />
-          <Route path="pengumuman" element={<TeacherAnnouncements />} />
-          <Route path="jadwal" element={<TeacherSchedule />} />
-          <Route path="assignments" element={<AllAssignment />} />
-          <Route
-            path="all-announcement-teacher"
-            element={<AllAnnouncementTeacher />}
-          />
-          {/* ===== 3 Hari (GLOBAL) ===== */}
-          <Route path="schedule-3-hari">
-            <Route index element={<ScheduleThreeDays />} />
-            <Route path=":scheduleId" element={<DetailScheduleThreeDays />} />
-          </Route>
+      <Route path=":slug/guru" element={<StudentLayout />}>
+        <Route index element={<TeacherDashboard />} />
+        <Route path="kehadiran" element={<TeacherAttendance />} />
+        <Route path="penilaian" element={<TeacherGrading />} />
+        <Route path="pengumuman" element={<TeacherAnnouncements />} />
+        <Route path="jadwal" element={<TeacherSchedule />} />
+        <Route path="assignments" element={<AllAssignment />} />
+        <Route
+          path="all-announcement-teacher"
+          element={<AllAnnouncementTeacher />}
+        />
+        {/* ===== 3 Hari (GLOBAL) ===== */}
+        <Route path="schedule-3-hari">
+          <Route index element={<ScheduleThreeDays />} />
+          <Route path=":scheduleId" element={<DetailScheduleThreeDays />} />
+        </Route>
 
-          {/* ===== 7 Hari (GLOBAL) =====
+        {/* ===== 7 Hari (GLOBAL) =====
      Parent TIDAK memiliki element langsung; anak ⁠ index ⁠ & ⁠ :scheduleId ⁠ yang render. */}
+        <Route path="schedule-seven-days">
+          <Route index element={<ScheduleSevenDays />} />
+          <Route path=":scheduleId" element={<DetailScheduleSevenDays />} />
+        </Route>
+
+        {/* (Opsional) Aliases lama → redirect */}
+        <Route
+          path="schedule-seven-days/*"
+          element={<Navigate to="../schedule-seven-days" replace />}
+        />
+
+        {/* ===== DALAM /kelas ===== */}
+        <Route path="kelas">
+          <Route index element={<TeacherClass />} />
+          <Route path=":id/material/:materialId" element={<DetailMateri />} />
+          <Route path=":id/assignment/:id" element={<DetailAssignment />} />
+          <Route path="jadwal" element={<TeacherSchedule />} />
+          <Route path="kehadiran" element={<TeacherClassAttendance />} />
+
+          {/* 7 Hari (DALAM /kelas) — lengkap list+detail */}
           <Route path="schedule-seven-days">
             <Route index element={<ScheduleSevenDays />} />
             <Route path=":scheduleId" element={<DetailScheduleSevenDays />} />
           </Route>
 
-          {/* (Opsional) Aliases lama → redirect */}
+          {/* (Opsional) alias lama di /kelas */}
           <Route
-            path="schedule-seven-days/*"
+            path="schedule-7-hari/*"
             element={<Navigate to="../schedule-seven-days" replace />}
           />
-
-          {/* ===== DALAM /kelas ===== */}
-          <Route path="kelas">
-            <Route index element={<TeacherClass />} />
-            <Route path=":id/material/:materialId" element={<DetailMateri />} />
-            <Route path=":id/assignment/:id" element={<DetailAssignment />} />
-            <Route path="jadwal" element={<TeacherSchedule />} />
-            <Route path="kehadiran" element={<TeacherClassAttendance />} />
-
-            {/* 7 Hari (DALAM /kelas) — lengkap list+detail */}
-            <Route path="schedule-seven-days">
-              <Route index element={<ScheduleSevenDays />} />
-              <Route path=":scheduleId" element={<DetailScheduleSevenDays />} />
-            </Route>
-
-            {/* (Opsional) alias lama di /kelas */}
-            <Route
-              path="schedule-7-hari/*"
-              element={<Navigate to="../schedule-seven-days" replace />}
-            />
-          </Route>
         </Route>
       </Route>
       {/* ==== Protected Routes - Sekolah (dkm only) ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
-        <Route path=":slug/sekolah" element={<StudentLayout />}>
-          <Route index element={<SchoolDashboard />} />
-          <Route path="murid" element={<SchoolStudent />} />
-          <Route path="all-schedule" element={<AllSchedule />} />
-          <Route path="all-invoices" element={<AllInvoices />} />
-          <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
-          <Route path="all-announcement" element={<AllAnnouncement />} />
-          <Route path="guru" element={<SchoolTeacher />} />
-          <Route path="kelas">
-            <Route index element={<SchoolClasses />} />
-            <Route path="detail/:id" element={<SchoolManageClass />} />
-          </Route>
-          <Route path="kehadiran" element={<SchoolAttendance />} />
-          <Route path="keuangan" element={<SchoolFinance />} />
-          <Route path="pengumuman" element={<SchoolAnnouncement />} />
-          <Route path="buku">
-            <Route index element={<SchoolBooks />} />
-            <Route path="detail/:id" element={<SchoolDetailBook />} />
-          </Route>
+      <Route path=":slug/sekolah" element={<StudentLayout />}>
+        <Route index element={<SchoolDashboard />} />
+        <Route path="murid" element={<SchoolStudent />} />
+        <Route path="all-schedule" element={<AllSchedule />} />
+        <Route
+          path="all-schedule/detail/:scheduleId"
+          element={<DetailSchedule />}
+        />
+        <Route path="all-invoices" element={<AllInvoices />} />
+        <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
+        <Route path="all-announcement" element={<AllAnnouncement />} />
+        <Route path="guru" element={<SchoolTeacher />} />
+        <Route path="kelas">
+          <Route index element={<SchoolClasses />} />
+          <Route path="detail/:id" element={<SchoolManageClass />} />
+        </Route>
+        <Route path="kehadiran" element={<SchoolAttendance />} />
+        <Route path="keuangan" element={<SchoolFinance />} />
+        <Route path="pengumuman" element={<SchoolAnnouncement />} />
+        <Route path="buku">
+          <Route index element={<SchoolBooks />} />
+          <Route path="detail/:id" element={<SchoolDetailBook />} />
         </Route>
       </Route>
       {/* ==== 404 ==== */}
