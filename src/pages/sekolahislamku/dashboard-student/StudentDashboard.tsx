@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import ParentTopBar from "../components/home/StudentTopBar";
+import ParentTopBar from "../components/home/ParentTopBar";
 
 import ChildSummaryCard from "@/pages/sekolahislamku/components/card/ChildSummaryCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ParentSidebarNav from "../components/home/StudentSideBarNav";
+import ParentSidebar from "../components/home/ParentSideBar";
 
 // --- Types ---
 interface ChildDetail {
@@ -152,7 +152,7 @@ export default function StudentDashboard() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri hanya tampil di PC */}
-          <ParentSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">

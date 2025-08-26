@@ -13,8 +13,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
 import {
   CalendarDays,
@@ -27,6 +26,7 @@ import {
   Clock,
   AlertTriangle,
 } from "lucide-react";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 export type AttendeeType = "siswa" | "guru";
@@ -60,8 +60,8 @@ const C = (p: Palette) => ({
 /* =============== Main Page =============== */
 export default function SchoolAttendance() {
   const { isDark } = useHtmlDarkMode();
-  const theme: Palette = isDark ? colors.dark : colors.light;
-  const c = C(theme);
+  const palette: Palette = isDark ? colors.dark : colors.light;
+  const c = C(palette);
   const qc = useQueryClient();
 
   // filters
@@ -146,9 +146,9 @@ export default function SchoolAttendance() {
 
   return (
     <>
-      <ParentTopBar palette={theme} title="Kehadiran" />
+      <ParentTopBar palette={palette} title="Kehadiran" />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
-        <SchoolSidebarNav palette={theme} className="hidden lg:block" />
+        <ParentSidebar palette={palette} className="hidden lg:block" />
 
         <main className="flex-1 mx-auto max-w-3xl py-6 space-y-5">
           {/* Header */}
@@ -173,7 +173,7 @@ export default function SchoolAttendance() {
               </div>
             </div>
             <Btn
-              palette={theme}
+              palette={palette}
               size="sm"
               variant="outline"
               onClick={() => refetch()}
@@ -184,7 +184,7 @@ export default function SchoolAttendance() {
 
           {/* Snapshot */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <p className="text-sm" style={{ color: c.muted }}>
                 Kehadiran Hari Ini saja
               </p>
@@ -195,7 +195,7 @@ export default function SchoolAttendance() {
                 {stats.rate}%
               </p>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <p className="text-sm" style={{ color: c.muted }}>
                 Hadir
               </p>
@@ -206,7 +206,7 @@ export default function SchoolAttendance() {
                 {stats.present}
               </p>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <p className="text-sm" style={{ color: c.muted }}>
                 Terlambat
               </p>
@@ -217,7 +217,7 @@ export default function SchoolAttendance() {
                 {stats.late}
               </p>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <p className="text-sm" style={{ color: c.muted }}>
                 Alfa
               </p>
@@ -231,7 +231,7 @@ export default function SchoolAttendance() {
           </div>
 
           {/* Filters */}
-          <SectionCard palette={theme} className="p-4">
+          <SectionCard palette={palette} className="p-4">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Search */}
               <div
@@ -259,9 +259,9 @@ export default function SchoolAttendance() {
           {/* ...tetap, tidak banyak perubahan warna */}
 
           {/* Table */}
-          <SectionCard palette={theme} className="p-2 md:p-4">
+          <SectionCard palette={palette} className="p-2 md:p-4">
             <table className="min-w-[900px] w-full">
-              <thead style={{ background: theme.white2 }}>
+              <thead style={{ background: palette.white2 }}>
                 <tr className="text-left text-sm" style={{ color: c.muted }}>
                   <th className="py-3 w-10">
                     <input
@@ -320,27 +320,27 @@ export default function SchoolAttendance() {
                     </td>
                     <td>
                       {r.status === "hadir" && (
-                        <Badge variant="success" palette={theme}>
+                        <Badge variant="success" palette={palette}>
                           Hadir
                         </Badge>
                       )}
                       {r.status === "terlambat" && (
-                        <Badge variant="warning" palette={theme}>
+                        <Badge variant="warning" palette={palette}>
                           Terlambat
                         </Badge>
                       )}
                       {r.status === "izin" && (
-                        <Badge variant="info" palette={theme}>
+                        <Badge variant="info" palette={palette}>
                           Izin
                         </Badge>
                       )}
                       {r.status === "sakit" && (
-                        <Badge variant="secondary" palette={theme}>
+                        <Badge variant="secondary" palette={palette}>
                           Sakit
                         </Badge>
                       )}
                       {r.status === "alfa" && (
-                        <Badge variant="destructive" palette={theme}>
+                        <Badge variant="destructive" palette={palette}>
                           Alfa
                         </Badge>
                       )}
@@ -357,7 +357,7 @@ export default function SchoolAttendance() {
                         </NavLink>
                         <Btn
                           size="sm"
-                          palette={theme}
+                          palette={palette}
                           variant="outline"
                           onClick={() =>
                             markMutation.mutate({

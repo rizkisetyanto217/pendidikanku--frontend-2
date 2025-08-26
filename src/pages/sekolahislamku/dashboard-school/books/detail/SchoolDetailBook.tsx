@@ -11,9 +11,9 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import { BookOpen, ArrowLeft, ExternalLink, ImageOff } from "lucide-react";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 /* ==================== Types (ikuti payload API detail) ==================== */
 export type SectionLite = {
@@ -102,7 +102,7 @@ export default function SchoolBookDetail() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <SchoolSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header + Back */}

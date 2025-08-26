@@ -16,9 +16,8 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import PageTopBar from "../../components/home/PageTopBar";
-import ParentSidebarNav from "../../components/home/StudentSideBarNav";
-import ParentTopBar from "../../components/home/StudentTopBar";
+import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* =========================
    Types
@@ -377,7 +376,7 @@ export default function StudentFinance() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri (sticky di desktop) */}
-          <ParentSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">

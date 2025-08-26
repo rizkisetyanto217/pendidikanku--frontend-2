@@ -7,7 +7,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-export interface TambahJadwalItem {
+export interface AddScheduleItem {
   time: string; // HH:MM
   title: string;
   room?: string;
@@ -21,7 +21,7 @@ const generateSlug = (text: string) =>
     .replace(/\s+/g, "-")
     .replace(/[^\w-]+/g, "");
 
-export default function TambahJadwal({
+export default function AddSchedule({
   open,
   onClose,
   onSubmit,
@@ -30,7 +30,7 @@ export default function TambahJadwal({
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmit: (item: TambahJadwalItem) => void;
+  onSubmit: (item: AddScheduleItem) => void;
   palette: Palette;
   defaultTime?: string; // optional prefill e.g. "10:00"
 }) {
@@ -83,7 +83,7 @@ export default function TambahJadwal({
       setError("Jam dan Judul wajib diisi");
       return;
     }
-    const payload: TambahJadwalItem = {
+    const payload: AddScheduleItem = {
       time: time.trim(),
       title: title.trim(),
       room: room.trim() || undefined,

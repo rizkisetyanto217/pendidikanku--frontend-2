@@ -17,8 +17,9 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import ParentSidebarNav from "@/pages/sekolahislamku/components/home/StudentSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+
 
 /* ===== Types ===== */
 interface NoteLog {
@@ -191,7 +192,7 @@ export default function StudentNotesSummary() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri (PC) */}
-          <ParentSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">

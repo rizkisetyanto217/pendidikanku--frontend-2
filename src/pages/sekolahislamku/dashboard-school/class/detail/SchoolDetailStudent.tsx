@@ -12,8 +12,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
 import {
   ArrowLeft,
@@ -24,6 +23,7 @@ import {
   FileDown,
   ClipboardList,
 } from "lucide-react";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 /* =========================================
    DUMMY SWITCH
@@ -520,7 +520,7 @@ export default function SchoolDetailStudent() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <SchoolSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header */}

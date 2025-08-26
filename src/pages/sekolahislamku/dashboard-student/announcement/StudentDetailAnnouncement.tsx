@@ -4,8 +4,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import ParentTopBar from "../../components/home/StudentTopBar";
-import ParentSidebarNav from "../../components/home/StudentSideBarNav";
+import ParentTopBar from "../../components/home/ParentTopBar";
 
 import {
   SectionCard,
@@ -22,6 +21,7 @@ import {
   Users,
   Check,
 } from "lucide-react";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ===== Types ===== */
 type AnnType = "info" | "warning" | "success";
@@ -162,7 +162,7 @@ export default function StudentDetailAnnouncement() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-4">
             {/* Back / loading / error */}

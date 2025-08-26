@@ -20,11 +20,11 @@ import {
   ImageOff,
 } from "lucide-react";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import BookModal from "./components/BookModal";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ============== Types API ============== */
 export type SectionLite = {
@@ -427,7 +427,7 @@ export default function SchoolBooks() {
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar kiri (sticky di desktop) */}
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <SchoolSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           {/* Konten utama */}

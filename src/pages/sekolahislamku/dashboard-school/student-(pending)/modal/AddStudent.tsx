@@ -13,7 +13,7 @@ type Props = {
   onClose: () => void;
 };
 
-export default function TambahSiswa({
+export default function AddStudent({
   open,
   palette,
   classes,

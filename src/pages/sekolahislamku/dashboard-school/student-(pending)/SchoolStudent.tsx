@@ -26,12 +26,12 @@ import {
   Phone,
 } from "lucide-react";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
-import TambahSiswa from "./modal/TambahSiswa";
+import TambahSiswa from "./modal/AddStudent";
 // NOTE: pastikan komponen ini menerima props: { open, onClose, palette }
-import UploadFileSiswa from "./modal/UploadFileSiswa";
+import UploadFileSiswa from "./modal/UploadFileStudent";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 export type StudentStatus = "aktif" | "nonaktif" | "alumni";
@@ -55,7 +55,7 @@ const genderLabel = (g?: "L" | "P") =>
 /* =============== Main Page =============== */
 export default function StudentsPage() {
   const { isDark } = useHtmlDarkMode();
-  const theme: Palette = isDark ? colors.dark : colors.light;
+  const palette: Palette = isDark ? colors.dark : colors.light;
 
   // === Modal states (mutually exclusive)
   const [openAdd, setOpenAdd] = useState(false);
@@ -118,20 +118,20 @@ export default function StudentsPage() {
       <TambahSiswa
         open={openAdd}
         onClose={closeAllModals}
-        palette={theme}
+        palette={palette}
         classes={classes}
       />
       <UploadFileSiswa
         open={openUpload}
         onClose={closeAllModals}
-        palette={theme}
+        palette={palette}
       />
 
       {/* Top navbar */}
-      <ParentTopBar palette={theme} title="Siswa" />
+      <ParentTopBar palette={palette} title="Siswa" />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         {/* Sidebar kiri */}
-        <SchoolSidebarNav palette={theme} className="hidden lg:block" />
+        <ParentSidebar palette={palette} className="hidden lg:block" />
 
         {/* Konten kanan */}
         <main className="flex-1 mx-auto max-w-6xl px-4 py-6 space-y-5">
@@ -140,18 +140,18 @@ export default function StudentsPage() {
             <div className="flex items-center gap-3">
               <div
                 className="h-10 w-10 rounded-xl flex items-center justify-center"
-                style={{ background: theme.white3, color: theme.quaternary }}
+                style={{ background: palette.white3, color: palette.quaternary }}
               >
                 <Users size={20} />
               </div>
               <div>
                 <h1
                   className="text-xl font-semibold"
-                  style={{ color: theme.quaternary }}
+                  style={{ color: palette.quaternary }}
                 >
                   Siswa
                 </h1>
-                <p className="text-sm" style={{ color: theme.secondary }}>
+                <p className="text-sm" style={{ color: palette.secondary }}>
                   Kelola data siswa, filter, dan tindakan cepat.
                 </p>
               </div>
@@ -163,7 +163,7 @@ export default function StudentsPage() {
                 onClick={openUploadCSV}
                 className="flex items-center gap-2"
                 size="sm"
-                palette={theme}
+                palette={palette}
               >
                 <Upload size={16} /> Import CSV
               </Btn>
@@ -171,7 +171,7 @@ export default function StudentsPage() {
                 variant="default"
                 className="flex items-center gap-2"
                 size="sm"
-                palette={theme}
+                palette={palette}
                 onClick={openTambahSiswa}
               >
                 <UserPlus size={16} /> Tambah Siswa
@@ -181,15 +181,15 @@ export default function StudentsPage() {
 
           {/* Statistic cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: theme.secondary }}>
+                  <p className="text-sm" style={{ color: palette.secondary }}>
                     Total Siswa
                   </p>
                   <p
                     className="text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {stats.total}
                   </p>
@@ -197,64 +197,64 @@ export default function StudentsPage() {
                 <GraduationCap />
               </div>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: theme.secondary }}>
+                  <p className="text-sm" style={{ color: palette.secondary }}>
                     Aktif
                   </p>
                   <p
                     className="text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {stats.aktif}
                   </p>
                 </div>
-                <Badge variant="success" palette={theme}>
+                <Badge variant="success" palette={palette}>
                   OK
                 </Badge>
               </div>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: theme.secondary }}>
+                  <p className="text-sm" style={{ color: palette.secondary }}>
                     Laki-laki
                   </p>
                   <p
                     className="text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {stats.L}
                   </p>
                 </div>
-                <Badge palette={theme}>L</Badge>
+                <Badge palette={palette}>L</Badge>
               </div>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: theme.secondary }}>
+                  <p className="text-sm" style={{ color: palette.secondary }}>
                     Perempuan
                   </p>
                   <p
                     className="text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {stats.P}
                   </p>
                 </div>
-                <Badge palette={theme}>P</Badge>
+                <Badge palette={palette}>P</Badge>
               </div>
             </SectionCard>
           </div>
 
           {/* Filters */}
-          <SectionCard palette={theme} className="p-4">
+          <SectionCard palette={palette} className="p-4">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               <div
                 className="flex items-center gap-2 flex-1 rounded-xl px-3 py-2 border"
-                style={{ borderColor: theme.white3, background: theme.white1 }}
+                style={{ borderColor: palette.white3, background: palette.white1 }}
               >
                 <Search size={16} />
                 <input
@@ -262,7 +262,7 @@ export default function StudentsPage() {
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Cari nama, NIS, orang tua…"
                   className="w-full bg-transparent outline-none"
-                  style={{ color: theme.quaternary }}
+                  style={{ color: palette.quaternary }}
                 />
               </div>
 
@@ -270,12 +270,12 @@ export default function StudentsPage() {
                 <div
                   className="rounded-xl border px-3 py-2"
                   style={{
-                    borderColor: theme.white3,
-                    background: theme.white1,
-                    color: theme.quaternary,
+                    borderColor: palette.white3,
+                    background: palette.white1,
+                    color: palette.quaternary,
                   }}
                 >
-                  <div className="text-xs" style={{ color: theme.secondary }}>
+                  <div className="text-xs" style={{ color: palette.secondary }}>
                     Kelas
                   </div>
                   <select
@@ -295,12 +295,12 @@ export default function StudentsPage() {
                 <div
                   className="rounded-xl border px-3 py-2"
                   style={{
-                    borderColor: theme.white3,
-                    background: theme.white1,
-                    color: theme.quaternary,
+                    borderColor: palette.white3,
+                    background: palette.white1,
+                    color: palette.quaternary,
                   }}
                 >
-                  <div className="text-xs" style={{ color: theme.secondary }}>
+                  <div className="text-xs" style={{ color: palette.secondary }}>
                     Status
                   </div>
                   <select
@@ -319,7 +319,7 @@ export default function StudentsPage() {
                   size="sm"
                   className="flex items-center gap-2"
                   onClick={() => refetch()}
-                  palette={theme}
+                  palette={palette}
                 >
                   <Filter size={16} /> Terapkan
                 </Btn>
@@ -328,13 +328,13 @@ export default function StudentsPage() {
           </SectionCard>
 
           {/* Table */}
-          <SectionCard palette={theme} className="p-2 md:p-4">
+          <SectionCard palette={palette} className="p-2 md:p-4">
             <div className="overflow-auto">
               <table className="min-w-[800px] w-full">
                 <thead>
                   <tr
                     className="text-left text-sm"
-                    style={{ color: theme.secondary }}
+                    style={{ color: palette.secondary }}
                   >
                     <th className="py-3">NIS</th>
                     <th>Nama</th>
@@ -352,7 +352,7 @@ export default function StudentsPage() {
                       <td
                         colSpan={8}
                         className="py-8 text-center"
-                        style={{ color: theme.secondary }}
+                        style={{ color: palette.secondary }}
                       >
                         Memuat data…
                       </td>
@@ -364,7 +364,7 @@ export default function StudentsPage() {
                       <td colSpan={8} className="py-8">
                         <div
                           className="flex items-center gap-2 justify-center text-sm"
-                          style={{ color: theme.warning1 }}
+                          style={{ color: palette.warning1 }}
                         >
                           <AlertTriangle size={16} /> Terjadi kesalahan.
                           <button
@@ -383,7 +383,7 @@ export default function StudentsPage() {
                       <td
                         colSpan={8}
                         className="py-10 text-center"
-                        style={{ color: theme.secondary }}
+                        style={{ color: palette.secondary }}
                       >
                         Belum ada data siswa.
                       </td>
@@ -394,12 +394,12 @@ export default function StudentsPage() {
                     <tr
                       key={s.id}
                       className="border-t"
-                      style={{ borderColor: theme.white3 }}
+                      style={{ borderColor: palette.white3 }}
                     >
                       <td className="py-3 align-top">
                         <div
                           className="font-medium"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {s.nis ?? "-"}
                         </div>
@@ -407,33 +407,33 @@ export default function StudentsPage() {
                       <td className="py-3 align-top">
                         <div
                           className="font-medium"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {s.name}
                         </div>
                         <div
                           className="text-xs"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           {s.email ?? ""}
                         </div>
                       </td>
                       <td
                         className="py-3 align-top"
-                        style={{ color: theme.primary }}
+                        style={{ color: palette.primary }}
                       >
                         {s.class_name ?? "-"}
                       </td>
                       <td
                         className="py-3 align-top"
-                        style={{ color: theme.quaternary }}
+                        style={{ color: palette.quaternary }}
                       >
                         {genderLabel(s.gender)}
                       </td>
                       <td className="py-3 align-top">
                         <div
                           className="text-sm"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {s.parent_name ?? "-"}
                         </div>
@@ -441,7 +441,7 @@ export default function StudentsPage() {
                       <td className="py-3 align-top">
                         <div
                           className="flex items-center gap-3 text-sm"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {s.phone && (
                             <a
@@ -463,17 +463,17 @@ export default function StudentsPage() {
                       </td>
                       <td className="py-3 align-top">
                         {s.status === "aktif" && (
-                          <Badge variant="success" palette={theme}>
+                          <Badge variant="success" palette={palette}>
                             Aktif
                           </Badge>
                         )}
                         {s.status === "nonaktif" && (
-                          <Badge variant="warning" palette={theme}>
+                          <Badge variant="warning" palette={palette}>
                             Nonaktif
                           </Badge>
                         )}
                         {s.status === "alumni" && (
-                          <Badge variant="info" palette={theme}>
+                          <Badge variant="info" palette={palette}>
                             Alumni
                           </Badge>
                         )}
@@ -483,19 +483,19 @@ export default function StudentsPage() {
                           <NavLink to={`/sekolah/murid/${s.id}`}>
                             <Btn
                               size="sm"
-                              palette={theme}
+                              palette={palette}
                               className="flex items-center gap-1"
                             >
                               Detail <ChevronRight size={14} />
                             </Btn>
                           </NavLink>
                           <NavLink to={`/sekolah/penilaian?siswa=${s.id}`}>
-                            <Btn size="sm" palette={theme}>
+                            <Btn size="sm" palette={palette}>
                               Nilai
                             </Btn>
                           </NavLink>
                           <NavLink to={`/sekolah/absensi?siswa=${s.id}`}>
-                            <Btn size="sm" palette={theme}>
+                            <Btn size="sm" palette={palette}>
                               Absensi
                             </Btn>
                           </NavLink>
@@ -510,7 +510,7 @@ export default function StudentsPage() {
             {/* Footer state */}
             <div
               className="mt-3 text-xs flex items-center justify-between"
-              style={{ color: theme.secondary }}
+              style={{ color: palette.secondary }}
             >
               <div>
                 {isFetching

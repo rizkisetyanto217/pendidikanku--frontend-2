@@ -18,7 +18,7 @@ type Props = {
   palette: Palette;
 };
 
-const Tagihan: React.FC<Props> = ({ open, onClose, onSubmit, palette }) => {
+const Bill: React.FC<Props> = ({ open, onClose, onSubmit, palette }) => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState<number>(0);
   const [due, setDue] = useState("");
@@ -211,4 +211,4 @@ const Tagihan: React.FC<Props> = ({ open, onClose, onSubmit, palette }) => {
     : node;
 };
 
-export default Tagihan;
+export default Bill;

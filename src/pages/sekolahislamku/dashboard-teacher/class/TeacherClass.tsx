@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 
-
 import {
   SectionCard,
   Badge,
@@ -15,7 +14,6 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
 import {
   Users,
@@ -31,16 +29,16 @@ import {
 import MiniBar from "../../components/ui/MiniBar";
 import StatPill from "../../components/ui/StatPill";
 import StudentsTable from "./components/StudentTable";
-import TeacherTopBar from "../../components/home/TeacherTopBar";
 import ModalAddStudent, {
   type AddStudentPayload,
 } from "./components/ModalAddStudent";
 import ModalExport from "./components/ModalExport";
 import ModalAddMateri from "./components/ModalAddMateri";
-import TambahJadwal from "../components/dashboard/TambahJadwal";
+import TambahJadwal from "../components/dashboard/AddSchedule";
+import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 // 🔹 Pakai modal TambahJadwal dari pages/schedule/modal
-
 
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -304,9 +302,8 @@ export default function TeacherClass() {
   const [openModal, setOpenModal] = useState(false); // Add materi
 
   // materi
-const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:id
-// const classId = selectedClassId || idFromUrl;
-
+  const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:id
+  // const classId = selectedClassId || idFromUrl;
 
   // Tambah Jadwal modal
   const [showTambahJadwal, setShowTambahJadwal] = useState(false);
@@ -401,7 +398,7 @@ const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title={`Kelas ${data?.name ?? ""}`}
         gregorianDate={data?.gregorianDate}
@@ -448,7 +445,7 @@ const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:
       {/* ===== Content + Sidebar ===== */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Main content */}
           <div className="flex-1 min-w-0 space-y-6">

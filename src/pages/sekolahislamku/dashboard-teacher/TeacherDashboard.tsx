@@ -11,14 +11,10 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-
-import TeacherSidebarNav from "../components/home/TeacherSideBarNav";
-import TeacherTopBar from "../components/home/TeacherTopBar";
-
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ListJadwal from "./schedule/modal/ListJadwal";
-import TambahJadwal from "./components/dashboard/TambahJadwal";
+import ListJadwal from "./schedule/modal/ListSchedule";
+import TambahJadwal from "./components/dashboard/AddSchedule";
 import TeacherAddEditAnnouncement, {
   type TeacherAnnouncementForm,
 } from "./announcement/TeacherAddEditAnnouncement";
@@ -29,6 +25,8 @@ import {
   TEACHER_HOME_QK,
   type Announcement,
 } from "../../../pages/sekolahislamku/dashboard-teacher/class/teacher";
+import ParentTopBar from "../components/home/ParentTopBar";
+import ParentSidebar from "../components/home/ParentSideBar";
 
 /* ================= Helpers ================ */
 const startOfDay = (d = new Date()) => {
@@ -97,29 +95,28 @@ export default function TeacherDashboard() {
   });
 
   /* -------- Jadwal 3 HARI KE DEPAN (fallback: hari ini) -------- */
-const scheduleItemsNext3Days = useMemo<UIScheduleItem[]>(() => {
-  const upcoming = data?.upcomingClasses ?? [];
+  const scheduleItemsNext3Days = useMemo<UIScheduleItem[]>(() => {
+    const upcoming = data?.upcomingClasses ?? [];
 
-  const start = startOfDay(new Date());
-  const end = startOfDay(new Date());
-  end.setDate(end.getDate() + 2); // +2 = total 3 hari
+    const start = startOfDay(new Date());
+    const end = startOfDay(new Date());
+    end.setDate(end.getDate() + 2); // +2 = total 3 hari
 
-  const within3Days = upcoming.filter((c) => {
-    if (!c.dateISO) return false;
-    const d = startOfDay(new Date(c.dateISO));
-    return d >= start && d <= end;
-  });
+    const within3Days = upcoming.filter((c) => {
+      if (!c.dateISO) return false;
+      const d = startOfDay(new Date(c.dateISO));
+      return d >= start && d <= end;
+    });
 
-  const src: (APIUpcomingClass | APITodayClass)[] =
-    within3Days.length > 0 ? within3Days : (data?.todayClasses ?? []);
+    const src: (APIUpcomingClass | APITodayClass)[] =
+      within3Days.length > 0 ? within3Days : (data?.todayClasses ?? []);
 
-  return src.map((c: any) => ({
-    time: c.time,
-    title: `${c.className} — ${c.subject}`,
-    room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
-  }));
-}, [data?.upcomingClasses, data?.todayClasses]);
-
+    return src.map((c: any) => ({
+      time: c.time,
+      title: `${c.className} — ${c.subject}`,
+      room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
+    }));
+  }, [data?.upcomingClasses, data?.todayClasses]);
 
   /* -------- Daftar Jadwal (mock terpisah untuk demo) -------- */
   const [listScheduleItems, setListScheduleItems] = useState<UIScheduleItem[]>(
@@ -269,7 +266,7 @@ const scheduleItemsNext3Days = useMemo<UIScheduleItem[]>(() => {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Topbar */}
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Dashboard Pengajar"
         gregorianDate={data?.gregorianDate}
@@ -307,7 +304,7 @@ const scheduleItemsNext3Days = useMemo<UIScheduleItem[]>(() => {
       {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Main */}
           <div className="flex-1 space-y-6">

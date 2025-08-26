@@ -10,10 +10,11 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
-import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import TambahJadwal from "../../components/dashboard/TambahJadwal";
+
+import TambahJadwal from "../../components/dashboard/AddSchedule";
 import { fetchTeacherHome } from "../../class/teacher";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 type ScheduleItem = {
   id?: string;
@@ -268,7 +269,7 @@ export default function ScheduleThreeDays() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title="Jadwal 3 Hari Kedepan"
@@ -293,7 +294,7 @@ export default function ScheduleThreeDays() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <TeacherSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">

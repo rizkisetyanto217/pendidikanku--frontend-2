@@ -10,10 +10,11 @@ import {
   LinkBtn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+
 import ModalAddAssignmentClass from "./ModalAddAssignmentClass";
 import ModalEditAssignmentClass from "./ModalEditAssignmentClass";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 type AssignmentState = {
   title?: string;
@@ -76,7 +77,7 @@ export default function DetailAssignment() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Detail Tugas"
         gregorianDate={new Date().toISOString()}
@@ -114,7 +115,7 @@ export default function DetailAssignment() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <TeacherSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">

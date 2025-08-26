@@ -19,7 +19,7 @@ export type PaymentPayload = {
 
 type Option = { value: string; label: string };
 
-interface PembayaranModalProps {
+interface PaymentModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: PaymentPayload) => void;
@@ -31,7 +31,7 @@ interface PembayaranModalProps {
   defaultDate?: string;
 }
 
-const Pembayaran: React.FC<PembayaranModalProps> = ({
+const Payment: React.FC<PaymentModalProps> = ({
   open,
   onClose,
   onSubmit,
@@ -287,4 +287,4 @@ const Pembayaran: React.FC<PembayaranModalProps> = ({
     : node;
 };
 
-export default Pembayaran;
+export default Payment;

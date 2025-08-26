@@ -22,13 +22,13 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "../../components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import TambahKelas, {
   type ClassRow as NewClassRow,
 } from "./components/AddClass";
 import TambahLevel from "./components/AddLevel";
 import axios from "@/lib/axios";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* =============== Types =============== */
 export type ClassStatus = "active" | "inactive";
@@ -299,7 +299,7 @@ export default function SchoolClasses() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <SchoolSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header (tanpa tombol aksi) */}

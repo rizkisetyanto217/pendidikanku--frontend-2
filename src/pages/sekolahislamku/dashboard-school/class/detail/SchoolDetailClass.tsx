@@ -12,9 +12,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import {
   ArrowLeft,
   BookOpen,
@@ -23,6 +21,7 @@ import {
   CalendarDays,
   Clock4,
 } from "lucide-react";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 /* =========================================
    DUMMY SWITCH
@@ -502,7 +501,7 @@ export default function SchoolDetailClass() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* === Sidebar kiri === */}
-          <SchoolSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* === Konten kanan === */}
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">

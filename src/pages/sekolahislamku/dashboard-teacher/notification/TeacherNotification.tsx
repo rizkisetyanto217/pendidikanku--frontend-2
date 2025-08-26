@@ -12,7 +12,7 @@ import {
 
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import { NavLink } from "react-router-dom";
 
 import {
@@ -32,9 +32,9 @@ import {
   CreditCard,
   X,
 } from "lucide-react";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+
 import MiniBar from "@/pages/sekolahislamku/components/ui/MiniBar";
-import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 interface Announcement {
@@ -358,7 +358,7 @@ export default function TeacherNotification() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Dashboard Pengajar"
         gregorianDate={data?.gregorianDate}
@@ -403,7 +403,7 @@ export default function TeacherNotification() {
       {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Main */}
           <div className="flex-1 space-y-6">

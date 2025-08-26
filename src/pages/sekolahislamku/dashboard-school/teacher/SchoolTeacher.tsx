@@ -13,8 +13,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
 import {
   UserCog,
@@ -28,8 +27,9 @@ import {
   Phone,
   Briefcase,
 } from "lucide-react";
-import TambahGuru from "./components/TambahGuru";
-import UploadFileGuru from "./components/UploadFileGuru";
+import TambahGuru from "./components/AddTeacher";
+import UploadFileGuru from "./components/UploadFileTeacher";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================= */
 export type TeacherStatus = "aktif" | "nonaktif" | "alumni";
@@ -85,11 +85,11 @@ const DEFAULT_SUBJECTS = [
 
 /* ================= Components kecil ================= */
 const PageHeader = ({
-  theme,
+  palette,
   onImportClick,
   onAddClick,
 }: {
-  theme: Palette;
+  palette: Palette;
   onImportClick: () => void;
   onAddClick: () => void;
 }) => (
@@ -97,20 +97,20 @@ const PageHeader = ({
     <div className="flex items-center gap-3">
       <div
         className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl grid place-items-center flex-shrink-0"
-        style={{ background: theme.primary2, color: theme.primary }}
+        style={{ background: palette.primary2, color: palette.primary }}
       >
         <UserCog size={16} className="sm:w-5 sm:h-5" />
       </div>
       <div className="min-w-0 flex-1">
         <h1
           className="text-lg sm:text-xl font-semibold truncate"
-          style={{ color: theme.black1 }}
+          style={{ color: palette.black1 }}
         >
           Guru
         </h1>
         <p
           className="text-xs sm:text-sm line-clamp-1"
-          style={{ color: theme.silver2 }}
+          style={{ color: palette.silver2 }}
         >
           Kelola data pengajar, filter, dan tindakan cepat.
         </p>
@@ -122,7 +122,7 @@ const PageHeader = ({
         onClick={onImportClick}
         className="flex items-center gap-1.5 text-xs sm:text-sm"
         size="sm"
-        palette={theme}
+        palette={palette}
         variant="outline"
       >
         <Upload size={14} />
@@ -134,7 +134,7 @@ const PageHeader = ({
         variant="default"
         className="flex items-center gap-1.5 text-xs sm:text-sm"
         size="sm"
-        palette={theme}
+        palette={palette}
         onClick={onAddClick}
       >
         <UserPlus size={14} />
@@ -149,22 +149,22 @@ const StatCard = ({
   title,
   value,
   icon,
-  theme,
+  palette,
 }: {
   title: string;
   value: number;
   icon: React.ReactNode;
-  theme: Palette;
+  palette: Palette;
 }) => (
-  <SectionCard palette={theme} className="p-3 sm:p-4">
+  <SectionCard palette={palette} className="p-3 sm:p-4">
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-xs sm:text-sm" style={{ color: theme.silver2 }}>
+        <p className="text-xs sm:text-sm" style={{ color: palette.silver2 }}>
           {title}
         </p>
         <p
           className="text-lg sm:text-2xl font-semibold"
-          style={{ color: theme.black1 }}
+          style={{ color: palette.black1 }}
         >
           {value}
         </p>
@@ -176,53 +176,53 @@ const StatCard = ({
 
 const StatsGrid = ({
   stats,
-  theme,
+  palette,
 }: {
   stats: TeacherStats;
-  theme: Palette;
+  palette: Palette;
 }) => (
   <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
     <StatCard
       title="Total Guru"
       value={stats.total}
       icon={<Briefcase size={18} />}
-      theme={theme}
+      palette={palette}
     />
     <StatCard
       title="Aktif"
       value={stats.aktif}
       icon={
-        <Badge variant="success" palette={theme} className="text-xs px-2">
+        <Badge variant="success" palette={palette} className="text-xs px-2">
           OK
         </Badge>
       }
-      theme={theme}
+      palette={palette}
     />
     <StatCard
       title="Laki-laki"
       value={stats.L}
       icon={
-        <Badge palette={theme} className="text-xs px-2">
+        <Badge palette={palette} className="text-xs px-2">
           L
         </Badge>
       }
-      theme={theme}
+      palette={palette}
     />
     <StatCard
       title="Perempuan"
       value={stats.P}
       icon={
-        <Badge palette={theme} className="text-xs px-2">
+        <Badge palette={palette} className="text-xs px-2">
           P
         </Badge>
       }
-      theme={theme}
+      palette={palette}
     />
   </div>
 );
 
 interface FiltersProps {
-  theme: Palette;
+  palette: Palette;
   q: string;
   setQ: (value: string) => void;
   mapel: string | undefined;
@@ -234,7 +234,7 @@ interface FiltersProps {
 }
 
 const FiltersSection = ({
-  theme,
+  palette,
   q,
   setQ,
   mapel,
@@ -244,23 +244,23 @@ const FiltersSection = ({
   subjects,
   onApply,
 }: FiltersProps) => (
-  <SectionCard palette={theme} className="p-3 sm:p-4">
+  <SectionCard palette={palette} className="p-3 sm:p-4">
     <div className="space-y-3">
       <div
         className="flex items-center gap-2 rounded-xl px-3 py-2.5 sm:py-2 border"
-        style={{ borderColor: theme.silver1, background: theme.white1 }}
+        style={{ borderColor: palette.silver1, background: palette.white1 }}
       >
         <Search
           size={16}
           className="flex-shrink-0"
-          style={{ color: theme.silver2 }}
+          style={{ color: palette.silver2 }}
         />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Cari nama, NIP, email…"
           className="w-full bg-transparent outline-none text-sm"
-          style={{ color: theme.black1 }}
+          style={{ color: palette.black1 }}
         />
       </div>
 
@@ -269,12 +269,12 @@ const FiltersSection = ({
           <div
             className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
             style={{
-              borderColor: theme.silver1,
-              background: theme.white1,
-              color: theme.black1,
+              borderColor: palette.silver1,
+              background: palette.white1,
+              color: palette.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: theme.silver2 }}>
+            <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
               Mapel
             </div>
             <select
@@ -294,12 +294,12 @@ const FiltersSection = ({
           <div
             className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
             style={{
-              borderColor: theme.silver1,
-              background: theme.white1,
-              color: theme.black1,
+              borderColor: palette.silver1,
+              background: palette.white1,
+              color: palette.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: theme.silver2 }}>
+            <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
               Status
             </div>
             <select
@@ -321,7 +321,7 @@ const FiltersSection = ({
           size="sm"
           className="flex items-center justify-center gap-2 text-sm py-2.5 sm:py-2"
           onClick={onApply}
-          palette={theme}
+          palette={palette}
         >
           <Filter size={16} /> Terapkan
         </Btn>
@@ -332,47 +332,47 @@ const FiltersSection = ({
 
 const TeacherTableRow = ({
   teacher,
-  theme,
+  palette,
 }: {
   teacher: TeacherItem;
-  theme: Palette;
+  palette: Palette;
 }) => (
   <tr
     className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-    style={{ borderColor: theme.silver1 }}
+    style={{ borderColor: palette.silver1 }}
   >
     <td className="py-3 align-top">
-      <div className="font-medium" style={{ color: theme.black1 }}>
+      <div className="font-medium" style={{ color: palette.black1 }}>
         {teacher.nip ?? "-"}
       </div>
     </td>
     <td className="py-3 align-top">
-      <div className="font-medium" style={{ color: theme.black1 }}>
+      <div className="font-medium" style={{ color: palette.black1 }}>
         {teacher.name}
       </div>
       {teacher.email && (
-        <div className="text-xs" style={{ color: theme.silver2 }}>
+        <div className="text-xs" style={{ color: palette.silver2 }}>
           {teacher.email}
         </div>
       )}
     </td>
-    <td className="py-3 align-top" style={{ color: theme.black1 }}>
+    <td className="py-3 align-top" style={{ color: palette.black1 }}>
       {teacher.subject ?? "-"}
     </td>
-    <td className="py-3 align-top" style={{ color: theme.black1 }}>
+    <td className="py-3 align-top" style={{ color: palette.black1 }}>
       {genderLabel(teacher.gender)}
     </td>
     <td className="py-3 align-top">
       <div
         className="flex items-center gap-3 text-sm"
-        style={{ color: theme.black1 }}
+        style={{ color: palette.black1 }}
       >
         {teacher.phone && (
           <a
             href={`tel:${teacher.phone}`}
             className="flex items-center gap-1 hover:underline"
             title={`Telepon ${teacher.phone}`}
-            style={{ color: theme.primary }}
+            style={{ color: palette.primary }}
           >
             <Phone size={14} /> {teacher.phone}
           </a>
@@ -382,7 +382,7 @@ const TeacherTableRow = ({
             href={`mailto:${teacher.email}`}
             className="flex items-center gap-1 hover:underline"
             title={`Email ${teacher.email}`}
-            style={{ color: theme.primary }}
+            style={{ color: palette.primary }}
           >
             <Mail size={14} /> Email
           </a>
@@ -391,17 +391,17 @@ const TeacherTableRow = ({
     </td>
     <td className="py-3 align-top">
       {teacher.status === "aktif" && (
-        <Badge variant="success" palette={theme}>
+        <Badge variant="success" palette={palette}>
           Aktif
         </Badge>
       )}
       {teacher.status === "nonaktif" && (
-        <Badge variant="warning" palette={theme}>
+        <Badge variant="warning" palette={palette}>
           Nonaktif
         </Badge>
       )}
       {teacher.status === "alumni" && (
-        <Badge variant="info" palette={theme}>
+        <Badge variant="info" palette={palette}>
           Alumni
         </Badge>
       )}
@@ -411,7 +411,7 @@ const TeacherTableRow = ({
         <NavLink to={`/sekolah/guru/${teacher.id}`}>
           <Btn
             size="sm"
-            palette={theme}
+            palette={palette}
             variant="quaternary"
             className="flex items-center gap-1"
           >
@@ -419,7 +419,7 @@ const TeacherTableRow = ({
           </Btn>
         </NavLink>
         <NavLink to={`/sekolah/absensi?guru=${teacher.id}`}>
-          <Btn size="sm" palette={theme} variant="outline">
+          <Btn size="sm" palette={palette} variant="outline">
             Absensi
           </Btn>
         </NavLink>
@@ -429,7 +429,7 @@ const TeacherTableRow = ({
 );
 
 interface TeachersTableProps {
-  theme: Palette;
+  palette: Palette;
   teachers: TeacherItem[];
   isLoading: boolean;
   isError: boolean;
@@ -438,21 +438,21 @@ interface TeachersTableProps {
 }
 
 const TeachersTable = ({
-  theme,
+  palette,
   teachers,
   isLoading,
   isError,
   isFetching,
   onRefetch,
 }: TeachersTableProps) => (
-  <SectionCard palette={theme} className="p-0 sm:p-2 lg:p-4">
+  <SectionCard palette={palette} className="p-0 sm:p-2 lg:p-4">
     {/* Desktop Table View */}
     <div className="overflow-auto">
       <table className="min-w-[800px] w-full">
         <thead>
           <tr
             className="text-left text-sm border-b"
-            style={{ color: theme.silver2, borderColor: theme.silver1 }}
+            style={{ color: palette.silver2, borderColor: palette.silver1 }}
           >
             <th className="py-3">NIP</th>
             <th>Nama</th>
@@ -469,7 +469,7 @@ const TeachersTable = ({
               <td
                 colSpan={7}
                 className="py-8 text-center"
-                style={{ color: theme.silver2 }}
+                style={{ color: palette.silver2 }}
               >
                 Memuat data…
               </td>
@@ -480,7 +480,7 @@ const TeachersTable = ({
               <td colSpan={7} className="py-8">
                 <div
                   className="flex items-center gap-2 justify-center text-sm"
-                  style={{ color: theme.warning1 }}
+                  style={{ color: palette.warning1 }}
                 >
                   <AlertTriangle size={16} />
                   Terjadi kesalahan.
@@ -496,7 +496,7 @@ const TeachersTable = ({
               <td
                 colSpan={7}
                 className="py-10 text-center"
-                style={{ color: theme.silver2 }}
+                style={{ color: palette.silver2 }}
               >
                 Belum ada data guru.
               </td>
@@ -505,7 +505,7 @@ const TeachersTable = ({
           {!isLoading &&
             !isError &&
             teachers.map((t) => (
-              <TeacherTableRow key={t.id} teacher={t} theme={theme} />
+              <TeacherTableRow key={t.id} teacher={t} palette={palette} />
             ))}
         </tbody>
       </table>
@@ -513,7 +513,7 @@ const TeachersTable = ({
 
     <div
       className="p-3 sm:mt-3 text-xs flex items-center justify-between border-t"
-      style={{ color: theme.silver2, borderColor: theme.silver1 }}
+      style={{ color: palette.silver2, borderColor: palette.silver1 }}
     >
       <div>
         {isFetching ? "Memuat ulang…" : `Menampilkan ${teachers.length} data`}
@@ -530,7 +530,7 @@ const TeachersTable = ({
 /* ================= Main Component ================= */
 export default function TeachersPage() {
   const { isDark } = useHtmlDarkMode();
-  const theme: Palette = isDark ? colors.dark : colors.light;
+  const palette: Palette = isDark ? colors.dark : colors.light;
 
   // Modal
   const [openAdd, setOpenAdd] = useState(false);
@@ -621,7 +621,7 @@ export default function TeachersPage() {
       <TambahGuru
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        palette={theme}
+        palette={palette}
         subjects={subjects}
         masjidId={masjidId}
         onCreated={() => refetch()}
@@ -629,24 +629,24 @@ export default function TeachersPage() {
       <UploadFileGuru
         open={openImport}
         onClose={() => setOpenImport(false)}
-        palette={theme}
+        palette={palette}
       />
 
-      <ParentTopBar palette={theme} title="Guru" />
+      <ParentTopBar palette={palette} title="Guru" />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
-        <SchoolSidebarNav palette={theme} className="hidden lg:block" />
+        <ParentSidebar palette={palette} className="hidden lg:block" />
 
         <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
           <PageHeader
-            theme={theme}
+            palette={palette}
             onImportClick={() => setOpenImport(true)}
             onAddClick={() => setOpenAdd(true)}
           />
 
-          <StatsGrid stats={stats} theme={theme} />
+          <StatsGrid stats={stats} palette={palette} />
 
           <FiltersSection
-            theme={theme}
+            palette={palette}
             q={q}
             setQ={setQ}
             mapel={mapel}
@@ -658,7 +658,7 @@ export default function TeachersPage() {
           />
 
           <TeachersTable
-            theme={theme}
+            palette={palette}
             teachers={teachers}
             isLoading={isLoading && !!masjidId}
             isError={isError}

@@ -6,8 +6,9 @@ import {
   SectionCard,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+
 
 // Interface untuk data tagihan
 interface Tagihan {
@@ -166,7 +167,6 @@ const TotalTagihan: React.FC<TotalTagihanProps> = ({
   );
 };
 
-
 // Komponen utama
 const AllInvoices: React.FC = () => {
   const { isDark } = useHtmlDarkMode();
@@ -223,7 +223,7 @@ const AllInvoices: React.FC = () => {
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar kiri */}
           <div className="lg:w-64 mb-6 lg:mb-0">
-            <SchoolSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </div>
 
           {/* Konten utama */}

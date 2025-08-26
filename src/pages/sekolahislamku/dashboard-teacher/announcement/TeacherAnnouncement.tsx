@@ -11,8 +11,8 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+
 
 import {
   Megaphone,
@@ -30,8 +30,8 @@ import {
   EyeOff,
   Clock,
 } from "lucide-react";
-import TeacherTopBar from "../../components/home/TeacherTopBar";
 import AnnouncementsListCard from "../../components/card/AnnouncementsListCard";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 /* ================= Types ================ */
@@ -331,7 +331,7 @@ export default function TeacherAnnouncements() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Pengumuman"
         gregorianDate={data?.gregorianDate}
@@ -342,7 +342,7 @@ export default function TeacherAnnouncements() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar */}
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Main */}
           <div className="flex-1 space-y-6">
@@ -364,8 +364,6 @@ export default function TeacherAnnouncements() {
                         <Plus className="mr-2" size={16} />
                         Buat Pengumuman
                       </Btn>
-
-                    
                     </div>
                   </div>
 

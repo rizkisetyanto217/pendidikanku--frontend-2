@@ -42,7 +42,7 @@ type ApiUsersSearchResponse = {
 };
 
 /* ================= Component ================ */
-export default function TambahGuru({
+export default function AddTeacher({
   open,
   palette,
   subjects,

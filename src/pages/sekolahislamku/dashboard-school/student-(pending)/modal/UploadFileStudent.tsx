@@ -1,4 +1,4 @@
-// src/pages/sekolahislamku/students/components/UploadFileSiswa.tsx
+// src/pages/sekolahislamku/students/components/UploadFileStudent.tsx
 import React, { useRef, useState } from "react";
 import {
   SectionCard,
@@ -13,7 +13,7 @@ type Props = {
   palette: Palette;
 };
 
-const UploadFileSiswa: React.FC<Props> = ({ open, onClose, palette }) => {
+const UploadFileStudent: React.FC<Props> = ({ open, onClose, palette }) => {
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -137,4 +137,4 @@ const UploadFileSiswa: React.FC<Props> = ({ open, onClose, palette }) => {
   );
 };
 
-export default UploadFileSiswa;
+export default UploadFileStudent;

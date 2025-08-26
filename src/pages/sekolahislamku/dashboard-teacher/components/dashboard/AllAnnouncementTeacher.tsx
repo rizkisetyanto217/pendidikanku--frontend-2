@@ -6,10 +6,10 @@ import {
   SectionCard,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+
+
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 // Types dan Interfaces
 type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
@@ -671,7 +671,7 @@ const AllAnnouncementTeacher: React.FC = () => {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Top Bar */}
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         gregorianDate={currentDate}
         title="Semua Pengumuman"
@@ -682,7 +682,7 @@ const AllAnnouncementTeacher: React.FC = () => {
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar kiri */}
           <div className="lg:w-64 mb-6 lg:mb-0">
-            <TeacherSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </div>
 
           {/* Konten utama */}

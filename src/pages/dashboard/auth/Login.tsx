@@ -14,18 +14,107 @@ import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import api from "@/lib/axios";
 import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton";
-import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal"; // ⬅️ import modal
+import LegalModal from "@/pages/dashboard/auth/components/LegalPrivacyModal";
 
+/* =======================
+   Types (ringkas)
+======================= */
+type AuthMe = {
+  user?: {
+    role?: "dkm" | "author" | "admin" | "teacher" | "user";
+    masjid_admin_ids?: string[];
+    masjid_teacher_ids?: string[];
+    masjid_student_ids?: string[];
+  };
+};
+
+/* =======================
+   Config
+======================= */
+const FORCE_RELOAD_AFTER_REDIRECT = true; // set ke false kalau tak perlu reload
+const DEFAULT_USER_REDIRECT = "/masjid/masjid-baitussalam";
+
+/* =======================
+   Utilities
+======================= */
+function storeToken(token: string, remember: boolean) {
+  if (remember) localStorage.setItem("access_token", token);
+  else sessionStorage.setItem("access_token", token);
+  try {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } catch {}
+}
+
+function pickPrimaryMasjidId(me: AuthMe): string | null {
+  const u = me?.user;
+  if (!u) return null;
+  const id =
+    (u.masjid_admin_ids && u.masjid_admin_ids[0]) ||
+    (u.masjid_teacher_ids && u.masjid_teacher_ids[0]) ||
+    (u.masjid_student_ids && u.masjid_student_ids[0]) ||
+    null;
+  return id ?? null;
+}
+
+async function redirectAfterLogin(args: {
+  role: string;
+  me: AuthMe;
+  slugParam?: string;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  const { role, me, slugParam, navigate } = args;
+
+  if (role === "dkm") {
+    const masjidId = pickPrimaryMasjidId(me);
+
+    if (import.meta.env?.DEV) {
+      console.debug("[Login] role=dkm, selected masjidId:", masjidId, me);
+    }
+
+    if (masjidId) {
+      localStorage.setItem("ctx_masjid_id", masjidId); // simpan konteks
+      navigate(`/${encodeURIComponent(masjidId)}/sekolah`, { replace: true });
+    } else {
+      // kalau belum punya institusi → fallback
+      navigate("/dkm", { replace: true });
+    }
+
+    if (FORCE_RELOAD_AFTER_REDIRECT) window.location.reload();
+    return;
+  }
+
+  // role lain
+  switch (role) {
+    case "author":
+      navigate("/author", { replace: true });
+      break;
+    case "admin":
+      navigate("/admin", { replace: true });
+      break;
+    case "teacher":
+      navigate("/teacher", { replace: true });
+      break;
+    case "user":
+    default: {
+      const target = slugParam ? `/masjid/${slugParam}` : DEFAULT_USER_REDIRECT;
+      navigate(target, { replace: true });
+      break;
+    }
+  }
+  if (FORCE_RELOAD_AFTER_REDIRECT) window.location.reload();
+}
+
+/* =======================
+   Component
+======================= */
 export default function Login() {
-  const { slug } = useParams();
+  const { slug: slugParam } = useParams();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // ⬅️ state untuk buka modal & tab awal
   const [openLegal, setOpenLegal] = useState<false | "tos" | "privacy">(false);
 
   const navigate = useNavigate();
@@ -54,33 +143,10 @@ export default function Login() {
     [theme, loading]
   );
 
-  const redirectToDashboard = (role: string) => {
-    switch (role) {
-      case "dkm":
-        navigate("/dkm");
-        break;
-      case "author":
-        navigate("/author");
-        break;
-      case "admin":
-        navigate("/admin");
-        break;
-      case "teacher":
-        navigate("/teacher");
-        break;
-      case "user":
-      default: {
-        const target = slug ? `/masjid/${slug}` : "/masjid/masjid-baitussalam";
-        navigate(target, { replace: true });
-        break;
-      }
-    }
-    window.location.reload();
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
     if (!identifier || !password) {
       setError("Harap isi email/username dan password.");
       return;
@@ -89,39 +155,51 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await api.post("/auth/login", { identifier, password });
-      const token = res.data?.data?.access_token ?? res.data?.access_token;
-      if (token) {
-        if (remember) localStorage.setItem("access_token", token);
-        else sessionStorage.setItem("access_token", token);
-      }
+      const token =
+        (res.data as any)?.data?.access_token ||
+        (res.data as any)?.access_token;
+      if (!token) throw new Error("Token tidak ditemukan.");
+      storeToken(token, remember);
 
-      const me = await api.get("/api/auth/me");
-      const role = me.data.user?.role ?? "user";
-      redirectToDashboard(role);
+      const meRes = await api.get("/api/auth/me");
+      const me: AuthMe = meRes.data ?? {};
+      const role = me?.user?.role ?? "user";
+
+      await redirectAfterLogin({ role, me, slugParam, navigate });
     } catch (err: any) {
-      if (err.response)
-        setError(err.response.data.message || "Login gagal, coba lagi.");
-      else if (err.request) setError("Tidak ada respon dari server.");
-      else setError("Terjadi kesalahan saat login.");
+      if (import.meta.env?.DEV) console.error("[LOGIN ERROR]", err);
+      if (err?.response)
+        setError(err.response.data?.message || "Login gagal, coba lagi.");
+      else if (err?.request) setError("Tidak ada respon dari server.");
+      else setError(err?.message || "Terjadi kesalahan saat login.");
     } finally {
       setLoading(false);
     }
   };
 
   const onGoogleSuccess = async (credential: string) => {
+    setError("");
+    setLoading(true);
     try {
       const res = await api.post("/auth/login-google", {
         id_token: credential,
       });
-      const token = res.data?.data?.access_token ?? res.data?.access_token;
-      if (token) localStorage.setItem("access_token", token);
+      const token =
+        (res.data as any)?.data?.access_token ||
+        (res.data as any)?.access_token;
+      if (!token) throw new Error("Token tidak ditemukan (Google).");
+      storeToken(token, true);
 
-      const me = await api.get("/api/auth/me");
-      const role = me.data.user?.role ?? "user";
-      redirectToDashboard(role);
+      const meRes = await api.get("/api/auth/me");
+      const me: AuthMe = meRes.data ?? {};
+      const role = me?.user?.role ?? "user";
+
+      await redirectAfterLogin({ role, me, slugParam, navigate });
     } catch (err) {
-      console.error("[GOOGLE LOGIN ERROR]", err);
+      if (import.meta.env?.DEV) console.error("[GOOGLE LOGIN ERROR]", err);
       setError("Login Google gagal. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -340,7 +418,7 @@ export default function Login() {
           />
         </div>
 
-        {/* Google Sign-In (reusable) */}
+        {/* Google Sign-In */}
         <div className="w-full flex justify-center">
           <GoogleIdentityButton
             clientId="330051036041-8src8un315p823ap640hv70vp3448ruh.apps.googleusercontent.com"
@@ -352,7 +430,7 @@ export default function Login() {
           />
         </div>
 
-        {/* Ketentuan -> buka modal */}
+        {/* Ketentuan */}
         <div className="mt-6 text-xs text-center" style={styles.muted}>
           Dengan masuk, Anda menyetujui{" "}
           <button
@@ -376,13 +454,11 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ===== Modal S&K / Privasi ===== */}
+      {/* Modal S&K / Privasi */}
       <LegalModal
         open={!!openLegal}
         initialTab={openLegal === "privacy" ? "privacy" : "tos"}
         onClose={() => setOpenLegal(false)}
-        // showAccept // <- aktifkan kalau perlu tombol “Saya Setuju”
-        // onAccept={() => setOpenLegal(false)}
       />
     </AuthLayout>
   );

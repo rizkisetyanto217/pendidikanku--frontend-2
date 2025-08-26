@@ -20,7 +20,7 @@ const ALLOWED = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
-const UploadFileGuru: React.FC<Props> = ({ open, onClose, palette }) => {
+const UploadFileTeacher: React.FC<Props> = ({ open, onClose, palette }) => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -186,4 +186,4 @@ const UploadFileGuru: React.FC<Props> = ({ open, onClose, palette }) => {
   );
 };
 
-export default UploadFileGuru;
+export default UploadFileTeacher;

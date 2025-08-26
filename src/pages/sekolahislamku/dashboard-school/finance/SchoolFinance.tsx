@@ -13,8 +13,7 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
 import {
   Wallet,
@@ -29,9 +28,10 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import Tagihan from "./modal/Tagihan";
+import Tagihan from "./modal/Bill";
 import Export from "./modal/Export";
-import Pembayaran from "./modal/Pembayaran";
+import Pembayaran from "./modal/Payment";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue";
@@ -79,17 +79,15 @@ const dateFmt = (iso?: string) =>
 /* =============== Main Page =============== */
 export default function SchoolFinance() {
   const { isDark } = useHtmlDarkMode();
-  const theme: Palette = isDark ? colors.dark : colors.light;
+  const palette: Palette = isDark ? colors.dark : colors.light;
   const qc = useQueryClient();
 
   // state ModalTagihan
   const [openModal, setOpenModal] = useState(false);
-  // state Export 
+  // state Export
   const [openExport, setOpenExport] = useState(false);
   // state pembayaran
   const [openPay, setOpenPay] = useState(false);
-
-
 
   // filters
   const today = new Date();
@@ -189,12 +187,12 @@ export default function SchoolFinance() {
           console.log("Data tagihan baru:", data);
           // TODO: panggil API create invoice
         }}
-        palette={theme}
+        palette={palette}
       />
       <Export
         open={openExport}
         onClose={() => setOpenExport(false)}
-        palette={theme}
+        palette={palette}
         // onSubmit opsional; kalau di-skip, modal cuma console.log & close
         onSubmit={({ month, format, file }) => {
           console.log("UI ONLY:", { month, format, file });
@@ -207,17 +205,17 @@ export default function SchoolFinance() {
           console.log("Pembayaran baru:", data);
           // TODO: panggil API create payment
         }}
-        palette={theme}
+        palette={palette}
         invoiceOptions={invoices.map((inv) => ({
           value: inv.id,
           label: `${inv.title} — ${inv.student_name ?? "-"}`,
         }))}
       />
 
-      <ParentTopBar palette={theme} title="Keuangan" />
+      <ParentTopBar palette={palette} title="Keuangan" />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         {/* Sidebar kiri */}
-        <SchoolSidebarNav palette={theme} className="hidden lg:block" />
+        <ParentSidebar palette={palette} className="hidden lg:block" />
 
         {/* Konten kanan */}
         <main className="flex-1 mx-auto w-full max-w-6xl py-4 md:py-6 space-y-5 px-3 md:px-0">
@@ -226,18 +224,18 @@ export default function SchoolFinance() {
             <div className="flex items-center gap-3">
               <div
                 className="h-10 w-10 rounded-xl grid place-items-center"
-                style={{ background: theme.white3, color: theme.quaternary }}
+                style={{ background: palette.white3, color: palette.quaternary }}
               >
                 <Wallet size={20} />
               </div>
               <div>
                 <h1
                   className="text-lg md:text-xl font-semibold"
-                  style={{ color: theme.quaternary }}
+                  style={{ color: palette.quaternary }}
                 >
                   Keuangan
                 </h1>
-                <p className="text-sm" style={{ color: theme.secondary }}>
+                <p className="text-sm" style={{ color: palette.secondary }}>
                   Kelola tagihan & pembayaran.
                 </p>
               </div>
@@ -247,7 +245,7 @@ export default function SchoolFinance() {
             <div className="hidden md:flex items-center gap-2">
               <Btn
                 onClick={() => setOpenExport(true)}
-                palette={theme}
+                palette={palette}
                 size="sm"
                 variant="outline"
               >
@@ -257,7 +255,7 @@ export default function SchoolFinance() {
               <Btn
                 type="button"
                 onClick={() => setOpenModal(true)}
-                palette={theme}
+                palette={palette}
                 size="sm"
                 variant="default"
                 className="gap-1"
@@ -267,7 +265,7 @@ export default function SchoolFinance() {
               </Btn>
 
               <Btn
-                palette={theme}
+                palette={palette}
                 size="sm"
                 variant="quaternary"
                 className="flex items-center gap-2"
@@ -284,7 +282,7 @@ export default function SchoolFinance() {
               <Btn
                 onClick={() => setOpenModal(true)}
                 type="button"
-                palette={theme}
+                palette={palette}
                 size="sm"
                 variant="default"
                 className="flex items-center gap-2 flex-1 justify-center"
@@ -295,7 +293,7 @@ export default function SchoolFinance() {
 
               {/* Rekam Pembayaran */}
               <Btn
-                palette={theme}
+                palette={palette}
                 size="sm"
                 variant="quaternary"
                 onClick={() => setOpenPay(true)}
@@ -308,7 +306,7 @@ export default function SchoolFinance() {
               {/* Export */}
               <Btn
                 onClick={() => setOpenExport(true)}
-                palette={theme}
+                palette={palette}
                 size="sm"
                 variant="outline"
                 className="flex items-center gap-2 flex-1 justify-center"
@@ -321,15 +319,15 @@ export default function SchoolFinance() {
 
           {/* Snapshot */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs" style={{ color: theme.secondary }}>
+                  <p className="text-xs" style={{ color: palette.secondary }}>
                     Tertagih Bulan Ini
                   </p>
                   <div
                     className="text-xl md:text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {idr(billed)}
                   </div>
@@ -337,33 +335,33 @@ export default function SchoolFinance() {
                 <Calendar size={18} />
               </div>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs" style={{ color: theme.secondary }}>
+                  <p className="text-xs" style={{ color: palette.secondary }}>
                     Tunggakan
                   </p>
                   <div
                     className="text-xl md:text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {idr(outstanding)}
                   </div>
                 </div>
-                <Badge variant="warning" palette={theme}>
+                <Badge variant="warning" palette={palette}>
                   Perlu perhatian
                 </Badge>
               </div>
             </SectionCard>
-            <SectionCard palette={theme} className="p-4">
+            <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs" style={{ color: theme.secondary }}>
+                  <p className="text-xs" style={{ color: palette.secondary }}>
                     Pembayaran Masuk
                   </p>
                   <div
                     className="text-xl md:text-2xl font-semibold"
-                    style={{ color: theme.quaternary }}
+                    style={{ color: palette.quaternary }}
                   >
                     {idr(collected)}
                   </div>
@@ -374,16 +372,16 @@ export default function SchoolFinance() {
           </div>
 
           {/* Filter bar */}
-          <SectionCard palette={theme} className="p-3 md:p-4">
+          <SectionCard palette={palette} className="p-3 md:p-4">
             {/* Header filter untuk mobile */}
             <div className="md:hidden mb-2">
               <button
                 onClick={() => setShowFiltersMobile((s) => !s)}
                 className="w-full flex items-center justify-between rounded-xl border px-3 py-2 text-sm"
                 style={{
-                  borderColor: theme.white3,
-                  background: theme.white1,
-                  color: theme.quaternary,
+                  borderColor: palette.white3,
+                  background: palette.white1,
+                  color: palette.quaternary,
                 }}
                 aria-expanded={showFiltersMobile}
                 aria-controls="filters-area"
@@ -410,7 +408,7 @@ export default function SchoolFinance() {
             >
               <div
                 className="min-h-0 flex items-center gap-2 rounded-xl px-3 py-2 border"
-                style={{ borderColor: theme.white3, background: theme.white1 }}
+                style={{ borderColor: palette.white3, background: palette.white1 }}
               >
                 <Search size={16} />
                 <input
@@ -422,7 +420,7 @@ export default function SchoolFinance() {
                       : "Cari pembayaran…"
                   }
                   className="w-full bg-transparent outline-none"
-                  style={{ color: theme.quaternary }}
+                  style={{ color: palette.quaternary }}
                   aria-label="Pencarian"
                 />
               </div>
@@ -430,12 +428,12 @@ export default function SchoolFinance() {
               <div
                 className="min-h-0 rounded-xl border px-3 py-2"
                 style={{
-                  borderColor: theme.white3,
-                  background: theme.white1,
-                  color: theme.quaternary,
+                  borderColor: palette.white3,
+                  background: palette.white1,
+                  color: palette.quaternary,
                 }}
               >
-                <div className="text-xs" style={{ color: theme.secondary }}>
+                <div className="text-xs" style={{ color: palette.secondary }}>
                   Bulan
                 </div>
                 <input
@@ -451,12 +449,12 @@ export default function SchoolFinance() {
                   <div
                     className="min-h-0 rounded-xl border px-3 py-2"
                     style={{
-                      borderColor: theme.white3,
-                      background: theme.white1,
-                      color: theme.quaternary,
+                      borderColor: palette.white3,
+                      background: palette.white1,
+                      color: palette.quaternary,
                     }}
                   >
-                    <div className="text-xs" style={{ color: theme.secondary }}>
+                    <div className="text-xs" style={{ color: palette.secondary }}>
                       Kelas
                     </div>
                     <select
@@ -475,12 +473,12 @@ export default function SchoolFinance() {
                   <div
                     className="min-h-0 rounded-xl border px-3 py-2"
                     style={{
-                      borderColor: theme.white3,
-                      background: theme.white1,
-                      color: theme.quaternary,
+                      borderColor: palette.white3,
+                      background: palette.white1,
+                      color: palette.quaternary,
                     }}
                   >
-                    <div className="text-xs" style={{ color: theme.secondary }}>
+                    <div className="text-xs" style={{ color: palette.secondary }}>
                       Jenis
                     </div>
                     <select
@@ -499,12 +497,12 @@ export default function SchoolFinance() {
                   <div
                     className="min-h-0 rounded-xl border px-3 py-2"
                     style={{
-                      borderColor: theme.white3,
-                      background: theme.white1,
-                      color: theme.quaternary,
+                      borderColor: palette.white3,
+                      background: palette.white1,
+                      color: palette.quaternary,
                     }}
                   >
-                    <div className="text-xs" style={{ color: theme.secondary }}>
+                    <div className="text-xs" style={{ color: palette.secondary }}>
                       Status
                     </div>
                     <select
@@ -531,7 +529,7 @@ export default function SchoolFinance() {
                   invoicesQuery.refetch();
                   paymentsQuery.refetch();
                 }}
-                palette={theme}
+                palette={palette}
               >
                 <Filter size={16} /> Terapkan
               </Btn>
@@ -544,9 +542,9 @@ export default function SchoolFinance() {
               onClick={() => setTab("invoices")}
               className="flex-1 md:flex-none px-3 py-2 rounded-xl text-sm border"
               style={{
-                borderColor: theme.silver1,
-                color: tab === "invoices" ? theme.quaternary : theme.secondary,
-                background: tab === "invoices" ? theme.white2 : theme.white1,
+                borderColor: palette.silver1,
+                color: tab === "invoices" ? palette.quaternary : palette.secondary,
+                background: tab === "invoices" ? palette.white2 : palette.white1,
                 fontWeight: tab === "invoices" ? 600 : 500,
               }}
               aria-pressed={tab === "invoices"}
@@ -557,9 +555,9 @@ export default function SchoolFinance() {
               onClick={() => setTab("payments")}
               className="flex-1 md:flex-none px-3 py-2 rounded-xl text-sm border"
               style={{
-                borderColor: theme.silver1,
-                color: tab === "payments" ? theme.quaternary : theme.secondary,
-                background: tab === "payments" ? theme.white2 : theme.white1,
+                borderColor: palette.silver1,
+                color: tab === "payments" ? palette.quaternary : palette.secondary,
+                background: tab === "payments" ? palette.white2 : palette.white1,
                 fontWeight: tab === "payments" ? 600 : 500,
               }}
               aria-pressed={tab === "payments"}
@@ -570,16 +568,16 @@ export default function SchoolFinance() {
 
           {/* Content */}
           {tab === "invoices" ? (
-            <SectionCard palette={theme} className="p-2 md:p-4">
+            <SectionCard palette={palette} className="p-2 md:p-4">
               {/* Mobile: card list */}
               <ul
                 className="md:hidden divide-y"
-                style={{ borderColor: theme.white3 }}
+                style={{ borderColor: palette.white3 }}
               >
                 {invoicesQuery.isLoading && (
                   <li
                     className="py-6 text-center"
-                    style={{ color: theme.secondary }}
+                    style={{ color: palette.secondary }}
                   >
                     Memuat data…
                   </li>
@@ -588,7 +586,7 @@ export default function SchoolFinance() {
                   <li className="py-6">
                     <div
                       className="flex items-center gap-2 justify-center text-sm"
-                      style={{ color: theme.warning1 }}
+                      style={{ color: palette.warning1 }}
                     >
                       <AlertTriangle size={16} /> Terjadi kesalahan.
                       <button
@@ -603,7 +601,7 @@ export default function SchoolFinance() {
                 {!invoicesQuery.isLoading && invoices.length === 0 && (
                   <li
                     className="py-8 text-center"
-                    style={{ color: theme.secondary }}
+                    style={{ color: palette.secondary }}
                   >
                     Belum ada tagihan.
                   </li>
@@ -614,13 +612,13 @@ export default function SchoolFinance() {
                       <div className="min-w-0">
                         <div
                           className="font-medium"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {inv.title}
                         </div>
                         <div
                           className="text-xs"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           {inv.type ?? "-"} • {inv.class_name ?? "-"}
                         </div>
@@ -628,24 +626,24 @@ export default function SchoolFinance() {
                           <div>
                             <div
                               className="text-xs"
-                              style={{ color: theme.secondary }}
+                              style={{ color: palette.secondary }}
                             >
                               Jatuh Tempo
                             </div>
-                            <div style={{ color: theme.quaternary }}>
+                            <div style={{ color: palette.quaternary }}>
                               {dateFmt(inv.due_date)}
                             </div>
                           </div>
                           <div className="text-right">
                             <div
                               className="text-xs"
-                              style={{ color: theme.secondary }}
+                              style={{ color: palette.secondary }}
                             >
                               Nominal
                             </div>
                             <div
                               className="font-medium"
-                              style={{ color: theme.quaternary }}
+                              style={{ color: palette.quaternary }}
                             >
                               {idr(inv.amount)}
                             </div>
@@ -653,22 +651,22 @@ export default function SchoolFinance() {
                         </div>
                         <div className="mt-2">
                           {inv.status === "paid" && (
-                            <Badge variant="success" palette={theme}>
+                            <Badge variant="success" palette={palette}>
                               Lunas
                             </Badge>
                           )}
                           {inv.status === "partial" && (
-                            <Badge variant="info" palette={theme}>
+                            <Badge variant="info" palette={palette}>
                               Sebagian
                             </Badge>
                           )}
                           {inv.status === "unpaid" && (
-                            <Badge variant="outline" palette={theme}>
+                            <Badge variant="outline" palette={palette}>
                               Belum Bayar
                             </Badge>
                           )}
                           {inv.status === "overdue" && (
-                            <Badge variant="warning" palette={theme}>
+                            <Badge variant="warning" palette={palette}>
                               Terlambat
                             </Badge>
                           )}
@@ -678,14 +676,14 @@ export default function SchoolFinance() {
                         <NavLink
                           to={`/sekolah/keuangan/tagihan/${inv.id}`}
                           className="underline text-sm"
-                          style={{ color: theme.primary }}
+                          style={{ color: palette.primary }}
                         >
                           Detail
                         </NavLink>
                         {inv.status !== "paid" && (
                           <Btn
                             size="sm"
-                            palette={theme}
+                            palette={palette}
                             onClick={() => markPaid.mutate({ id: inv.id })}
                           >
                             Tandai Lunas
@@ -703,7 +701,7 @@ export default function SchoolFinance() {
                   <thead>
                     <tr
                       className="text-left text-sm"
-                      style={{ color: theme.secondary }}
+                      style={{ color: palette.secondary }}
                     >
                       <th className="py-3">Judul</th>
                       <th>Nama Siswa</th>
@@ -720,7 +718,7 @@ export default function SchoolFinance() {
                         <td
                           colSpan={7}
                           className="py-8 text-center"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           Memuat data…
                         </td>
@@ -731,7 +729,7 @@ export default function SchoolFinance() {
                         <td colSpan={7} className="py-8">
                           <div
                             className="flex items-center gap-2 justify-center text-sm"
-                            style={{ color: theme.warning1 }}
+                            style={{ color: palette.warning1 }}
                           >
                             <AlertTriangle size={16} /> Terjadi kesalahan.{" "}
                             <button
@@ -749,7 +747,7 @@ export default function SchoolFinance() {
                         <td
                           colSpan={7}
                           className="py-10 text-center"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           Belum ada tagihan.
                         </td>
@@ -760,64 +758,64 @@ export default function SchoolFinance() {
                       <tr
                         key={inv.id}
                         className="border-t"
-                        style={{ borderColor: theme.white3 }}
+                        style={{ borderColor: palette.white3 }}
                       >
                         <td className="py-3 align-top">
                           <div
                             className="font-medium"
-                            style={{ color: theme.quaternary }}
+                            style={{ color: palette.quaternary }}
                           >
                             {inv.title}
                           </div>
                           <div
                             className="text-xs"
-                            style={{ color: theme.secondary }}
+                            style={{ color: palette.secondary }}
                           >
                             {inv.type ?? "-"}
                           </div>
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {inv.student_name ?? "-"}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.primary }}
+                          style={{ color: palette.primary }}
                         >
                           {inv.class_name ?? "-"}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {dateFmt(inv.due_date)}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {idr(inv.amount)}
                         </td>
                         <td className="py-3 align-top">
                           {inv.status === "paid" && (
-                            <Badge variant="success" palette={theme}>
+                            <Badge variant="success" palette={palette}>
                               Lunas
                             </Badge>
                           )}
                           {inv.status === "partial" && (
-                            <Badge variant="info" palette={theme}>
+                            <Badge variant="info" palette={palette}>
                               Sebagian
                             </Badge>
                           )}
                           {inv.status === "unpaid" && (
-                            <Badge variant="outline" palette={theme}>
+                            <Badge variant="outline" palette={palette}>
                               Belum Bayar
                             </Badge>
                           )}
                           {inv.status === "overdue" && (
-                            <Badge variant="warning" palette={theme}>
+                            <Badge variant="warning" palette={palette}>
                               Terlambat
                             </Badge>
                           )}
@@ -830,7 +828,7 @@ export default function SchoolFinance() {
                             {inv.status !== "paid" && (
                               <Btn
                                 size="sm"
-                                palette={theme}
+                                palette={palette}
                                 onClick={() => markPaid.mutate({ id: inv.id })}
                               >
                                 Tandai Lunas
@@ -846,7 +844,7 @@ export default function SchoolFinance() {
 
               <div
                 className="mt-3 text-xs flex items-center justify-between"
-                style={{ color: theme.secondary }}
+                style={{ color: palette.secondary }}
               >
                 <div>
                   {invoicesQuery.isFetching
@@ -862,16 +860,16 @@ export default function SchoolFinance() {
               </div>
             </SectionCard>
           ) : (
-            <SectionCard palette={theme} className="p-2 md:p-4">
+            <SectionCard palette={palette} className="p-2 md:p-4">
               {/* Mobile: card list */}
               <ul
                 className="md:hidden divide-y"
-                style={{ borderColor: theme.white3 }}
+                style={{ borderColor: palette.white3 }}
               >
                 {paymentsQuery.isLoading && (
                   <li
                     className="py-6 text-center"
-                    style={{ color: theme.secondary }}
+                    style={{ color: palette.secondary }}
                   >
                     Memuat data…
                   </li>
@@ -880,7 +878,7 @@ export default function SchoolFinance() {
                   <li className="py-6">
                     <div
                       className="flex items-center gap-2 justify-center text-sm"
-                      style={{ color: theme.warning1 }}
+                      style={{ color: palette.warning1 }}
                     >
                       <AlertTriangle size={16} /> Terjadi kesalahan.{" "}
                       <button
@@ -895,7 +893,7 @@ export default function SchoolFinance() {
                 {!paymentsQuery.isLoading && payments.length === 0 && (
                   <li
                     className="py-8 text-center"
-                    style={{ color: theme.secondary }}
+                    style={{ color: palette.secondary }}
                   >
                     Belum ada pembayaran.
                   </li>
@@ -906,19 +904,19 @@ export default function SchoolFinance() {
                       <div className="min-w-0">
                         <div
                           className="font-medium"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {idr(p.amount)}
                         </div>
                         <div
                           className="text-xs"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           {p.method ?? "-"} • {p.invoice_title ?? "-"}
                         </div>
                         <div
                           className="mt-2 text-sm"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {dateFmt(p.date)} — {p.payer_name ?? "-"}
                         </div>
@@ -934,7 +932,7 @@ export default function SchoolFinance() {
                   <thead>
                     <tr
                       className="text-left text-sm"
-                      style={{ color: theme.secondary }}
+                      style={{ color: palette.secondary }}
                     >
                       <th className="py-3">Tanggal</th>
                       <th>Nama</th>
@@ -949,7 +947,7 @@ export default function SchoolFinance() {
                         <td
                           colSpan={5}
                           className="py-8 text-center"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           Memuat data…
                         </td>
@@ -960,7 +958,7 @@ export default function SchoolFinance() {
                         <td colSpan={5} className="py-8">
                           <div
                             className="flex items-center gap-2 justify-center text-sm"
-                            style={{ color: theme.warning1 }}
+                            style={{ color: palette.warning1 }}
                           >
                             <AlertTriangle size={16} /> Terjadi kesalahan.{" "}
                             <button
@@ -978,7 +976,7 @@ export default function SchoolFinance() {
                         <td
                           colSpan={5}
                           className="py-10 text-center"
-                          style={{ color: theme.secondary }}
+                          style={{ color: palette.secondary }}
                         >
                           Belum ada pembayaran.
                         </td>
@@ -989,35 +987,35 @@ export default function SchoolFinance() {
                       <tr
                         key={p.id}
                         className="border-t"
-                        style={{ borderColor: theme.white3 }}
+                        style={{ borderColor: palette.white3 }}
                       >
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {dateFmt(p.date)}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {p.payer_name ?? "-"}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.primary }}
+                          style={{ color: palette.primary }}
                         >
                           {p.invoice_title ?? "-"}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {p.method ?? "-"}
                         </td>
                         <td
                           className="py-3 align-top"
-                          style={{ color: theme.quaternary }}
+                          style={{ color: palette.quaternary }}
                         >
                           {idr(p.amount)}
                         </td>
@@ -1029,7 +1027,7 @@ export default function SchoolFinance() {
 
               <div
                 className="mt-3 text-xs flex items-center justify-between"
-                style={{ color: theme.secondary }}
+                style={{ color: palette.secondary }}
               >
                 <div>
                   {paymentsQuery.isFetching
@@ -1054,8 +1052,8 @@ export default function SchoolFinance() {
               onClick={() => setOpenModal(true)} // ✅ buka modal
               className="h-12 w-12 rounded-full grid place-items-center shadow-lg"
               style={{
-                background: theme.primary,
-                color: theme.white1,
+                background: palette.primary,
+                color: palette.white1,
                 boxShadow: "0 10px 20px rgba(0,0,0,.15)",
               }}
               aria-label="Buat Tagihan"

@@ -13,20 +13,19 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 
 import { Users, UserCog, BookOpen, CheckSquare, BarChart2 } from "lucide-react";
-import SchoolSidebarNav from "../components/home/SchoolSideBarNav";
-
 // ✅ import type + helper + mock jadwal
 import {
   TodayScheduleItem,
   mapSessionsToTodaySchedule,
   mockTodaySchedule,
 } from "./types/TodaySchedule";
+import ParentSidebar from "../components/home/ParentSideBar";
 
 /* ================= Types (API & UI) ================ */
 export type AnnouncementUI = {
@@ -877,7 +876,7 @@ export default function SchoolDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
-            <SchoolSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}

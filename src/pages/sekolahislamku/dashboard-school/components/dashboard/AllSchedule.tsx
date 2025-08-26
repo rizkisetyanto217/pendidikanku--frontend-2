@@ -10,18 +10,17 @@ import {
   type Palette,
   Btn,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
-
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import {
   mockTodaySchedule,
   type TodayScheduleItem,
 } from "../../types/TodaySchedule";
 
 // Tambah (buat item baru)
-import TambahJadwal from "@/pages/sekolahislamku/dashboard-teacher/components/dashboard/TambahJadwal";
+import TambahJadwal from "@/pages/sekolahislamku/dashboard-teacher/components/dashboard/AddSchedule";
 // Edit (ubah item yang ada)
 import ModalEditSchedule from "./ModalEditSchedule";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 /** State yang dikirim dari komponen lain via <Link state={...}> */
 type LocationState = {
@@ -199,7 +198,7 @@ export default function AllSchedule() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <SchoolSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">

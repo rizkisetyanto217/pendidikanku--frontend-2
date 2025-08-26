@@ -10,11 +10,10 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import TeacherSidebarNav from "../../components/home/TeacherSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import { DeleteConfirmButton } from "../../components/common/DeleteConfirmModal";
 import ScheduleEditorModal from "./components/ScheduleEditorModal";
-import TeacherTopBar from "../../components/home/TeacherTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================= */
 type ScheduleItem = {
@@ -233,7 +232,7 @@ export default function TeacherSchedule() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title="Jadwal (Guru)"
@@ -241,7 +240,7 @@ export default function TeacherSchedule() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6">
             {/* Filter / Toolbar */}

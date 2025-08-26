@@ -9,8 +9,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import TeacherTopBar from "../../components/home/TeacherTopBar";
+
 import {
   Filter,
   Search,
@@ -26,6 +25,8 @@ import {
   FileText,
   Eye,
 } from "lucide-react";
+import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
 type Assignment = {
@@ -375,7 +376,7 @@ export default function TeacherGrading() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Penilaian"
         gregorianDate={data?.gregorianDate}
@@ -386,7 +387,7 @@ export default function TeacherGrading() {
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar */}
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Main Content */}
           <div className="flex-1 space-y-6">

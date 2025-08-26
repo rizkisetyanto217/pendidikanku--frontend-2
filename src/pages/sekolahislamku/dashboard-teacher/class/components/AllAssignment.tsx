@@ -20,15 +20,14 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
 import ModalAddAssignment, {
   type AddAssignmentPayload,
 } from "./ModalAddAssignment";
 import ModalEditAssignment from "./ModalEditAssignment";
-import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+
 
 /* =========================
    Types
@@ -239,7 +238,7 @@ export default function AllAssignment() {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Top Bar */}
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title={heading || "Semua Tugas"}
@@ -279,7 +278,7 @@ export default function AllAssignment() {
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri */}
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <TeacherSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           {/* Konten utama */}

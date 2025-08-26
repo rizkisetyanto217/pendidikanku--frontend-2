@@ -23,9 +23,9 @@ import {
   ProgressBar,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
-import TeacherTopBar from "../../components/home/TeacherTopBar";
 
+import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 /* ========================================
    Types & constants
 ======================================== */
@@ -695,7 +695,7 @@ export default function TeacherAttendancePage({
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Absensi & Progress Harian (Guru)"
         gregorianDate={new Date().toISOString()}
@@ -704,7 +704,7 @@ export default function TeacherAttendancePage({
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6">
             {/* ===== Filter bar (kelas + tanggal + search + status) ===== */}

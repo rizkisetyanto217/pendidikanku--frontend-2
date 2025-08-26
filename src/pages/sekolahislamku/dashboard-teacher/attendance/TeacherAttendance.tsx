@@ -18,10 +18,10 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/StudentTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+
 import MiniBar from "../../components/ui/MiniBar";
-import TeacherTopBar from "../../components/home/TeacherTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -213,7 +213,7 @@ export default function TeacherAttendance() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         title="Kehadiran"
         gregorianDate={qDate}
@@ -224,7 +224,7 @@ export default function TeacherAttendance() {
       {/* ⬇️ Tambahan: layout 2 kolom dengan sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <TeacherSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
 
           {/* Konten utama (semua bagian lama tetap) */}
           <div className="flex-1 space-y-6">

@@ -10,8 +10,8 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentSidebarNav from "../../components/home/StudentSideBarNav";
-import ParentTopBar from "../../components/home/StudentTopBar";
+import ParentTopBar from "../../components/home/ParentTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================= */
 type ClassItem = {
@@ -382,7 +382,7 @@ export default function StudentSchedule() {
       />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebarNav palette={palette} />
+          <ParentSidebar palette={palette} />
           <div className="flex-1 space-y-6">
             {classesError && (
               <SectionCard palette={palette}>

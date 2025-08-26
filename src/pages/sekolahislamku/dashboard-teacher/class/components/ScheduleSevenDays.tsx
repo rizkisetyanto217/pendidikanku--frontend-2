@@ -11,8 +11,6 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { Plus, Calendar, Clock, MapPin, ArrowLeft } from "lucide-react";
-import TeacherTopBar from "@/pages/sekolahislamku/components/home/TeacherTopBar";
-import TeacherSidebarNav from "@/pages/sekolahislamku/components/home/TeacherSideBarNav";
 
 // API & Types
 import {
@@ -23,7 +21,9 @@ import {
   type UpcomingClass,
 } from "../teacher";
 
-import TambahJadwal from "../../components/dashboard/TambahJadwal";
+import TambahJadwal from "../../components/dashboard/AddSchedule";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 /* =========================
    Types (UI normalized)
@@ -258,7 +258,7 @@ export default function ScheduleSevenDays() {
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      <TeacherTopBar
+      <ParentTopBar
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title="Jadwal 7 Hari Kedepan"
@@ -283,7 +283,7 @@ export default function ScheduleSevenDays() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
-            <TeacherSidebarNav palette={palette} />
+            <ParentSidebar palette={palette} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
