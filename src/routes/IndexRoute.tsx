@@ -175,7 +175,6 @@ import AllAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/com
 import AllTodaySchedule from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllTodaySchedhule";
 import ScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleThreeDays";
 import AllAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/AllAssignment";
-import PendaftaranPage from "@/pages/sekolahislamku/pages/Register";
 import DetailMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailMateri";
 import DetailAssignment from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignment";
 import Register from "@/pages/dashboard/auth/register/RegisterAdminMasjid";
@@ -186,6 +185,7 @@ import RegisterDetailAdminMasjid from "@/pages/dashboard/auth/register/RegisterD
 import DetailScheduleThreeDays from "@/pages/sekolahislamku/dashboard-school/components/dashboard/DetailScheduleTreeDays";
 import ScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleSevenDays";
 import DetailScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailScheduleSevenDays";
+import RegisterDetailUser from "@/pages/dashboard/auth/register/RegisterDetailUser";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -647,7 +647,6 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Route>
-      <Route path=":slug/register" element={<PendaftaranPage />} />
       {/* ==== 404 ==== */}
       <Route path="*" element={<NotFound />} />
     </Routes>

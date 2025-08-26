@@ -159,7 +159,7 @@ export default function RegisterAdminMasjid() {
 
       setSuccess("Berhasil menggunakan Google. Mengarahkan…");
       // 👉 arahkan ke halaman registrasi lembaga
-      setTimeout(() => navigate("/register-lembaga"), 800);
+      setTimeout(() => navigate("/register-detail-sekolah"), 800);
     } catch (err: any) {
       if (err?.response?.status === 403) {
         setError(
@@ -200,7 +200,7 @@ export default function RegisterAdminMasjid() {
       if (res.data?.status === "success") {
         setSuccess("Registrasi berhasil! Silakan lengkapi data lembaga…");
         // 👉 arahkan ke halaman registrasi lembaga
-        setTimeout(() => navigate("/register-lembaga"), 1200);
+        setTimeout(() => navigate("/register-detail-sekolah"), 1200);
       } else {
         setError(res.data?.message || "Registrasi gagal, coba lagi.");
       }

@@ -9,9 +9,14 @@ interface InputFieldProps {
   type?: string;
   as?: "input" | "textarea";
   rows?: number;
-  onChange: (
+  accept?: string;
+
+  // umum untuk input teks / textarea
+  onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  // khusus untuk type="file"
+  onFileChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function InputField({
@@ -22,7 +27,9 @@ export default function InputField({
   type = "text",
   as = "input",
   rows = 4,
+  accept,
   onChange,
+  onFileChange,
 }: InputFieldProps) {
   const { isDark } = useHtmlDarkMode();
 
@@ -58,7 +65,8 @@ export default function InputField({
           id={name}
           name={name}
           type="file"
-          onChange={onChange}
+          accept={accept}
+          onChange={onFileChange} // <- pakai handler khusus file
           className={baseInputClass}
         />
       ) : (

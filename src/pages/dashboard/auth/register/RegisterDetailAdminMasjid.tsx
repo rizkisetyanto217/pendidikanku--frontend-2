@@ -1,9 +1,9 @@
-// src/pages/masjid/RegisterLembaga.tsx (masjid_id version)
-import React, { useMemo, useState, useEffect, useRef } from "react";
+// src/pages/masjid/RegisterLembaga.tsx (refactor pakai InputField + Success Lock Modal)
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
-import axios from "@/lib/axios";
+import axios, { apiLogout } from "@/lib/axios"; // ⬅️ pastikan export-nya ada
 import {
   MapPin,
   Image as ImageIcon,
@@ -15,7 +15,11 @@ import {
   AlertTriangle,
   Compass,
   Info,
+  LogOut,
 } from "lucide-react";
+
+// ⬇️ sesuaikan path InputField
+import InputField from "@/components/common/main/InputField";
 
 /* =======================
    Utils
@@ -24,7 +28,6 @@ const CREATE_ENDPOINT = "api/u/masjids/user"; // ← ganti jika perlu
 
 function extractLatLngFromGmaps(url: string) {
   try {
-    // Support: https://maps.google.com/?q=-7.3,112.7  atau  .../@-7.3,112.7,15z
     const qMatch = url.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/i);
     if (qMatch) {
       return { lat: parseFloat(qMatch[1]), lon: parseFloat(qMatch[2]) };
@@ -100,6 +103,8 @@ export default function RegisterDetailAdminMasjid() {
 
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const styles = useMemo(
     () => ({
@@ -111,13 +116,7 @@ export default function RegisterDetailAdminMasjid() {
         borderColor: theme.white3,
         color: theme.black1,
       },
-      input: {
-        backgroundColor: theme.white1,
-        color: theme.black1,
-        borderColor: theme.white3,
-      },
       muted: { color: theme.silver2 },
-      ringFocus: `0 0 0 3px ${theme.primary}33`,
       primaryBtn: {
         backgroundColor: theme.primary,
         color: theme.white1,
@@ -132,9 +131,26 @@ export default function RegisterDetailAdminMasjid() {
         border: `1px solid ${theme.white3}`,
         color: theme.black1,
       },
+      errorBg: isDark ? `${theme.error1}10` : `${theme.error1}0D`,
+      errorBorder: `${theme.error1}33`,
+      successBg: isDark ? `${theme.success1}10` : `${theme.success1}0D`,
+      successBorder: `${theme.success1}33`,
+      // Modal
+      modalBackdrop: `rgba(0,0,0,${isDark ? 0.65 : 0.5})`,
     }),
     [theme, isDark]
   );
+
+  // Lock scroll saat modal open
+  useEffect(() => {
+    if (showSuccessModal) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [showSuccessModal]);
 
   /* =======================
      Validation
@@ -271,7 +287,7 @@ export default function RegisterDetailAdminMasjid() {
         },
       });
 
-      // Ambil masjid_id dari response
+      // Ambil masjid_id dari response (disimpan kalau nanti mau dipakai)
       const masjidId =
         (res.data as any)?.data?.masjid_id ??
         (res.data as any)?.masjid_id ??
@@ -279,16 +295,9 @@ export default function RegisterDetailAdminMasjid() {
         (res.data as any)?.id ??
         null;
 
-      setSuccess("Masjid berhasil didaftarkan. Mengarahkan…");
-      setTimeout(() => {
-        if (masjidId) {
-          navigate(
-            `/dkm/profil-masjid?id=${encodeURIComponent(String(masjidId))}`
-          );
-        } else {
-          navigate("/dkm");
-        }
-      }, 900);
+      setSuccess("Masjid berhasil didaftarkan.");
+      // ⬇️ tampilkan modal kunci; jangan navigate otomatis
+      setShowSuccessModal(true);
     } catch (err: any) {
       if (err?.name === "CanceledError") {
         // dibatalkan user; jangan tampilkan error merah
@@ -302,6 +311,20 @@ export default function RegisterDetailAdminMasjid() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogoutAndGoLogin = async () => {
+    if (isLoggingOut) return;
+    try {
+      setIsLoggingOut(true);
+      await apiLogout(); // ⬅️ clear session/token server & client
+    } catch (e) {
+      // abaikan error, tetap paksa redirect
+      console.error("apiLogout error (ignored):", e);
+    } finally {
+      setIsLoggingOut(false);
+      navigate("/login", { replace: true });
     }
   };
 
@@ -341,24 +364,20 @@ export default function RegisterDetailAdminMasjid() {
             <div
               className="mb-5 rounded-xl px-3 py-2 text-sm border flex items-center gap-2"
               style={{
-                backgroundColor: isDark
-                  ? `${theme.error1}10`
-                  : `${theme.error1}0D`,
-                borderColor: `${theme.error1}33`,
+                backgroundColor: styles.errorBg,
+                borderColor: styles.errorBorder,
                 color: theme.error1,
               }}
             >
               <AlertTriangle className="h-4 w-4" /> {error}
             </div>
           )}
-          {!!success && (
+          {!!success && !showSuccessModal && (
             <div
               className="mb-5 rounded-xl px-3 py-2 text-sm border flex items-center gap-2"
               style={{
-                backgroundColor: isDark
-                  ? `${theme.success1}10`
-                  : `${theme.success1}0D`,
-                borderColor: `${theme.success1}33`,
+                backgroundColor: styles.successBg,
+                borderColor: styles.successBorder,
                 color: theme.success1,
               }}
             >
@@ -369,113 +388,85 @@ export default function RegisterDetailAdminMasjid() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nama */}
             <div className="grid md:grid-cols-1 gap-4">
-              <Field
+              <div className="flex items-center gap-2">
+                <Landmark className="h-5 w-5" style={styles.muted as any} />
+                <span className="text-sm" style={{ color: theme.black1 }}>
+                  Data Utama
+                </span>
+              </div>
+              <InputField
                 label="Nama Masjid"
-                icon={
-                  <Landmark className="h-5 w-5" style={styles.muted as any} />
-                }
-              >
-                <input
-                  type="text"
-                  value={form.masjid_name}
-                  onChange={onChange("masjid_name")}
-                  required
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                />
-              </Field>
+                name="masjid_name"
+                value={form.masjid_name}
+                onChange={onChange("masjid_name")}
+                placeholder="Masukkan nama masjid"
+                type="text"
+              />
             </div>
 
             {/* Bio & Lokasi */}
             <div className="grid md:grid-cols-2 gap-4">
-              <Field
+              <InputField
                 label="Deskripsi Singkat"
-                icon={<Info className="h-5 w-5" style={styles.muted as any} />}
-              >
-                <textarea
-                  value={form.masjid_bio_short}
-                  onChange={onChange("masjid_bio_short")}
-                  rows={3}
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                />
-              </Field>
-
-              <Field
-                label="Alamat/Lokasi (teks)"
-                icon={
+                name="masjid_bio_short"
+                value={form.masjid_bio_short}
+                onChange={onChange("masjid_bio_short")}
+                as="textarea"
+                rows={3}
+                placeholder="Tulis deskripsi singkat masjid"
+              />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
                   <MapPin className="h-5 w-5" style={styles.muted as any} />
-                }
-              >
-                <input
-                  type="text"
+                  <span className="text-sm" style={{ color: theme.black1 }}>
+                    Alamat/Lokasi (teks)
+                  </span>
+                </div>
+                <InputField
+                  label=""
+                  name="masjid_location"
                   value={form.masjid_location}
                   onChange={onChange("masjid_location")}
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+                  placeholder="Jl. Contoh No. 1, Kota"
                 />
-              </Field>
+              </div>
             </div>
 
             {/* Koordinat */}
             <div className="grid md:grid-cols-3 gap-4">
-              <Field
-                label="Latitude"
-                icon={
+              <div>
+                <div className="flex items-center gap-2 mb-1">
                   <Compass className="h-5 w-5" style={styles.muted as any} />
-                }
-              >
-                <input
+                  <span className="text-sm" style={{ color: theme.black1 }}>
+                    Koordinat
+                  </span>
+                </div>
+                <InputField
+                  label="Latitude"
+                  name="masjid_latitude"
                   type="number"
-                  step="0.000001"
                   value={form.masjid_latitude}
                   onChange={onChange("masjid_latitude")}
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+                  placeholder="-7.123456"
                 />
                 {!latValid && (
                   <SmallError>Rentang latitude −90 .. 90.</SmallError>
                 )}
-              </Field>
+              </div>
 
-              <Field
-                label="Longitude"
-                icon={
-                  <Compass className="h-5 w-5" style={styles.muted as any} />
-                }
-              >
-                <input
+              <div className="pt-6 md:pt-0">
+                <InputField
+                  label="Longitude"
+                  name="masjid_longitude"
                   type="number"
-                  step="0.000001"
                   value={form.masjid_longitude}
                   onChange={onChange("masjid_longitude")}
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+                  placeholder="112.654321"
                 />
                 {!lonValid && (
                   <SmallError>Rentang longitude −180 .. 180.</SmallError>
                 )}
-              </Field>
+              </div>
 
               <div className="flex gap-2 items-end">
                 <button
@@ -490,93 +481,89 @@ export default function RegisterDetailAdminMasjid() {
             </div>
 
             {/* Google Maps URL */}
-            <Field
-              label="Google Maps URL"
-              icon={
+            <div>
+              <div className="flex items-center gap-2 mb-1">
                 <LinkIcon className="h-5 w-5" style={styles.muted as any} />
-              }
-            >
+                <span className="text-sm" style={{ color: theme.black1 }}>
+                  Google Maps
+                </span>
+              </div>
               <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={form.masjid_google_maps_url}
-                  onChange={onChange("masjid_google_maps_url")}
-                  placeholder="Tempelkan link Google Maps"
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                />
+                <div className="flex-1">
+                  <InputField
+                    label="Google Maps URL"
+                    name="masjid_google_maps_url"
+                    type="url"
+                    value={form.masjid_google_maps_url}
+                    onChange={onChange("masjid_google_maps_url")}
+                    placeholder="Tempelkan link Google Maps"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={applyGmaps}
-                  className="px-4 rounded-xl border text-sm whitespace-nowrap"
+                  className="px-4 rounded-xl border text-sm whitespace-nowrap h-[42px] md:h-auto mt-[22px]"
                   style={styles.ghostBtn}
                 >
                   Ambil Koordinat
                 </button>
               </div>
-            </Field>
+            </div>
 
             {/* Domain (opsional) */}
-            <Field
-              label="Custom Domain (opsional)"
-              icon={<Globe className="h-5 w-5" style={styles.muted as any} />}
-            >
-              <input
-                type="text"
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Globe className="h-5 w-5" style={styles.muted as any} />
+                <span className="text-sm" style={{ color: theme.black1 }}>
+                  Custom Domain (opsional)
+                </span>
+              </div>
+              <InputField
+                label=""
+                name="masjid_domain"
                 value={form.masjid_domain}
                 onChange={onChange("masjid_domain")}
                 placeholder="contoh: alikhlas.sch.id"
-                className="w-full rounded-xl border px-10 py-3 outline-none"
-                style={{ ...styles.input }}
-                onFocus={(e) =>
-                  (e.currentTarget.style.boxShadow = styles.ringFocus)
-                }
-                onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
               />
               {!domainValid && form.masjid_domain && (
                 <SmallError>Format domain tidak valid.</SmallError>
               )}
-            </Field>
+            </div>
 
             {/* Gambar */}
             <div className="grid md:grid-cols-2 gap-4">
-              <Field
-                label="URL Gambar (opsional)"
-                icon={
+              <div>
+                <div className="flex items-center gap-2 mb-1">
                   <ImageIcon className="h-5 w-5" style={styles.muted as any} />
-                }
-              >
-                <input
+                  <span className="text-sm" style={{ color: theme.black1 }}>
+                    URL Gambar (opsional)
+                  </span>
+                </div>
+                <InputField
+                  label=""
+                  name="masjid_image_url"
                   type="url"
                   value={form.masjid_image_url}
                   onChange={onChange("masjid_image_url")}
                   placeholder="https://..."
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{ ...styles.input }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
                 />
-              </Field>
-              <Field
-                label="Upload Gambar (opsional)"
-                icon={
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-1">
                   <ImageIcon className="h-5 w-5" style={styles.muted as any} />
-                }
-              >
-                <input
+                  <span className="text-sm" style={{ color: theme.black1 }}>
+                    Upload Gambar (opsional)
+                  </span>
+                </div>
+                <InputField
+                  label="Upload Gambar"
+                  name="masjid_image_file"
                   type="file"
                   accept="image/*"
-                  onChange={onFile}
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                  style={{ ...styles.input, paddingLeft: "2.5rem" }}
+                  onFileChange={onFile}
                 />
-              </Field>
+              </div>
             </div>
 
             {/* Sosial Media */}
@@ -588,47 +575,61 @@ export default function RegisterDetailAdminMasjid() {
                 Sosial Media (opsional)
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <UrlField
+                <InputField
                   label="Instagram"
+                  name="masjid_instagram_url"
+                  type="url"
                   value={form.masjid_instagram_url}
                   onChange={onChange("masjid_instagram_url")}
-                  styles={styles}
+                  placeholder="https://instagram.com/..."
                 />
-                <UrlField
+                <InputField
                   label="WhatsApp"
+                  name="masjid_whatsapp_url"
+                  type="url"
                   value={form.masjid_whatsapp_url}
                   onChange={onChange("masjid_whatsapp_url")}
-                  styles={styles}
+                  placeholder="https://wa.me/..."
                 />
-                <UrlField
+                <InputField
                   label="YouTube"
+                  name="masjid_youtube_url"
+                  type="url"
                   value={form.masjid_youtube_url}
                   onChange={onChange("masjid_youtube_url")}
-                  styles={styles}
+                  placeholder="https://youtube.com/@..."
                 />
-                <UrlField
+                <InputField
                   label="Facebook"
+                  name="masjid_facebook_url"
+                  type="url"
                   value={form.masjid_facebook_url}
                   onChange={onChange("masjid_facebook_url")}
-                  styles={styles}
+                  placeholder="https://facebook.com/..."
                 />
-                <UrlField
+                <InputField
                   label="TikTok"
+                  name="masjid_tiktok_url"
+                  type="url"
                   value={form.masjid_tiktok_url}
                   onChange={onChange("masjid_tiktok_url")}
-                  styles={styles}
+                  placeholder="https://tiktok.com/@..."
                 />
-                <UrlField
+                <InputField
                   label="WA Group Ikhwan"
+                  name="masjid_whatsapp_group_ikhwan_url"
+                  type="url"
                   value={form.masjid_whatsapp_group_ikhwan_url}
                   onChange={onChange("masjid_whatsapp_group_ikhwan_url")}
-                  styles={styles}
+                  placeholder="https://chat.whatsapp.com/..."
                 />
-                <UrlField
+                <InputField
                   label="WA Group Akhwat"
+                  name="masjid_whatsapp_group_akhwat_url"
+                  type="url"
                   value={form.masjid_whatsapp_group_akhwat_url}
                   onChange={onChange("masjid_whatsapp_group_akhwat_url")}
-                  styles={styles}
+                  placeholder="https://chat.whatsapp.com/..."
                 />
               </div>
             </div>
@@ -685,64 +686,79 @@ export default function RegisterDetailAdminMasjid() {
           berlaku.
         </p>
       </div>
-    </div>
-  );
-}
 
-/* =======================
-   Small Bits
-======================= */
-function Field({
-  label,
-  icon,
-  children,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium">{label}</label>
-      <div className="relative mt-2">
-        <span className="absolute inset-y-0 left-3 flex items-center">
-          {icon}
-        </span>
-        {children}
-      </div>
-    </div>
-  );
-}
+      {/* =======================
+          SUCCESS LOCK MODAL
+          (muncul setelah registrasi sukses, hanya 1 tombol)
+      ======================== */}
+      {showSuccessModal && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby="success-title"
+          aria-describedby="success-desc"
+          // tanpa onClick: tidak bisa close lewat backdrop
+          style={{ backgroundColor: styles.modalBackdrop }}
+        >
+          <div
+            className="mx-4 w-full max-w-md rounded-2xl border p-6 shadow-xl"
+            style={{
+              backgroundColor: theme.white1,
+              borderColor: theme.white3,
+              color: theme.black1,
+            }}
+            // cegah bubbling ke backdrop
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div
+                className="h-10 w-10 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: isDark
+                    ? `${theme.success1}15`
+                    : `${theme.success1}12`,
+                }}
+              >
+                <CheckCircle2 className="h-6 w-6" color={theme.success1} />
+              </div>
+              <h2 id="success-title" className="text-lg font-semibold">
+                Registrasi Berhasil
+              </h2>
+            </div>
 
-function UrlField({
-  label,
-  value,
-  onChange,
-  styles,
-}: {
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  styles: any;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium">{label}</label>
-      <div className="relative mt-2">
-        <span className="absolute inset-y-0 left-3 flex items-center">
-          <LinkIcon className="h-5 w-5" style={styles.muted as any} />
-        </span>
-        <input
-          type="url"
-          value={value}
-          onChange={onChange}
-          placeholder="https://..."
-          className="w-full rounded-xl border px-10 py-3 outline-none"
-          style={{ ...styles.input }}
-          onFocus={(e) => (e.currentTarget.style.boxShadow = styles.ringFocus)}
-          onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-        />
-      </div>
+            <p id="success-desc" className="text-sm" style={styles.muted}>
+              Akun lembaga Anda telah aktif. Demi sinkron sesi, silakan login
+              kembali untuk mulai mengelola profil masjid.
+            </p>
+
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={handleLogoutAndGoLogin}
+                disabled={isLoggingOut}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: theme.primary,
+                  color: theme.white1,
+                }}
+              >
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Mengarahkan ke Login…
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="h-4 w-4" />
+                    Login kembali
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
