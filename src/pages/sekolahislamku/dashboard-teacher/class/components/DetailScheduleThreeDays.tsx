@@ -16,10 +16,10 @@ import {
   Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
-
 import ModalEditSchedule from "@/pages/sekolahislamku/dashboard-school/components/dashboard/ModalEditSchedule";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+
 
 type ThreeDaysScheduleItem = {
   title: string;

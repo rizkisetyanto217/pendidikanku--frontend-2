@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
@@ -10,21 +10,23 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import { ArrowLeft, Calendar, Paperclip } from "lucide-react";
+import ModalEditMateri, { EditMateriPayload } from "./ModalEditMateri";
+import Swal from "sweetalert2";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
-/** ===== Types (selaras TeacherClass) ===== */
+/** ===== Types ===== */
 type MaterialItem = {
   id: string;
   title: string;
   date: string; // ISO
-  attachments?: number; // jumlah lampiran
-  content?: string; // (opsional) jika kamu punya konten materi
+  attachments?: number;
+  content?: string;
 };
 
 type LocationState = {
-  material?: MaterialItem; // bisa dikirim dari TeacherClassDetail via Link state
-  className?: string; // opsional
+  material?: MaterialItem;
+  className?: string;
 };
 
 const dateLong = (iso?: string) =>
@@ -49,28 +51,69 @@ export default function DetailMateri() {
   const { state } = useLocation();
   const { material: incoming, className } = (state ?? {}) as LocationState;
 
-  // Sumber data materi:
-  // - Utamakan dari router state (cepat, tanpa refetch)
-  // - Jika kamu punya API, di sini kamu bisa fetch by classId + materialId
-  //   dan fallback ke incoming kalau ada.
   const material = useMemo<MaterialItem | null>(() => {
     if (incoming && (!materialId || incoming.id === materialId))
       return incoming;
-    // TODO: panggil API fetch detail materi di sini jika diperlukan
-    // misal: return dataDariAPI
     return incoming ?? null;
   }, [incoming, materialId]);
+
+  const [openEdit, setOpenEdit] = useState(false);
+
+  const handleSubmitEditMateri = (p: EditMateriPayload) => {
+    if (material) {
+      material.title = p.title;
+      material.date = p.date;
+      material.attachments = p.attachments;
+      material.content = p.content;
+    }
+    setOpenEdit(false);
+  };
+
+  /** 🔹 hapus dengan sweetalert */
+  const handleDelete = async () => {
+    if (!material) return;
+    const result = await Swal.fire({
+      title: "Hapus Materi?",
+      text: `Apakah Anda yakin ingin menghapus materi "${material.title}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#aaa",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      // TODO: panggil API delete pakai material.id
+      await Swal.fire("Terhapus!", "Materi berhasil dihapus.", "success");
+      navigate(-1);
+    }
+  };
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
+      <ModalEditMateri
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        palette={palette}
+        defaultValues={{
+          title: material?.title,
+          date: material?.date,
+          attachments: material?.attachments,
+          content: material?.content,
+        }}
+        onSubmit={handleSubmitEditMateri}
+        onDelete={handleDelete} // <-- pakai swal juga di modal
+      />
+
       <ParentTopBar
         palette={palette}
         title={material?.title || "Detail Materi"}
         gregorianDate={new Date().toISOString()}
-        dateFmt={(iso) => dateLong(iso)}
+        dateFmt={dateLong}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
@@ -80,7 +123,6 @@ export default function DetailMateri() {
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            {/* Header actions */}
             <div className="flex items-center gap-2 font-semibold text-lg">
               <button
                 onClick={() => navigate(-1)}
@@ -91,14 +133,13 @@ export default function DetailMateri() {
                 <ArrowLeft size={20} />
               </button>
               <span>Detail Materi</span>
-              {className ? (
+              {className && (
                 <Badge palette={palette} variant="outline">
                   {className}
                 </Badge>
-              ) : null}
+              )}
             </div>
 
-            {/* Content */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               {material ? (
                 <div className="space-y-3">
@@ -133,8 +174,7 @@ export default function DetailMateri() {
                         className="text-sm"
                         style={{ color: palette.silver2 }}
                       >
-                        Belum ada konten materi. (Isi dari API / editor materi
-                        dapat ditampilkan di sini.)
+                        Belum ada konten materi.
                       </div>
                     )}
                   </div>
@@ -143,22 +183,15 @@ export default function DetailMateri() {
                     <Btn
                       palette={palette}
                       size="sm"
-                      onClick={() =>
-                        alert("Edit materi (hubungkan ke modal/halaman edit)")
-                      }
+                      onClick={() => setOpenEdit(true)}
                     >
                       Edit
                     </Btn>
                     <Btn
                       palette={palette}
                       size="sm"
-                      variant="quaternary"
-                      onClick={() => {
-                        if (!confirm(`Hapus materi "${material.title}"?`))
-                          return;
-                        alert("Hapus materi (panggil API di sini)");
-                        navigate(-1);
-                      }}
+                      variant="destructive"
+                      onClick={handleDelete}
                     >
                       Hapus
                     </Btn>
@@ -166,8 +199,7 @@ export default function DetailMateri() {
                 </div>
               ) : (
                 <div className="text-sm" style={{ color: palette.silver2 }}>
-                  Materi tidak ditemukan. (Pastikan Anda melewatkan state atau
-                  implementasikan fetch by ID.)
+                  Materi tidak ditemukan.
                 </div>
               )}
             </SectionCard>

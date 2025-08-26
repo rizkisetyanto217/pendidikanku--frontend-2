@@ -34,9 +34,9 @@ import ModalAddStudent, {
 } from "./components/ModalAddStudent";
 import ModalExport from "./components/ModalExport";
 import ModalAddMateri from "./components/ModalAddMateri";
-import TambahJadwal from "../components/dashboard/AddSchedule";
 import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
+import AddSchedule from "../components/dashboard/AddSchedule";
 
 // 🔹 Pakai modal TambahJadwal dari pages/schedule/modal
 
@@ -431,7 +431,7 @@ export default function TeacherClass() {
         }}
       />
 
-      <TambahJadwal
+      <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
         palette={palette}
@@ -492,7 +492,7 @@ export default function TeacherClass() {
                   title="Jadwal 7 Hari Kedepan"
                   addLabel="Tambah Jadwal"
                   onAdd={() => setShowTambahJadwal(true)}
-                  seeAllPath="all-today-schedule"
+                  seeAllPath="schedule-seven-days"
                   seeAllState={{ upcoming: combinedUpcoming }}
                 />
               </div>

@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/assignment/AllAssignment.tsx
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import {
   Calendar,
@@ -20,14 +20,12 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
-
 import ModalAddAssignment, {
   type AddAssignmentPayload,
 } from "./ModalAddAssignment";
 import ModalEditAssignment from "./ModalEditAssignment";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
-
 
 /* =========================
    Types
@@ -216,21 +214,20 @@ export default function AllAssignment() {
     setShowTambah(false);
   };
 
-  // Actions
-  const handleDetail = (a: AssignmentItem) => {
-    alert(
-      `Detail Tugas:\n${a.title}\nKelas: ${a.kelas ?? "-"}\nDibuat: ${
-        a.createdISO ? dateShort(a.createdISO) : "-"
-      }\nBatas: ${dateShort(a.dueDateISO)}\nStatus: ${a.status}\nTerkumpul: ${
-        a.submitted
-      }/${a.total}`
-    );
-  };
-
   const handleDelete = (a: AssignmentItem) => {
     if (!confirm(`Hapus tugas "${a.title}"?`)) return;
     setItems((prev) => prev.filter((x) => x.id !== a.id));
   };
+
+  const fmtDateLong = (iso?: string) =>
+    iso
+      ? new Date(iso).toLocaleDateString("id-ID", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "-";
 
   return (
     <div
@@ -242,6 +239,7 @@ export default function AllAssignment() {
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title={heading || "Semua Tugas"}
+        dateFmt={fmtDateLong}
       />
 
       {/* Modals */}
@@ -418,14 +416,23 @@ export default function AllAssignment() {
 
                         {/* Aksi: Detail / Edit / Hapus */}
                         <div className="shrink-0 flex items-center gap-2">
-                          <Btn
-                            palette={palette}
-                            size="sm"
-                            variant="white1"
-                            onClick={() => handleDetail(a)}
+                          <Link
+                            to={`./${a.id}`} // relative ke /:slug/guru/assignments
+                            state={{
+                              assignment: {
+                                id: a.id,
+                                title: a.title,
+                                dueDate: a.dueDateISO,
+                                submitted: a.submitted,
+                                total: a.total,
+                              },
+                            }}
                           >
-                            Detail
-                          </Btn>
+                            <Btn palette={palette} size="sm" variant="white1">
+                              Detail
+                            </Btn>
+                          </Link>
+
                           <Btn
                             palette={palette}
                             size="sm"
@@ -434,11 +441,10 @@ export default function AllAssignment() {
                           >
                             Edit
                           </Btn>
-
                           <Btn
                             palette={palette}
                             size="sm"
-                            variant="quaternary"
+                            variant="destructive"
                             onClick={() => handleDelete(a)}
                           >
                             Hapus

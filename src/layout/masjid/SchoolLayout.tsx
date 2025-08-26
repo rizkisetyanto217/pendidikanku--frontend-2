@@ -3,8 +3,8 @@ import { Outlet } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
-import SchoolTopBar from "@/pages/sekolahislamku/components/home/SchoolTopBar";
-import SchoolSidebarNav from "@/pages/sekolahislamku/components/home/SchoolSideBarNav";
+
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 export default function SchoolLayout() {
   const { isDark } = useHtmlDarkMode();
@@ -26,7 +26,7 @@ export default function SchoolLayout() {
       {/* Container + 2 kolom saat lg+ */}
       <div className="mx-auto max-w-6xl pb-6 lg:flex lg:items-start lg:gap-4">
         {/* Sidebar Navigation (desktop only) */}
-        <SchoolSidebarNav palette={palette} />
+        <ParentSidebar palette={palette} />
 
         {/* Konten halaman */}
         <div className="flex-1">

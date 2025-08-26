@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentSidebarNav from "@/pages/sekolahislamku/components/home/StudentSideBarNav";
+
 
 export default function StudentLayout() {
   const { isDark } = useHtmlDarkMode();
