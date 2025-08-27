@@ -82,10 +82,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
           <div className="flex flex-wrap items-center gap-2">
             {canAdd &&
               (onAdd ? (
-                <Btn size="sm" palette={palette} onClick={onAdd}>
-                  <Plus className="mr-1" size={16} />
-                  <span className="hidden xs:inline">Tambah</span>
-                </Btn>
+                <p></p>
               ) : addHref ? (
                 <Link to={addHref}>
                   <Btn size="sm" palette={palette}>
@@ -97,7 +94,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
 
             <Link to={seeAllPath} state={seeAllState as unknown}>
               <Btn variant="ghost" size="sm" palette={palette}>
-                <span className="hidden xs:inline">Lihat semua</span>
+                <span className=" xs:inline">Lihat semua</span>
                 <ChevronRight className="xs:ml-1" size={16} />
               </Btn>
             </Link>
@@ -167,67 +164,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
                   </Link>
 
                   {/* Right: actions */}
-                  {showActions && (
-                    <div className="flex md:flex-col items-center md:items-end justify-end gap-2 md:gap-2">
-                      {onEdit ? (
-                        <Btn
-                          size="sm"
-                          palette={palette}
-                          variant="secondary"
-                          onClick={() => onEdit(a)}
-                          disabled={isDeleting}
-                          aria-label="Edit pengumuman"
-                        >
-                         
-                          <span className="hidden sm:inline">Edit</span>
-                        </Btn>
-                      ) : (
-                        <Link to={editHref}>
-                          <Btn
-                            size="sm"
-                            palette={palette}
-                            variant="secondary"
-                            disabled={isDeleting}
-                            aria-label="Edit pengumuman"
-                          >
-                            
-                            <span className="hidden sm:inline">Edit</span>
-                          </Btn>
-                        </Link>
-                      )}
-
-                      <Btn
-                        size="sm"
-                        palette={palette}
-                        onClick={() => {
-                          if (isDeleting) return;
-                          if (onDelete) return onDelete(a);
-                          if (confirm(`Hapus pengumuman "${a.title}"?`)) {
-                            alert(
-                              "Implement onDelete untuk menghapus di server."
-                            );
-                          }
-                        }}
-                        disabled={isDeleting}
-                        className="focus:outline-none"
-                        aria-label={
-                          isDeleting ? "Sedang menghapus" : "Hapus pengumuman"
-                        }
-                        style={{
-                          background: palette.error1,
-                          color: palette.white1,
-                          borderColor: palette.error1,
-                          boxShadow: `0 0 0 2px ${palette.error2} inset`,
-                          opacity: isDeleting ? 0.7 : 1,
-                        }}
-                      >
-                        
-                        <span className="hidden sm:inline">
-                          {isDeleting ? "Menghapus…" : "Hapus"}
-                        </span>
-                      </Btn>
-                    </div>
-                  )}
+                
                 </div>
               </div>
             );

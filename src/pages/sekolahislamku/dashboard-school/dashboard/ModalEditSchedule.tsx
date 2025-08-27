@@ -205,18 +205,7 @@ const ModalEditSchedule: React.FC<ModalEditScheduleProps> = ({
           className="px-5 py-4 flex items-center justify-between border-t"
           style={{ borderColor: palette.silver1, background: palette.white2 }}
         >
-          {onDelete ? (
-            <Btn
-              palette={palette}
-              size="sm"
-              variant="quaternary"
-              onClick={onDelete}
-            >
-              Hapus
-            </Btn>
-          ) : (
-            <span />
-          )}
+          
           <div className="flex gap-2">
             <Btn palette={palette} size="sm" variant="ghost" onClick={onClose}>
               Batal

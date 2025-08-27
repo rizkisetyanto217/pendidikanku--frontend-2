@@ -513,6 +513,17 @@ export default function ScheduleThreeDays() {
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
+                              {/* Detail: Link + bawa state item */}
+                              <Link to={`./${slug}`} state={{ item: s }}>
+                                <Btn
+                                  palette={palette}
+                                  size="sm"
+                                  variant="white1"
+                                >
+                                  Detail
+                                </Btn>
+                              </Link>
+
                               <Btn
                                 palette={palette}
                                 size="sm"
@@ -521,18 +532,6 @@ export default function ScheduleThreeDays() {
                               >
                                 Edit
                               </Btn>
-
-                              {/* Detail: Link + bawa state item */}
-                              <Link to={`./${slug}`} state={{ item: s }}>
-                                <Btn
-                                  palette={palette}
-                                  size="sm"
-                                  variant="ghost"
-                                >
-                                  Detail
-                                </Btn>
-                              </Link>
-
                               <Btn
                                 palette={palette}
                                 size="sm"

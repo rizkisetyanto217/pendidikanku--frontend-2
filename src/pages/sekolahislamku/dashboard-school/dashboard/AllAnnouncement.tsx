@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/pengumuman/AllAnnouncement.tsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -11,6 +11,9 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+import Swal from "sweetalert2";
+import axios from "@/lib/axios";
+import InputField from "@/components/common/main/InputField";
 
 /* ================= Types ================= */
 type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
@@ -114,15 +117,331 @@ const StatusBadge: React.FC<{ status: StatusType }> = ({ status }) => {
   );
 };
 
-/* =============== Card Pengumuman =============== */
+/* =============== Modal Add/Edit =============== */ 
+type AnnouncementModalProps =
+  {
+    open: boolean;
+    onClose: () => void;
+    palette: Palette;
+    title: string;
+    defaultValue?: Partial<Pengumuman>;
+    onSubmit: (
+      payload: Omit<Pengumuman, "id" | "views"> & {
+        id?: number;
+        views?: number;
+      }
+    ) => Promise<void> | void;
+  };
+
+const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
+  open,
+  onClose,
+  palette,
+  title,
+  defaultValue,
+  onSubmit,
+}) => {
+  const [judul, setJudul] = useState(defaultValue?.judul ?? "");
+  const [konten, setKonten] = useState(defaultValue?.konten ?? "");
+  const [kategori, setKategori] = useState<CategoryType>(
+    (defaultValue?.kategori as CategoryType) ?? "Umum"
+  );
+  const [prioritas, setPrioritas] = useState<PriorityLevel>(
+    (defaultValue?.prioritas as PriorityLevel) ?? "Rendah"
+  );
+  const [status, setStatus] = useState<StatusType>(
+    (defaultValue?.status as StatusType) ?? "Draft"
+  );
+  const [tanggalPublish, setTanggalPublish] = useState<string>(
+    defaultValue?.tanggalPublish
+      ? defaultValue.tanggalPublish.slice(0, 10)
+      : new Date().toISOString().slice(0, 10)
+  );
+  const [tanggalBerakhir, setTanggalBerakhir] = useState<string>(
+    defaultValue?.tanggalBerakhir
+      ? defaultValue.tanggalBerakhir.slice(0, 10)
+      : ""
+  );
+  const [penulis, setPenulis] = useState(defaultValue?.penulis ?? "");
+  const [target, setTarget] = useState((defaultValue?.target ?? []).join(", "));
+  const [tags, setTags] = useState((defaultValue?.tags ?? []).join(", "));
+  const [isPinned, setIsPinned] = useState<boolean>(
+    defaultValue?.isPinned ?? false
+  );
+  const [lampiran, setLampiran] = useState(
+    (defaultValue?.lampiran ?? []).join(", ")
+  );
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setJudul(defaultValue?.judul ?? "");
+    setKonten(defaultValue?.konten ?? "");
+    setKategori((defaultValue?.kategori as CategoryType) ?? "Umum");
+    setPrioritas((defaultValue?.prioritas as PriorityLevel) ?? "Rendah");
+    setStatus((defaultValue?.status as StatusType) ?? "Draft");
+    setTanggalPublish(
+      defaultValue?.tanggalPublish
+        ? defaultValue.tanggalPublish.slice(0, 10)
+        : new Date().toISOString().slice(0, 10)
+    );
+    setTanggalBerakhir(
+      defaultValue?.tanggalBerakhir
+        ? defaultValue.tanggalBerakhir.slice(0, 10)
+        : ""
+    );
+    setPenulis(defaultValue?.penulis ?? "");
+    setTarget((defaultValue?.target ?? []).join(", "));
+    setTags((defaultValue?.tags ?? []).join(", "));
+    setIsPinned(defaultValue?.isPinned ?? false);
+    setLampiran((defaultValue?.lampiran ?? []).join(", "));
+  }, [open, defaultValue]);
+
+  if (!open) return null;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!judul || !konten) {
+      Swal.fire({
+        icon: "warning",
+        title: "Lengkapi data",
+        text: "Judul dan konten wajib diisi.",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      await onSubmit({
+        id: defaultValue?.id,
+        judul,
+        konten,
+        kategori,
+        prioritas,
+        status,
+        tanggalPublish: new Date(tanggalPublish).toISOString(),
+        tanggalBerakhir: tanggalBerakhir
+          ? new Date(tanggalBerakhir).toISOString()
+          : undefined,
+        penulis,
+        target: target
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        lampiran: lampiran
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        views: defaultValue?.views ?? 0,
+        isPinned,
+        tags: tags
+          .split(",")
+          .map((s) => s.trim().replace(/^#/, ""))
+          .filter(Boolean),
+      });
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+   <div
+  className="fixed inset-0 z-50 flex items-center justify-center p-4"
+  style={{ background: "rgba(0,0,0,0.35)" }}
+  aria-modal
+  role="dialog"
+>
+  <div
+    className="w-full max-w-3xl max-h-[90vh] rounded-2xl"
+    style={{
+      background: palette.white2,
+      color: palette.black1,
+      border: `1px solid ${palette.silver1}`,
+    }}
+  >
+    {/* HEADER (sticky top) */}
+    <div
+      className="sticky top-0 z-10 p-4 border-b rounded-xl"
+      style={{ background: palette.white2, borderColor: palette.silver1 }}
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <Btn variant="white1" palette={palette} onClick={onClose}>
+          Tutup
+        </Btn>
+      </div>
+    </div>
+
+    {/* FORM membungkus body + footer agar submit tetap jalan */}
+    <form onSubmit={submit} className="flex flex-col max-h-[calc(90vh-64px)]">
+      {/* BODY (scrollable) */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-5 [-webkit-overflow-scrolling:touch]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <InputField
+              label="Judul"
+              name="judul"
+              value={judul}
+              placeholder="Judul pengumuman"
+              onChange={(e) => setJudul(e.currentTarget.value)}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <InputField
+              label="Konten"
+              name="konten"
+              as="textarea"
+              rows={5}
+              value={konten}
+              placeholder="Isi pengumuman…"
+              onChange={(e) => setKonten((e.target as HTMLTextAreaElement).value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Kategori</label>
+            <select
+              className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              style={{ background: palette.white1, borderColor: palette.silver1, color: palette.black1 }}
+              value={kategori}
+              onChange={(e) => setKategori(e.target.value as CategoryType)}
+            >
+              <option value="Umum">Umum</option>
+              <option value="Tahfidz">Tahfidz</option>
+              <option value="Tahsin">Tahsin</option>
+              <option value="Kajian">Kajian</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Prioritas</label>
+            <select
+              className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              style={{ background: palette.white1, borderColor: palette.silver1, color: palette.black1 }}
+              value={prioritas}
+              onChange={(e) => setPrioritas(e.target.value as PriorityLevel)}
+            >
+              <option value="Rendah">Rendah</option>
+              <option value="Sedang">Sedang</option>
+              <option value="Tinggi">Tinggi</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Status</label>
+            <select
+              className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              style={{ background: palette.white1, borderColor: palette.silver1, color: palette.black1 }}
+              value={status}
+              onChange={(e) => setStatus(e.target.value as StatusType)}
+            >
+              <option value="Draft">Draft</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Berakhir">Berakhir</option>
+            </select>
+          </div>
+
+          <InputField
+            label="Tanggal Publish"
+            name="tanggalPublish"
+            type="date"
+            value={tanggalPublish}
+            onChange={(e) => setTanggalPublish(e.currentTarget.value)}
+          />
+
+          <InputField
+            label="Tanggal Berakhir"
+            name="tanggalBerakhir"
+            type="date"
+            value={tanggalBerakhir}
+            onChange={(e) => setTanggalBerakhir(e.currentTarget.value)}
+          />
+
+          <InputField
+            label="Penulis"
+            name="penulis"
+            value={penulis}
+            placeholder="Nama penulis"
+            onChange={(e) => setPenulis(e.currentTarget.value)}
+          />
+
+          <div className="flex items-center gap-2 mt-6">
+            <input
+              id="isPinned"
+              type="checkbox"
+              checked={isPinned}
+              onChange={(e) => setIsPinned(e.target.checked)}
+            />
+            <label htmlFor="isPinned" className="text-sm">Sematkan (Pinned)</label>
+          </div>
+
+          <div className="md:col-span-2">
+            <InputField
+              label="Target (pisahkan dengan koma)"
+              name="target"
+              value={target}
+              placeholder="Contoh: Wali Murid, Santri Kelas 7"
+              onChange={(e) => setTarget(e.currentTarget.value)}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <InputField
+              label="Tags (pisahkan dengan koma)"
+              name="tags"
+              value={tags}
+              placeholder="contoh: ujian, tahfidz"
+              onChange={(e) => setTags(e.currentTarget.value)}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <InputField
+              label="Lampiran (opsional, pisahkan dengan koma atau unggah file)"
+              name="lampiran"
+              value={lampiran}
+              placeholder="file1.pdf, link-gdrive, ..."
+              onChange={(e) => setLampiran(e.currentTarget.value)}
+            />
+          </div>
+        </div>
+
+      {/* FOOTER (sticky bottom, SELALU kelihatan) */}
+      <div
+        className="sticky bottom-0 z-10 p-4 border-t flex justify-end gap-2
+                   pb-[env(safe-area-inset-bottom)] bg-clip-padding"
+        style={{ background: palette.white2, borderColor: palette.silver1, boxShadow: "0 -4px 10px rgba(0,0,0,0.04)" }}
+      >
+        <Btn type="button" variant="white1" palette={palette} onClick={onClose}>
+          Batal
+        </Btn>
+        <Btn type="submit" palette={palette} disabled={loading}>
+          {loading ? "Menyimpan..." : "Simpan"}
+        </Btn>
+      </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+  );
+};
+
+/* =============== Card Pengumuman (dengan Aksi) =============== */
 function PengumumanCard({
   pengumuman,
   palette,
   onDetailClick,
+  onEdit,
+  onDelete,
 }: {
   pengumuman: Pengumuman;
   palette: Palette;
   onDetailClick: (p: Pengumuman) => void;
+  onEdit: (p: Pengumuman) => void;
+  onDelete: (p: Pengumuman) => void;
 }) {
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("id-ID", {
@@ -293,7 +612,7 @@ function PengumumanCard({
           </div>
         ) : null}
 
-        {/* Footer */}
+        {/* Footer: aksi */}
         <div
           className="flex items-center justify-between pt-4 border-t"
           style={{ borderColor: palette.silver1 }}
@@ -303,13 +622,31 @@ function PengumumanCard({
               <span>Berakhir: {formatDate(pengumuman.tanggalBerakhir)}</span>
             )}
           </div>
-          <button
-            onClick={() => onDetailClick(pengumuman)}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:opacity-80"
-            style={{ background: palette.black1, color: palette.white1 }}
-          >
-            Baca Selengkapnya
-          </button>
+          <div className="flex items-center gap-2">
+            <Btn
+              size="sm"
+              variant="white1"
+              palette={palette}
+              onClick={() => onEdit(pengumuman)}
+            >
+              Edit
+            </Btn>
+            <Btn
+              size="sm"
+              variant="destructive"
+              palette={palette}
+              onClick={() => onDelete(pengumuman)}
+            >
+              Hapus
+            </Btn>
+            <button
+              onClick={() => onDetailClick(pengumuman)}
+              className="px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:opacity-80"
+              style={{ background: palette.black1, color: palette.white1 }}
+            >
+              Baca Selengkapnya
+            </button>
+          </div>
         </div>
       </div>
     </SectionCard>
@@ -430,13 +767,24 @@ const AllAnnouncement: React.FC = () => {
     searchQuery: "",
   });
 
-  // Sample data
+  // --- Sample data (silakan ganti dengan data asli)
   const pengumumanList: Pengumuman[] = [
-    /* ... (data contohmu tetap sama persis) ... */
+    // ... (data contohmu tetap sama persis) ...
   ];
 
+  // State lokal untuk Add/Edit/Delete
+  const [items, setItems] = useState<Pengumuman[]>(pengumumanList);
+
+  // Jika pengumumanList dari luar berubah (mis: fetch), sinkronkan
+  useEffect(
+    () => setItems(pengumumanList),
+    [
+      /* tambahkan dep kalau sumbernya berubah */
+    ]
+  );
+
   const filteredPengumuman = useMemo(() => {
-    return pengumumanList
+    return items
       .filter((p) => {
         const matchKat =
           !filters.kategori ||
@@ -466,7 +814,7 @@ const AllAnnouncement: React.FC = () => {
           return order[b.prioritas] - order[a.prioritas];
         return +new Date(b.tanggalPublish) - +new Date(a.tanggalPublish);
       });
-  }, [pengumumanList, filters]);
+  }, [items, filters]);
 
   const handleFiltersChange = (f: Partial<FilterOptions>) =>
     setFilters((prev) => ({ ...prev, ...f }));
@@ -477,15 +825,108 @@ const AllAnnouncement: React.FC = () => {
 
   const stats = useMemo(
     () => ({
-      total: pengumumanList.length,
-      aktif: pengumumanList.filter((p) => p.status === "Aktif").length,
-      tahfidz: pengumumanList.filter((p) => p.kategori === "Tahfidz").length,
-      tahsin: pengumumanList.filter((p) => p.kategori === "Tahsin").length,
-      kajian: pengumumanList.filter((p) => p.kategori === "Kajian").length,
-      urgent: pengumumanList.filter((p) => p.prioritas === "Urgent").length,
+      total: items.length,
+      aktif: items.filter((p) => p.status === "Aktif").length,
+      tahfidz: items.filter((p) => p.kategori === "Tahfidz").length,
+      tahsin: items.filter((p) => p.kategori === "Tahsin").length,
+      kajian: items.filter((p) => p.kategori === "Kajian").length,
+      urgent: items.filter((p) => p.prioritas === "Urgent").length,
     }),
-    [pengumumanList]
+    [items]
   );
+
+  /* ========== Add / Edit / Delete Handlers ========== */
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selected, setSelected] = useState<Pengumuman | null>(null);
+
+  const handleAddAnnouncement = async (
+    payload: Omit<Pengumuman, "id" | "views"> & { id?: number; views?: number }
+  ) => {
+    // API nyata:
+    // const res = await axios.post<{ data: Pengumuman }>("/api/a/announcements", payload, { withCredentials: true });
+    // const created = res.data.data;
+
+    // Fallback lokal:
+    const created: Pengumuman = {
+      ...(payload as Pengumuman),
+      id: payload.id ?? Date.now(),
+      views: payload.views ?? 0,
+    };
+    setItems((prev) => [created, ...prev]);
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil",
+      text: "Pengumuman ditambahkan.",
+      timer: 1400,
+      showConfirmButton: false,
+    });
+  };
+
+  const openEditAnnouncement = (p: Pengumuman) => {
+    setSelected(p);
+    setOpenEdit(true);
+  };
+
+  const handleEditAnnouncement = async (
+    payload: Omit<Pengumuman, "id" | "views"> & { id?: number; views?: number }
+  ) => {
+    if (!selected) return;
+    const id = selected.id;
+
+    // API nyata:
+    // const res = await axios.put<{ data: Pengumuman }>(`/api/a/announcements/${id}`, payload, { withCredentials: true });
+    // const updated = res.data.data;
+
+    // Fallback lokal:
+    const updated: Pengumuman = {
+      ...(payload as Pengumuman),
+      id,
+      views: selected.views,
+    };
+
+    setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
+    Swal.fire({
+      icon: "success",
+      title: "Tersimpan",
+      text: "Pengumuman diperbarui.",
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleDeleteAnnouncement = async (p: Pengumuman) => {
+    const res = await Swal.fire({
+      title: "Hapus pengumuman?",
+      text: `"${p.judul}" akan dihapus permanen.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#d33",
+    });
+    if (!res.isConfirmed) return;
+
+    try {
+      // API nyata:
+      // await axios.delete(`/api/a/announcements/${p.id}`, { withCredentials: true });
+
+      setItems((prev) => prev.filter((x) => x.id !== p.id));
+      Swal.fire({
+        icon: "success",
+        title: "Terhapus",
+        text: "Pengumuman telah dihapus.",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (e: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal menghapus",
+        text: e?.message ?? "Terjadi kesalahan.",
+      });
+    }
+  };
 
   return (
     <div
@@ -499,6 +940,27 @@ const AllAnnouncement: React.FC = () => {
         title="Semua Pengumuman"
       />
 
+      {/* Modal Add */}
+      <AnnouncementModal
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        palette={palette}
+        title="Tambah Pengumuman"
+        onSubmit={handleAddAnnouncement}
+      />
+      {/* Modal Edit */}
+      <AnnouncementModal
+        open={openEdit}
+        onClose={() => {
+          setOpenEdit(false);
+          setSelected(null);
+        }}
+        palette={palette}
+        title={`Edit Pengumuman${selected ? `: ${selected.judul}` : ""}`}
+        defaultValue={selected ?? undefined}
+        onSubmit={handleEditAnnouncement}
+      />
+
       {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
@@ -507,7 +969,7 @@ const AllAnnouncement: React.FC = () => {
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
-            {/* Back button dengan ukuran yang lebih sesuai */}
+            {/* Back */}
             <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 hover:bg-black"
@@ -517,69 +979,76 @@ const AllAnnouncement: React.FC = () => {
               <span className=" font-semibold text-md">Kembali</span>
             </button>
 
-            {/* Header Stats */}
+            {/* Header + Add Button */}
             <SectionCard palette={palette} className="p-6">
-              <div className="text-left">
-                <h1 className="text-2xl font-bold mb-2">Semua Pengumuman</h1>
-                <p className="opacity-70 mb-6">
-                  Informasi terbaru seputar kegiatan Tahfidz, Tahsin, dan Kajian
-                </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-left">
+                  <h1 className="text-2xl font-bold mb-2">Semua Pengumuman</h1>
+                  <p className="opacity-70">
+                    Informasi terbaru seputar kegiatan Tahfidz, Tahsin, dan
+                    Kajian
+                  </p>
+                </div>
+                <Btn palette={palette} onClick={() => setOpenAdd(true)}>
+                  Tambah Pengumuman
+                </Btn>
+              </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                  <div
-                    className="text-left p-3 rounded-lg"
-                    style={{ background: palette.white1 }}
-                  >
-                    <p className="text-2xl font-bold text-blue-600">
-                      {stats.total}
-                    </p>
-                    <p className="text-xs opacity-70">Total</p>
-                  </div>
-                  <div
-                    className="text-left p-3 rounded-lg"
-                    style={{ background: palette.white1 }}
-                  >
-                    <p className="text-2xl font-bold text-green-600">
-                      {stats.aktif}
-                    </p>
-                    <p className="text-xs opacity-70">Aktif</p>
-                  </div>
-                  <div
-                    className="text-left p-3 rounded-lg"
-                    style={{ background: palette.white1 }}
-                  >
-                    <p className="text-2xl font-bold text-emerald-600">
-                      {stats.tahfidz}
-                    </p>
-                    <p className="text-xs opacity-70">Tahfidz</p>
-                  </div>
-                  <div
-                    className="text-left p-3 rounded-lg"
-                    style={{ background: palette.white1 }}
-                  >
-                    <p className="text-2xl font-bold text-cyan-600">
-                      {stats.tahsin}
-                    </p>
-                    <p className="text-xs opacity-70">Tahsin</p>
-                  </div>
-                  <div
-                    className="text-left p-3 rounded-lg"
-                    style={{ background: palette.white1 }}
-                  >
-                    <p className="text-2xl font-bold text-purple-600">
-                      {stats.kajian}
-                    </p>
-                    <p className="text-xs opacity-70">Kajian</p>
-                  </div>
-                  <div
-                    className="text-left p-3 rounded-lg"
-                    style={{ background: palette.white1 }}
-                  >
-                    <p className="text-2xl font-bold text-red-600">
-                      {stats.urgent}
-                    </p>
-                    <p className="text-xs opacity-70">Urgent</p>
-                  </div>
+              {/* Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-6">
+                <div
+                  className="text-left p-3 rounded-lg"
+                  style={{ background: palette.white1 }}
+                >
+                  <p className="text-2xl font-bold text-blue-600">
+                    {stats.total}
+                  </p>
+                  <p className="text-xs opacity-70">Total</p>
+                </div>
+                <div
+                  className="text-left p-3 rounded-lg"
+                  style={{ background: palette.white1 }}
+                >
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.aktif}
+                  </p>
+                  <p className="text-xs opacity-70">Aktif</p>
+                </div>
+                <div
+                  className="text-left p-3 rounded-lg"
+                  style={{ background: palette.white1 }}
+                >
+                  <p className="text-2xl font-bold text-emerald-600">
+                    {stats.tahfidz}
+                  </p>
+                  <p className="text-xs opacity-70">Tahfidz</p>
+                </div>
+                <div
+                  className="text-left p-3 rounded-lg"
+                  style={{ background: palette.white1 }}
+                >
+                  <p className="text-2xl font-bold text-cyan-600">
+                    {stats.tahsin}
+                  </p>
+                  <p className="text-xs opacity-70">Tahsin</p>
+                </div>
+                <div
+                  className="text-left p-3 rounded-lg"
+                  style={{ background: palette.white1 }}
+                >
+                  <p className="text-2xl font-bold text-purple-600">
+                    {stats.kajian}
+                  </p>
+                  <p className="text-xs opacity-70">Kajian</p>
+                </div>
+                <div
+                  className="text-left p-3 rounded-lg"
+                  style={{ background: palette.white1 }}
+                >
+                  <p className="text-2xl font-bold text-red-600">
+                    {stats.urgent}
+                  </p>
+                  <p className="text-xs opacity-70">Urgent</p>
                 </div>
               </div>
             </SectionCard>
@@ -594,8 +1063,8 @@ const AllAnnouncement: React.FC = () => {
             {/* Result info */}
             <div className="flex items-center justify-between">
               <p className="text-sm opacity-70">
-                Menampilkan {filteredPengumuman.length} dari{" "}
-                {pengumumanList.length} pengumuman
+                Menampilkan {filteredPengumuman.length} dari {items.length}{" "}
+                pengumuman
               </p>
               {(filters.kategori ||
                 filters.prioritas ||
@@ -626,6 +1095,8 @@ const AllAnnouncement: React.FC = () => {
                     pengumuman={p}
                     palette={palette}
                     onDetailClick={handleDetailClick}
+                    onEdit={openEditAnnouncement}
+                    onDelete={handleDeleteAnnouncement}
                   />
                 ))
               ) : (
@@ -656,7 +1127,7 @@ const AllAnnouncement: React.FC = () => {
               )}
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick Actions (opsional) */}
             <SectionCard palette={palette} className="p-4">
               <h3 className="font-semibold mb-3">Aksi Cepat</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -700,7 +1171,7 @@ const AllAnnouncement: React.FC = () => {
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
-                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 001 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
                       </svg>
                     </div>
                     <div>

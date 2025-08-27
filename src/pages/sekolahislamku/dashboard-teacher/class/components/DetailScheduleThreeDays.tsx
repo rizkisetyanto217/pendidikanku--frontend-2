@@ -16,7 +16,7 @@ import {
   Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ModalEditSchedule from "@/pages/sekolahislamku/dashboard-school/components/dashboard/ModalEditSchedule";
+import ModalEditSchedule from "@/pages/sekolahislamku/dashboard-school/dashboard/ModalEditSchedule";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 

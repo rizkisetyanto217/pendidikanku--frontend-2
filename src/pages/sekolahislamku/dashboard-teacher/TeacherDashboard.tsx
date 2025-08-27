@@ -13,7 +13,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ListJadwal from "./schedule/modal/ListSchedule";
+import ListJadwal from "./schedule/components/ListSchedule";
 import TeacherAddEditAnnouncement, {
   type TeacherAnnouncementForm,
 } from "./announcement/TeacherAddEditAnnouncement";
@@ -27,6 +27,7 @@ import {
 import ParentTopBar from "../components/home/ParentTopBar";
 import ParentSidebar from "../components/home/ParentSideBar";
 import AddSchedule from "./dashboard/AddSchedule";
+import { useNavigate, useParams } from "react-router-dom";
 
 /* ================= Helpers ================ */
 const startOfDay = (d = new Date()) => {
@@ -259,6 +260,7 @@ export default function TeacherDashboard() {
     });
     return Array.from(map.values());
   }, [data?.todayClasses]);
+  const { slug } = useParams();
 
   return (
     <div
@@ -358,7 +360,7 @@ export default function TeacherDashboard() {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium">Pengumuman</h3>
-                <Btn
+                {/* <Btn
                   palette={palette}
                   size="sm"
                   onClick={() => {
@@ -367,7 +369,7 @@ export default function TeacherDashboard() {
                   }}
                 >
                   Tambah Pengumuman
-                </Btn>
+                </Btn> */}
               </div>
 
               <AnnouncementsList
@@ -376,8 +378,10 @@ export default function TeacherDashboard() {
                 dateFmt={fmtLong}
                 seeAllState={{ announcements }} // ⬅️ ini yang dibaca komponen di atas
                 seeAllPath="all-announcement-teacher"
-                getDetailHref={(a) => `/guru/pengumuman/detail/${a.id}`}
-                showActions
+                getDetailHref={(a) =>
+                  `/${slug}/guru/all-announcement-teacher/detail/${a.id}`
+                }
+                // showActions
                 canAdd={false}
                 onEdit={(a) => {
                   setAnnounceInitial({
@@ -417,6 +421,9 @@ function MyClassItem({
   lastSubject?: string;
   palette: Palette;
 }) {
+  const navigate = useNavigate();
+  const { slug } = useParams();
+
   return (
     <div
       className="flex items-center justify-between rounded-xl border px-3 py-2"
@@ -429,11 +436,16 @@ function MyClassItem({
           {lastSubject ? `• ${lastSubject}` : ""}
         </div>
       </div>
+
       <Btn
         palette={palette}
         size="sm"
         variant="ghost"
-        onClick={() => alert(`Kelola ${name}`)}
+        onClick={() =>
+          navigate(`/${slug}/guru/management-class/${name}`, {
+            state: { className: name, students, lastSubject },
+          })
+        }
       >
         Kelola
       </Btn>

@@ -171,7 +171,15 @@ export default function DetailAssignment() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Btn palette={palette} size="sm">
+                <Btn
+                  palette={palette}
+                  size="sm"
+                  onClick={() =>
+                    navigate(`../${assignmentId}/score`, {
+                      state: { assignment: data }, // biar TaskScore bisa tampilkan judul, dll.
+                    })
+                  }
+                >
                   Nilai
                 </Btn>
                 <Btn

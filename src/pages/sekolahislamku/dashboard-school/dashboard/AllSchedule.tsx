@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { ArrowLeft, Clock, MapPin, Plus } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
+import Swal from "sweetalert2";
 import {
   SectionCard,
   Badge,
@@ -14,8 +15,7 @@ import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import {
   mockTodaySchedule,
   type TodayScheduleItem,
-} from "../../types/TodaySchedule";
-
+} from "../types/TodaySchedule";
 
 // Edit (ubah item yang ada)
 import ModalEditSchedule from "./ModalEditSchedule";
@@ -151,11 +151,31 @@ export default function AllSchedule() {
   };
 
   /* ===== Hapus & Detail (dari list) ===== */
-  const handleDelete = (it: TodayScheduleItem) => {
-    if (!confirm(`Hapus jadwal "${it.title}"?`)) return;
-    const k = keyOf(it);
-    setItems((prev) => prev.filter((x) => keyOf(x) !== k));
-  };
+const handleDelete = (it: TodayScheduleItem) => {
+  Swal.fire({
+    title: "Yakin hapus?",
+    text: `Jadwal "${it.title}" akan dihapus.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Ya, hapus",
+    cancelButtonText: "Batal",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const k = keyOf(it);
+      setItems((prev) => prev.filter((x) => keyOf(x) !== k));
+
+      Swal.fire({
+        title: "Terhapus!",
+        text: `Jadwal "${it.title}" berhasil dihapus.`,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  });
+};
 
   const handleDetail = (it: TodayScheduleItem) => {
     const id = makeScheduleId(it);
@@ -327,7 +347,7 @@ export default function AllSchedule() {
                           <Btn
                             palette={palette}
                             size="sm"
-                            variant="quaternary"
+                            variant="destructive"
                             onClick={() => handleDelete(j)}
                           >
                             Hapus

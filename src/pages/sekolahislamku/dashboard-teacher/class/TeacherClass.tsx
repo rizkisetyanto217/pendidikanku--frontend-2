@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/TeacherClassDetail.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -301,6 +301,7 @@ export default function TeacherClass() {
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false); // Add materi
+  const navigate = useNavigate();
 
   // materi
   const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:id
@@ -499,7 +500,20 @@ export default function TeacherClass() {
               </div>
 
               {/* Wali kelas card */}
-              <SectionCard palette={palette} className="lg:col-span-5">
+              <SectionCard
+                palette={palette}
+                className="lg:col-span-5"
+                onClick={() =>
+                  navigate("homeroom", {
+                    state: {
+                      homeroom: data?.homeroom,
+                      assistants: data?.assistants,
+                      room: data?.room,
+                      studentsCount: data?.studentsCount,
+                    },
+                  })
+                }
+              >
                 <div className="p-4 md:p-6 flex flex-col gap-3">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
                     <div className="space-y-1.5">
@@ -606,10 +620,23 @@ export default function TeacherClass() {
                             <Btn
                               palette={palette}
                               size="sm"
-                              variant="quaternary"
+                              onClick={() =>
+                                navigate(`../kelas/${classId}/score`, {
+                                  state: {
+                                    assignment: {
+                                      id: t.id,
+                                      title: t.title,
+                                      dueDate: t.dueDate,
+                                      submitted: t.submitted,
+                                      total: t.total,
+                                    },
+                                  },
+                                })
+                              }
                             >
                               Nilai
                             </Btn>
+
                             <LinkBtn
                               palette={palette}
                               size="sm"
@@ -743,7 +770,11 @@ export default function TeacherClass() {
                     <Btn
                       palette={palette}
                       size="sm"
-                      onClick={() => alert("Kelola Absen")}
+                      onClick={() =>
+                        navigate("../attendance-management", {
+                          state: { className: data?.name },
+                        })
+                      }
                     >
                       Kelola Absen
                     </Btn>

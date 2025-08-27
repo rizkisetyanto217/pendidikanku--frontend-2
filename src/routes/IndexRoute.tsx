@@ -162,10 +162,10 @@ import TeacherSchedule from "@/pages/sekolahislamku/dashboard-teacher/schedule/T
 import TeacherClassAttendance from "@/pages/sekolahislamku/dashboard-teacher/class/TeacherClassAttendance";
 
 // School Routes
-import AllSchedule from "@/pages/sekolahislamku/dashboard-school/components/dashboard/AllSchedule";
-import AllAnnouncement from "@/pages/sekolahislamku/dashboard-school/components/dashboard/AllAnnouncement";
-import AllInvoices from "@/pages/sekolahislamku/dashboard-school/components/dashboard/AllInvoices";
-import TryoutTahfizhExam from "@/pages/sekolahislamku/dashboard-school/components/dashboard/TryoutTahfizhExam";
+import AllSchedule from "@/pages/sekolahislamku/dashboard-school/dashboard/AllSchedule";
+import AllAnnouncement from "@/pages/sekolahislamku/dashboard-school/dashboard/AllAnnouncement";
+import AllInvoices from "@/pages/sekolahislamku/dashboard-school/dashboard/AllInvoices";
+import TryoutTahfizhExam from "@/pages/sekolahislamku/dashboard-school/dashboard/TryoutTahfizhExam";
 
 import { financeRoutes } from "@/pages/masjidku/financial/routes";
 import SchoolManageClass from "@/pages/sekolahislamku/dashboard-school/class/detail/SchoolDetailClass";
@@ -186,7 +186,12 @@ import DetailScheduleThreeDays from "@/pages/sekolahislamku/dashboard-teacher/cl
 import ScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/ScheduleSevenDays";
 import DetailScheduleSevenDays from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailScheduleSevenDays";
 import RegisterDetailUser from "@/pages/dashboard/auth/register/RegisterDetailUser";
-import DetailSchedule from "@/pages/sekolahislamku/dashboard-school/components/dashboard/DetailSchedule";
+import DetailSchedule from "@/pages/sekolahislamku/dashboard-school/dashboard/DetailSchedule";
+import DetailAnnouncementTeacher from "@/pages/sekolahislamku/dashboard-teacher/dashboard/DetailAnnouncementTeacher";
+import ManagementClass from "@/pages/sekolahislamku/dashboard-teacher/dashboard/ManagementClass";
+import HomeroomTeacher from "@/pages/sekolahislamku/dashboard-teacher/class/components/HomeroomTeacher";
+import TaskScore from "@/pages/sekolahislamku/dashboard-teacher/class/components/TaskScore";
+import AttendanceManagement from "@/pages/sekolahislamku/dashboard-teacher/class/components/AttendanceManagement";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -579,10 +584,25 @@ export default function AppRoutes() {
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
         <Route path="jadwal" element={<TeacherSchedule />} />
         <Route path="assignments" element={<AllAssignment />} />
+        <Route path="assignments" element={<AllAssignment />} />
+        <Route path="assignments/:id" element={<DetailAssignment />} />
+        <Route path="kelas/:id/score" element={<TaskScore />} />
+        <Route
+          path="attendance-management"
+          element={<AttendanceManagement />}
+        />
+
+        <Route path="kelas/homeroom" element={<HomeroomTeacher />} />
         <Route
           path="all-announcement-teacher"
           element={<AllAnnouncementTeacher />}
         />
+        <Route
+          path="all-announcement-teacher/detail/:id"
+          element={<DetailAnnouncementTeacher />}
+        />
+
+        <Route path="management-class/:name" element={<ManagementClass />} />
         {/* ===== 3 Hari (GLOBAL) ===== */}
         <Route path="schedule-3-hari">
           <Route index element={<ScheduleThreeDays />} />

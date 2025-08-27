@@ -21,7 +21,6 @@ import {
   type UpcomingClass,
 } from "../teacher";
 
-
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 import AddSchedule from "../../dashboard/AddSchedule";
@@ -428,7 +427,7 @@ export default function ScheduleSevenDays() {
                               <Btn
                                 palette={palette}
                                 size="sm"
-                                variant="ghost"
+                                variant="white1"
                                 onClick={() => openEdit(s)}
                               >
                                 Edit
