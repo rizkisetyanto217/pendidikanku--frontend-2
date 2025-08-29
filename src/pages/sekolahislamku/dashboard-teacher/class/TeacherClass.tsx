@@ -38,9 +38,6 @@ import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
 import AddSchedule from "../dashboard/AddSchedule";
 
-
-// 🔹 Pakai modal TambahJadwal dari pages/schedule/modal
-
 /* ================= Types ================ */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
 type AttendanceMode = "onsite" | "online";
@@ -73,7 +70,6 @@ type MaterialItem = {
   attachments?: number;
 };
 
-/** Item jadwal untuk beberapa hari ke depan */
 type UpcomingItem = {
   dateISO: string;
   time: string;
@@ -87,9 +83,11 @@ type ClassDetail = {
   room?: string;
   homeroom: string;
   assistants?: string[];
+  /** ❗️Tidak lagi dipakai untuk ringkasan; biarkan tetap di tipe agar kompatibel dengan API */
   studentsCount: number;
   scheduleToday: { time: string; title: string; room?: string }[];
   upcomingSchedule: UpcomingItem[];
+  /** ❗️Tidak dipakai untuk ringkasan; ringkasan dihitung dari students */
   attendanceToday: { byStatus: Record<AttendanceStatus, number> };
   students: StudentRow[];
   assignments: Assignment[];
@@ -201,11 +199,11 @@ async function fetchClassDetail(classId: string): Promise<ClassDetail> {
     room: classId === "tpa-b" ? "R. Tahfiz" : "Aula 1",
     homeroom: "Ustadz Abdullah",
     assistants: ["Ustadzah Amina"],
-    studentsCount: 22,
+    studentsCount: 22, // ❗️tidak dipakai sebagai sumber kebenaran
     scheduleToday,
     upcomingSchedule,
     attendanceToday: {
-      byStatus: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 },
+      byStatus: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 }, // ❗️tidak dipakai sebagai sumber kebenaran
     },
     students,
     assignments: [
@@ -297,24 +295,13 @@ function ClassSelector({
 
 /* ================= Page ================= */
 export default function TeacherClass() {
-  // Top-level UI states
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [openModal, setOpenModal] = useState(false); // Add materi
+  const [openModal, setOpenModal] = useState(false);
   const navigate = useNavigate();
 
-  // materi
-  const { id: idFromUrl } = useParams(); // kalau halaman detailnya sudah /kelas/:id
-  // const classId = selectedClassId || idFromUrl;
-
-  // Tambah Jadwal modal
-  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
-  const [listScheduleItems, setListScheduleItems] = useState<
-    { time: string; title: string; room?: string; slug?: string }[]
-  >([]);
-
   const params = useParams<{ id: string }>();
-  const classId = params.id ?? "tpa-a";
+  const classIdFromUrl = params.id ?? "tpa-a";
 
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
@@ -326,19 +313,37 @@ export default function TeacherClass() {
     staleTime: 5 * 60_000,
   });
 
-  // State kelas terpilih, default dari URL param
-  const [selectedClassId, setSelectedClassId] = useState<string>(classId);
-  useEffect(() => setSelectedClassId(classId), [classId]);
+  // Kelas terpilih (default dari URL)
+  const [selectedClassId, setSelectedClassId] =
+    useState<string>(classIdFromUrl);
+  useEffect(() => setSelectedClassId(classIdFromUrl), [classIdFromUrl]);
 
   // Detail kelas
   const { data } = useQuery({
-    queryKey: ["teacher-class-detail", selectedClassId || classId],
-    queryFn: () => fetchClassDetail(selectedClassId || classId),
+    queryKey: ["teacher-class-detail", selectedClassId],
+    queryFn: () => fetchClassDetail(selectedClassId),
     staleTime: 60_000,
-    enabled: !!(selectedClassId || classId),
+    enabled: !!selectedClassId,
   });
 
-  // === Jadwal 7 hari ke depan (hari ini s/d +6) ===
+  // === Konsolidasi ringkasan dari students (Sumber Kebenaran Tunggal) ===
+  const attendanceFromStudents = useMemo(() => {
+    const counts: Record<AttendanceStatus, number> = {
+      hadir: 0,
+      online: 0,
+      sakit: 0,
+      izin: 0,
+      alpa: 0,
+    };
+    const list = data?.students ?? [];
+    for (const s of list) {
+      if (!s.statusToday) continue;
+      counts[s.statusToday] = (counts[s.statusToday] ?? 0) + 1;
+    }
+    return { byStatus: counts, total: list.length };
+  }, [data?.students]);
+
+  // Jadwal 7 hari ke depan (today..+6)
   const next7DaysItems = useMemo(() => {
     const start = startOfDay(new Date());
     const end = startOfDay(addDays(new Date(), 6));
@@ -362,7 +367,17 @@ export default function TeacherClass() {
       }));
   }, [data?.upcomingSchedule]);
 
-  // ====== Students filter/search ======
+  // Jadwal manual (local)
+  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
+  const [listScheduleItems, setListScheduleItems] = useState<
+    { time: string; title: string; room?: string; slug?: string }[]
+  >([]);
+  const combinedUpcoming = useMemo(
+    () => [...next7DaysItems, ...listScheduleItems],
+    [next7DaysItems, listScheduleItems]
+  );
+
+  // ===== Students filter/search =====
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<AttendanceStatus | "all">(
     "all"
@@ -389,12 +404,6 @@ export default function TeacherClass() {
     setExportOpen(false);
   };
 
-  // Gabungkan jadwal API + manual
-  const combinedUpcoming = useMemo(
-    () => [...next7DaysItems, ...listScheduleItems],
-    [next7DaysItems, listScheduleItems]
-  );
-
   return (
     <div
       className="min-h-screen w-full"
@@ -415,24 +424,20 @@ export default function TeacherClass() {
         palette={palette}
         onSubmit={handleAddStudent}
       />
-
       <ModalExport
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         onSubmit={handleExport}
         palette={palette}
       />
-
       <ModalAddMateri
         open={openModal}
         onClose={() => setOpenModal(false)}
         palette={palette}
         onSubmit={(form) => {
           console.log("Materi baru:", form);
-          // TODO: API POST ke backend
         }}
       />
-
       <AddSchedule
         open={showTambahJadwal}
         onClose={() => setShowTambahJadwal(false)}
@@ -453,12 +458,12 @@ export default function TeacherClass() {
           <div className="flex-1 min-w-0 space-y-6">
             <ClassSelector
               palette={palette}
-              value={selectedClassId || classId}
+              value={selectedClassId}
               options={classOptions}
               onChange={(nextId) => setSelectedClassId(nextId)}
             />
 
-            {/* Banner info kelas aktif */}
+            {/* Banner info kelas aktif — total siswa sinkron dg tabel */}
             <div
               className="rounded-xl p-3 md:p-4"
               style={{ background: palette.primary2, color: palette.primary }}
@@ -479,8 +484,8 @@ export default function TeacherClass() {
                 ) : null}
               </div>
               <div className="text-sm" style={{ color: palette.silver2 }}>
-                Wali Kelas: {data?.homeroom ?? "-"} • {data?.studentsCount ?? 0}{" "}
-                siswa
+                Wali Kelas: {data?.homeroom ?? "-"} •{" "}
+                {attendanceFromStudents.total} siswa
               </div>
             </div>
 
@@ -509,7 +514,7 @@ export default function TeacherClass() {
                       homeroom: data?.homeroom,
                       assistants: data?.assistants,
                       room: data?.room,
-                      studentsCount: data?.studentsCount,
+                      studentsCount: attendanceFromStudents.total,
                     },
                   })
                 }
@@ -541,7 +546,7 @@ export default function TeacherClass() {
                       </Badge>
                       <Badge palette={palette} variant="outline">
                         <Users className="mr-1" size={14} />
-                        {data?.studentsCount ?? 0} siswa
+                        {attendanceFromStudents.total} siswa
                       </Badge>
                     </div>
                   </div>
@@ -621,7 +626,7 @@ export default function TeacherClass() {
                               palette={palette}
                               size="sm"
                               onClick={() =>
-                                navigate(`../kelas/${classId}/score`, {
+                                navigate(`../kelas/${selectedClassId}/score`, {
                                   state: {
                                     assignment: {
                                       id: t.id,
@@ -641,7 +646,7 @@ export default function TeacherClass() {
                               palette={palette}
                               size="sm"
                               variant="ghost"
-                              to={`${classId}/assignment/${t.id}`}
+                              to={`${selectedClassId}/assignment/${t.id}`}
                               state={{ assignment: t }}
                             >
                               Detail
@@ -704,9 +709,8 @@ export default function TeacherClass() {
                           </div>
                         </div>
 
-                        {/* Pastikan menyertakan :id */}
                         <Link
-                          to={`${classId}/material/${m.id}`} // hasil: /:slug/guru/kelas/:id/material/:materialId
+                          to={`${selectedClassId}/material/${m.id}`}
                           state={{ material: m, className: data?.name }}
                         >
                           <Btn palette={palette} variant="white1" size="sm">
@@ -727,6 +731,7 @@ export default function TeacherClass() {
                 </div>
               </SectionCard>
 
+              {/* Ringkasan Kehadiran — sinkron dari students */}
               <SectionCard palette={palette} className="lg:col-span-5">
                 <div className="p-4 md:p-5">
                   <div className="font-medium mb-2 flex items-center gap-2">
@@ -737,12 +742,12 @@ export default function TeacherClass() {
                     <StatPill
                       palette={palette}
                       label="Total Siswa"
-                      value={data?.studentsCount ?? 0}
+                      value={attendanceFromStudents.total}
                     />
                     <StatPill
                       palette={palette}
                       label="Hadir"
-                      value={data?.attendanceToday.byStatus.hadir ?? 0}
+                      value={attendanceFromStudents.byStatus.hadir}
                     />
                   </div>
 
@@ -760,8 +765,8 @@ export default function TeacherClass() {
                         key={k}
                         palette={palette}
                         label={k.toUpperCase()}
-                        value={data?.attendanceToday.byStatus[k] ?? 0}
-                        total={data?.studentsCount ?? 0}
+                        value={attendanceFromStudents.byStatus[k]}
+                        total={attendanceFromStudents.total}
                       />
                     ))}
                   </div>
@@ -772,7 +777,19 @@ export default function TeacherClass() {
                       size="sm"
                       onClick={() =>
                         navigate("../attendance-management", {
-                          state: { className: data?.name },
+                          state: {
+                            className: data?.name,
+                            students: (data?.students ?? []).map((s) => ({
+                              id: s.id,
+                              name: s.name,
+                              status: (s.statusToday ?? "alpa") as
+                                | "hadir"
+                                | "online"
+                                | "sakit"
+                                | "izin"
+                                | "alpa",
+                            })),
+                          },
                         })
                       }
                     >
@@ -853,14 +870,52 @@ export default function TeacherClass() {
                     </div>
                   </div>
 
-                  {/* Table */}
                   <StudentsTable
                     palette={palette}
                     rows={filteredStudents}
-                    onDetail={(id) => alert(`Detail siswa ${id}`)}
-                    onGrade={(id) => alert(`Nilai siswa ${id}`)}
-                  />
+                    onDetail={(id) => {
+                      const s = (data?.students ?? []).find((x) => x.id === id);
+                      if (!s) return;
 
+                      navigate(`${selectedClassId}/student/${s.id}`, {
+                        state: {
+                          student: {
+                            id: s.id,
+                            name: s.name,
+                            avatarUrl: s.avatarUrl,
+                            statusToday: s.statusToday,
+                            mode: s.mode,
+                            time: s.time,
+                            iqraLevel: s.iqraLevel,
+                            juzProgress: s.juzProgress,
+                            lastScore: s.lastScore,
+                            className: data?.name,
+                          },
+                        },
+                      });
+                    }}
+                    onGrade={(id) => {
+                      const s = (data?.students ?? []).find((x) => x.id === id);
+                      if (!s) return;
+                      // siapkan daftar tugas (opsional, boleh tidak dikirim)
+                      const tasks = (data?.assignments ?? []).map((t) => ({
+                        id: t.id,
+                        title: t.title,
+                        dueDate: t.dueDate,
+                      }));
+
+                      navigate(`${selectedClassId}/student/${id}/score`, {
+                        state: {
+                          student: {
+                            id: s.id,
+                            name: s.name,
+                            className: data?.name,
+                          },
+                          assignments: tasks,
+                        },
+                      });
+                    }}
+                  />
                   {/* Footer actions */}
                   <div className="mt-4 flex justify-between items-center">
                     <div className="text-xs" style={{ color: palette.silver2 }}>
@@ -875,7 +930,6 @@ export default function TeacherClass() {
                       >
                         Export CSV
                       </Btn>
-
                       <Btn
                         palette={palette}
                         size="sm"

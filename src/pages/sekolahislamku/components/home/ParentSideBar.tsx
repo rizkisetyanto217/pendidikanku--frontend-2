@@ -56,7 +56,7 @@ const DEFAULT_NAVS: NavDict = {
     // { path: "kehadiran", label: "Absensi", icon: CheckSquare },
     { path: "buku", label: "Buku", icon: Book },
     { path: "keuangan", label: "Keuangan", icon: Wallet },
-    { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+    // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   ],
   murid: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -72,7 +72,7 @@ const DEFAULT_NAVS: NavDict = {
     { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
     { path: "penilaian", label: "Penilaian", icon: ClipboardList },
     // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
-    { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+    // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   ],
 };
 

@@ -192,6 +192,10 @@ import ManagementClass from "@/pages/sekolahislamku/dashboard-teacher/dashboard/
 import HomeroomTeacher from "@/pages/sekolahislamku/dashboard-teacher/class/components/HomeroomTeacher";
 import TaskScore from "@/pages/sekolahislamku/dashboard-teacher/class/components/TaskScore";
 import AttendanceManagement from "@/pages/sekolahislamku/dashboard-teacher/class/components/AttendanceManagement";
+import DetailStudent from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailStudent";
+import StudentScore from "@/pages/sekolahislamku/dashboard-teacher/class/components/StudentScore";
+import AttendanceDetail from "@/pages/sekolahislamku/dashboard-teacher/attendance/components/AttendanceDetail";
+import DetailGrading from "@/pages/sekolahislamku/dashboard-teacher/grade/components/DetailGrading";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -580,12 +584,15 @@ export default function AppRoutes() {
       <Route path=":slug/guru" element={<StudentLayout />}>
         <Route index element={<TeacherDashboard />} />
         <Route path="kehadiran" element={<TeacherAttendance />} />
+        <Route path="kehadiran/:id" element={<AttendanceDetail />} />
+
         <Route path="penilaian" element={<TeacherGrading />} />
+        <Route path="penilaian/:id" element={<DetailGrading />} />
+
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
         <Route path="jadwal" element={<TeacherSchedule />} />
         <Route path="assignments" element={<AllAssignment />} />
-        <Route path="assignments" element={<AllAssignment />} />
-        <Route path="assignments/:id" element={<DetailAssignment />} />
+
         <Route path="kelas/:id/score" element={<TaskScore />} />
         <Route
           path="attendance-management"
@@ -627,6 +634,11 @@ export default function AppRoutes() {
           <Route index element={<TeacherClass />} />
           <Route path=":id/material/:materialId" element={<DetailMateri />} />
           <Route path=":id/assignment/:id" element={<DetailAssignment />} />
+          <Route path=":id/student/:studentId" element={<DetailStudent />} />
+          <Route
+            path=":id/student/:studentId/score"
+            element={<StudentScore />}
+          />
           <Route path="jadwal" element={<TeacherSchedule />} />
           <Route path="kehadiran" element={<TeacherClassAttendance />} />
 
@@ -662,7 +674,7 @@ export default function AppRoutes() {
         </Route>
         <Route path="kehadiran" element={<SchoolAttendance />} />
         <Route path="keuangan" element={<SchoolFinance />} />
-        <Route path="pengumuman" element={<SchoolAnnouncement />} />
+        {/* <Route path="pengumuman" element={<SchoolAnnouncement />} /> */}
         <Route path="buku">
           <Route index element={<SchoolBooks />} />
           <Route path="detail/:id" element={<SchoolDetailBook />} />
