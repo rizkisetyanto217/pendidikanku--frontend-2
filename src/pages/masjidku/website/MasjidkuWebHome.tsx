@@ -1,7 +1,6 @@
 // src/pages/SekolahIslamkuHome.tsx
 import React, { useMemo } from "react";
 import {
-  PlayCircle,
   BookOpen,
   Users,
   Award,
@@ -9,22 +8,19 @@ import {
   Calendar,
   ChevronRight,
   CheckCircle2,
-  Mail,
   Phone,
-  MapPin,
-  Instagram,
-  Youtube,
-  Facebook,
   Star,
 } from "lucide-react";
-import LinktreeNavbar from "@/components/common/public/LintreeNavbar";
-import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
+
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
+import WebsiteFooter from "./components/MasjidkuWebFooter";
+
+import useHtmlThema from "@/hooks/useHTMLThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+
 import TestimonialSlider, {
   TestimonialItem,
 } from "./components/MasjidkuTestimonialSlider";
-import WebsiteFooter from "./components/MasjidkuWebFooter";
 
 /** =================== Data =================== */
 const modules = [
@@ -145,7 +141,6 @@ const kpis = [
 ];
 
 /** ========= Utilities ========= */
-/** FullBleed memaksa lebar elemen = viewport, menembus parent yg punya max-w */
 const FullBleed: React.FC<{
   className?: string;
   children: React.ReactNode;
@@ -157,7 +152,6 @@ const FullBleed: React.FC<{
   </div>
 );
 
-/** Section: sekarang TANPA max-w supaya benar2 full-width */
 const Section: React.FC<{
   id?: string;
   className?: string;
@@ -169,19 +163,18 @@ const Section: React.FC<{
 );
 
 export default function SekolahIslamkuHome() {
-  const { isDark, themeName } = useHtmlDarkMode();
+  const { isDark, themeName } = useHtmlThema();
   const theme = pickTheme(themeName as ThemeName, isDark);
 
   const primaryBtnStyle = useMemo(
     () => ({
       backgroundColor: theme.primary,
       borderColor: theme.primary,
-      color: theme.white1,
+      color: "#FFFFFF",
     }),
     [theme]
   );
 
-  // Tambahkan di atas (bareng primaryBtnStyle & ghostBtnStyle)
   const supportBtnStyle = useMemo(
     () => ({
       color: theme.quaternary,
@@ -191,13 +184,12 @@ export default function SekolahIslamkuHome() {
     [theme, isDark]
   );
 
-  const ghostBtnStyle = useMemo(
-    () => ({
-      color: theme.black1,
-      borderColor: theme.white3,
-      backgroundColor: isDark ? theme.white2 : "transparent",
-    }),
-    [theme, isDark]
+  const pageBg = useMemo(
+    () =>
+      isDark
+        ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
+        : `linear-gradient(180deg, ${theme.white2} 0%, ${theme.white1} 100%)`,
+    [isDark, theme]
   );
 
   return (
@@ -205,17 +197,13 @@ export default function SekolahIslamkuHome() {
       <div
         id="home"
         className="min-h-screen overflow-x-hidden w-screen"
-        style={{
-          background: isDark
-            ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
-            : `linear-gradient(180deg, ${theme.white2} 0%, ${theme.white1} 100%)`,
-          color: theme.black1,
-        }}
+        style={{ background: pageBg, color: theme.black1 }}
       >
-        {/* NAVBAR (ikut viewport width) */}
+        {/* NAVBAR */}
         <WebsiteNavbar />
         <div style={{ height: "5.5rem" }} />
-        {/* HERO full-bleed (REPLACE seluruh blok hero lama dengan ini) */}
+
+        {/* HERO */}
         <div className="relative overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2400&auto=format&fit=crop"
@@ -308,6 +296,7 @@ export default function SekolahIslamkuHome() {
             </div>
           </Section>
         </div>
+
         {/* MODUL INTI */}
         <Section id="program" className="py-16 md:py-20">
           <header className="mb-8 md:mb-12 text-center">
@@ -358,6 +347,7 @@ export default function SekolahIslamkuHome() {
             ))}
           </div>
         </Section>
+
         {/* FITUR TAMBAHAN */}
         <Section id="fasilitas" className="py-16 md:py-20">
           <header className="mb-8 md:mb-12 text-center">
@@ -398,6 +388,7 @@ export default function SekolahIslamkuHome() {
             ))}
           </div>
         </Section>
+
         {/* KEUNGGULAN */}
         <Section id="keunggulan" className="py-16 md:py-20">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -463,13 +454,14 @@ export default function SekolahIslamkuHome() {
               </div>
               <div
                 className="absolute -bottom-6 -right-6 hidden md:block rounded-2xl px-4 py-3 shadow-lg"
-                style={{ backgroundColor: theme.primary, color: theme.white1 }}
+                style={{ backgroundColor: theme.primary, color: "#FFFFFF" }}
               >
                 Fokus: Efisiensi • Transparansi • Data-Driven
               </div>
             </div>
           </div>
         </Section>
+
         {/* TESTIMONI */}
         <Section id="testimoni" className="py-16 md:py-20">
           <header className="mb-8 md:mb-12 text-center">
@@ -491,12 +483,13 @@ export default function SekolahIslamkuHome() {
             showArrows
           />
         </Section>
-        {/* CTA DEMO full-bleed */}
+
+        {/* CTA DEMO */}
         <div
           id="demo"
           className="relative overflow-hidden"
           style={{
-            background: `linear-gradient(135deg, ${theme.primary} 0%, ${colors.light.quaternary} 100%)`,
+            background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.quaternary} 100%)`,
           }}
         >
           <img
@@ -510,8 +503,8 @@ export default function SekolahIslamkuHome() {
             <div
               className="rounded-3xl border backdrop-blur-sm p-6 md:p-10 grid md:grid-cols-2 gap-8 items-center"
               style={{
-                borderColor: `${colors.light.white1}33`,
-                color: colors.light.white1,
+                borderColor: "rgba(255,255,255,0.2)",
+                color: "#FFFFFF",
               }}
             >
               <div>
@@ -527,9 +520,9 @@ export default function SekolahIslamkuHome() {
                     href="#kontak"
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm shadow transition hover:opacity-90"
                     style={{
-                      backgroundColor: colors.light.white1,
+                      backgroundColor: "#FFFFFF",
                       color: theme.primary,
-                      borderColor: colors.light.white1,
+                      borderColor: "#FFFFFF",
                     }}
                   >
                     <Calendar className="h-4 w-4" /> Booking Slot Demo
@@ -539,8 +532,8 @@ export default function SekolahIslamkuHome() {
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm transition"
                     style={{
                       backgroundColor: "transparent",
-                      color: colors.light.white1,
-                      borderColor: `${colors.light.white1}99`,
+                      color: "#FFFFFF",
+                      borderColor: "rgba(255,255,255,0.6)",
                     }}
                   >
                     <Phone className="h-4 w-4" /> Hubungi Sales
@@ -562,6 +555,7 @@ export default function SekolahIslamkuHome() {
             </div>
           </Section>
         </div>
+
         {/* NEWSLETTER */}
         <Section className="py-16 md:py-20">
           <div
@@ -605,6 +599,7 @@ export default function SekolahIslamkuHome() {
             </div>
           </div>
         </Section>
+
         {/* FOOTER */}
         <WebsiteFooter />
       </div>

@@ -8,21 +8,22 @@ import {
   BookOpen,
   Calendar,
   Wallet,
-  GraduationCap,
+  Mail,
+  Phone,
+  MapPin,
+  ChevronRight,
   BarChart3,
   Heart,
   Handshake,
   Leaf,
   Globe2,
-  Mail,
-  Phone,
-  MapPin,
-  ChevronRight,
 } from "lucide-react";
+
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import WebsiteFooter from "../components/MasjidkuWebFooter";
+import WebsiteFooter from "../components/MasjidkuWebFooter"; // sesuaikan jika path kamu beda
+
+import useHtmlThema from "@/hooks/useHTMLThema"; // ✅ gunakan file yang kamu kirim
+import { pickTheme, ThemeName } from "@/constants/thema"; // ✅ gunakan colorsThema
 
 /** ===== Helpers ===== */
 const FullBleed: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
@@ -45,8 +46,8 @@ const Section: React.FC<
 );
 
 /** ===== Page ===== */
-export default function MasjidkuWebAbout() {
-  const { isDark, themeName } = useHtmlDarkMode();
+export default function SekolahIslamkuAbout() {
+  const { isDark, themeName } = useHtmlThema();
   const theme = pickTheme(themeName as ThemeName, isDark);
 
   const bg = useMemo(
@@ -72,7 +73,7 @@ export default function MasjidkuWebAbout() {
     () => ({
       backgroundColor: theme.primary,
       borderColor: theme.primary,
-      color: theme.white1,
+      color: "#FFFFFF",
     }),
     [theme]
   );
@@ -440,7 +441,7 @@ export default function MasjidkuWebAbout() {
         <div
           className="relative overflow-hidden"
           style={{
-            background: `linear-gradient(135deg, ${theme.primary} 0%, ${colors.light.quaternary} 100%)`,
+            background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.quaternary} 100%)`,
           }}
         >
           <img
@@ -454,8 +455,8 @@ export default function MasjidkuWebAbout() {
             <div
               className="rounded-3xl border backdrop-blur-sm p-6 md:p-10 grid md:grid-cols-2 gap-8 items-center"
               style={{
-                borderColor: `${colors.light.white1}33`,
-                color: colors.light.white1,
+                borderColor: "rgba(255,255,255,0.2)",
+                color: "#FFFFFF",
               }}
             >
               <div>
@@ -471,9 +472,9 @@ export default function MasjidkuWebAbout() {
                     href="/#demo"
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm shadow transition hover:opacity-90"
                     style={{
-                      backgroundColor: colors.light.white1,
+                      backgroundColor: "#FFFFFF",
                       color: theme.primary,
-                      borderColor: colors.light.white1,
+                      borderColor: "#FFFFFF",
                     }}
                   >
                     <Calendar className="h-4 w-4" /> Booking Demo
@@ -483,8 +484,8 @@ export default function MasjidkuWebAbout() {
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm transition"
                     style={{
                       backgroundColor: "transparent",
-                      color: colors.light.white1,
-                      borderColor: `${colors.light.white1}99`,
+                      color: "#FFFFFF",
+                      borderColor: "rgba(255,255,255,0.6)",
                     }}
                   >
                     <Phone className="h-4 w-4" /> Hubungi Kami

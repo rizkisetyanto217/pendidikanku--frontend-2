@@ -1,8 +1,10 @@
+// src/pages/dkm/keuangan/PengeluaranPage.tsx
+
 import React, { useState, useMemo, ChangeEvent } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
@@ -115,7 +117,7 @@ const MonthFilter: React.FC<{
   month: string;
   onMonthChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
-  theme: typeof colors.light;
+  theme: Palette;
 }> = ({ month, onMonthChange, onExport, theme }) => (
   <div
     className="mt-4 rounded-xl border p-3 flex flex-wrap gap-3 items-center justify-between"
@@ -158,7 +160,7 @@ const MonthFilter: React.FC<{
 const StatsGrid: React.FC<{
   stats?: ExpenseStats;
   loading: boolean;
-  theme: typeof colors.light;
+  theme: Palette;
 }> = ({ stats, loading, theme }) => {
   const items = [
     {
@@ -215,7 +217,7 @@ const ExpenseList: React.FC<{
   transactions: ExpenseTransaction[];
   loading: boolean;
   error: boolean;
-  theme: typeof colors.light;
+  theme: Palette;
 }> = ({ transactions, loading, error, theme }) => {
   const grouped = useMemo(() => {
     const map: Record<string, ExpenseTransaction[]> = {};
@@ -403,13 +405,16 @@ const PengeluaranPage: React.FC = () => {
         onBackClick={() => navigate(-1)}
         withPaddingTop
       />
+
       <MonthFilter
         month={month}
         onMonthChange={onMonthChange}
         onExport={() => exportToCSV(transactions, slug, month)}
         theme={theme}
       />
+
       <StatsGrid stats={statsResp?.data} loading={loadingStats} theme={theme} />
+
       <section className="mt-6">
         <header className="flex items-center gap-2 mb-4">
           <ArrowUpCircle size={20} style={{ color: theme.error1 }} />
@@ -417,6 +422,7 @@ const PengeluaranPage: React.FC = () => {
             Riwayat Pengeluaran
           </h2>
         </header>
+
         <ExpenseList
           transactions={transactions}
           loading={loadingExpense}
@@ -424,6 +430,7 @@ const PengeluaranPage: React.FC = () => {
           theme={theme}
         />
       </section>
+
       <BottomNavbar />
     </div>
   );

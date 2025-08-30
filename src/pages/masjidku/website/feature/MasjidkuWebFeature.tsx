@@ -9,23 +9,20 @@ import {
   Sparkles,
   Users,
   BookOpen,
-  Clock,
-  Award,
-  CreditCard,
-  MessageSquare,
+  Calendar,
   BarChart3,
   ChevronRight,
-  Calendar,
   Plug,
 } from "lucide-react";
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import WebsiteFooter from "../components/MasjidkuWebFooter";
 
+import useHtmlThema from "@/hooks/useHTMLThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+
 /* =====================================================================
- * Utilities (consistent with SekolahIslamkuHome)
+ * Utilities
  * ===================================================================== */
 const FullBleed: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
   className = "",
@@ -68,7 +65,7 @@ const FEATURE_SUMMARY_10: FeatureSummaryItem[] = [
   },
   {
     title: "Absensi",
-    desc: "QR/ID, izin, rekap real‑time.",
+    desc: "QR/ID, izin, rekap real-time.",
     img: "https://images.unsplash.com/photo-1596495578065-8fe1800a2a4b?q=80&w=600&auto=format&fit=crop",
   },
   {
@@ -112,8 +109,13 @@ const FEATURE_SUMMARY_10: FeatureSummaryItem[] = [
  * Small Card (reusable)
  * ===================================================================== */
 const MiniFeatureCard: React.FC<
-  FeatureSummaryItem & { bg: string; fg: string; border: string }
-> = memo(({ title, desc, img, bg, fg, border }) => (
+  FeatureSummaryItem & {
+    bg: string;
+    fg: string;
+    border: string;
+    muted?: string;
+  }
+> = memo(({ title, desc, img, bg, fg, border, muted }) => (
   <figure
     className="rounded-2xl overflow-hidden border shadow-sm hover:shadow-md transition"
     style={{ backgroundColor: bg, borderColor: border }}
@@ -128,7 +130,7 @@ const MiniFeatureCard: React.FC<
       <div className="font-semibold text-sm" style={{ color: fg }}>
         {title}
       </div>
-      <div className="text-xs mt-1" style={{ color: border }}>
+      <div className="text-xs mt-1" style={{ color: muted ?? border }}>
         {desc}
       </div>
     </figcaption>
@@ -140,14 +142,22 @@ MiniFeatureCard.displayName = "MiniFeatureCard";
  * Page Content
  * ===================================================================== */
 export default function SekolahIslamkuFeatures() {
-  const { isDark, themeName } = useHtmlDarkMode();
+  const { isDark, themeName } = useHtmlThema();
   const theme = pickTheme(themeName as ThemeName, isDark);
+
+  const pageBg = useMemo(
+    () =>
+      isDark
+        ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
+        : `linear-gradient(180deg, ${theme.white2} 0%, ${theme.white1} 100%)`,
+    [isDark, theme]
+  );
 
   const primaryBtnStyle = useMemo(
     () => ({
       backgroundColor: theme.primary,
       borderColor: theme.primary,
-      color: theme.white1,
+      color: "#FFFFFF",
     }),
     [theme]
   );
@@ -156,12 +166,7 @@ export default function SekolahIslamkuFeatures() {
     <FullBleed>
       <div
         className="min-h-screen overflow-x-hidden w-screen"
-        style={{
-          background: isDark
-            ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`
-            : `linear-gradient(180deg, ${theme.white2} 0%, ${theme.white1} 100%)`,
-          color: theme.black1,
-        }}
+        style={{ background: pageBg, color: theme.black1 }}
       >
         {/* NAVBAR */}
         <WebsiteNavbar />
@@ -199,7 +204,7 @@ export default function SekolahIslamkuFeatures() {
                 </h1>
                 <p className="mt-4 max-w-3xl" style={{ color: theme.silver2 }}>
                   Kelola PPDB, akademik, keuangan, absensi, komunikasi orang
-                  tua, hingga pelaporan KPI—tanpa perlu gonta‑ganti aplikasi.
+                  tua, hingga pelaporan KPI—tanpa perlu gonta-ganti aplikasi.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <a
@@ -245,7 +250,7 @@ export default function SekolahIslamkuFeatures() {
                     <BarChart3 className="h-4 w-4" />
                     <p className="text-xs">
                       Pantau KPI sekolah, progres kurikulum, keuangan, dan
-                      kehadiran—real‑time.
+                      kehadiran—real-time.
                     </p>
                   </div>
                 </div>
@@ -276,6 +281,7 @@ export default function SekolahIslamkuFeatures() {
                 bg={theme.white1}
                 fg={theme.black1}
                 border={theme.white3}
+                muted={theme.silver2}
               />
             ))}
           </div>
@@ -296,7 +302,7 @@ export default function SekolahIslamkuFeatures() {
                 style={{ color: theme.silver2 }}
               >
                 {[
-                  "Form pendaftaran online (multi‑gelombang)",
+                  "Form pendaftaran online (multi-gelombang)",
                   "Verifikasi berkas & validasi NISN/NIK",
                   "Pembayaran biaya pendaftaran/SPP via payment gateway",
                   "Algoritma penempatan kelas otomatis dengan kuota & preferensi",
@@ -419,7 +425,7 @@ export default function SekolahIslamkuFeatures() {
                   {
                     icon: Lock,
                     title: "Kontrol Akses",
-                    desc: "Role‑based & granular permission.",
+                    desc: "Role-based & granular permission.",
                   },
                   {
                     icon: Database,
@@ -599,7 +605,7 @@ export default function SekolahIslamkuFeatures() {
                   {
                     a: "Keuangan",
                     b: "Catatan tersebar, rekonsiliasi sulit",
-                    c: "Tagih‑bayar online, laporan sekali klik",
+                    c: "Tagih-bayar online, laporan sekali klik",
                   },
                   {
                     a: "Komunikasi",
@@ -685,7 +691,7 @@ export default function SekolahIslamkuFeatures() {
               },
               {
                 q: "Apa saja metode pembayaran SPP?",
-                a: "Transfer bank/VA, e‑wallet, QRIS—tergantung payment gateway yang diaktifkan oleh sekolah.",
+                a: "Transfer bank/VA, e-wallet, QRIS—tergantung payment gateway yang diaktifkan oleh sekolah.",
               },
               {
                 q: "Apakah modul bisa dipilih?",
@@ -693,7 +699,7 @@ export default function SekolahIslamkuFeatures() {
               },
               {
                 q: "Apakah ada pelatihan?",
-                a: "Ada. Onboarding 1‑3 sesi sesuai kebutuhan, termasuk dokumentasi & video panduan.",
+                a: "Ada. Onboarding 1-3 sesi sesuai kebutuhan, termasuk dokumentasi & video panduan.",
               },
               {
                 q: "Bagaimana keamanan data?",
@@ -724,7 +730,7 @@ export default function SekolahIslamkuFeatures() {
           id="demo"
           className="relative overflow-hidden"
           style={{
-            background: `linear-gradient(135deg, ${theme.primary} 0%, ${colors.light.quaternary} 100%)`,
+            background: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.quaternary} 100%)`,
           }}
         >
           <img
@@ -738,8 +744,8 @@ export default function SekolahIslamkuFeatures() {
             <div
               className="rounded-3xl border backdrop-blur-sm p-6 md:p-10 grid md:grid-cols-2 gap-8 items-center"
               style={{
-                borderColor: `${colors.light.white1}33`,
-                color: colors.light.white1,
+                borderColor: "rgba(255,255,255,0.2)",
+                color: "#FFFFFF",
               }}
             >
               <div>
@@ -755,9 +761,9 @@ export default function SekolahIslamkuFeatures() {
                     href="#kontak"
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm shadow transition hover:opacity-90"
                     style={{
-                      backgroundColor: colors.light.white1,
+                      backgroundColor: "#FFFFFF",
                       color: theme.primary,
-                      borderColor: colors.light.white1,
+                      borderColor: "#FFFFFF",
                     }}
                   >
                     <Calendar className="h-4 w-4" /> Booking Slot Demo
@@ -767,8 +773,8 @@ export default function SekolahIslamkuFeatures() {
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm transition"
                     style={{
                       backgroundColor: "transparent",
-                      color: colors.light.white1,
-                      borderColor: `${colors.light.white1}99`,
+                      color: "#FFFFFF",
+                      borderColor: "rgba(255,255,255,0.6)",
                     }}
                   >
                     <ChevronRight className="h-4 w-4" /> Tanya Tim Sales
