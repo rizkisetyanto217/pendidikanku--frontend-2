@@ -394,7 +394,6 @@ export default function TeacherGrading() {
 
   const { slug } = useParams<{ slug: string }>();
 
-
   return (
     <div
       className="min-h-screen w-full"
@@ -851,16 +850,16 @@ export default function TeacherGrading() {
 
                         {/* Contoh ke halaman detail (kirim state) */}
                         <Link
-                          to={`/teacher/grading/${encodeURIComponent(selected.className)}/assignment/${selected.id}`}
+                          to={`/${slug}/guru/penilaian/${selected.id}`}
                           state={{
                             assignment: selected,
                             className: selected.className,
                             submissions,
                           }}
                         >
-                          <Btn palette={palette} variant="ghost">
+                          <Btn palette={palette} size="sm" variant="ghost">
                             <Eye size={14} className="mr-1" />
-                            Lihat Detail
+                            Detail
                           </Btn>
                         </Link>
                       </div>

@@ -196,6 +196,12 @@ import DetailStudent from "@/pages/sekolahislamku/dashboard-teacher/class/compon
 import StudentScore from "@/pages/sekolahislamku/dashboard-teacher/class/components/StudentScore";
 import AttendanceDetail from "@/pages/sekolahislamku/dashboard-teacher/attendance/components/AttendanceDetail";
 import DetailGrading from "@/pages/sekolahislamku/dashboard-teacher/grade/components/DetailGrading";
+import StudentDetail from "@/pages/sekolahislamku/dashboard-student/dashboard/StudentDetail";
+import ListFinance from "@/pages/sekolahislamku/dashboard-student/dashboard/ListFinnance";
+import InvoiceTagihan from "@/pages/sekolahislamku/dashboard-student/dashboard/InvoiceTagihan";
+import AnnouncementsStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AnnouncementsStudent";
+import AllScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AllScheduleStudent";
+import DetailScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/DetailScheduleStudent";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -565,20 +571,29 @@ export default function AppRoutes() {
       </Route>
       <Route path=":slug/murid" element={<StudentLayout />}>
         <Route index element={<StudentDashboard />} />
-
         <Route path="progress" element={<StudentProgressDetail />} />
+        <Route path="all-schedule" element={<AllScheduleStudent />} />
+        <Route
+          path="all-schedule/detail/:scheduleId"
+          element={<DetailScheduleStudent />}
+        />
+        <Route path="announcements" element={<AnnouncementsStudent />} />
+        <Route path="tagihan/:id" element={<InvoiceTagihan />} />
         <Route path="progress/raport" element={<StudentRaport />} />
-
+        <Route path="detail" element={<StudentDetail />} />
         <Route path="finance" element={<StudentFInance />} />
         <Route path="jadwal" element={<StudentSchedule />} />
-
+        <Route path="finnance-list" element={<ListFinance />} />
+        <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
         <Route path="pengumuman">
           <Route index element={<StudentAnnouncement />} />
           <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
         </Route>
-
-        <Route path="absensi" element={<StudentAbsence />} />
-        <Route path="catatan" element={<StudentNotesSummary />} />
+        <Route path="progress/absensi" element={<StudentAbsence />} />
+        <Route
+          path="progress/catatan-hasil"
+          element={<StudentNotesSummary />}
+        />
       </Route>
       {/* ==== Protected Routes - Guru (teacher only) ==== */}
       <Route path=":slug/guru" element={<StudentLayout />}>

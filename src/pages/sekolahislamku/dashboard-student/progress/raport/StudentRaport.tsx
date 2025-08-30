@@ -1,7 +1,8 @@
 // src/pages/StudentReport.tsx
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
+  ArrowLeft,
   Award,
   CalendarDays,
   ClipboardList,
@@ -159,7 +160,7 @@ function grade(num: number) {
 export default function StudentRaport() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
-
+  const navigate = useNavigate();
   const { data: s } = useQuery({
     queryKey: ["student-report"],
     queryFn: fetchReport,
@@ -188,6 +189,15 @@ export default function StudentRaport() {
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
+            <Btn
+              palette={palette}
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft size={16} className="mr-1" />
+              Kembali
+            </Btn>
             {/* Ringkasan Siswa & Periode */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

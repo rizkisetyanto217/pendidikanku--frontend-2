@@ -223,7 +223,7 @@ export default function StudentProgress() {
 
                 <div className="flex flex-col gap-2 md:flex-row">
                   <Link
-                    to="/murid/progress/raport"
+                    to="raport"
                     className="w-full md:w-auto"
                   >
                     <Btn size="sm" variant="default" palette={palette}>
@@ -502,7 +502,7 @@ export default function StudentProgress() {
               </div>
 
               <div className="pt-6">
-                <Link to="/student/progress/absensi" className="block">
+                <Link to="absensi" className="block">
                   <Btn
                     variant="outline"
                     size="sm"
@@ -575,7 +575,7 @@ export default function StudentProgress() {
                   </div>
                 ))}
                 <div className="pt-3">
-                  <Link to="/student/progress/catatan-hasil" className="block">
+                  <Link to="catatan-hasil" className="block">
                     <Btn
                       variant="outline"
                       size="sm"

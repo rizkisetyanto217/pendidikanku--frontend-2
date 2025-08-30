@@ -1,15 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import ParentTopBar from "../components/home/ParentTopBar";
 
+import ParentTopBar from "../components/home/ParentTopBar";
+import ParentSidebar from "../components/home/ParentSideBar";
 import ChildSummaryCard from "@/pages/sekolahislamku/components/card/ChildSummaryCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
-import ParentSidebar from "../components/home/ParentSideBar";
 
-// --- Types ---
+// ✅ cukup import helper & type jadwal
+import {
+  TodayScheduleItem,
+  mapSessionsToTodaySchedule,
+  mockTodaySchedule,
+} from "@/pages/sekolahislamku/dashboard-school/types/TodaySchedule";
+
+// --- Types (untuk bentuk data hasil query) ---
 interface ChildDetail {
   id: string;
   name: string;
@@ -34,25 +41,23 @@ interface BillItem {
   dueDate: string;
   status: "unpaid" | "paid" | "overdue";
 }
-
-// --- Types tambahan (taruh dekat blok Types kamu)
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
 type AttendanceMode = "onsite" | "online";
 interface TodaySummary {
   attendance: {
-    status: AttendanceStatus; // Wajib
+    status: AttendanceStatus;
     mode?: AttendanceMode;
     time?: string;
   };
-  informasiUmum: string; // Wajib
-  nilai?: number; // Opsional
-  materiPersonal?: string; // Opsional
-  penilaianPersonal?: string; // Opsional
-  hafalan?: string; // Opsional
-  pr?: string; // Opsional
+  informasiUmum: string;
+  nilai?: number;
+  materiPersonal?: string;
+  penilaianPersonal?: string;
+  hafalan?: string;
+  pr?: string;
 }
 
-// --- Fake API layer (replace with axios) ---
+// --- Fake API (replace with axios) ---
 async function fetchParentHome() {
   return Promise.resolve({
     parentName: "Bapak/Ibu",
@@ -67,8 +72,6 @@ async function fetchParentHome() {
       iqraLevel: "Iqra 2",
       lastScore: 88,
     } as ChildDetail,
-
-    // ⬇️ DATA DUMMY HARI INI
     today: {
       attendance: { status: "hadir", mode: "onsite", time: "07:28" },
       informasiUmum:
@@ -80,7 +83,6 @@ async function fetchParentHome() {
       hafalan: "An-Naba 1–10",
       pr: "An-Naba 11–15 tambah hafalan",
     } as TodaySummary,
-
     announcements: [
       {
         id: "a1",
@@ -90,7 +92,6 @@ async function fetchParentHome() {
         type: "info",
       },
     ] as Announcement[],
-
     bills: [
       {
         id: "b1",
@@ -102,11 +103,19 @@ async function fetchParentHome() {
         status: "unpaid",
       },
     ] as BillItem[],
-
-    todaySchedule: [
-      { time: "07:30", title: "Tahsin Kelas", room: "Aula 1" },
-      { time: "09:30", title: "Hafalan Juz 30", room: "R. Tahfiz" },
-    ] as { time: string; title: string; room?: string }[],
+    // ✅ kirim data sesi → StudentDashboard tinggal map
+    sessionsToday: [
+      {
+        class_attendance_sessions_title: "Tahsin Kelas",
+        class_attendance_sessions_general_info: "Aula 1",
+        class_attendance_sessions_date: new Date().toISOString(),
+      },
+      {
+        class_attendance_sessions_title: "Hafalan Juz 30",
+        class_attendance_sessions_general_info: "R. Tahfiz",
+        class_attendance_sessions_date: new Date().toISOString(),
+      },
+    ],
   });
 }
 
@@ -136,6 +145,11 @@ export default function StudentDashboard() {
     staleTime: 60_000,
   });
 
+  // ✅ mapping dari sessionsToday → TodayScheduleItem[]
+  const todayScheduleItems: TodayScheduleItem[] = data?.sessionsToday?.length
+    ? mapSessionsToTodaySchedule(data.sessionsToday)
+    : mockTodaySchedule;
+
   return (
     <div
       className="min-h-screen w-full"
@@ -151,20 +165,23 @@ export default function StudentDashboard() {
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri hanya tampil di PC */}
           <ParentSidebar palette={palette} />
 
-          {/* Konten utama */}
           <div className="flex-1 space-y-6">
             <section>
               <ChildSummaryCard
                 child={data?.child}
                 today={data?.today}
                 palette={palette}
-                detailPath="/murid/progress"
+                detailPath="detail"
+                detailState={{
+                  child: data?.child,
+                  today: data?.today,
+                }}
                 todayDisplay="compact"
               />
             </section>
+
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:items-stretch">
               <div className="lg:col-span-8">
                 <BillsSectionCard
@@ -172,16 +189,17 @@ export default function StudentDashboard() {
                   bills={data?.bills ?? []}
                   dateFmt={dateFmt}
                   formatIDR={formatIDR}
-                  seeAllPath="/murid/finance"
-                  getPayHref={(b) => `/tagihan/${b.id}`}
+                  seeAllPath="finnance-list"
+                  getPayHref={(b) => `tagihan/${b.id}`}
                 />
               </div>
 
               <div className="lg:col-span-4">
                 <TodayScheduleCard
                   palette={palette}
-                  items={data?.todaySchedule ?? []}
-                  seeAllPath="/murid/jadwal"
+                  title="Jadwal Hari Ini"
+                  items={todayScheduleItems}
+                  seeAllPath="all-schedule" // boleh diarahkan ke detail juga
                 />
               </div>
             </section>
@@ -191,8 +209,12 @@ export default function StudentDashboard() {
                 palette={palette}
                 items={data?.announcements ?? []}
                 dateFmt={dateFmt}
-                seeAllPath="/murid/pengumuman" // halaman list
-                getDetailHref={(a) => `/murid/pengumuman/detail/${a.id}`} // detail per item
+                seeAllPath="announcements"
+                seeAllState={{
+                  items: data?.announcements,
+                  heading: "Semua Pengumuman",
+                }}
+                getDetailHref={(a) => `/murid/pengumuman/detail/${a.id}`}
                 showActions={false}
               />
             </section>

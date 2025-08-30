@@ -118,7 +118,7 @@ export default function TodayScheduleCard<TState = unknown>({
                     {s.title}
                   </div>
                   {(s.room || s.time) && (
-                    <div style={{ fontSize: 12, color: palette.silver2 }}>
+                    <div style={{ fontSize: 12, color: palette.black2 }}>
                       {s.room}
                     </div>
                   )}

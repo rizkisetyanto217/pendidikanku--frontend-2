@@ -75,7 +75,7 @@ function BillCard({
         {/* Info Tagihan */}
         <div className="min-w-0">
           <div className="font-medium truncate">{bill.title}</div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
+          <div className="text-xs" style={{ color: palette.black2 }}>
             Jatuh tempo: {dateFmt(bill.dueDate)}
           </div>
         </div>
@@ -97,6 +97,12 @@ function BillCard({
 
           <Link
             to={getPayHref(bill)}
+            state={{
+              bill, // kirim objek bill
+              parentName: undefined, // opsional: bisa isi dari dashboard
+              hijriDate: undefined,
+              gregorianDate: undefined,
+            }}
             className="w-full md:w-auto md:flex-shrink-0"
             aria-disabled={isPaid}
             onClick={(e) => {

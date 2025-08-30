@@ -1,5 +1,5 @@
 // src/pages/StudentNotesDetail.tsx
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -19,7 +19,6 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
-
 
 /* ===== Types ===== */
 interface NoteLog {
@@ -123,7 +122,7 @@ const topbarDateFmt = (isoStr: string) =>
 export default function StudentNotesSummary() {
   const { isDark } = useHtmlDarkMode();
   const palette: Palette = isDark ? colors.dark : colors.light;
-
+const navigate = useNavigate();
   const [sp, setSp] = useSearchParams();
 
   const childId = sp.get("child") ?? undefined;
@@ -196,6 +195,15 @@ export default function StudentNotesSummary() {
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
+            <Btn
+              palette={palette}
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft size={16} className="mr-1" />
+              Kembali
+            </Btn>
             {/* Ringkasan */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="font-medium mb-3 flex items-center gap-2">

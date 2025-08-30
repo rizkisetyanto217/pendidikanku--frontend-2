@@ -137,7 +137,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
                     <div className="font-medium truncate">{a.title}</div>
                     <div
                       className="mt-0.5 text-[12px]"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       {dateFmt(a.date)}
                     </div>

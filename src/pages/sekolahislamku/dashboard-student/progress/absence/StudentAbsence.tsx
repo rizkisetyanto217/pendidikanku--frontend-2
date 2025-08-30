@@ -1,5 +1,5 @@
 // src/pages/StudentAbsenceDetail.tsx
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, CalendarDays, Filter, Percent } from "lucide-react";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
@@ -14,7 +14,6 @@ import {
 import { useMemo } from "react";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
-
 
 /* ================= Types ================= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -135,7 +134,7 @@ async function fetchAbsence(
 /* ================= Page ================= */
 export default function StudentAbsence() {
   const [sp, setSp] = useSearchParams();
-
+  const navigate = useNavigate();
   const childId = sp.get("child") ?? undefined;
 
   // Parse query params safely
@@ -204,6 +203,15 @@ export default function StudentAbsence() {
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6">
+            <Btn
+              palette={palette}
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft size={16} className="mr-1" />
+              Kembali
+            </Btn>
             {/* Ringkasan */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="font-medium mb-3 flex items-center gap-2">
