@@ -1,16 +1,18 @@
-import AdminTopbar from "@/components/common/navigation/AdminTopbar";
-import MobileSidebar from "@/components/common/navigation/MobileSidebar";
-import Sidebar, { SidebarItem } from "@/components/common/navigation/Sidebar";
-import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
+// src/layout/GenericAdminLayout.tsx
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 
-// src/layout/GenericAdminLayout.tsx
+import AdminTopbar from "@/components/common/navigation/AdminTopbar";
+import MobileSidebar from "@/components/common/navigation/MobileSidebar";
+import Sidebar, { SidebarItem } from "@/components/common/navigation/Sidebar";
+
+import useHtmlThema from "@/hooks/useHTMLThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+
 type Props = {
   desktopSidebar: SidebarItem[];
   mobileSidebar: SidebarItem[];
-  topbarTitle?: string; // kalau mau judul role
+  topbarTitle?: string; // optional: judul/topbar role
 };
 
 export default function GenericAdminLayout({
@@ -20,11 +22,11 @@ export default function GenericAdminLayout({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { isDark } = useHtmlDarkMode();
+
+  const { isDark, themeName } = useHtmlThema();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const isDashboard = location.pathname.endsWith("/");
-
-  const theme = isDark ? colors.dark : colors.light;
 
   return (
     <div

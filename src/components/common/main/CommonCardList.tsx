@@ -23,9 +23,9 @@ export default function CommonCardList({
     <div
       className={`rounded-xl border ${className}`}
       style={{
-        borderColor: borderColor || themeColors.silver1,
+        borderColor: borderColor || theme.silver1,
         backgroundColor:
-          backgroundColor || (isDark ? themeColors.white2 : themeColors.white1),
+          backgroundColor || (isDark ? theme.white2 : theme.white1),
       }}
     >
       {children}

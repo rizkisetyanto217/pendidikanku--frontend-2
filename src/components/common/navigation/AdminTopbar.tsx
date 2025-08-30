@@ -1,6 +1,6 @@
-import { MenuIcon, MoonIcon, SunIcon } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import useHtmlThema from "@/hooks/useHTMLThema";
 import UserDropdown from "./AdminDropDownTopbar";
 import { Link } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -11,9 +11,9 @@ interface AdminTopbarProps {
   title?: string;
 }
 
-export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
-  const { isDark, toggleDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
+export default function AdminTopbar({ onMenuClick, title }: AdminTopbarProps) {
+  const { isDark, toggleDark, themeName } = useHtmlThema();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const { data: user, isLoading } = useCurrentUser();
   const isLoggedIn = !!user;
@@ -22,28 +22,55 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     <header
       className="flex items-center justify-between px-6 py-4 shadow md:ml-0"
       style={{
-        backgroundColor: themeColors.white1,
-        color: themeColors.black1,
+        backgroundColor: theme.white1,
+        color: theme.black1,
+        borderBottom: `1px solid ${theme.white3}`,
       }}
     >
+      {/* Left: menu (mobile) */}
       <div className="md:hidden">
-        <button onClick={onMenuClick}>
-          <MenuIcon className="w-6 h-6" />
+        <button
+          onClick={onMenuClick}
+          className="p-2 rounded-md transition hover:opacity-85"
+          style={{
+            border: `1px solid ${theme.white3}`,
+            backgroundColor: theme.white2,
+          }}
+          aria-label="Open sidebar menu"
+        >
+          <Menu className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Center: optional title */}
+      <div className="hidden md:block">
+        {title ? (
+          <h1
+            className="text-sm md:text-base font-semibold"
+            style={{ color: theme.black1 }}
+          >
+            {title}
+          </h1>
+        ) : (
+          <span className="sr-only">Admin Topbar</span>
+        )}
       </div>
 
       <div className="flex-1" />
 
+      {/* Right: theme toggle + user */}
       <div className="flex items-center gap-3">
         <button
           onClick={toggleDark}
-          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+          className="p-2 rounded-full transition"
+          style={{
+            border: `1px solid ${theme.white3}`,
+            backgroundColor: isDark ? theme.white2 : "transparent",
+          }}
+          aria-label="Toggle dark mode"
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {isDark ? (
-            <SunIcon className="w-5 h-5 text-yellow-400" />
-          ) : (
-            <MoonIcon className="w-5 h-5 text-gray-600" />
-          )}
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
 
         {isLoading ? null : isLoggedIn ? (
@@ -51,7 +78,8 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
         ) : (
           <Link
             to="/login"
-            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+            className="text-sm font-medium hover:underline"
+            style={{ color: theme.primary }}
           >
             Login
           </Link>

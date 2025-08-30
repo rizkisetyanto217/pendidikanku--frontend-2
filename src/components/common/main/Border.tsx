@@ -1,6 +1,7 @@
+// src/components/common/BorderLine.tsx
 import React from "react";
 import { pickTheme, ThemeName } from "@/constants/thema";
-import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import useHtmlThema from "@/hooks/useHTMLThema";
 
 interface BorderLineProps {
   className?: string;
@@ -8,13 +9,13 @@ interface BorderLineProps {
 }
 
 const BorderLine: React.FC<BorderLineProps> = ({ className = "", style }) => {
-  const isDarkMode = useHtmlDarkMode();
-  const themeColors = isDarkMode ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlThema();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
     <div
       className={`border-t my-6 ${className}`}
-      style={{ borderColor: themeColors.silver2, ...style }}
+      style={{ borderColor: theme.silver2, ...style }}
     />
   );
 };
