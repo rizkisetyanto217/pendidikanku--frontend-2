@@ -30,7 +30,7 @@ import {
   type UpcomingClass,
 } from "../../class/teacher";
 
-import TambahJadwal from "../../components/dashboard/AddSchedule";
+import TambahJadwal from "../../dashboard/AddSchedule";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 

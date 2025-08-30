@@ -58,13 +58,13 @@ export default function MasjidDetailSpeech() {
 
       <div className="space-y-4 mt-4">
         {isLoading ? (
-          <p className="text-sm" style={{ color: themeColors.silver2 }}>
+          <p className="text-sm" style={{ color: theme.silver2 }}>
             Memuat sambutan…
           </p>
         ) : isError ? (
           <p className="text-sm text-red-500">Gagal memuat sambutan.</p>
         ) : speeches.length === 0 ? (
-          <p className="text-sm" style={{ color: themeColors.silver2 }}>
+          <p className="text-sm" style={{ color: theme.silver2 }}>
             Belum ada sambutan.
           </p>
         ) : (
@@ -73,8 +73,8 @@ export default function MasjidDetailSpeech() {
               key={item.masjid_profile_teacher_dkm_id}
               className="border rounded-md p-4 shadow-sm"
               style={{
-                backgroundColor: themeColors.white1,
-                borderColor: themeColors.silver1,
+                backgroundColor: theme.white1,
+                borderColor: theme.silver1,
               }}
             >
               <div className="flex items-start gap-3">
@@ -89,20 +89,20 @@ export default function MasjidDetailSpeech() {
                 <div className="flex-1">
                   <p
                     className="font-semibold"
-                    style={{ color: themeColors.black1 }}
+                    style={{ color: theme.black1 }}
                   >
                     {item.masjid_profile_teacher_dkm_name}
                   </p>
                   <p
                     className="text-sm mb-2"
-                    style={{ color: themeColors.silver2 }}
+                    style={{ color: theme.silver2 }}
                   >
                     {item.masjid_profile_teacher_dkm_role || "—"}
                   </p>
 
                   <p
                     className="text-base leading-relaxed"
-                    style={{ color: themeColors.black2 }}
+                    style={{ color: theme.black2 }}
                   >
                     {item.masjid_profile_teacher_dkm_message}
                   </p>

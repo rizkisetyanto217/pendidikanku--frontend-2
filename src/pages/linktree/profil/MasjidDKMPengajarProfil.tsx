@@ -78,24 +78,24 @@ export default function MasjidDKMPengajarProfil() {
         onClick={() => handleSelect(item)}
         className="w-full flex justify-between items-center p-3 rounded border mt-2 transition-colors"
         style={{
-          backgroundColor: isActive ? themeColors.success2 : themeColors.white1,
-          borderColor: themeColors.silver1,
-          color: themeColors.black1,
+          backgroundColor: isActive ? theme.success2 : theme.white1,
+          borderColor: theme.silver1,
+          color: theme.black1,
         }}
         onMouseEnter={(e) => {
           if (!isActive)
-            e.currentTarget.style.backgroundColor = themeColors.white2;
+            e.currentTarget.style.backgroundColor = theme.white2;
         }}
         onMouseLeave={(e) => {
           if (!isActive)
-            e.currentTarget.style.backgroundColor = themeColors.white1;
+            e.currentTarget.style.backgroundColor = theme.white1;
         }}
       >
         <span className="flex flex-col items-start text-left">
           <span className="font-medium">
             {label || item.masjid_profile_teacher_dkm_role || "—"}
           </span>
-          <span className="text-sm" style={{ color: themeColors.silver2 }}>
+          <span className="text-sm" style={{ color: theme.silver2 }}>
             {item.masjid_profile_teacher_dkm_name}
           </span>
         </span>
@@ -116,7 +116,7 @@ export default function MasjidDKMPengajarProfil() {
       <div className="md:flex md:gap-6">
         <div className="md:w-1/2 space-y-4">
           {isLoading ? (
-            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+            <p className="text-sm" style={{ color: theme.silver2 }}>
               Memuat data…
             </p>
           ) : isError ? (
@@ -126,7 +126,7 @@ export default function MasjidDKMPengajarProfil() {
               <div>
                 <h2
                   className="font-semibold text-lg"
-                  style={{ color: themeColors.black1 }}
+                  style={{ color: theme.black1 }}
                 >
                   DKM Masjid
                 </h2>
@@ -137,7 +137,7 @@ export default function MasjidDKMPengajarProfil() {
                 ) : (
                   <p
                     className="text-sm mt-2"
-                    style={{ color: themeColors.silver2 }}
+                    style={{ color: theme.silver2 }}
                   >
                     Belum ada data DKM.
                   </p>
@@ -147,7 +147,7 @@ export default function MasjidDKMPengajarProfil() {
               <div className="pt-4">
                 <h3
                   className="text-md font-semibold"
-                  style={{ color: themeColors.black1 }}
+                  style={{ color: theme.black1 }}
                 >
                   Pengajar
                 </h3>
@@ -156,7 +156,7 @@ export default function MasjidDKMPengajarProfil() {
                 ) : (
                   <p
                     className="text-sm mt-2"
-                    style={{ color: themeColors.silver2 }}
+                    style={{ color: theme.silver2 }}
                   >
                     Belum ada data pengajar.
                   </p>
@@ -169,20 +169,20 @@ export default function MasjidDKMPengajarProfil() {
         {!isMobile && (
           <div
             className="md:w-1/2 rounded shadow p-4 space-y-3 mt-6 md:mt-0"
-            style={{ backgroundColor: themeColors.white1 }}
+            style={{ backgroundColor: theme.white1 }}
           >
             {selectedDetail ? (
               <>
                 <h3
                   className="text-lg font-semibold"
-                  style={{ color: themeColors.quaternary }}
+                  style={{ color: theme.quaternary }}
                 >
                   {selectedDetail.masjid_profile_teacher_dkm_name}
                 </h3>
 
                 <div
                   className="space-y-2 text-sm"
-                  style={{ color: themeColors.black2 }}
+                  style={{ color: theme.black2 }}
                 >
                   {selectedDetail.masjid_profile_teacher_dkm_role && (
                     <div>
@@ -209,7 +209,7 @@ export default function MasjidDKMPengajarProfil() {
                 </div>
               </>
             ) : (
-              <p className="text-sm" style={{ color: themeColors.silver2 }}>
+              <p className="text-sm" style={{ color: theme.silver2 }}>
                 Klik salah satu untuk melihat detail.
               </p>
             )}

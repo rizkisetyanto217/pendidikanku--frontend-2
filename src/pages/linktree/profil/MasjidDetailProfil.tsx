@@ -33,10 +33,10 @@ export default function MasjidProfileDetail() {
     content: React.ReactNode;
   }) => (
     <div className="mb-4">
-      <p style={{ color: themeColors.quaternary, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: theme.quaternary, fontWeight: 600 }}>{label}</p>
       <div
         className="text-base leading-relaxed"
-        style={{ color: themeColors.black1 }}
+        style={{ color: theme.black1 }}
       >
         {content}
       </div>

@@ -9,7 +9,7 @@ export default function MasjidLayout() {
   return (
     <div
       className="w-full h-screen flex flex-col"
-      style={{ backgroundColor: themeColors.white2 }}
+      style={{ backgroundColor: theme.white2 }}
     >
       {/* Area konten scrollable */}
       <div className="w-full flex-1 overflow-y-auto px-4 md:px-6">

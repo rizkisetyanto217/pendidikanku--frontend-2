@@ -140,25 +140,25 @@ export default function MasjidProfile() {
         {/* Informasi Umum */}
         <div
           className="py-4 md:p-5 space-y-2 text-base"
-          style={{ color: themeColors.black1 }}
+          style={{ color: theme.black1 }}
         >
           <h1
             className="text-xl md:text-2xl font-semibold flex items-center gap-2"
-            style={{ color: themeColors.primary }}
+            style={{ color: theme.primary }}
           >
-            <Landmark size={20} style={{ color: themeColors.primary }} />
+            <Landmark size={20} style={{ color: theme.primary }} />
             <span>{masjid.masjid_name}</span>
           </h1>
-          <p className="text-base" style={{ color: themeColors.silver2 }}>
+          <p className="text-base" style={{ color: theme.silver2 }}>
             Dikelola oleh DKM Masjid untuk umat muslim
           </p>
           <p
             className="text-base font-medium"
-            style={{ color: themeColors.black2 }}
+            style={{ color: theme.black2 }}
           >
             {masjid.masjid_location}
           </p>
-          <p className="text-base" style={{ color: themeColors.silver2 }}>
+          <p className="text-base" style={{ color: theme.silver2 }}>
             {loadingProfile
               ? "Memuat tahun didirikan…"
               : errorProfile
@@ -170,11 +170,11 @@ export default function MasjidProfile() {
         {/* Profil Lembaga */}
         <div
           className="border-t-[5px] py-4 md:p-5 space-y-2 text-base"
-          style={{ borderColor: themeColors.white3 }}
+          style={{ borderColor: theme.white3 }}
         >
           <h2
             className="text-lg font-semibold flex items-center gap-2"
-            style={{ color: themeColors.quaternary }}
+            style={{ color: theme.quaternary }}
           >
             <BookOpen size={18} />
             <span>Profil Lembaga</span>
@@ -182,7 +182,7 @@ export default function MasjidProfile() {
 
           <div
             className="text-base leading-relaxed"
-            style={{ color: themeColors.black2 }}
+            style={{ color: theme.black2 }}
           >
             {loadingProfile ? (
               <span>Memuat deskripsi…</span>
@@ -197,8 +197,8 @@ export default function MasjidProfile() {
             onClick={() => navigate("detail")}
             className="mt-2 px-4 py-2 text-base rounded hover:opacity-80 border flex items-center gap-2"
             style={{
-              borderColor: themeColors.quaternary,
-              color: themeColors.quaternary,
+              borderColor: theme.quaternary,
+              color: theme.quaternary,
             }}
           >
             <span>Profil Lengkap</span>
@@ -209,16 +209,16 @@ export default function MasjidProfile() {
         {/* Pengurus & Pengajar */}
         <div
           className="border-t-[5px] py-4 md:p-5 space-y-2 text-base"
-          style={{ borderColor: themeColors.white3 }}
+          style={{ borderColor: theme.white3 }}
         >
           <h2
             className="text-lg font-semibold flex items-center gap-2"
-            style={{ color: themeColors.primary }}
+            style={{ color: theme.primary }}
           >
             <Users size={18} />
             <span>Pengurus & Pengajar</span>
           </h2>
-          <p className="text-base" style={{ color: themeColors.black2 }}>
+          <p className="text-base" style={{ color: theme.black2 }}>
             Pengurus dan Pengajar berasal dari masyarakat setempat yang memiliki
             tujuan memajukan Masjid.
           </p>
@@ -228,17 +228,17 @@ export default function MasjidProfile() {
               onClick={() => navigate("dkm-pengajar")}
               className="w-full flex justify-between items-center p-3 rounded hover:opacity-80 text-base"
               style={{
-                backgroundColor: themeColors.white2,
-                borderColor: themeColors.white3,
+                backgroundColor: theme.white2,
+                borderColor: theme.white3,
                 borderWidth: 1,
-                color: themeColors.black1,
+                color: theme.black1,
               }}
             >
               <span className="flex items-center gap-2">
                 <ClipboardList size={18} />
                 <span>Profil Pengurus Masjid dan Pengajar</span>
               </span>
-              <ChevronRight size={18} style={{ color: themeColors.silver2 }} />
+              <ChevronRight size={18} style={{ color: theme.silver2 }} />
             </button>
           </div>
         </div>
@@ -246,22 +246,22 @@ export default function MasjidProfile() {
         {/* Sambutan & Donasi */}
         <div
           className="border-t-[5px] py-4 md:p-5 space-y-3 text-base"
-          style={{ borderColor: themeColors.white3 }}
+          style={{ borderColor: theme.white3 }}
         >
           <h2
             className="flex items-center gap-2 text-lg font-semibold"
-            style={{ color: themeColors.quaternary }}
+            style={{ color: theme.quaternary }}
           >
             <Megaphone size={18} />
             <span>Sambutan dan Motivasi</span>
           </h2>
-          <p className="text-base" style={{ color: themeColors.black2 }}>
+          <p className="text-base" style={{ color: theme.black2 }}>
             Tulisan dari pengurus, pengajar dan jamaah{" "}
             <strong>{masjid.masjid_name}</strong>
           </p>
 
           {loadingGreetings ? (
-            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+            <p className="text-sm" style={{ color: theme.silver2 }}>
               Memuat sambutan…
             </p>
           ) : errorGreetings ? (
@@ -272,30 +272,30 @@ export default function MasjidProfile() {
                 key={i}
                 className="p-3 rounded-lg text-base space-y-1"
                 style={{
-                  backgroundColor: themeColors.white2,
-                  borderColor: themeColors.white3,
+                  backgroundColor: theme.white2,
+                  borderColor: theme.white3,
                   borderWidth: 1,
                 }}
               >
                 <p
                   className="font-semibold"
-                  style={{ color: themeColors.black1 }}
+                  style={{ color: theme.black1 }}
                 >
                   {greet.name}
                 </p>
-                <p className="text-base" style={{ color: themeColors.silver2 }}>
+                <p className="text-base" style={{ color: theme.silver2 }}>
                   {greet.role}
                 </p>
                 <p
                   className="text-base leading-relaxed"
-                  style={{ color: themeColors.black2 }}
+                  style={{ color: theme.black2 }}
                 >
                   {greet.message}
                 </p>
               </div>
             ))
           ) : (
-            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+            <p className="text-sm" style={{ color: theme.silver2 }}>
               Belum ada sambutan.
             </p>
           )}
@@ -304,8 +304,8 @@ export default function MasjidProfile() {
             onClick={() => navigate("sambutan")}
             className="w-full text-base rounded px-4 py-2 font-medium flex justify-between items-center border hover:opacity-80"
             style={{
-              borderColor: themeColors.quaternary,
-              color: themeColors.quaternary,
+              borderColor: theme.quaternary,
+              color: theme.quaternary,
             }}
           >
             <span>Selengkapnya</span>
