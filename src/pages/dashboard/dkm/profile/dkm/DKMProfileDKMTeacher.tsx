@@ -53,18 +53,18 @@ export default function DKMProfileDKMTeacher() {
         onClick={() => handleSelect(item)}
         className="w-full flex justify-between items-center p-3 rounded border mt-2"
         style={{
-          backgroundColor: isActive ? themeColors.success2 : themeColors.white1,
-          borderColor: themeColors.silver1,
-          color: themeColors.black1,
+          backgroundColor: isActive ? theme.success2 : theme.white1,
+          borderColor: theme.silver1,
+          color: theme.black1,
         }}
         onMouseEnter={(e) => {
           if (!isActive) {
-            e.currentTarget.style.backgroundColor = themeColors.white2;
+            e.currentTarget.style.backgroundColor = theme.white2;
           }
         }}
         onMouseLeave={(e) => {
           if (!isActive) {
-            e.currentTarget.style.backgroundColor = themeColors.white1;
+            e.currentTarget.style.backgroundColor = theme.white1;
           }
         }}
       >
@@ -72,7 +72,7 @@ export default function DKMProfileDKMTeacher() {
           <span className="font-medium">
             {item.masjid_profile_teacher_dkm_role}
           </span>
-          <span className="text-sm" style={{ color: themeColors.silver2 }}>
+          <span className="text-sm" style={{ color: theme.silver2 }}>
             {item.masjid_profile_teacher_dkm_name}
           </span>
         </span>
@@ -107,7 +107,7 @@ export default function DKMProfileDKMTeacher() {
           <div>
             <h2
               className="font-semibold text-lg"
-              style={{ color: themeColors.primary }}
+              style={{ color: theme.primary }}
             >
               DKM Masjid
             </h2>
@@ -117,7 +117,7 @@ export default function DKMProfileDKMTeacher() {
           <div className="pt-4">
             <h3
               className="text-md font-semibold"
-              style={{ color: themeColors.primary }}
+              style={{ color: theme.primary }}
             >
               Pengajar
             </h3>
@@ -128,20 +128,20 @@ export default function DKMProfileDKMTeacher() {
         {!isMobile && (
           <div
             className="md:w-1/2 rounded shadow p-4 space-y-3 mt-6 md:mt-0"
-            style={{ backgroundColor: themeColors.white1 }}
+            style={{ backgroundColor: theme.white1 }}
           >
             {selectedDetail ? (
               <>
                 <h3
                   className="text-lg font-semibold"
-                  style={{ color: themeColors.quaternary }}
+                  style={{ color: theme.quaternary }}
                 >
                   {selectedDetail.masjid_profile_teacher_dkm_name}
                 </h3>
 
                 <div
                   className="space-y-2 text-sm"
-                  style={{ color: themeColors.black2 }}
+                  style={{ color: theme.black2 }}
                 >
                   <div>
                     <p className="font-semibold">Jabatan / Peran</p>
@@ -162,7 +162,7 @@ export default function DKMProfileDKMTeacher() {
                 </div>
               </>
             ) : (
-              <p className="text-sm" style={{ color: themeColors.silver2 }}>
+              <p className="text-sm" style={{ color: theme.silver2 }}>
                 Klik salah satu untuk melihat detail.
               </p>
             )}

@@ -104,7 +104,7 @@ export default function DKMEditProfileDKMTeacher() {
         <button
           onClick={handleSubmit}
           className="px-4 py-2 rounded text-white"
-          style={{ backgroundColor: themeColors.primary }}
+          style={{ backgroundColor: theme.primary }}
         >
           Simpan Perubahan
         </button>

@@ -1,14 +1,15 @@
+// src/pages/dkm/post/DKMAddEditPost.tsx
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import useHtmlDarkMode from "@/hooks/useHTMLThema"; // ✅ pakai hook baru
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import InputField from "@/components/common/main/InputField";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema"; // ✅ import ThemeName + Palette
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 import RichEditor from "@/components/common/main/RichEditor";
 
@@ -35,7 +36,7 @@ export default function DKMAddEditPost() {
   const post = location.state as Post | undefined;
 
   const { isDark, themeName } = useHtmlDarkMode();
-  const theme = pickTheme(themeName as ThemeName, isDark);
+  const theme: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -155,9 +156,9 @@ export default function DKMAddEditPost() {
               disabled={isLoadingThemes}
             >
               <option value="">-- Pilih Tema --</option>
-              {themes.map((theme) => (
-                <option key={theme.post_theme_id} value={theme.post_theme_id}>
-                  {theme.post_theme_name}
+              {themes.map((t) => (
+                <option key={t.post_theme_id} value={t.post_theme_id}>
+                  {t.post_theme_name}
                 </option>
               ))}
             </select>

@@ -1,5 +1,6 @@
+// src/pages/sekolahislamku/dashboard-school/StudentDashboard.tsx
 import { useQuery } from "@tanstack/react-query";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 import ParentTopBar from "../components/home/ParentTopBar";
@@ -9,14 +10,13 @@ import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectio
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 
-// ✅ cukup import helper & type jadwal
 import {
   TodayScheduleItem,
   mapSessionsToTodaySchedule,
   mockTodaySchedule,
 } from "@/pages/sekolahislamku/dashboard-school/types/TodaySchedule";
 
-// --- Types (untuk bentuk data hasil query) ---
+/* ---------- Types ---------- */
 interface ChildDetail {
   id: string;
   name: string;
@@ -57,7 +57,7 @@ interface TodaySummary {
   pr?: string;
 }
 
-// --- Fake API (replace with axios) ---
+/* ---------- Fake API ---------- */
 async function fetchParentHome() {
   return Promise.resolve({
     parentName: "Bapak/Ibu",
@@ -103,7 +103,6 @@ async function fetchParentHome() {
         status: "unpaid",
       },
     ] as BillItem[],
-    // ✅ kirim data sesi → StudentDashboard tinggal map
     sessionsToday: [
       {
         class_attendance_sessions_title: "Tahsin Kelas",
@@ -119,7 +118,7 @@ async function fetchParentHome() {
   });
 }
 
-// --- Helpers ---
+/* ---------- Helpers ---------- */
 const formatIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -134,10 +133,10 @@ const dateFmt = (iso: string) =>
     day: "numeric",
   });
 
-// --- Page ---
+/* ---------- Page ---------- */
 export default function StudentDashboard() {
-  const { isDark } = useHtmlDarkMode();
-  const palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data } = useQuery({
     queryKey: ["parent-home-single"],
@@ -145,7 +144,6 @@ export default function StudentDashboard() {
     staleTime: 60_000,
   });
 
-  // ✅ mapping dari sessionsToday → TodayScheduleItem[]
   const todayScheduleItems: TodayScheduleItem[] = data?.sessionsToday?.length
     ? mapSessionsToTodaySchedule(data.sessionsToday)
     : mockTodaySchedule;
@@ -199,7 +197,7 @@ export default function StudentDashboard() {
                   palette={palette}
                   title="Jadwal Hari Ini"
                   items={todayScheduleItems}
-                  seeAllPath="all-schedule" // boleh diarahkan ke detail juga
+                  seeAllPath="all-schedule"
                 />
               </div>
             </section>
