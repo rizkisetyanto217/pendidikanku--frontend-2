@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import CommonButton from "@/components/common/main/CommonButton";
 import CommonActionButton from "@/components/common/main/CommonActionButton";
@@ -34,14 +34,14 @@ type NormalizedUser = {
 type LectureSessionApi = {
   lecture_session_id: string;
   lecture_session_slug?: string | null;
-  lecture_id?: string | null; // kemungkinan snake_case
-  lectureId?: string | null; // kemungkinan camelCase
+  lecture_id?: string | null;
+  lectureId?: string | null;
   lecture_session_image_url?: string | null;
   lecture_session_title?: string | null;
   lecture_session_teacher_name?: string | null;
   lecture_session_place?: string | null;
   lecture_session_start_time: string;
-  user_attendance_status?: number | null; // ⬅️ gunakan number agar cocok dengan komponen
+  user_attendance_status?: number | null;
   user_grade_result?: number | null;
 };
 
@@ -73,7 +73,7 @@ function normalizeUser(u?: AnyUser): NormalizedUser | undefined {
 /* ===================== Page ===================== */
 export default function MasjidMyActivity() {
   const { isDark, themeName } = useHtmlDarkMode();
-  const theme = pickTheme(themeName as ThemeName, isDark);
+  const theme = pickTheme(themeName as ThemeName, isDark); // ⬅️ Palette
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { data: currentUserRaw } = useCurrentUser();
@@ -107,7 +107,7 @@ export default function MasjidMyActivity() {
       Boolean(slug) && Boolean((currentUserRaw as AnyUser | undefined)?.id),
   });
 
-  // ⬇️ Map KE tipe yang diminta komponen (LectureMaterialItem)
+  // Map ke tipe komponen
   const mappedSessions: LectureMaterialItem[] = useMemo(
     () =>
       lectureSessions.map((sesi) => {
@@ -115,7 +115,6 @@ export default function MasjidMyActivity() {
         const lectureId =
           sesi.lecture_id ?? sesi.lectureId ?? sesi.lecture_session_id;
 
-        // Normalisasi -> undefined (bukan null)
         const attendance =
           typeof sesi.user_attendance_status === "number"
             ? sesi.user_attendance_status
@@ -126,7 +125,6 @@ export default function MasjidMyActivity() {
             ? sesi.user_grade_result
             : undefined;
 
-        // Susun objek dasar (field wajib)
         const base = {
           id: sesi.lecture_session_id,
           lecture_session_slug: slug,
@@ -148,7 +146,6 @@ export default function MasjidMyActivity() {
           status: grade !== undefined ? "tersedia" : "proses",
         } as const;
 
-        // Tambahkan field optional hanya jika ada nilainya
         const item: LectureMaterialItem = {
           ...base,
           ...(sesi.lecture_session_image_url
@@ -170,14 +167,11 @@ export default function MasjidMyActivity() {
       <PublicNavbar masjidName="Aktivitas Saya" />
 
       {!currentUserRaw ? (
-        <GuestView
-          themeColors={themeColors}
-          onLogin={() => navigate("/login")}
-        />
+        <GuestView themeColors={theme} onLogin={() => navigate("/login")} />
       ) : (
         <UserActivityView
           user={user}
-          themeColors={themeColors}
+          themeColors={theme}
           isDark={isDark}
           slug={slug || ""}
           sessions={displayedSessions}
@@ -196,7 +190,7 @@ function GuestView({
   themeColors,
   onLogin,
 }: {
-  themeColors: typeof colors.light;
+  themeColors: Palette;
   onLogin: () => void;
 }) {
   return (
@@ -230,10 +224,10 @@ function UserActivityView({
   isError,
 }: {
   user?: NormalizedUser;
-  themeColors: typeof colors.light;
+  themeColors: Palette;
   isDark: boolean;
   slug: string;
-  sessions: LectureMaterialItem[]; // ⬅️ pakai tipe yang benar
+  sessions: LectureMaterialItem[];
   isLoading: boolean;
   isError: boolean;
 }) {
@@ -284,7 +278,7 @@ function UserProfileCard({
   isDark,
 }: {
   user?: NormalizedUser;
-  themeColors: typeof colors.light;
+  themeColors: Palette;
   isDark: boolean;
 }) {
   const joinDate = user?.joinedAt;

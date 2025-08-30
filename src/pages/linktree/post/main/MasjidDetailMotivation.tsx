@@ -52,25 +52,25 @@ export default function MasjidDetailDonation() {
       <div
         className="m-4 p-4 rounded-xl space-y-2"
         style={{
-          backgroundColor: isDark ? themeColors.white2 : themeColors.white1,
-          color: themeColors.black2,
-          border: `1px solid ${themeColors.silver1}`,
+          backgroundColor: isDark ? theme.white2 : theme.white1,
+          color: theme.black2,
+          border: `1px solid ${theme.silver1}`,
         }}
       >
         <p className="text-sm font-semibold">💝 Donatur:</p>
         <p className="text-base font-bold">{donation.donation_name}</p>
 
-        <p className="text-sm mt-2" style={{ color: themeColors.silver4 }}>
+        <p className="text-sm mt-2" style={{ color: theme.silver4 }}>
           {donation.donation_message}
         </p>
 
         <FormattedDate value={donation.created_at} fullMonth />
 
-        <p className="text-sm" style={{ color: themeColors.silver2 }}>
+        <p className="text-sm" style={{ color: theme.silver2 }}>
           Status: {donation.donation_status}
         </p>
 
-        <p className="text-sm" style={{ color: themeColors.silver2 }}>
+        <p className="text-sm" style={{ color: theme.silver2 }}>
           Jumlah Donasi: Rp{donation.donation_amount.toLocaleString("id-ID")}
         </p>
       </div>

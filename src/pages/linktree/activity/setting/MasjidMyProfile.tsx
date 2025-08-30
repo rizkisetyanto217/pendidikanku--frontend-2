@@ -1,5 +1,6 @@
+// src/pages/linktree/activity/my-activity/MasjidMyProfile.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -19,7 +20,7 @@ type ProfilePayload = {
 
 export default function MasjidMyProfile() {
   const { isDark, themeName } = useHtmlDarkMode();
-  const theme = pickTheme(themeName as ThemeName, isDark);
+  const theme = pickTheme(themeName as ThemeName, isDark); // <- Palette
   const qc = useQueryClient();
 
   // auth (buat email & fallback nama)
@@ -256,7 +257,7 @@ function FieldCard({
 }: {
   children: React.ReactNode;
   label: string;
-  theme: typeof colors.light;
+  theme: Palette; // <- ganti tipe
 }) {
   return (
     <div
@@ -281,7 +282,7 @@ function FieldCard({
 
 function Input(
   props: React.InputHTMLAttributes<HTMLInputElement> & {
-    theme: typeof colors.light;
+    theme: Palette; // <- ganti tipe
   }
 ) {
   const { theme, style, ...rest } = props;
@@ -301,7 +302,7 @@ function Input(
 
 function Textarea(
   props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-    theme: typeof colors.light;
+    theme: Palette; // <- ganti tipe
   }
 ) {
   const { theme, style, ...rest } = props;

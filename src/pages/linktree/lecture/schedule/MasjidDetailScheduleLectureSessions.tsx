@@ -66,8 +66,8 @@ export default function MasjidDetailLecture() {
       <div
         className="rounded-md shadow-sm"
         style={{
-          backgroundColor: themeColors.white1,
-          color: themeColors.black1,
+          backgroundColor: theme.white1,
+          color: theme.black1,
         }}
       >
         <div className="md:flex md:gap-6">
@@ -91,7 +91,7 @@ export default function MasjidDetailLecture() {
             <div>
               <h2
                 className="text-base font-semibold"
-                style={{ color: themeColors.quaternary }}
+                style={{ color: theme.quaternary }}
               >
                 Informasi Kajian
               </h2>
@@ -121,13 +121,13 @@ export default function MasjidDetailLecture() {
             <div>
               <h2
                 className="text-base font-semibold"
-                style={{ color: themeColors.quaternary }}
+                style={{ color: theme.quaternary }}
               >
                 Keterangan
               </h2>
               <p
                 className="text-sm leading-relaxed"
-                style={{ color: themeColors.black2 }}
+                style={{ color: theme.black2 }}
               >
                 {kajian.lecture_session_description ||
                   "Tidak ada deskripsi yang tersedia."}

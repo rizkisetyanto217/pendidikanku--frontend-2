@@ -33,7 +33,7 @@ function InlineShare({ title, url }: { title: string; url: string }) {
           setShowShare(!showShare);
         }}
         className="flex items-center space-x-1 text-sm"
-        style={{ color: themeColors.quaternary }}
+        style={{ color: theme.quaternary }}
       >
         <Share2 size={16} />
         <span>Bagikan</span>
@@ -43,11 +43,11 @@ function InlineShare({ title, url }: { title: string; url: string }) {
         <div
           className="absolute z-50 mt-2 p-3 border rounded shadow w-64 right-0"
           style={{
-            backgroundColor: themeColors.white1,
-            borderColor: themeColors.silver1,
+            backgroundColor: theme.white1,
+            borderColor: theme.silver1,
           }}
         >
-          <p className="text-xs mb-2" style={{ color: themeColors.black2 }}>
+          <p className="text-xs mb-2" style={{ color: theme.black2 }}>
             Bagikan link:
           </p>
           <input
@@ -56,16 +56,16 @@ function InlineShare({ title, url }: { title: string; url: string }) {
             value={url}
             className="w-full text-xs p-1 border rounded mb-2"
             style={{
-              backgroundColor: themeColors.white3,
-              borderColor: themeColors.silver1,
-              color: themeColors.black1,
+              backgroundColor: theme.white3,
+              borderColor: theme.silver1,
+              color: theme.black1,
             }}
           />
           <div className="flex justify-between">
             <button
               onClick={handleCopy}
               className="text-sm font-semibold hover:underline"
-              style={{ color: themeColors.success1 }}
+              style={{ color: theme.success1 }}
             >
               Salin Link
             </button>
@@ -76,7 +76,7 @@ function InlineShare({ title, url }: { title: string; url: string }) {
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-semibold hover:underline"
-              style={{ color: themeColors.success1 }}
+              style={{ color: theme.success1 }}
             >
               WhatsApp
             </a>
@@ -197,12 +197,12 @@ export default function MasjidPost() {
               className="px-4 py-1 rounded-full border text-sm font-medium capitalize"
               style={{
                 backgroundColor:
-                  activeTab === tabKey ? themeColors.primary : "transparent",
-                color: activeTab === tabKey ? "#fff" : themeColors.black2,
+                  activeTab === tabKey ? theme.primary : "transparent",
+                color: activeTab === tabKey ? "#fff" : theme.black2,
                 borderColor:
                   activeTab === tabKey
-                    ? themeColors.primary
-                    : themeColors.silver1,
+                    ? theme.primary
+                    : theme.silver1,
               }}
             >
               {tabKey === "masjid" ? "🕌 Masjid" : "✍️ Motivasi & Doa"}
@@ -214,7 +214,7 @@ export default function MasjidPost() {
         {isLoadingPosts ? (
           <p
             className="text-center text-sm"
-            style={{ color: themeColors.silver2 }}
+            style={{ color: theme.silver2 }}
           >
             Memuat postingan...
           </p>
@@ -236,11 +236,11 @@ export default function MasjidPost() {
                 <Link to={`/masjid/${slug}/post/${post.post_id}`}>
                   <p
                     className="font-semibold text-sm"
-                    style={{ color: themeColors.black2 }}
+                    style={{ color: theme.black2 }}
                   >
                     {post.post_theme?.post_theme_name || "Tanpa Tema"}
                   </p>
-                  <p className="text-sm" style={{ color: themeColors.silver4 }}>
+                  <p className="text-sm" style={{ color: theme.silver4 }}>
                     <strong>{post.post_title}</strong> – {post.post_content}
                   </p>
                 </Link>
@@ -260,7 +260,7 @@ export default function MasjidPost() {
                       <Heart
                         size={14}
                         fill={
-                          post.is_liked_by_user ? themeColors.primary : "none"
+                          post.is_liked_by_user ? theme.primary : "none"
                         }
                       />
                       <span>{post.like_count} Suka</span>
@@ -287,7 +287,7 @@ export default function MasjidPost() {
             <>
               <p
                 className="pt-4 text-sm font-semibold"
-                style={{ color: themeColors.black2 }}
+                style={{ color: theme.black2 }}
               >
                 💝 Doa & Dukungan dari Donatur:
               </p>
@@ -303,10 +303,10 @@ export default function MasjidPost() {
                     key={donation.donation_id}
                     className="rounded-xl border px-4 py-3 cursor-pointer"
                     style={{
-                      borderColor: themeColors.primary,
+                      borderColor: theme.primary,
                       backgroundColor: isDark
-                        ? themeColors.white2
-                        : themeColors.white1,
+                        ? theme.white2
+                        : theme.white1,
                     }}
                     onClick={() =>
                       navigate(
@@ -316,13 +316,13 @@ export default function MasjidPost() {
                   >
                     <p
                       className="font-semibold text-sm"
-                      style={{ color: themeColors.black2 }}
+                      style={{ color: theme.black2 }}
                     >
                       {donorName}
                     </p>
                     <p
                       className="text-sm"
-                      style={{ color: themeColors.silver4 }}
+                      style={{ color: theme.silver4 }}
                     >
                       {donation.donation_message}
                     </p>
@@ -334,7 +334,7 @@ export default function MasjidPost() {
 
                     <div
                       className="flex items-center justify-between pt-2 text-xs"
-                      style={{ color: themeColors.silver2 }}
+                      style={{ color: theme.silver2 }}
                     >
                       <div
                         className="flex items-center space-x-1 cursor-pointer"
@@ -347,13 +347,13 @@ export default function MasjidPost() {
                           size={14}
                           fill={
                             donation.is_liked_by_user
-                              ? themeColors.primary
+                              ? theme.primary
                               : "none"
                           }
                           stroke={
                             donation.is_liked_by_user
-                              ? themeColors.primary
-                              : themeColors.silver2
+                              ? theme.primary
+                              : theme.silver2
                           }
                         />
                         <span>{donation.like_count} Suka</span>

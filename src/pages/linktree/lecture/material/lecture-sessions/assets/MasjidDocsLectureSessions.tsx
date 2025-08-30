@@ -1,8 +1,9 @@
-import { useMemo, useCallback } from "react";
+// src/pages/linktree/activity/my-activity/MasjidDocsLectureSessions.tsx
+import React, { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
-import { pickTheme, ThemeName } from "@/constants/thema";
+import { pickTheme, ThemeName, type Palette } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { Download } from "lucide-react";
@@ -62,9 +63,8 @@ const toLabel = (ext: string): string => {
 
 const labelColors = (
   ext: string,
-  isDark: boolean
+  theme: Palette
 ): { backgroundColor: string; color: string } => {
-  const theme = isDark ? colors.dark : colors.light;
   switch (ext) {
     case "pdf":
       return { backgroundColor: "#FFD700", color: "#000000" };
@@ -87,17 +87,16 @@ const labelColors = (
 ========================= */
 function DocItem({
   asset,
-  isDark,
+  theme,
   onDownload,
 }: {
   asset: LectureSessionsAsset;
-  isDark: boolean;
+  theme: Palette;
   onDownload: (url: string, filename: string) => void;
 }) {
-  const theme = isDark ? colors.dark : colors.light;
   const rawExt = extractExt(asset.lecture_sessions_asset_file_url);
   const label = toLabel(rawExt);
-  const badgeStyle = labelColors(rawExt, isDark);
+  const badgeStyle = labelColors(rawExt, theme);
   const safeFilename = rawExt
     ? `${asset.lecture_sessions_asset_title}.${rawExt}`
     : asset.lecture_sessions_asset_title;
@@ -158,9 +157,8 @@ export default function MasjidDocsLectureSessions() {
     slug: string;
   }>();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-
-  const theme = useMemo(() => (isDark ? colors.dark : colors.light), [isDark]);
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const handleDownload = useCallback((url: string, filename: string) => {
     try {
@@ -201,7 +199,6 @@ export default function MasjidDocsLectureSessions() {
       return Array.isArray(payload) ? payload : [];
     },
     select: (rows) =>
-      // pastikan urut terbaru dulu (kalau backend belum order)
       [...rows].sort(
         (a, b) =>
           new Date(b.lecture_sessions_asset_created_at).getTime() -
@@ -239,7 +236,7 @@ export default function MasjidDocsLectureSessions() {
             <DocItem
               key={doc.lecture_sessions_asset_id}
               asset={doc}
-              isDark={isDark}
+              theme={theme}
               onDownload={handleDownload}
             />
           ))}

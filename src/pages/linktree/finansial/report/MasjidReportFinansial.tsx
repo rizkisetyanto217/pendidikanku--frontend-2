@@ -52,13 +52,13 @@ const FinancialReportPage = () => {
   const renderDonationList = () => {
     if (isDonasiLoading)
       return (
-        <p className="text-sm" style={{ color: themeColors.silver2 }}>
+        <p className="text-sm" style={{ color: theme.silver2 }}>
           Memuat donasi...
         </p>
       );
     if (!donations?.length)
       return (
-        <p className="text-sm" style={{ color: themeColors.silver2 }}>
+        <p className="text-sm" style={{ color: theme.silver2 }}>
           Belum ada donasi
         </p>
       );
@@ -67,13 +67,13 @@ const FinancialReportPage = () => {
       <div
         key={item.donation_id}
         className="flex justify-between px-4 py-2 rounded"
-        style={{ border: `1px solid ${themeColors.silver1}` }}
+        style={{ border: `1px solid ${theme.silver1}` }}
       >
-        <p className="text-sm capitalize" style={{ color: themeColors.black1 }}>
+        <p className="text-sm capitalize" style={{ color: theme.black1 }}>
           {item.donation_name || "Anonim"}
         </p>
         <div className="text-right text-sm">
-          <p style={{ color: themeColors.black1 }}>
+          <p style={{ color: theme.black1 }}>
             Rp. {(item.donation_amount_masjid || 0).toLocaleString("id-ID")}
           </p>
 
@@ -91,7 +91,7 @@ const FinancialReportPage = () => {
       <div className="space-y-2 mt-4">
         <h3
           className="text-sm font-semibold"
-          style={{ color: themeColors.primary }}
+          style={{ color: theme.primary }}
         >
           Motivasi & Doa
         </h3>
@@ -99,23 +99,23 @@ const FinancialReportPage = () => {
           <div
             key={d.donation_id}
             className="rounded p-3 space-y-2"
-            style={{ border: `1px solid ${themeColors.silver1}` }}
+            style={{ border: `1px solid ${theme.silver1}` }}
           >
             <div className="flex justify-between items-center">
               <p
                 className="text-sm font-medium"
-                style={{ color: themeColors.black1 }}
+                style={{ color: theme.black1 }}
               >
                 {d.donation_name || "Anonim"}
               </p>
               <button
                 className="text-xs"
-                style={{ color: themeColors.primary }}
+                style={{ color: theme.primary }}
               >
                 Bagikan
               </button>
             </div>
-            <p className="text-sm" style={{ color: themeColors.silver2 }}>
+            <p className="text-sm" style={{ color: theme.silver2 }}>
               {d.donation_message}
             </p>
           </div>
@@ -126,7 +126,7 @@ const FinancialReportPage = () => {
 
   if (isMasjidLoading) {
     return (
-      <p className="p-4 text-sm" style={{ color: themeColors.silver2 }}>
+      <p className="p-4 text-sm" style={{ color: theme.silver2 }}>
         Memuat data masjid...
       </p>
     );
@@ -153,13 +153,13 @@ const FinancialReportPage = () => {
           {/* Statistik Dinamis */}
           <div
             className="flex items-center justify-between px-4 py-3 rounded"
-            style={{ border: `1px solid ${themeColors.silver1}` }}
+            style={{ border: `1px solid ${theme.silver1}` }}
           >
             <div>
-              <p className="text-sm" style={{ color: themeColors.black1 }}>
+              <p className="text-sm" style={{ color: theme.black1 }}>
                 Rp. {stats.total?.toLocaleString("id-ID") || 0}
               </p>
-              <p className="text-xs" style={{ color: themeColors.silver2 }}>
+              <p className="text-xs" style={{ color: theme.silver2 }}>
                 {stats.count} Donatur
               </p>
             </div>
@@ -170,7 +170,7 @@ const FinancialReportPage = () => {
           <div className="space-y-2">
             <h3
               className="text-sm font-semibold"
-              style={{ color: themeColors.black1 }}
+              style={{ color: theme.black1 }}
             >
               Donasi
             </h3>
@@ -183,7 +183,7 @@ const FinancialReportPage = () => {
       </TabsContent>
 
       <TabsContent value="info" current={tab}>
-        <p className="text-sm p-4" style={{ color: themeColors.silver2 }}>
+        <p className="text-sm p-4" style={{ color: theme.silver2 }}>
           [Coming soon]
         </p>
       </TabsContent>

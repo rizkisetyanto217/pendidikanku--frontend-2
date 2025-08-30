@@ -15,7 +15,7 @@ declare global {
 
 const MasjidDonationConfirmMasjid = () => {
   const [searchParams] = useSearchParams();
-  const { isDark } = useHtmlDarkMode();
+  const { isDark, themeName } = useHtmlDarkMode();
   const masjidDonation = Number(searchParams.get("masjid")) || 0;
   const masjidkuDonation = Number(searchParams.get("masjidku")) || 0;
   const [donationName, setDonationName] = useState("");
@@ -30,7 +30,7 @@ const MasjidDonationConfirmMasjid = () => {
   const total = masjidDonation + masjidkuDonation + fee;
   const navigate = useNavigate();
 
-  const themeColors = isDark ? colors.dark : colors.light;
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const format = (n: number) =>
     `Rp ${new Intl.NumberFormat("id-ID").format(n)}`;
@@ -135,20 +135,20 @@ const MasjidDonationConfirmMasjid = () => {
       />
 
       <div className="max-w-md mx-auto">
-        <p className="text-sm mb-3" style={{ color: themeColors.black2 }}>
+        <p className="text-sm mb-3" style={{ color: theme.black2 }}>
           Berikut adalah rincian donasi detail
         </p>
 
         <div
           className="overflow-x-auto rounded border"
-          style={{ borderColor: themeColors.silver1 }}
+          style={{ borderColor: theme.silver1 }}
         >
           <table className="w-full text-sm">
             <thead>
               <tr
                 style={{
-                  backgroundColor: themeColors.white2,
-                  color: themeColors.black1,
+                  backgroundColor: theme.white2,
+                  color: theme.black1,
                 }}
               >
                 <th className="p-3">No</th>
@@ -156,7 +156,7 @@ const MasjidDonationConfirmMasjid = () => {
                 <th className="p-3 text-right">Rincian</th>
               </tr>
             </thead>
-            <tbody style={{ color: themeColors.black1 }}>
+            <tbody style={{ color: theme.black1 }}>
               <tr>
                 <td className="p-3">1</td>
                 <td className="p-3">Nominal Donasi</td>
@@ -174,7 +174,7 @@ const MasjidDonationConfirmMasjid = () => {
               </tr>
               <tr
                 className="font-semibold"
-                style={{ backgroundColor: themeColors.success2 }}
+                style={{ backgroundColor: theme.success2 }}
               >
                 <td className="p-3" colSpan={2}>
                   Total Transfer
@@ -187,7 +187,7 @@ const MasjidDonationConfirmMasjid = () => {
 
         <p
           className="text-xs leading-relaxed"
-          style={{ color: themeColors.silver2 }}
+          style={{ color: theme.silver2 }}
         >
           * Biaya transaksi digunakan untuk kebutuhan sistem pembayaran.
           <br />* Dukungan perkembangan aplikasi digunakan untuk operasional dan
@@ -203,15 +203,15 @@ const MasjidDonationConfirmMasjid = () => {
           onChange={(e) => setDonationName(e.target.value)}
           className="w-full p-3 rounded-md border text-sm outline-none transition-all duration-200"
           style={{
-            borderColor: themeColors.silver1,
-            backgroundColor: themeColors.white1,
-            color: themeColors.black1,
+            borderColor: theme.silver1,
+            backgroundColor: theme.white1,
+            color: theme.black1,
           }}
           onFocus={(e) =>
-            (e.currentTarget.style.borderColor = themeColors.primary)
+            (e.currentTarget.style.borderColor = theme.primary)
           }
           onBlur={(e) =>
-            (e.currentTarget.style.borderColor = themeColors.silver1)
+            (e.currentTarget.style.borderColor = theme.silver1)
           }
         />
         <textarea
@@ -221,15 +221,15 @@ const MasjidDonationConfirmMasjid = () => {
           className="w-full p-3 rounded-md border text-sm outline-none transition-all duration-200"
           rows={3}
           style={{
-            borderColor: themeColors.silver1,
-            backgroundColor: themeColors.white1,
-            color: themeColors.black1,
+            borderColor: theme.silver1,
+            backgroundColor: theme.white1,
+            color: theme.black1,
           }}
           onFocus={(e) =>
-            (e.currentTarget.style.borderColor = themeColors.primary)
+            (e.currentTarget.style.borderColor = theme.primary)
           }
           onBlur={(e) =>
-            (e.currentTarget.style.borderColor = themeColors.silver1)
+            (e.currentTarget.style.borderColor = theme.silver1)
           }
         />
       </div>
@@ -237,8 +237,8 @@ const MasjidDonationConfirmMasjid = () => {
       <div
         className="fixed bottom-0 left-0 w-full px-4 py-4 border-t shadow-md"
         style={{
-          backgroundColor: themeColors.white1,
-          borderColor: themeColors.silver1,
+          backgroundColor: theme.white1,
+          borderColor: theme.silver1,
         }}
       >
         <div className="max-w-xl mx-auto">

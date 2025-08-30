@@ -289,7 +289,7 @@ export default function PublicLinktree() {
           {/* HERO */}
           <div
             className="relative rounded-2xl overflow-hidden border"
-            style={{ borderColor: themeColors.silver1 }}
+            style={{ borderColor: theme.silver1 }}
           >
             <div className="h-40 sm:h-52 w-full bg-gray-100 dark:bg-gray-800">
               <ShimmerImage
@@ -506,7 +506,7 @@ export default function PublicLinktree() {
           <div className="relative">
             <h2
               className="text-lg font-semibold mb-3 mt-2"
-              style={{ color: themeColors.black1 }}
+              style={{ color: theme.black1 }}
             >
               Kajian Mendatang
             </h2>
@@ -554,8 +554,8 @@ export default function PublicLinktree() {
                         }
                         className="flex-shrink-0 snap-start w-[200px] sm:w-[220px] md:w-[240px] rounded-xl overflow-hidden border cursor-pointer hover:opacity-90 transition"
                         style={{
-                          backgroundColor: themeColors.white1,
-                          borderColor: themeColors.silver1,
+                          backgroundColor: theme.white1,
+                          borderColor: theme.silver1,
                         }}
                       >
                         <ShimmerImage
@@ -566,21 +566,21 @@ export default function PublicLinktree() {
                         <div className="p-2.5">
                           <h3
                             className="font-semibold text-sm line-clamp-2"
-                            style={{ color: themeColors.black1 }}
+                            style={{ color: theme.black1 }}
                             title={kajian.lecture_session_title}
                           >
                             {kajian.lecture_session_title}
                           </h3>
                           <p
                             className="text-xs mt-1 line-clamp-1"
-                            style={{ color: themeColors.black2 }}
+                            style={{ color: theme.black2 }}
                             title={kajian.lecture_session_teacher_name}
                           >
                             {kajian.lecture_session_teacher_name || "-"}
                           </p>
                           <p
                             className="text-xs line-clamp-1"
-                            style={{ color: themeColors.black2 }}
+                            style={{ color: theme.black2 }}
                           >
                             {kajian.lecture_session_start_time ? (
                               <FormattedDate
@@ -598,7 +598,7 @@ export default function PublicLinktree() {
                 <div className="mt-3 text-right">
                   <span
                     className="text-sm underline cursor-pointer hover:opacity-80 transition"
-                    style={{ color: themeColors.black2 }}
+                    style={{ color: theme.black2 }}
                     onClick={() => navigate(`/masjid/${slug}/jadwal-kajian`)}
                   >
                     Lihat semua kajian
@@ -619,11 +619,11 @@ export default function PublicLinktree() {
           <div className="mb-4 mt-4">
             <h2
               className="text-lg font-semibold"
-              style={{ color: themeColors.black1 }}
+              style={{ color: theme.black1 }}
             >
               Tentang Masjid
             </h2>
-            <p className="text-sm mt-1" style={{ color: themeColors.black2 }}>
+            <p className="text-sm mt-1" style={{ color: theme.black2 }}>
               Dikelola oleh DKM Masjid untuk ummat muslim
             </p>
 
@@ -633,7 +633,7 @@ export default function PublicLinktree() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-base inline-flex flex-col gap-0.5 pb-2 pt-2"
-                style={{ color: themeColors.black2 }}
+                style={{ color: theme.black2 }}
               >
                 <span className="inline-flex items-center gap-1">
                   <MapPin size={16} />
@@ -653,7 +653,7 @@ export default function PublicLinktree() {
           <div>
             <h2
               className="text-lg font-semibold mb-2"
-              style={{ color: themeColors.black1 }}
+              style={{ color: theme.black1 }}
             >
               Menu Utama
             </h2>

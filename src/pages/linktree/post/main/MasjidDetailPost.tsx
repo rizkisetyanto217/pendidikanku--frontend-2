@@ -118,25 +118,25 @@ export default function MasjidDetailPost() {
         <div
           className="space-y-1 py-2"
           style={{
-            borderColor: themeColors.silver1,
-            backgroundColor: isDark ? themeColors.white2 : themeColors.white1,
+            borderColor: theme.silver1,
+            backgroundColor: isDark ? theme.white2 : theme.white1,
           }}
         >
           <p
             className="text-sm font-semibold"
-            style={{ color: themeColors.black2 }}
+            style={{ color: theme.black2 }}
           >
             {post.post_theme?.post_theme_name || "Tanpa Tema"}
           </p>
 
           <p
             className="text-lg font-bold"
-            style={{ color: themeColors.black2 }}
+            style={{ color: theme.black2 }}
           >
             {post.post_title}
           </p>
 
-          <p className="text-sm" style={{ color: themeColors.silver4 }}>
+          <p className="text-sm" style={{ color: theme.silver4 }}>
             {post.post_content}
           </p>
 
@@ -148,7 +148,7 @@ export default function MasjidDetailPost() {
 
           <div
             className="flex items-center justify-between pt-2 text-xs"
-            style={{ color: themeColors.silver2 }}
+            style={{ color: theme.silver2 }}
           >
             {/* LIKE */}
             <div
@@ -157,8 +157,8 @@ export default function MasjidDetailPost() {
             >
               <Heart
                 size={14}
-                fill={isLiked ? themeColors.primary : "none"}
-                stroke={isLiked ? themeColors.primary : themeColors.silver2}
+                fill={isLiked ? theme.primary : "none"}
+                stroke={isLiked ? theme.primary : theme.silver2}
               />
               <span>{likeCount} Suka</span>
             </div>

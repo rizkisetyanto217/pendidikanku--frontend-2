@@ -170,8 +170,8 @@ export default function DonationMasjid() {
         <button
           className="w-full max-w-xl flex justify-between items-center font-medium px-4 py-2 rounded text-sm md:text-base"
           style={{
-            backgroundColor: themeColors.quaternary,
-            color: themeColors.white1,
+            backgroundColor: theme.quaternary,
+            color: theme.white1,
           }}
         >
           <span>Lihat riwayat donasi saya</span>
@@ -183,8 +183,8 @@ export default function DonationMasjid() {
           onClick={handleSubmit}
           className="w-full max-w-xl py-3 rounded text-sm md:text-base"
           style={{
-            backgroundColor: themeColors.primary,
-            color: themeColors.white1,
+            backgroundColor: theme.primary,
+            color: theme.white1,
           }}
         />
       </div>
