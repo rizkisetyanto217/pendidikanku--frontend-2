@@ -1,6 +1,6 @@
 import ShimmerImage from "@/components/common/main/ShimmerImage";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useNavigate, useParams } from "react-router-dom";
 import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
 
@@ -9,8 +9,8 @@ export default function LectureMaterialList({
 }: {
   data: LectureMaterialItem[];
 }) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { slug = "" } = useParams();
 
@@ -112,9 +112,7 @@ export default function LectureMaterialList({
                         ? theme.success1
                         : theme.white3,
                     color:
-                      item.status === "tersedia"
-                        ? theme.white1
-                        : theme.silver2,
+                      item.status === "tersedia" ? theme.white1 : theme.silver2,
                   }}
                 >
                   {item.status === "tersedia"

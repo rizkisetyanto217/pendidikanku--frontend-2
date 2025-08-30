@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Home, MapPin, Calendar, BookOpen, FileText } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 interface BottomNavbarProps {
@@ -11,8 +11,8 @@ interface BottomNavbarProps {
 export default function BottomNavbar({
   hideOnScroll = false,
 }: BottomNavbarProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const location = useLocation();
   const navigate = useNavigate();
   const { slug } = useParams();

@@ -202,6 +202,7 @@ import InvoiceTagihan from "@/pages/sekolahislamku/dashboard-student/dashboard/I
 import AnnouncementsStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AnnouncementsStudent";
 import AllScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AllScheduleStudent";
 import DetailScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/DetailScheduleStudent";
+import Test from "@/pages/Test";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -696,7 +697,7 @@ export default function AppRoutes() {
         </Route>
       </Route>
       {/* ==== 404 ==== */}
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<Test />} />
     </Routes>
   );
 }

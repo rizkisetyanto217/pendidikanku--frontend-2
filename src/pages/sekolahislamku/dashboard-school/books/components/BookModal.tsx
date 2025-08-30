@@ -7,7 +7,7 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import { colors } from "@/constants/colorsThema";
+import { colors } from "@/constants/thema";
 
 /* ===== helper debounce ===== */
 function useDebounce<T>(value: T, delay = 350) {
@@ -308,7 +308,7 @@ export default function BookModal({
               {bindingEnabledByMode && (
                 <div
                   className="mt-2 pt-3 border-t"
-                  style={{ borderColor: colors.light.silver1 }}
+                  style={{ borderColor: palette.silver1 }}
                 >
                   <label className="flex items-center gap-2 text-sm">
                     <input

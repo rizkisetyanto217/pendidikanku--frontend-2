@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
@@ -18,8 +18,8 @@ interface LectureExamQuestion {
 export default function MasjidExamLecture() {
   const { id, slug } = useParams();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const startTimeRef = useRef<number>(Date.now());
 
   const { data, isLoading } = useQuery({

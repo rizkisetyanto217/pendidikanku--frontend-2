@@ -2,8 +2,8 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, MapPin } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -30,8 +30,8 @@ export default function DetailScheduleStudent() {
   const state = (location.state ?? {}) as LocationState | undefined;
   const navigate = useNavigate();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const item = state?.item;
   const readableId = (() => {

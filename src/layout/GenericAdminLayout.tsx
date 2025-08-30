@@ -1,8 +1,8 @@
 import AdminTopbar from "@/components/common/navigation/AdminTopbar";
 import MobileSidebar from "@/components/common/navigation/MobileSidebar";
 import Sidebar, { SidebarItem } from "@/components/common/navigation/Sidebar";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 

@@ -1,8 +1,8 @@
 // src/pages/sekolahislamku/pengumuman/DetailAnnouncementTeacher.tsx
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -98,8 +98,8 @@ const fmtDate = (iso: string) =>
   });
 
 const DetailAnnouncementTeacher: React.FC = () => {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const location = useLocation() as {
     state?: { pengumuman?: Pengumuman; classId?: string };
   };

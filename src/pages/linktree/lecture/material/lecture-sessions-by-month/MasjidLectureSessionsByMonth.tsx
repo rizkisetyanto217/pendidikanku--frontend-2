@@ -2,8 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import FormattedDate from "@/constants/formattedDate";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import { LectureMaterialItem } from "@/pages/linktree/lecture/material/lecture-sessions/main/types/lectureSessions";
@@ -27,8 +27,8 @@ interface LectureSession {
 
 export default function MasjidMaterialByMonth() {
   const { slug, month } = useParams();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const { data: currentUser } = useCurrentUser(); // ambil user saat ini

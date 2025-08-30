@@ -14,8 +14,8 @@ import {
   Layers,
 } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -181,8 +181,8 @@ async function fetchLevels(): Promise<Level[]> {
 
 /* =============== Page =============== */
 export default function SchoolClasses() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const [sp, setSp] = useSearchParams();
   const qc = useQueryClient();

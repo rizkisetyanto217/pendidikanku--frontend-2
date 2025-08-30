@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 
 export interface LinktreeNavbarProps {
@@ -31,8 +31,8 @@ export default function LinktreeNavbar({
   maxWidthClass = "max-w-screen-xl",
 }: LinktreeNavbarProps) {
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const [solid, setSolid] = useState(!coverOverlap);
   const ticking = useRef(false);

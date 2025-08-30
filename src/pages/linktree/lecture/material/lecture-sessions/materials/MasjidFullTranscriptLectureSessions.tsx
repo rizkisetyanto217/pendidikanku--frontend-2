@@ -1,6 +1,6 @@
 import PageHeader from "@/components/common/home/PageHeaderUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -9,8 +9,8 @@ import parse from "html-react-parser";
 import cleanTranscriptHTML from "@/constants/cleanTransciptHTML";
 
 export default function MasjidFullTranscriptLectureSessions() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { lecture_session_slug, slug } = useParams<{
     lecture_session_slug: string;
     slug: string;

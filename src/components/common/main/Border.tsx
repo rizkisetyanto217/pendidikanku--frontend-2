@@ -1,6 +1,6 @@
 import React from "react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface BorderLineProps {
   className?: string;

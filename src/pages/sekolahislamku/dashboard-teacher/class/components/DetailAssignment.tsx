@@ -3,8 +3,8 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ArrowLeft, Calendar, Clock, Plus } from "lucide-react";
 import Swal from "sweetalert2";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -39,8 +39,8 @@ export default function DetailAssignment() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // data awal dari state (kalau navigasi dari list)
   const initial = (state as any)?.assignment as AssignmentState | undefined;

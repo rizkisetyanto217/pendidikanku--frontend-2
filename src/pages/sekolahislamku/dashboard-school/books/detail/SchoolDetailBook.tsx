@@ -4,8 +4,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -72,8 +72,8 @@ export default function SchoolBookDetail() {
   const base = slug ? `/${encodeURIComponent(slug)}` : "";
   const nav = useNavigate();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const q = useQuery({
     queryKey: ["book-detail", id],
@@ -248,9 +248,7 @@ export default function SchoolBookDetail() {
                         className="px-2 py-[2px] rounded-full text-[11px] border"
                         style={{
                           borderColor: palette.silver1,
-                          background: isDark
-                            ? colors.dark.white2
-                            : colors.light.white2,
+                          background: isDark ? palette.white2 : palette.white2,
                           color: palette.quaternary,
                         }}
                         title={s.class_sections_slug ?? s.class_sections_name}

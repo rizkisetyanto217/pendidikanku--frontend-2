@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 type CartLinkProps = {
   label: string;
@@ -18,9 +18,8 @@ export default function CartLink({
   onClick,
 }: CartLinkProps) {
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -46,15 +45,15 @@ export default function CartLink({
       onClick={handleClick}
       className="cursor-pointer flex items-center justify-between p-3 rounded hover:opacity-90 transition-all"
       style={{
-        backgroundColor: themeColors.white2,
-        border: `1px solid ${themeColors.silver1}`,
+        backgroundColor: theme.white2,
+        border: `1px solid ${theme.silver1}`,
       }}
     >
       <span className="flex items-center space-x-2">
         <span>{icon}</span>
-        <span style={{ color: themeColors.black1 }}>{label}</span>
+        <span style={{ color: theme.black1 }}>{label}</span>
       </span>
-      <span style={{ color: themeColors.silver4 }}>›</span>
+      <span style={{ color: theme.silver4 }}>›</span>
     </div>
   );
 }

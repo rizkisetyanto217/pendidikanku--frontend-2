@@ -1,7 +1,7 @@
 // components/common/main/ShowImageFull.tsx
 import React from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface ShowImageFullProps {
   url: string;
@@ -9,8 +9,8 @@ interface ShowImageFullProps {
 }
 
 export default function ShowImageFull({ url, onClose }: ShowImageFullProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
     <div

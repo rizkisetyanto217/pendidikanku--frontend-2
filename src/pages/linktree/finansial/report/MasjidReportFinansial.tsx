@@ -4,16 +4,15 @@ import { useParams } from "react-router-dom";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import api from "@/lib/axios";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import FormattedDate from "@/constants/formattedDate";
 
 const FinancialReportPage = () => {
   const [tab, setTab] = useState("recent");
   const { slug } = useParams();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   // 1. Get Masjid Data
   const { data: masjidRes, isLoading: isMasjidLoading } = useQuery({
     queryKey: ["masjid-detail", slug],

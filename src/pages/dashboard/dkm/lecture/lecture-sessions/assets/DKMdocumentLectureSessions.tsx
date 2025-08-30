@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useNavigate, useParams } from "react-router-dom";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import toast from "react-hot-toast";
@@ -21,8 +21,8 @@ interface LectureSessionsAsset {
 
 export default function DKMDocumentLectureSessions() {
   const { id: lecture_session_id } = useParams();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { id } = useParams();
 

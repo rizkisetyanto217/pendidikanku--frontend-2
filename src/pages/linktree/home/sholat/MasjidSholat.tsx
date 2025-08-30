@@ -3,8 +3,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
@@ -13,8 +13,8 @@ export default function MasjidSholat({
   kotaId = 1301,
   location = "DKI Jakarta",
 }) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { slug } = useParams();
 

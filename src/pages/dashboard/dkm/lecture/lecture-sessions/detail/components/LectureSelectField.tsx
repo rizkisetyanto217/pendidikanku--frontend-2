@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -25,8 +25,8 @@ export default function LectureSelectField({
   label = "Pilih Tema Kajian",
   onChange,
 }: LectureSelectFieldProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const {
     data: lectures = [],

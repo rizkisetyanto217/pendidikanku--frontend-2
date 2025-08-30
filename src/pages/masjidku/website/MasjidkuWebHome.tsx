@@ -18,8 +18,8 @@ import {
   Star,
 } from "lucide-react";
 import LinktreeNavbar from "@/components/common/public/LintreeNavbar";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
 import TestimonialSlider, {
   TestimonialItem,
@@ -169,8 +169,8 @@ const Section: React.FC<{
 );
 
 export default function SekolahIslamkuHome() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const primaryBtnStyle = useMemo(
     () => ({

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 
 interface PageHeaderProps {
@@ -24,8 +24,8 @@ export default function PageHeaderUser({
   withPaddingTop = false, // default false
 }: PageHeaderProps) {
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
     <div

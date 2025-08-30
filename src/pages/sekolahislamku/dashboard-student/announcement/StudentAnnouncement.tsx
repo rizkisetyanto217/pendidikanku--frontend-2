@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -81,8 +81,8 @@ async function fetchAnnouncements({
 
 /* ======== Page ======== */
 export default function StudentAnnouncement() {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<AnnType | "all">("all");

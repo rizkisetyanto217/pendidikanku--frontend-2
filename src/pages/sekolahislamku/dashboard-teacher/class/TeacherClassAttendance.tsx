@@ -14,8 +14,8 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -524,8 +524,8 @@ export default function TeacherAttendancePage({
 }: {
   classId?: string;
 }) {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // ----- state utama
   const [classId, setClassId] = useState<string>(initialClassId);

@@ -34,8 +34,8 @@ export default function DKMAddEditPost() {
 
   const post = location.state as Post | undefined;
 
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");

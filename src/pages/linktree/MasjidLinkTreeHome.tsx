@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useResponsive } from "@/hooks/isResponsive";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   ChevronLeft,
   ChevronRight,
@@ -133,9 +133,8 @@ export default function PublicLinktree() {
   const { isDesktop } = useResponsive();
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
 

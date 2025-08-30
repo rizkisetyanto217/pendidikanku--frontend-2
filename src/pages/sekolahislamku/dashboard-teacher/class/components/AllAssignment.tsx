@@ -11,8 +11,8 @@ import {
   Plus,
 } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -85,8 +85,8 @@ const computeStatus = (a: {
    Page
 ========================= */
 export default function AllAssignment() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   // Ambil data dari TeacherClassDetail via router state

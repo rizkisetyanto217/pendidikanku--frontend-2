@@ -3,8 +3,8 @@ import React, { useMemo } from "react";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import CommonButton from "@/components/common/main/CommonButton";
 import CommonActionButton from "@/components/common/main/CommonActionButton";
 import { useQuery } from "@tanstack/react-query";
@@ -72,8 +72,8 @@ function normalizeUser(u?: AnyUser): NormalizedUser | undefined {
 
 /* ===================== Page ===================== */
 export default function MasjidMyActivity() {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { data: currentUserRaw } = useCurrentUser();

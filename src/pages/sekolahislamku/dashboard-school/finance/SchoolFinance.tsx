@@ -2,8 +2,8 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { NavLink } from "react-router-dom";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 
 import {
@@ -78,8 +78,8 @@ const dateFmt = (iso?: string) =>
 
 /* =============== Main Page =============== */
 export default function SchoolFinance() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
   // state ModalTagihan
@@ -224,7 +224,10 @@ export default function SchoolFinance() {
             <div className="flex items-center gap-3">
               <div
                 className="h-10 w-10 rounded-xl grid place-items-center"
-                style={{ background: palette.white3, color: palette.quaternary }}
+                style={{
+                  background: palette.white3,
+                  color: palette.quaternary,
+                }}
               >
                 <Wallet size={20} />
               </div>
@@ -408,7 +411,10 @@ export default function SchoolFinance() {
             >
               <div
                 className="min-h-0 flex items-center gap-2 rounded-xl px-3 py-2 border"
-                style={{ borderColor: palette.white3, background: palette.white1 }}
+                style={{
+                  borderColor: palette.white3,
+                  background: palette.white1,
+                }}
               >
                 <Search size={16} />
                 <input
@@ -454,7 +460,10 @@ export default function SchoolFinance() {
                       color: palette.quaternary,
                     }}
                   >
-                    <div className="text-xs" style={{ color: palette.secondary }}>
+                    <div
+                      className="text-xs"
+                      style={{ color: palette.secondary }}
+                    >
                       Kelas
                     </div>
                     <select
@@ -478,7 +487,10 @@ export default function SchoolFinance() {
                       color: palette.quaternary,
                     }}
                   >
-                    <div className="text-xs" style={{ color: palette.secondary }}>
+                    <div
+                      className="text-xs"
+                      style={{ color: palette.secondary }}
+                    >
                       Jenis
                     </div>
                     <select
@@ -502,7 +514,10 @@ export default function SchoolFinance() {
                       color: palette.quaternary,
                     }}
                   >
-                    <div className="text-xs" style={{ color: palette.secondary }}>
+                    <div
+                      className="text-xs"
+                      style={{ color: palette.secondary }}
+                    >
                       Status
                     </div>
                     <select
@@ -543,8 +558,10 @@ export default function SchoolFinance() {
               className="flex-1 md:flex-none px-3 py-2 rounded-xl text-sm border"
               style={{
                 borderColor: palette.silver1,
-                color: tab === "invoices" ? palette.quaternary : palette.secondary,
-                background: tab === "invoices" ? palette.white2 : palette.white1,
+                color:
+                  tab === "invoices" ? palette.quaternary : palette.secondary,
+                background:
+                  tab === "invoices" ? palette.white2 : palette.white1,
                 fontWeight: tab === "invoices" ? 600 : 500,
               }}
               aria-pressed={tab === "invoices"}
@@ -556,8 +573,10 @@ export default function SchoolFinance() {
               className="flex-1 md:flex-none px-3 py-2 rounded-xl text-sm border"
               style={{
                 borderColor: palette.silver1,
-                color: tab === "payments" ? palette.quaternary : palette.secondary,
-                background: tab === "payments" ? palette.white2 : palette.white1,
+                color:
+                  tab === "payments" ? palette.quaternary : palette.secondary,
+                background:
+                  tab === "payments" ? palette.white2 : palette.white1,
                 fontWeight: tab === "payments" ? 600 : 500,
               }}
               aria-pressed={tab === "payments"}

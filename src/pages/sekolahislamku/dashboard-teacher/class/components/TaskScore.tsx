@@ -11,8 +11,8 @@ import {
   AlertCircle,
   Eye,
 } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -50,8 +50,8 @@ export default function TaskScore() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const assignment = (state as any)?.assignment as AssignmentState | undefined;
 

@@ -1,8 +1,8 @@
 // src/pages/auth/components/ModalRegister.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   Btn,
   type Palette,
@@ -72,8 +72,8 @@ export function ModalRegister({
 }: ModalRegisterProps) {
   const navigate = useNavigate();
   const { slug: urlSlug } = useParams();
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const [open, setOpen] = useState(initialOpen);
   const [step, setStep] = useState(0); // 0: Angkatan, 1: Program, 2: Form, 3: Konfirmasi

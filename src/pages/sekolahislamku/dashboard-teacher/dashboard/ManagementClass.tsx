@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   Btn,
   SectionCard,
@@ -12,7 +12,9 @@ import {
 import { ArrowLeft, Users, BookOpen, Calendar } from "lucide-react";
 import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
-import ModalEditManagementClass, { ClassInfo } from "./ModalEditManagementClass";
+import ModalEditManagementClass, {
+  ClassInfo,
+} from "./ModalEditManagementClass";
 import AddStudent from "./AddStudent";
 import Swal from "sweetalert2";
 
@@ -22,8 +24,8 @@ const ManagementClass = () => {
     state?: { className?: string; students?: number; lastSubject?: string };
   };
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const info = location.state;
   const currentDate = new Date().toISOString();
@@ -46,64 +48,64 @@ const ManagementClass = () => {
   }, [overrides, info, className]);
   const [editOpen, setEditOpen] = useState(false);
 
-//   state add student
+  //   state add student
   const [openAdd, setOpenAdd] = useState(false);
 
-//   state delete
-const handleDeleteClass = async () => {
-  const res = await Swal.fire({
-    title: "Hapus kelas?",
-    text: `Kelas “${view.className || className}” akan dihapus.`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Ya, hapus",
-    cancelButtonText: "Batal",
-    reverseButtons: true,
-    confirmButtonColor: palette.error1,     // warnanya mengikuti tema
-    cancelButtonColor: palette.silver2,
-    background: palette.white1,
-    color: palette.black1,
-  });
-
-  if (!res.isConfirmed) return;
-
-  try {
-    // (opsional) tampilkan loading
-    await Swal.fire({
-      title: "Menghapus…",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-      showConfirmButton: false,
-      background: palette.white1,
-    });
-
-    // TODO: panggil API penghapusan di sini
-    // await axios.delete(`/api/kelas/${idKelas}`);
-
-    // sukses
-    await Swal.fire({
-      title: "Terhapus",
-      text: "Kelas berhasil dihapus.",
-      icon: "success",
-      timer: 1400,
-      showConfirmButton: false,
+  //   state delete
+  const handleDeleteClass = async () => {
+    const res = await Swal.fire({
+      title: "Hapus kelas?",
+      text: `Kelas “${view.className || className}” akan dihapus.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+      confirmButtonColor: palette.error1, // warnanya mengikuti tema
+      cancelButtonColor: palette.silver2,
       background: palette.white1,
       color: palette.black1,
     });
 
-    // misal balik ke halaman sebelumnya
-    navigate(-1);
-  } catch (e: any) {
-    await Swal.fire({
-      title: "Gagal menghapus",
-      text: e?.message ?? "Terjadi kesalahan saat menghapus kelas.",
-      icon: "error",
-      confirmButtonText: "Tutup",
-      background: palette.white1,
-      color: palette.black1,
-    });
-  }
-};
+    if (!res.isConfirmed) return;
+
+    try {
+      // (opsional) tampilkan loading
+      await Swal.fire({
+        title: "Menghapus…",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+        showConfirmButton: false,
+        background: palette.white1,
+      });
+
+      // TODO: panggil API penghapusan di sini
+      // await axios.delete(`/api/kelas/${idKelas}`);
+
+      // sukses
+      await Swal.fire({
+        title: "Terhapus",
+        text: "Kelas berhasil dihapus.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+        background: palette.white1,
+        color: palette.black1,
+      });
+
+      // misal balik ke halaman sebelumnya
+      navigate(-1);
+    } catch (e: any) {
+      await Swal.fire({
+        title: "Gagal menghapus",
+        text: e?.message ?? "Terjadi kesalahan saat menghapus kelas.",
+        icon: "error",
+        confirmButtonText: "Tutup",
+        background: palette.white1,
+        color: palette.black1,
+      });
+    }
+  };
 
   return (
     <div

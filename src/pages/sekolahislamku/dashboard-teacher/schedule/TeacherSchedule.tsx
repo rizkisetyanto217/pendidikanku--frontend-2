@@ -2,8 +2,8 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, Plus, Pencil, CalendarRange } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -159,8 +159,8 @@ function TypeBadge({
 
 /* ================= Page ================= */
 export default function TeacherSchedule() {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
   // Tanggal yang sedang dilihat

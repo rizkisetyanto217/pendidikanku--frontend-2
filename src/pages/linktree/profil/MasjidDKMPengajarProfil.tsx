@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useResponsive } from "@/hooks/isResponsive";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
@@ -23,9 +23,8 @@ export default function MasjidDKMPengajarProfil() {
   const { slug } = useParams();
   const { isMobile } = useResponsive();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [selectedDetail, setSelectedDetail] = useState<ProfileItem | null>(
     null
   );

@@ -3,8 +3,8 @@ import { useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Receipt, ArrowLeft } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 import {
@@ -87,8 +87,8 @@ const dateLong = (iso?: string) =>
 /* ================= Page ================= */
 export default function ListFinance() {
   const { state } = useLocation() as { state?: LocationState };
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data } = useQuery({
     queryKey: ["parent-home-single"], // sama dengan dashboard

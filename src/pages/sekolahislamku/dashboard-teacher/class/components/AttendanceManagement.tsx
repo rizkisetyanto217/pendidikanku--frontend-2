@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -19,8 +19,8 @@ type LocationState = { className?: string; students?: StudentRow[] };
 export default function AttendanceManagement() {
   const navigate = useNavigate();
   const { state } = useLocation() as { state?: LocationState };
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // ⬇️ langsung pakai data dari state
   const [students, setStudents] = useState<StudentRow[]>(state?.students ?? []);

@@ -10,17 +10,15 @@ import {
   Sun,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQueryClient } from "@tanstack/react-query";
 import SharePopover from "./SharePopover";
 import { useResponsive } from "@/hooks/isResponsive";
-// ⬇️ pakai helper logout dari axios
 import { apiLogout } from "@/lib/axios";
 
 interface PublicUserDropdownProps {
   variant?: "default" | "icon";
-  /** Default: true -> tombol trigger memakai bg abu/silver */
   withBg?: boolean;
 }
 
@@ -28,8 +26,9 @@ export default function PublicUserDropdown({
   variant = "default",
   withBg = true,
 }: PublicUserDropdownProps) {
-  const { isDark, setDarkMode } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, setDarkMode, themeName, setThemeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
+
   const { data: user } = useCurrentUser();
   const isLoggedIn = !!user;
   const navigate = useNavigate();
@@ -44,21 +43,13 @@ export default function PublicUserDropdown({
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    setOpen(false); // tutup dropdown biar responsif
-
+    setOpen(false);
     try {
-      // ✅ cukup panggil helper; dia akan call /api/logout (GET/POST sesuai ENV)
-      // dan tetap membersihkan token meski server balas 401/403.
       await apiLogout();
-
-      // Bersihkan cache user agar UI langsung ter-update
       queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
-
-      // Arahkan ke halaman login publik/umum
       navigate(slug ? `${base}/login` : "/login", { replace: true });
     } catch (err: any) {
-      // Kalau backend blokir CORS/CSRF, helper sudah best-effort clear token.
-      console.error("Logout error (diabaikan):", err?.response ?? err);
+      console.error("Logout error (ignored):", err?.response ?? err);
       navigate(slug ? `${base}/login` : "/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
@@ -67,7 +58,10 @@ export default function PublicUserDropdown({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -103,7 +97,7 @@ export default function PublicUserDropdown({
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 mt-2 w-48 rounded-lg border z-50"
+          className="absolute right-0 mt-2 w-56 rounded-lg border z-50"
           role="menu"
           style={{
             backgroundColor: theme.white1,
@@ -147,6 +141,7 @@ export default function PublicUserDropdown({
               </li>
             )}
 
+            {/* Bantuan */}
             <li>
               <button
                 onClick={() => {
@@ -161,6 +156,7 @@ export default function PublicUserDropdown({
               </button>
             </li>
 
+            {/* Toggle Dark/Light */}
             <li>
               <button
                 onClick={() => {
@@ -183,12 +179,44 @@ export default function PublicUserDropdown({
               </button>
             </li>
 
+            {/* Pilih Tema */}
             <li>
               <div className="px-4 py-2">
-                <SharePopover title={document.title} url={window.location.href} forceCustom />
+                <p className="text-xs mb-1" style={{ color: theme.silver2 }}>
+                  Pilih Tema
+                </p>
+                <select
+                  value={themeName}
+                  onChange={(e) => {
+                    setThemeName(e.target.value as ThemeName);
+                    setOpen(false);
+                  }}
+                  className="w-full border rounded px-2 py-1 text-sm"
+                  style={{
+                    backgroundColor: theme.white2,
+                    color: theme.black1,
+                    borderColor: theme.silver1,
+                  }}
+                >
+                  <option value="default">Default</option>
+                  <option value="sunrise">Sunrise</option>
+                  <option value="midnight">Midnight</option>
+                </select>
               </div>
             </li>
 
+            {/* Share */}
+            <li>
+              <div className="px-4 py-2">
+                <SharePopover
+                  title={document.title}
+                  url={window.location.href}
+                  forceCustom
+                />
+              </div>
+            </li>
+
+            {/* Logout */}
             {isLoggedIn && (
               <li>
                 <button

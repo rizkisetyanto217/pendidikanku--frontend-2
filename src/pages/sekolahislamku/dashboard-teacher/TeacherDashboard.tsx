@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { Users } from "lucide-react";
 
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -85,8 +85,8 @@ type APITeacherHome = {
 /* ================= Page ================= */
 export default function TeacherDashboard() {
   // Thema
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // Query data utama (API bersama)
   const { data, isLoading } = useQuery<APITeacherHome>({

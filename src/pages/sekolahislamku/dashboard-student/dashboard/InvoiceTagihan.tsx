@@ -9,8 +9,8 @@ import {
   Printer,
 } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -99,8 +99,8 @@ export default function InvoiceTagihan() {
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data } = useQuery({
     queryKey: ["parent-home-single"],

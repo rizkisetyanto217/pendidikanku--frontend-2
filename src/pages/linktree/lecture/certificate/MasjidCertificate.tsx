@@ -2,16 +2,16 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import QRCodeLink from "@/components/common/main/QRCodeLink";
 
 export default function MasjidCertificateLecture() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { user_exam_id } = useParams();
 
   const { data, isLoading } = useQuery({

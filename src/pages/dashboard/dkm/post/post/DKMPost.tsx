@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
@@ -31,8 +31,8 @@ interface Post {
 export default function DKMPost() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();
   const masjidId = user?.masjid_admin_ids?.[0];

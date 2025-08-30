@@ -1,6 +1,6 @@
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import RichEditor from "@/components/common/main/RichEditor";
 
 export default function DKMAddEditFullTransciptLectureSessions() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id: lecture_session_id } = useParams();

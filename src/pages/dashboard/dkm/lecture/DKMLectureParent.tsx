@@ -6,23 +6,22 @@ import axios from "@/lib/axios";
 import DashboardSidebar, {
   SidebarMenuItem,
 } from "@/components/common/navigation/SidebarMenu";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface TokenPayload {
   masjid_admin_ids: string[];
 }
 
 export default function DKMLectureParent() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const location = useLocation();
 
   const sidebarMenus: SidebarMenuItem[] = [
     { name: "Terbaru", icon: <BookOpen />, to: "/dkm/kajian" },
     { name: "Tema", icon: <Star />, to: "/dkm/tema" },
   ];
-
 
   return (
     <div className="flex flex-col md:flex-row gap-4">

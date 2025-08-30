@@ -1,12 +1,11 @@
 import { Outlet } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-
 export default function StudentLayout() {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   return (
     <div

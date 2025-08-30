@@ -5,13 +5,13 @@ import axios from "@/lib/axios";
 import DashboardSidebar, {
   SidebarMenuItem,
 } from "@/components/common/navigation/SidebarMenu";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function DKMProfilMasjidParent() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const location = useLocation();
 
   const { user, isLoggedIn, isLoading: isUserLoading } = useCurrentUser();

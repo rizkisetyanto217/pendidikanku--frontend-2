@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Share } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface SharePopoverProps {
   title: string;
@@ -18,9 +18,8 @@ export default function SharePopover({
   customClassName = "",
   forceCustom = false,
 }: SharePopoverProps) {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [showMenu, setShowMenu] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -56,7 +55,7 @@ export default function SharePopover({
       <button
         onClick={handleClick}
         className="flex items-center space-x-1 text-sm"
-        style={{ color: themeColors.quaternary }}
+        style={{ color: theme.quaternary }}
       >
         <Share size={16} />
         <span>Bagikan</span>
@@ -68,12 +67,12 @@ export default function SharePopover({
             position === "left" ? "left-0" : "right-0"
           }`}
           style={{
-            backgroundColor: themeColors.white1,
-            borderColor: themeColors.silver1,
+            backgroundColor: theme.white1,
+            borderColor: theme.silver1,
             zIndex: 9999, // Penting!
           }}
         >
-          <p className="text-xs mb-2" style={{ color: themeColors.black2 }}>
+          <p className="text-xs mb-2" style={{ color: theme.black2 }}>
             Bagikan link:
           </p>
 
@@ -83,9 +82,9 @@ export default function SharePopover({
             value={url}
             className="w-full text-xs p-1 border rounded mb-2"
             style={{
-              backgroundColor: themeColors.white3,
-              borderColor: themeColors.silver1,
-              color: themeColors.black1,
+              backgroundColor: theme.white3,
+              borderColor: theme.silver1,
+              color: theme.black1,
             }}
           />
 
@@ -93,7 +92,7 @@ export default function SharePopover({
             <button
               onClick={handleCopy}
               className="text-sm font-semibold hover:underline"
-              style={{ color: themeColors.success1 }}
+              style={{ color: theme.success1 }}
             >
               Salin Link
             </button>
@@ -103,7 +102,7 @@ export default function SharePopover({
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-semibold hover:underline"
-              style={{ color: themeColors.success1 }}
+              style={{ color: theme.success1 }}
             >
               WhatsApp
             </a>

@@ -3,8 +3,8 @@ import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 import {
@@ -529,8 +529,8 @@ const TeachersTable = ({
 
 /* ================= Main Component ================= */
 export default function TeachersPage() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // Modal
   const [openAdd, setOpenAdd] = useState(false);

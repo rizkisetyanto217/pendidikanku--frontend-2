@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useParams, useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import SimpleTable from "@/components/common/main/SimpleTable";
 import FormattedDate from "@/constants/formattedDate";
@@ -17,8 +17,8 @@ interface LectureQuiz {
 }
 
 export default function DKMQuizLecture() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { id: lecture_id } = useParams();
 
@@ -53,7 +53,7 @@ export default function DKMQuizLecture() {
           navigate(
             `/dkm/kajian/kajian-detail/${quiz.lecture_sessions_quiz_lecture_session_id}/latihan-soal`,
             {
-              state: { from: location.pathname }, 
+              state: { from: location.pathname },
             }
           );
         }}

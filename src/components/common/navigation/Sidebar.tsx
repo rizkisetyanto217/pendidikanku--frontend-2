@@ -1,7 +1,7 @@
 import { SidebarLink } from "./SidebarLink";
 import clsx from "clsx";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 export interface SidebarItem {
   text: string;
@@ -24,8 +24,8 @@ export default function Sidebar({
   isOpen,
   onClose,
 }: SidebarProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   if (isMobile && !isOpen) return null;
 

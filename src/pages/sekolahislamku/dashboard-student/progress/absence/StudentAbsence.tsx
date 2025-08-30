@@ -2,8 +2,8 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, CalendarDays, Filter, Percent } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -157,8 +157,8 @@ export default function StudentAbsence() {
   const status: AttendanceStatusFilter = asStatusFilter(sp.get("status"));
   const mode: AttendanceModeFilter = asModeFilter(sp.get("mode"));
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data: s } = useQuery({
     queryKey: ["student-absence", childId, period],

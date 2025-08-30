@@ -2,16 +2,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { Tabs, TabsContent } from "@/components/common/main/Tabs";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { Check } from "lucide-react";
 
 export default function MasjidVideoAudioDetailLectureSessions() {
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [tab, setTab] = useState("youtube");
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -23,12 +23,15 @@ export default function MasjidVideoAudioDetailLectureSessions() {
   const { data: assets = [] } = useQuery({
     queryKey: ["lecture-session-assets", lecture_session_slug],
     queryFn: async () => {
-      const res = await axios.get("/public/lecture-sessions-assets/filter-slug", {
-        params: {
-          lecture_session_slug,
-          file_type: "1,2", // 1 = video, 2 = audio
-        },
-      });
+      const res = await axios.get(
+        "/public/lecture-sessions-assets/filter-slug",
+        {
+          params: {
+            lecture_session_slug,
+            file_type: "1,2", // 1 = video, 2 = audio
+          },
+        }
+      );
       return Array.isArray(res.data) ? res.data : [];
     },
     enabled: !!lecture_session_slug,

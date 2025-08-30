@@ -5,8 +5,8 @@ import {
 } from "@tanstack/react-query";
 import { useDeleteLectureSession } from "./detail/add-edit/useDeleteDKMLectureSessions";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import StatusBadge from "@/components/common/main/MainStatusBadge";
 import ActionEditDelete from "@/components/common/main/MainActionEditDelete";
 import toast from "react-hot-toast";
@@ -35,8 +35,8 @@ interface LectureSession {
 
 export default function DKMLectureSessions() {
   const { mutate: deleteLectureSession } = useDeleteLectureSession();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const queryClient = useQueryClient(); // ⬅️ Tambahkan ini

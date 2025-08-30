@@ -3,8 +3,8 @@
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import LectureMaterialList from "@/components/pages/lecture/LectureMaterialList";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useParams, useNavigate } from "react-router-dom";
@@ -13,8 +13,8 @@ import FormattedDate from "@/constants/formattedDate";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 
 export default function MasjidAllMyLecture() {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { data: currentUser } = useCurrentUser();
   const { slug } = useParams();
   const navigate = useNavigate();

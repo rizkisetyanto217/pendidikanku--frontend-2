@@ -2,8 +2,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -117,21 +117,20 @@ const StatusBadge: React.FC<{ status: StatusType }> = ({ status }) => {
   );
 };
 
-/* =============== Modal Add/Edit =============== */ 
-type AnnouncementModalProps =
-  {
-    open: boolean;
-    onClose: () => void;
-    palette: Palette;
-    title: string;
-    defaultValue?: Partial<Pengumuman>;
-    onSubmit: (
-      payload: Omit<Pengumuman, "id" | "views"> & {
-        id?: number;
-        views?: number;
-      }
-    ) => Promise<void> | void;
-  };
+/* =============== Modal Add/Edit =============== */
+type AnnouncementModalProps = {
+  open: boolean;
+  onClose: () => void;
+  palette: Palette;
+  title: string;
+  defaultValue?: Partial<Pengumuman>;
+  onSubmit: (
+    payload: Omit<Pengumuman, "id" | "views"> & {
+      id?: number;
+      views?: number;
+    }
+  ) => Promise<void> | void;
+};
 
 const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
   open,
@@ -245,187 +244,220 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
   };
 
   return (
-   <div
-  className="fixed inset-0 z-50 flex items-center justify-center p-4"
-  style={{ background: "rgba(0,0,0,0.35)" }}
-  aria-modal
-  role="dialog"
->
-  <div
-    className="w-full max-w-3xl max-h-[90vh] rounded-2xl"
-    style={{
-      background: palette.white2,
-      color: palette.black1,
-      border: `1px solid ${palette.silver1}`,
-    }}
-  >
-    {/* HEADER (sticky top) */}
     <div
-      className="sticky top-0 z-10 p-4 border-b rounded-xl"
-      style={{ background: palette.white2, borderColor: palette.silver1 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.35)" }}
+      aria-modal
+      role="dialog"
     >
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <Btn variant="white1" palette={palette} onClick={onClose}>
-          Tutup
-        </Btn>
-      </div>
-    </div>
-
-    {/* FORM membungkus body + footer agar submit tetap jalan */}
-    <form onSubmit={submit} className="flex flex-col max-h-[calc(90vh-64px)]">
-      {/* BODY (scrollable) */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-5 [-webkit-overflow-scrolling:touch]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <InputField
-              label="Judul"
-              name="judul"
-              value={judul}
-              placeholder="Judul pengumuman"
-              onChange={(e) => setJudul(e.currentTarget.value)}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <InputField
-              label="Konten"
-              name="konten"
-              as="textarea"
-              rows={5}
-              value={konten}
-              placeholder="Isi pengumuman…"
-              onChange={(e) => setKonten((e.target as HTMLTextAreaElement).value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Kategori</label>
-            <select
-              className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              style={{ background: palette.white1, borderColor: palette.silver1, color: palette.black1 }}
-              value={kategori}
-              onChange={(e) => setKategori(e.target.value as CategoryType)}
-            >
-              <option value="Umum">Umum</option>
-              <option value="Tahfidz">Tahfidz</option>
-              <option value="Tahsin">Tahsin</option>
-              <option value="Kajian">Kajian</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Prioritas</label>
-            <select
-              className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              style={{ background: palette.white1, borderColor: palette.silver1, color: palette.black1 }}
-              value={prioritas}
-              onChange={(e) => setPrioritas(e.target.value as PriorityLevel)}
-            >
-              <option value="Rendah">Rendah</option>
-              <option value="Sedang">Sedang</option>
-              <option value="Tinggi">Tinggi</option>
-              <option value="Urgent">Urgent</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Status</label>
-            <select
-              className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              style={{ background: palette.white1, borderColor: palette.silver1, color: palette.black1 }}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as StatusType)}
-            >
-              <option value="Draft">Draft</option>
-              <option value="Aktif">Aktif</option>
-              <option value="Berakhir">Berakhir</option>
-            </select>
-          </div>
-
-          <InputField
-            label="Tanggal Publish"
-            name="tanggalPublish"
-            type="date"
-            value={tanggalPublish}
-            onChange={(e) => setTanggalPublish(e.currentTarget.value)}
-          />
-
-          <InputField
-            label="Tanggal Berakhir"
-            name="tanggalBerakhir"
-            type="date"
-            value={tanggalBerakhir}
-            onChange={(e) => setTanggalBerakhir(e.currentTarget.value)}
-          />
-
-          <InputField
-            label="Penulis"
-            name="penulis"
-            value={penulis}
-            placeholder="Nama penulis"
-            onChange={(e) => setPenulis(e.currentTarget.value)}
-          />
-
-          <div className="flex items-center gap-2 mt-6">
-            <input
-              id="isPinned"
-              type="checkbox"
-              checked={isPinned}
-              onChange={(e) => setIsPinned(e.target.checked)}
-            />
-            <label htmlFor="isPinned" className="text-sm">Sematkan (Pinned)</label>
-          </div>
-
-          <div className="md:col-span-2">
-            <InputField
-              label="Target (pisahkan dengan koma)"
-              name="target"
-              value={target}
-              placeholder="Contoh: Wali Murid, Santri Kelas 7"
-              onChange={(e) => setTarget(e.currentTarget.value)}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <InputField
-              label="Tags (pisahkan dengan koma)"
-              name="tags"
-              value={tags}
-              placeholder="contoh: ujian, tahfidz"
-              onChange={(e) => setTags(e.currentTarget.value)}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <InputField
-              label="Lampiran (opsional, pisahkan dengan koma atau unggah file)"
-              name="lampiran"
-              value={lampiran}
-              placeholder="file1.pdf, link-gdrive, ..."
-              onChange={(e) => setLampiran(e.currentTarget.value)}
-            />
+      <div
+        className="w-full max-w-3xl max-h-[90vh] rounded-2xl"
+        style={{
+          background: palette.white2,
+          color: palette.black1,
+          border: `1px solid ${palette.silver1}`,
+        }}
+      >
+        {/* HEADER (sticky top) */}
+        <div
+          className="sticky top-0 z-10 p-4 border-b rounded-xl"
+          style={{ background: palette.white2, borderColor: palette.silver1 }}
+        >
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <Btn variant="white1" palette={palette} onClick={onClose}>
+              Tutup
+            </Btn>
           </div>
         </div>
 
-      {/* FOOTER (sticky bottom, SELALU kelihatan) */}
-      <div
-        className="sticky bottom-0 z-10 p-4 border-t flex justify-end gap-2
-                   pb-[env(safe-area-inset-bottom)] bg-clip-padding"
-        style={{ background: palette.white2, borderColor: palette.silver1, boxShadow: "0 -4px 10px rgba(0,0,0,0.04)" }}
-      >
-        <Btn type="button" variant="white1" palette={palette} onClick={onClose}>
-          Batal
-        </Btn>
-        <Btn type="submit" palette={palette} disabled={loading}>
-          {loading ? "Menyimpan..." : "Simpan"}
-        </Btn>
-      </div>
-      </div>
-    </form>
-  </div>
-</div>
+        {/* FORM membungkus body + footer agar submit tetap jalan */}
+        <form
+          onSubmit={submit}
+          className="flex flex-col max-h-[calc(90vh-64px)]"
+        >
+          {/* BODY (scrollable) */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-5 [-webkit-overflow-scrolling:touch]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <InputField
+                  label="Judul"
+                  name="judul"
+                  value={judul}
+                  placeholder="Judul pengumuman"
+                  onChange={(e) => setJudul(e.currentTarget.value)}
+                />
+              </div>
 
+              <div className="md:col-span-2">
+                <InputField
+                  label="Konten"
+                  name="konten"
+                  as="textarea"
+                  rows={5}
+                  value={konten}
+                  placeholder="Isi pengumuman…"
+                  onChange={(e) =>
+                    setKonten((e.target as HTMLTextAreaElement).value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Kategori
+                </label>
+                <select
+                  className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  style={{
+                    background: palette.white1,
+                    borderColor: palette.silver1,
+                    color: palette.black1,
+                  }}
+                  value={kategori}
+                  onChange={(e) => setKategori(e.target.value as CategoryType)}
+                >
+                  <option value="Umum">Umum</option>
+                  <option value="Tahfidz">Tahfidz</option>
+                  <option value="Tahsin">Tahsin</option>
+                  <option value="Kajian">Kajian</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Prioritas
+                </label>
+                <select
+                  className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  style={{
+                    background: palette.white1,
+                    borderColor: palette.silver1,
+                    color: palette.black1,
+                  }}
+                  value={prioritas}
+                  onChange={(e) =>
+                    setPrioritas(e.target.value as PriorityLevel)
+                  }
+                >
+                  <option value="Rendah">Rendah</option>
+                  <option value="Sedang">Sedang</option>
+                  <option value="Tinggi">Tinggi</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  className="w-full text-sm px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  style={{
+                    background: palette.white1,
+                    borderColor: palette.silver1,
+                    color: palette.black1,
+                  }}
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as StatusType)}
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Aktif">Aktif</option>
+                  <option value="Berakhir">Berakhir</option>
+                </select>
+              </div>
+
+              <InputField
+                label="Tanggal Publish"
+                name="tanggalPublish"
+                type="date"
+                value={tanggalPublish}
+                onChange={(e) => setTanggalPublish(e.currentTarget.value)}
+              />
+
+              <InputField
+                label="Tanggal Berakhir"
+                name="tanggalBerakhir"
+                type="date"
+                value={tanggalBerakhir}
+                onChange={(e) => setTanggalBerakhir(e.currentTarget.value)}
+              />
+
+              <InputField
+                label="Penulis"
+                name="penulis"
+                value={penulis}
+                placeholder="Nama penulis"
+                onChange={(e) => setPenulis(e.currentTarget.value)}
+              />
+
+              <div className="flex items-center gap-2 mt-6">
+                <input
+                  id="isPinned"
+                  type="checkbox"
+                  checked={isPinned}
+                  onChange={(e) => setIsPinned(e.target.checked)}
+                />
+                <label htmlFor="isPinned" className="text-sm">
+                  Sematkan (Pinned)
+                </label>
+              </div>
+
+              <div className="md:col-span-2">
+                <InputField
+                  label="Target (pisahkan dengan koma)"
+                  name="target"
+                  value={target}
+                  placeholder="Contoh: Wali Murid, Santri Kelas 7"
+                  onChange={(e) => setTarget(e.currentTarget.value)}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <InputField
+                  label="Tags (pisahkan dengan koma)"
+                  name="tags"
+                  value={tags}
+                  placeholder="contoh: ujian, tahfidz"
+                  onChange={(e) => setTags(e.currentTarget.value)}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <InputField
+                  label="Lampiran (opsional, pisahkan dengan koma atau unggah file)"
+                  name="lampiran"
+                  value={lampiran}
+                  placeholder="file1.pdf, link-gdrive, ..."
+                  onChange={(e) => setLampiran(e.currentTarget.value)}
+                />
+              </div>
+            </div>
+
+            {/* FOOTER (sticky bottom, SELALU kelihatan) */}
+            <div
+              className="sticky bottom-0 z-10 p-4 border-t flex justify-end gap-2
+                   pb-[env(safe-area-inset-bottom)] bg-clip-padding"
+              style={{
+                background: palette.white2,
+                borderColor: palette.silver1,
+                boxShadow: "0 -4px 10px rgba(0,0,0,0.04)",
+              }}
+            >
+              <Btn
+                type="button"
+                variant="white1"
+                palette={palette}
+                onClick={onClose}
+              >
+                Batal
+              </Btn>
+              <Btn type="submit" palette={palette} disabled={loading}>
+                {loading ? "Menyimpan..." : "Simpan"}
+              </Btn>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 
@@ -756,8 +788,8 @@ function SearchFilter({
 
 /* =================== Main Page =================== */
 const AllAnnouncement: React.FC = () => {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const [filters, setFilters] = useState<FilterOptions>({

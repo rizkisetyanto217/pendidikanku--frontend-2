@@ -1,12 +1,15 @@
 // src/pages/NotFound.tsx
 import React, { useState, useEffect } from "react";
 import { Home, Search, ArrowLeft, Zap, Star } from "lucide-react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import { colors, ThemeName } from "@/constants/thema";
 
 export default function NotFound() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+
+  // pilih palet sesuai themeName + mode
+  const variant = colors[themeName as ThemeName] ?? colors.default;
+  const theme = isDark ? variant.dark : variant.light;
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [glitchActive, setGlitchActive] = useState(false);
@@ -42,7 +45,6 @@ export default function NotFound() {
         top: `${30 + (i % 3) * 20}%`,
         animationDelay: `${i * 0.5}s`,
         animationDuration: "3s",
-        // gradasi sesuai tema
         background: `linear-gradient(90deg, ${theme.tertiary}, ${theme.quaternary})`,
         boxShadow: `0 0 10px ${theme.quaternary}55`,
       }}
@@ -53,7 +55,6 @@ export default function NotFound() {
     <div
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{
-        // background mengikuti tema (halus & responsive mouse radial)
         background: `linear-gradient(135deg, ${theme.white1}, ${theme.white2})`,
       }}
     >

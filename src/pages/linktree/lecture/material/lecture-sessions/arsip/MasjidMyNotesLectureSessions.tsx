@@ -3,13 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import RichEditor from "@/components/common/main/RichEditor";
 
 export default function MasjidMyNotesLectureSessions() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { lecture_session_slug, slug } = useParams<{

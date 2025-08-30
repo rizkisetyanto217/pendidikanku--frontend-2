@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Outlet } from "react-router-dom";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
 
@@ -670,8 +670,8 @@ function AnnouncementModal({
 
 /* ================= Page ================= */
 export default function SchoolDashboard() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
   const [flash, setFlash] = useState<{

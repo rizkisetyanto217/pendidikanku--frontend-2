@@ -8,8 +8,8 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { ArrowLeft, GraduationCap, Clock, Activity } from "lucide-react";
 import React from "react";
 
@@ -30,8 +30,8 @@ export type StudentDetailState = {
 };
 
 const DetailStudent: React.FC = () => {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { studentId } = useParams<{ studentId: string }>();
   const { state } = useLocation() as {
@@ -166,10 +166,7 @@ const DetailStudent: React.FC = () => {
                   <div className="text-xs font-medium opacity-60">
                     Status Hari Ini
                   </div>
-                  <Badge
-                    palette={palette}
-                  
-                  >
+                  <Badge palette={palette}>
                     {(s?.statusToday ?? "—").toString().toUpperCase()}
                   </Badge>
                   {s?.mode ? (

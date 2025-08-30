@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface SholatScheduleCardProps {
   location: string;
@@ -14,8 +14,8 @@ export default function SholatScheduleCard({
   location,
   slug,
 }: SholatScheduleCardProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const textColor = "#000"; // ⬅️ semua font hitam
   const dividerColor = "#00000033"; // garis pembatas transparan

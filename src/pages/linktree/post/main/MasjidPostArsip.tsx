@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bookmark, Heart, Share2 } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import BottomNavbar from "@/components/common/public/ButtonNavbar";
@@ -15,8 +15,8 @@ import CommonCardList from "@/components/common/main/CommonCardList";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
 
 function InlineShare({ title, url }: { title: string; url: string }) {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [showShare, setShowShare] = useState(false);
 
   const handleCopy = () => {
@@ -112,8 +112,8 @@ interface Donation {
 }
 
 export default function MasjidPost() {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [activeTab, setActiveTab] = useState<"masjid" | "motivasi">("masjid");
   const { slug = "" } = useParams<{ slug: string }>();
   const { user, isLoggedIn } = useCurrentUser();

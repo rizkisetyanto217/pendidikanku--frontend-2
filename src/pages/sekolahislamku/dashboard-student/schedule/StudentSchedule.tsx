@@ -2,8 +2,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, GraduationCap } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -335,8 +335,8 @@ function ScheduleDetailModal({
 
 /* =============== Page =============== */
 export default function StudentSchedule() {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const [dateStr, setDateStr] = useState<string>(() => toISODate(new Date()));
   const [active, setActive] = useState<ActiveEntry>(null);
 

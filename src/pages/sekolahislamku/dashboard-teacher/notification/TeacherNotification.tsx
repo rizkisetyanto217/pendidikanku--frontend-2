@@ -1,8 +1,8 @@
 // src/pages/sekolahislamku/TeacherDashboard.tsx
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -232,8 +232,8 @@ function timeAgo(iso: string) {
 
 /* ================= Page ================= */
 export default function TeacherNotification() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data, isLoading } = useQuery({
     queryKey: ["teacher-home"],

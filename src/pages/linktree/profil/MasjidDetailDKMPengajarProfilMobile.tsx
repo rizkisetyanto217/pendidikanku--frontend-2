@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 type ProfileItem = {
   masjid_profile_teacher_dkm_id: string;
@@ -24,8 +24,8 @@ export default function MasjidDetailDKMPengajarMobile() {
   const location = useLocation() as {
     state?: { item?: ProfileItem; slug?: string; from?: string };
   };
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const itemFromState = location.state?.item;
   const slug = location.state?.slug;
@@ -133,7 +133,6 @@ export default function MasjidDetailDKMPengajarMobile() {
                 </p>
               </div>
             )}
-
           </>
         )}
       </div>

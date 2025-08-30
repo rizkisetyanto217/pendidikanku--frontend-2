@@ -1,8 +1,8 @@
 // src/pages/sekolahislamku/tagihan/AllInvoices.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -373,8 +373,8 @@ const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
 
 /* ===== Page ===== */
 export default function AllInvoices() {
-  const { isDark } = useHtmlDarkMode();
-  const palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const { state } = useLocation() as { state: LocationState };
   const navigate = useNavigate();
 

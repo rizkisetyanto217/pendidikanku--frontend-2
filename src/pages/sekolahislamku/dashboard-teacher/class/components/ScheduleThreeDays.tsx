@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css"; // ⬅️ pastikan CSS swal ter-load
 import {
@@ -12,7 +12,6 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
-
 
 import { fetchTeacherHome } from "../../class/teacher";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
@@ -150,8 +149,8 @@ const normalizeItem = (c: any, fallback: Date): ScheduleItem => {
 
 /* ================= Component ================= */
 export default function ScheduleThreeDays() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   // optional preload dari router state

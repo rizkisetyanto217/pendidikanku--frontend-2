@@ -1,8 +1,8 @@
 // MasjidProfileDetail.tsx
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { useNavigate, useParams } from "react-router-dom";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import parse from "html-react-parser";
@@ -11,9 +11,8 @@ import cleanTranscriptHTML from "@/constants/cleanTransciptHTML"; // ← pakai u
 export default function MasjidProfileDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["masjid-profile-detail", slug],
     queryFn: async () => {

@@ -2,8 +2,8 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Clock, MapPin, PencilLine, Trash2 } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -33,8 +33,8 @@ export default function DetailSchedule() {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // Ambil item dari state (jika datang dari list). Kalau tidak ada, kita
   // hanya tampilkan ID ter-decode. (Nanti bisa kamu sambungkan ke API by id.)
@@ -104,7 +104,6 @@ export default function DetailSchedule() {
                 </button>
                 <span>Detail Jadwal</span>
               </div>
-
             </div>
 
             {/* Card Detail */}

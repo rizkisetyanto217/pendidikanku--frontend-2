@@ -1,12 +1,12 @@
 // src/pages/pendaftaran/PendaftaranPage.tsx
 import React, { useMemo } from "react";
 import { ModalRegister } from "../components/RegisterModalUser";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 export default function RegisterDetailUser() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const styles = useMemo(
     () => ({

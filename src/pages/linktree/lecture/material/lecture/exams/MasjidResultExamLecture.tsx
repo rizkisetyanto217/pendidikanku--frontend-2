@@ -1,15 +1,15 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useCallback } from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axiosInstance from "@/lib/axios";
 import axios from "axios";
 
 export default function MasjidResultExamLecture() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const {
     correct = 0,

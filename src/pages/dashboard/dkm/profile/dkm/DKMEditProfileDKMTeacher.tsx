@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import InputField from "@/components/common/main/InputField"; // pastikan path-nya sesuai
 
 interface Profile {
@@ -20,9 +20,8 @@ interface Profile {
 export default function DKMEditProfileDKMTeacher() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { data, isLoading } = useQuery<Profile>({
     queryKey: ["masjid-profile-teacher-dkm", id],
     queryFn: async () => {

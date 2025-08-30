@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useNavigate, useParams } from "react-router-dom";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 
@@ -22,8 +22,8 @@ interface LectureSession {
 
 export default function MasjidFullTransciptLecture() {
   const { slug = "", id = "" } = useParams();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const { data, isLoading } = useQuery<{

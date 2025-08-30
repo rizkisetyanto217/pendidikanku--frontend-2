@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -48,8 +48,8 @@ export default function AttendanceDetail() {
   const navigate = useNavigate();
 
   // tema
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // dukung state lama (classRow) & baru (classInfo)
   const classInfo: ClassInfo | undefined = useMemo(() => {

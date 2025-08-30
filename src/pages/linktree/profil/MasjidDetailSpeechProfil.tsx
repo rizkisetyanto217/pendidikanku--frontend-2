@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useMemo } from "react";
 
 type ProfileItem = {
@@ -21,9 +21,8 @@ type ProfileItem = {
 export default function MasjidDetailSpeech() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { data, isLoading, isError } = useQuery({
     queryKey: ["masjid-profile-teacher-dkm", slug],
     queryFn: async () => {

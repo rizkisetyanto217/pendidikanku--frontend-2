@@ -1,8 +1,8 @@
 // src/components/layout/AuthLayout.tsx
 import React, { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 // ⬇️ Import modal pilihan pendaftaran (bukan role)
 import RegisterChoiceModal from "@/pages/dashboard/auth/components/RegisterModalChoice";
@@ -20,8 +20,8 @@ export default function AuthLayout({
   fullWidth = false,
   contentClassName = "",
 }: AuthLayoutProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const isLogin = mode === "login";
 
   const navigate = useNavigate();

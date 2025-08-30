@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import toast from "react-hot-toast";
 
 interface QRCodeLinkProps {
@@ -10,8 +10,8 @@ interface QRCodeLinkProps {
 
 export default function QRCodeLink({ value }: QRCodeLinkProps) {
   const [showUrl, setShowUrl] = useState(false);
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(value);

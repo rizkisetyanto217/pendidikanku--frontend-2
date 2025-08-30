@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 import ParentTopBar from "../components/home/ParentTopBar";
 import ParentSidebar from "../components/home/ParentSideBar";

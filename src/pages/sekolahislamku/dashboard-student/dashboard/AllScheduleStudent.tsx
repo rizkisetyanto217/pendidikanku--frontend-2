@@ -2,8 +2,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, MapPin, CalendarDays } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Badge,
@@ -35,8 +35,8 @@ const topbarDateFmt = (iso: string) =>
 export default function AllScheduleStudent() {
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // Ambil data hanya untuk hari ini
   const items: TodayScheduleItem[] =

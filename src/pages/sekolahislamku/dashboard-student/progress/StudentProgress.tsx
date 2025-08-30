@@ -13,8 +13,8 @@ import {
   Mail,
   ChevronRight,
 } from "lucide-react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 import {
   SectionCard,
@@ -167,8 +167,8 @@ const dateShort = (iso: string) =>
 
 /* ===== Page ===== */
 export default function StudentProgress() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data } = useQuery({
     queryKey: ["parent-child-detail"],
@@ -222,10 +222,7 @@ export default function StudentProgress() {
                 </div>
 
                 <div className="flex flex-col gap-2 md:flex-row">
-                  <Link
-                    to="raport"
-                    className="w-full md:w-auto"
-                  >
+                  <Link to="raport" className="w-full md:w-auto">
                     <Btn size="sm" variant="default" palette={palette}>
                       <FileSpreadsheet size={16} /> Lihat Rapor
                     </Btn>

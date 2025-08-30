@@ -2,8 +2,8 @@ import { useResponsive } from "@/hooks/isResponsive";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
@@ -21,9 +21,8 @@ export default function DKMProfileDKMTeacher() {
   const { isMobile } = useResponsive();
   const navigate = useNavigate();
   const [selectedDetail, setSelectedDetail] = useState<Profile | null>(null);
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { data, isLoading } = useQuery({
     queryKey: ["masjid-profile-teacher-dkm"],
     queryFn: async () => {

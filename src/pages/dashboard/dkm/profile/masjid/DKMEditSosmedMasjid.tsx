@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InputField from "@/components/common/main/InputField";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import api from "@/lib/axios";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -19,8 +19,8 @@ interface MasjidData {
 }
 
 export default function DkmEditSosmedProfile() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const { user, isLoading: isUserLoading } = useCurrentUser();

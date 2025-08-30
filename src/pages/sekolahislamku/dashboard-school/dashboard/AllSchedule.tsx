@@ -2,8 +2,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { ArrowLeft, Clock, MapPin, Plus } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import Swal from "sweetalert2";
 import {
   SectionCard,
@@ -36,8 +36,8 @@ const keyOf = (it: TodayScheduleItem) =>
 const makeScheduleId = (it: TodayScheduleItem) => encodeURIComponent(keyOf(it));
 
 export default function AllSchedule() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = (isDark ? colors.dark : colors.light) as Palette;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const { state } = useLocation();
@@ -151,31 +151,31 @@ export default function AllSchedule() {
   };
 
   /* ===== Hapus & Detail (dari list) ===== */
-const handleDelete = (it: TodayScheduleItem) => {
-  Swal.fire({
-    title: "Yakin hapus?",
-    text: `Jadwal "${it.title}" akan dihapus.`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Ya, hapus",
-    cancelButtonText: "Batal",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const k = keyOf(it);
-      setItems((prev) => prev.filter((x) => keyOf(x) !== k));
+  const handleDelete = (it: TodayScheduleItem) => {
+    Swal.fire({
+      title: "Yakin hapus?",
+      text: `Jadwal "${it.title}" akan dihapus.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const k = keyOf(it);
+        setItems((prev) => prev.filter((x) => keyOf(x) !== k));
 
-      Swal.fire({
-        title: "Terhapus!",
-        text: `Jadwal "${it.title}" berhasil dihapus.`,
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    }
-  });
-};
+        Swal.fire({
+          title: "Terhapus!",
+          text: `Jadwal "${it.title}" berhasil dihapus.`,
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
 
   const handleDetail = (it: TodayScheduleItem) => {
     const id = makeScheduleId(it);

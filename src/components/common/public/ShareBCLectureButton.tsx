@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 import { Share2, X, Copy, MessageCircle } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 /* ========= Types ========= */
 type MinimalSession = { startTime: string; place?: string };
@@ -89,8 +89,8 @@ export default function ShareBCLectureButton({
   socialLinks,
   prefetchOnHover = true,
 }: Props) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
   const [open, setOpen] = useState(false);

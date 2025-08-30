@@ -37,8 +37,8 @@ interface JadwalRutin {
 
 export default function MasjidScheduleLecture() {
   const { slug } = useParams<{ slug: string }>();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab") || "mendatang";

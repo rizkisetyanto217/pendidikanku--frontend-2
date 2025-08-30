@@ -2,9 +2,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -130,8 +130,8 @@ function CardSkeleton({ palette }: { palette: Palette }) {
 
 /* ============== Page ============== */
 export default function SchoolBooks() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   useEffectiveMasjidId();
 
   const [sp, setSp] = useSearchParams();
@@ -265,7 +265,7 @@ export default function SchoolBooks() {
                 className="px-2 py-[2px] rounded-full text-[11px] border"
                 style={{
                   borderColor: palette.silver1,
-                  background: isDark ? colors.dark.white2 : colors.light.white2,
+                  background: isDark ? palette.white2 : palette.white2,
                 }}
                 title={s.class_sections_slug ?? s.class_sections_name}
               >
@@ -360,9 +360,7 @@ export default function SchoolBooks() {
                       className="px-2 py-[2px] rounded-full text-[11px] border"
                       style={{
                         borderColor: palette.silver1,
-                        background: isDark
-                          ? colors.dark.white2
-                          : colors.light.white2,
+                        background: isDark ? palette.white2 : palette.white2,
                       }}
                     >
                       {s.class_sections_name}

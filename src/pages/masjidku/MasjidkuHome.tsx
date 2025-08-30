@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import CartLink from "@/components/common/main/CardLink";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import MasjidkuHomePrayerCard from "@/components/pages/home/MasjidkuHomePrayerCard";
 import LinktreeNavbar from "@/components/common/public/LintreeNavbar";
-
 
 /* =========================================================
    Helpers
@@ -105,8 +104,8 @@ export default function MasjidkuHome() {
   const [copiedText, setCopiedText] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   // Demo data — gantikan dari API jika sudah tersedia
   const masjidku = {

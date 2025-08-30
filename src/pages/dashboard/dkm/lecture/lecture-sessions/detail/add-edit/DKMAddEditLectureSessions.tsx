@@ -11,8 +11,8 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import SelectMasjidTeacher from "../components/SelectMasjidTeacher";
 import SubmitActionButtons from "@/components/common/main/SubmitActionButton";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 export default function DKMAddEditLectureSession() {
   const { user: currentUser, isLoading: isUserLoading } = useCurrentUser();
@@ -20,8 +20,8 @@ export default function DKMAddEditLectureSession() {
   const queryClient = useQueryClient();
   const { id } = useParams();
   const isEditMode = !!id;
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const [form, setForm] = useState({
     lecture_session_title: "",

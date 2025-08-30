@@ -1,8 +1,8 @@
 // src/pages/sekolahislamku/teacher/TeacherAnnouncements.tsx
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 import {
   SectionCard,
@@ -12,7 +12,6 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
-
 
 import {
   Megaphone,
@@ -176,8 +175,8 @@ const dateShort = (iso?: string) =>
 
 /* ================= Page ================= */
 export default function TeacherAnnouncements() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data, isLoading } = useQuery({
     queryKey: ["teacher-announcements"],

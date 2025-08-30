@@ -20,8 +20,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import WebsiteFooter from "../components/MasjidkuWebFooter";
 
 /** ===== Helpers ===== */
@@ -46,8 +46,8 @@ const Section: React.FC<
 
 /** ===== Page ===== */
 export default function MasjidkuWebAbout() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const bg = useMemo(
     () =>

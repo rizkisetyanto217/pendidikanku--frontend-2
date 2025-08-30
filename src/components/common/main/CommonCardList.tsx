@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface CommonCardProps {
   children: ReactNode;
@@ -17,9 +17,8 @@ export default function CommonCardList({
   borderColor,
   backgroundColor,
 }: CommonCardProps) {
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   return (
     <div
       className={`rounded-xl border ${className}`}

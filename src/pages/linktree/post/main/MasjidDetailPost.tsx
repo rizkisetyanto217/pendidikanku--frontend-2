@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Heart, Share2 } from "lucide-react";
 import axios from "@/lib/axios";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PublicNavbar from "@/components/common/public/PublicNavbar";
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import FormattedDate from "@/constants/formattedDate";
@@ -30,9 +30,8 @@ export default function MasjidDetailPost() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isLoggedIn } = useCurrentUser();
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const {
     data: post,
     isLoading,

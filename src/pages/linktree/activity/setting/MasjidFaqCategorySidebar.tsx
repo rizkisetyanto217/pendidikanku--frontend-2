@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface FaqCategorySidebarProps {
   categories: string[];
@@ -14,8 +14,8 @@ export default function MasjidFaqCategorySidebar({
   onSelect,
 }: FaqCategorySidebarProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   useEffect(() => {
     const handleResize = () => {
@@ -41,7 +41,8 @@ export default function MasjidFaqCategorySidebar({
                   : "bg-transparent text-gray-700 border-gray-300 hover:bg-teal-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-teal-800"
               }`}
               style={{
-                backgroundColor: selected === cat ? theme.primary : theme.white1,
+                backgroundColor:
+                  selected === cat ? theme.primary : theme.white1,
                 color: selected === cat ? theme.white1 : theme.black1,
                 borderColor: selected === cat ? theme.secondary : theme.silver1,
               }}

@@ -1,13 +1,13 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useEffect, useMemo } from "react";
 
 export default function MasjidResultQuizDetailLectureSessions() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   // Ambil param untuk fallback jika state kosong
   const {

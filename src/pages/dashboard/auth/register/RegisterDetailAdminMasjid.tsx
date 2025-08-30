@@ -1,8 +1,8 @@
 // src/pages/masjid/RegisterLembaga.tsx (refactor pakai InputField + Success Lock Modal)
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios, { apiLogout } from "@/lib/axios"; // ⬅️ pastikan export-nya ada
 import {
   MapPin,
@@ -71,8 +71,8 @@ type FormState = {
    Component
 ======================= */
 export default function RegisterDetailAdminMasjid() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>({

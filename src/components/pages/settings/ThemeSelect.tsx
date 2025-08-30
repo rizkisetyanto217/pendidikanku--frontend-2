@@ -1,7 +1,7 @@
 // src/components/common/ThemeSelect.tsx
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface ThemeSelectProps {
   label?: string;
@@ -12,28 +12,26 @@ export default function ThemeSelect({
   label = "Tema",
   className = "",
 }: ThemeSelectProps) {
-  const { isDark, setDarkMode } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setDarkMode(e.target.value === "dark");
-  };
+  const { isDark, mode, setMode, themeName, setThemeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
-    <div className={`relative w-fit ${className}`}>
+    <div className={`space-y-3 w-fit ${className}`}>
       {label && (
         <label
           htmlFor="themeSelect"
-          className="block text-sm font-medium mb-2"
+          className="block text-sm font-medium"
           style={{ color: theme.black2 }}
         >
           {label}
         </label>
       )}
+
+      {/* Pilih mode terang/gelap/system */}
       <select
-        id="themeSelect"
-        onChange={handleChange}
-        value={isDark ? "dark" : "light"}
+        id="modeSelect"
+        onChange={(e) => setMode(e.target.value as any)}
+        value={mode}
         className="appearance-none border pr-10 pl-4 py-2 rounded-md text-sm w-40 transition focus:outline-none focus:ring-2 focus:ring-teal-500"
         style={{
           backgroundColor: theme.white2,
@@ -43,29 +41,25 @@ export default function ThemeSelect({
       >
         <option value="light">Terang</option>
         <option value="dark">Gelap</option>
+        <option value="system">Sistem</option>
       </select>
 
-      {/* Icon dropdown
-      <div
-        className="pointer-events-none absolute top-1/2 right-3 transform -translate-y-1/2"
-        style={{ color: theme.black2 }}
-        aria-hidden="true"
+      {/* Pilih varian tema */}
+      <select
+        id="themeVariant"
+        onChange={(e) => setThemeName(e.target.value as ThemeName)}
+        value={themeName}
+        className="appearance-none border pr-10 pl-4 py-2 rounded-md text-sm w-40 transition focus:outline-none focus:ring-2 focus:ring-teal-500"
+        style={{
+          backgroundColor: theme.white2,
+          color: theme.black1,
+          borderColor: theme.silver1,
+        }}
       >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </div> */}
+        <option value="default">Default</option>
+        <option value="sunrise">Sunrise</option>
+        <option value="midnight">Midnight</option>
+      </select>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import useHtmlDarkMode  from "@/hooks/userHTMLDarkMode";
+import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
 import { colors } from "@/constants/colorsThema";
 
 interface CommonButtonProps {
@@ -19,8 +19,8 @@ export default function CommonButton({
   className = "",
   style = {},
 }: CommonButtonProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const isOutline = variant === "outline";
 

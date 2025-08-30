@@ -2,8 +2,8 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import ParentTopBar from "../../components/home/ParentTopBar";
 
 import {
@@ -133,8 +133,8 @@ async function fetchAnnouncementDummy(id?: string) {
 export default function StudentDetailAnnouncement() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["student-ann-detail", id],

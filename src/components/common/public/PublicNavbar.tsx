@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import PublicUserDropdown from "./UserDropDown";
 
@@ -34,9 +34,8 @@ export default function PublicNavbar({
     return ""; // terakhir kalau benar2 ga ketemu
   }, [masjidSlug, slugFromParams]);
 
-  const { isDark } = useHtmlDarkMode();
-  const themeColors = isDark ? colors.dark : colors.light;
-
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { data: user, isLoading } = useCurrentUser();
   const isLoggedIn = !!user;
 

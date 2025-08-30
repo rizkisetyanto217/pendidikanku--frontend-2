@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import axios from "@/lib/axios";
@@ -10,8 +10,8 @@ import CommonActionButton from "@/components/common/main/CommonActionButton";
 import ImagePreview from "@/components/common/main/ImageReview";
 
 export default function DKMEditMasjid() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { user } = useCurrentUser();
   const masjidId = user?.masjid_admin_ids?.[0];
   const navigate = useNavigate();

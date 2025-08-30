@@ -11,8 +11,8 @@ import {
   X,
 } from "lucide-react";
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import WebsiteFooter from "../components/MasjidkuWebFooter";
 
 /* Helpers layout */
@@ -41,8 +41,8 @@ const IntroModal: React.FC<{
   onClose: () => void;
   onProceed: () => void;
 }> = ({ open, onClose, onProceed }) => {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const [agree, setAgree] = useState(false);
 
   // lock scroll + esc
@@ -199,8 +199,8 @@ const IntroModal: React.FC<{
 /* PAGE: Intro only → redirect to login/register */
 export default function MasjidkuRegisterNow() {
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const bg = useMemo(
     () =>

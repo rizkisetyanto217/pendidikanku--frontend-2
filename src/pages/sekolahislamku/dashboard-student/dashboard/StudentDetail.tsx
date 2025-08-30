@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, CalendarDays, Award, User } from "lucide-react";
 
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
   Btn,
@@ -43,8 +43,8 @@ export default function StudentDetail() {
   const { state } = useLocation() as { state?: LocationState };
   const navigate = useNavigate();
 
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   const child = state?.child;
   const today = state?.today;
@@ -74,7 +74,12 @@ export default function StudentDetail() {
 
           <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between">
-              <Btn onClick={() => navigate(-1)} palette={palette} variant="ghost" size="sm">
+              <Btn
+                onClick={() => navigate(-1)}
+                palette={palette}
+                variant="ghost"
+                size="sm"
+              >
                 <ArrowLeft size={16} className="mr-1" />
                 Kembali
               </Btn>

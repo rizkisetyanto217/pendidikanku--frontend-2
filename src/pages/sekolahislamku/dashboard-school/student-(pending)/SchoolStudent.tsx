@@ -2,8 +2,8 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { NavLink } from "react-router-dom";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 
 import {
@@ -54,8 +54,8 @@ const genderLabel = (g?: "L" | "P") =>
 
 /* =============== Main Page =============== */
 export default function StudentsPage() {
-  const { isDark } = useHtmlDarkMode();
-  const palette: Palette = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
   // === Modal states (mutually exclusive)
   const [openAdd, setOpenAdd] = useState(false);
@@ -140,7 +140,10 @@ export default function StudentsPage() {
             <div className="flex items-center gap-3">
               <div
                 className="h-10 w-10 rounded-xl flex items-center justify-center"
-                style={{ background: palette.white3, color: palette.quaternary }}
+                style={{
+                  background: palette.white3,
+                  color: palette.quaternary,
+                }}
               >
                 <Users size={20} />
               </div>
@@ -254,7 +257,10 @@ export default function StudentsPage() {
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               <div
                 className="flex items-center gap-2 flex-1 rounded-xl px-3 py-2 border"
-                style={{ borderColor: palette.white3, background: palette.white1 }}
+                style={{
+                  borderColor: palette.white3,
+                  background: palette.white1,
+                }}
               >
                 <Search size={16} />
                 <input

@@ -1,6 +1,6 @@
 import React from "react";
-import { colors } from "@/constants/colorsThema";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface MonthSummary {
   month: string; // format: "2025-07"
@@ -14,8 +14,8 @@ export default function LectureMaterialMonthList({
   data: MonthSummary[];
   onSelectMonth: (month: string) => void;
 }) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   // ✅ Fungsi bantu untuk ubah "2025-07" → "Juli 2025"
   const formatMonthYear = (input: string) => {

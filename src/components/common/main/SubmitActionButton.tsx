@@ -1,6 +1,6 @@
 import React from "react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 type ButtonVariant = "primary" | "next";
 
 type Props = {
@@ -18,8 +18,8 @@ type ButtonProps = {
 };
 
 const Button = ({ variant, children, onClick, disabled }: ButtonProps) => {
-  const isDarkMode = useHtmlDarkMode();
-  const theme = isDarkMode ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const background = variant === "primary" ? theme.primary : theme.tertiary;
   const backgroundHover =

@@ -4,8 +4,8 @@ import axios from "@/lib/axios";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/home/PageHeaderDashboard";
 import { BookOpen, PlayCircle, StickyNote, Video, Home } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import NavigationCard from "./components/NavigationCard";
 import FormattedDate from "@/constants/formattedDate";
 import ShimmerImage from "@/components/common/main/ShimmerImage";
@@ -31,8 +31,8 @@ interface LectureSessionDetail {
 }
 
 export default function DKMDetailLectureSessions() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();

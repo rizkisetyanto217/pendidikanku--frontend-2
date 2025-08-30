@@ -1,8 +1,8 @@
 // src/pages/website/PrivacyPolicy.tsx
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import WebsiteFooter from "../components/MasjidkuWebFooter";
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
 
@@ -31,8 +31,8 @@ const Section: React.FC<{
 type SectionItem = { id: string; title: string; content: React.ReactNode };
 
 export default function MasjidWebPrivacyPolicy() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const bgGradient = isDark
     ? `linear-gradient(180deg, ${theme.white1} 0%, ${theme.white2} 100%)`

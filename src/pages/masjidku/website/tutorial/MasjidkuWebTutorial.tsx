@@ -20,8 +20,8 @@ import {
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
 import WebsiteFooter from "@/pages/masjidku/website/components/MasjidkuWebFooter";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 /* ================= Utilities ================= */
 const FullBleed: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
@@ -47,8 +47,8 @@ const Section: React.FC<
 type RoleKey = "murid" | "guru" | "sekolah";
 
 export default function MasjidkuWebTutorial() {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const [role, setRole] = useState<RoleKey>("murid");
 

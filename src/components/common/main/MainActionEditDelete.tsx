@@ -1,8 +1,8 @@
 // src/components/common/ActionEditDelete.tsx
 
 import { Edit, Trash2 } from "lucide-react";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface ActionEditDeleteProps {
   onEdit?: () => void;
@@ -17,8 +17,8 @@ export default function ActionEditDelete({
   showEdit = true,
   showDelete = true,
 }: ActionEditDeleteProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
     <div className="flex items-center gap-2">

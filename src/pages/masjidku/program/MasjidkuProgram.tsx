@@ -1,13 +1,13 @@
 import PageHeaderUser from "@/components/common/home/PageHeaderUser";
 import { useNavigate } from "react-router-dom";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { Target, ListChecks, Wallet, CalendarCheck } from "lucide-react";
 
 export default function MasjidkuProgram() {
   const navigate = useNavigate();
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
     <>
@@ -144,37 +144,27 @@ export default function MasjidkuProgram() {
               style={{ color: theme.black1 }}
             >
               <div className="col-span-8">1) Setup & Onboarding Teknis</div>
-              <div className="col-span-4 text-right font-semibold">
-               300.000
-              </div>
+              <div className="col-span-4 text-right font-semibold">300.000</div>
 
               <div className="col-span-8">2) Desain & Slicing Halaman</div>
-              <div className="col-span-4 text-right font-semibold">
-               250.000
-              </div>
+              <div className="col-span-4 text-right font-semibold">250.000</div>
 
               <div className="col-span-8">3) Pelatihan Pengurus (online)</div>
-              <div className="col-span-4 text-right font-semibold">
-               150.000
-              </div>
+              <div className="col-span-4 text-right font-semibold">150.000</div>
 
               <div className="col-span-8">4) Produksi Konten Awal</div>
-              <div className="col-span-4 text-right font-semibold">
-               200.000
-              </div>
+              <div className="col-span-4 text-right font-semibold">200.000</div>
 
               <div className="col-span-8">
                 5) Dukungan Operasional (1–3 bulan)
               </div>
-              <div className="col-span-4 text-right font-semibold">
-               300.000
-              </div>
+              <div className="col-span-4 text-right font-semibold">300.000</div>
 
               <div className="col-span-8 opacity-80">
                 Opsional: Custom Domain / Tahun
               </div>
               <div className="col-span-4 text-right font-semibold opacity-80">
-               200.000
+                200.000
               </div>
 
               <div className="col-span-8 mt-2 font-semibold">
@@ -184,7 +174,7 @@ export default function MasjidkuProgram() {
                 className="col-span-4 mt-2 text-right font-bold"
                 style={{ color: theme.specialColor }}
               >
-               1.200.000
+                1.200.000
               </div>
             </div>
           </div>
@@ -205,29 +195,29 @@ export default function MasjidkuProgram() {
                 Implementasi 100 Masjid (Rp1.200.000 x 100)
               </div>
               <div className="col-span-4 text-right font-semibold">
-               120.000.000
+                120.000.000
               </div>
 
               <div className="col-span-8">
                 Pool Program (shared): Platform & Infra
               </div>
               <div className="col-span-4 text-right font-semibold">
-               10.000.000
+                10.000.000
               </div>
 
               <div className="col-span-8">Support, QA, & Koordinasi</div>
               <div className="col-span-4 text-right font-semibold">
-               5.000.000
+                5.000.000
               </div>
 
               <div className="col-span-8">Pelatihan & Materi</div>
               <div className="col-span-4 text-right font-semibold">
-               5.000.000
+                5.000.000
               </div>
 
               <div className="col-span-8">Cadangan/Risiko</div>
               <div className="col-span-4 text-right font-semibold">
-               5.000.000
+                5.000.000
               </div>
 
               <div className="col-span-8 mt-2 font-semibold">
@@ -237,7 +227,7 @@ export default function MasjidkuProgram() {
                 className="col-span-4 mt-2 text-right font-bold"
                 style={{ color: theme.specialColor }}
               >
-               145.000.000
+                145.000.000
               </div>
             </div>
 
@@ -253,8 +243,8 @@ export default function MasjidkuProgram() {
 
           {/* Timeline singkat */}
           <div
-            // className="rounded-lg ring-1 p-4"
-            // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
+          // className="rounded-lg ring-1 p-4"
+          // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
           >
             <div className="flex items-center gap-2 mb-2">
               <CalendarCheck size={16} style={{ color: theme.quaternary }} />

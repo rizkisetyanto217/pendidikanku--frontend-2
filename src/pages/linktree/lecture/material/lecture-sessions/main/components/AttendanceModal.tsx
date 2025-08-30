@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import axios from "@/lib/axios";
-import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
-import { colors } from "@/constants/colorsThema";
+import { pickTheme, ThemeName } from "@/constants/thema";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 interface AttendanceModalProps {
   show: boolean;
@@ -16,8 +16,8 @@ export default function AttendanceModal({
   sessionId,
   onSuccess,
 }: AttendanceModalProps) {
-  const { isDark } = useHtmlDarkMode();
-  const theme = isDark ? colors.dark : colors.light;
+  const { isDark, themeName } = useHtmlDarkMode();
+  const theme = pickTheme(themeName as ThemeName, isDark);
 
   const [attendanceChoice, setAttendanceChoice] = useState<string | null>(null);
   const [kajianInsight, setKajianInsight] = useState("");
