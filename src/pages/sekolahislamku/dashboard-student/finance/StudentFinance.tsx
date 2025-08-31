@@ -1,4 +1,3 @@
-// src/pages/sekolahislamku/finance/OrtuFinanceDetail.tsx
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -41,7 +40,39 @@ interface BillDetail {
 }
 
 /* =========================
-   Utils (format)
+   Date helpers (timezone-safe)
+========================= */
+// set jam ke 12:00 siang lokal supaya tidak geser hari saat toISOString()
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+
+const dateLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
+
+// Hijriah (Umm al-Qura)
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
+/* =========================
+   Currency
 ========================= */
 const formatIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", {
@@ -49,14 +80,6 @@ const formatIDR = (n: number) =>
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(n);
-
-const dateLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
 /* =========================
    Fake API (dummy)
@@ -360,6 +383,9 @@ export default function StudentFinance() {
     staleTime: 60_000,
   });
 
+  // TopBar: gunakan local-noon agar stabil & tampilkan Hijriah
+  const topbarGregorianISO = toLocalNoonISO(new Date());
+
   return (
     <div
       className="min-h-screen w-full"
@@ -368,8 +394,10 @@ export default function StudentFinance() {
       {/* Top Bar */}
       <ParentTopBar
         palette={palette}
-        gregorianDate={new Date().toISOString()}
+        gregorianDate={topbarGregorianISO}
+        hijriDate={hijriLong(topbarGregorianISO)}
         title="Pembayaran"
+        dateFmt={dateLong}
       />
 
       {/* Content + Sidebar */}

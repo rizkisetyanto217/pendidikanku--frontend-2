@@ -29,12 +29,25 @@ import ParentSidebar from "../components/home/ParentSideBar";
 import AddSchedule from "./dashboard/AddSchedule";
 import { useNavigate, useParams } from "react-router-dom";
 
-/* ================= Helpers ================ */
+/* ================= Date/Time Utils (timezone-safe) ================ */
+/** Jadikan Date pada pukul 12:00 waktu lokal (hindari crossing hari) */
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+/** ISO string aman (siang lokal) dari Date */
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+/** Normalisasi ISO apapun menjadi ISO siang lokal, menjaga tanggal lokal */
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+/** Start of day lokal untuk perbandingan range tanggal */
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
   return x;
 };
+/** Formatter pendek (gunakan ISO yang sudah dinormalisasi agar aman) */
 const fmtShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -42,7 +55,7 @@ const fmtShort = (iso?: string) =>
         month: "short",
       })
     : "-";
-
+/** Formatter panjang (gunakan ISO yang sudah dinormalisasi agar aman) */
 const fmtLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -52,6 +65,17 @@ const fmtLong = (iso?: string) =>
         year: "numeric",
       })
     : "";
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+    /* tambahkan helper di blok Date/Time Utils (tepat di bawah dateShort) */
 
 /* ================= Local Types (UI) ================ */
 type UIScheduleItem = {
@@ -75,8 +99,8 @@ type APIUpcomingClass = APITodayClass & {
 };
 
 type APITeacherHome = {
-  gregorianDate?: string;
-  hijriDate?: string;
+  gregorianDate?: string; // bisa 'YYYY-MM-DD' atau ISO
+  hijriDate?: string; // opsional: jika API sudah provide
   todayClasses?: APITodayClass[];
   upcomingClasses?: APIUpcomingClass[];
   announcements?: Announcement[];
@@ -95,13 +119,23 @@ export default function TeacherDashboard() {
     staleTime: 60_000,
   });
 
+  // 🔒 Normalisasi tanggal dari API ke "siang lokal" agar topbar & hijriah stabil
+  const normalizedGregorianISO =
+    normalizeISOToLocalNoon(data?.gregorianDate) ?? toLocalNoonISO(new Date());
+
   /* -------- Jadwal 3 HARI KE DEPAN (fallback: hari ini) -------- */
   const scheduleItemsNext3Days = useMemo<UIScheduleItem[]>(() => {
-    const upcoming = data?.upcomingClasses ?? [];
+    const upcomingRaw = data?.upcomingClasses ?? [];
 
-    const start = startOfDay(new Date());
+    // Normalisasi semua dateISO ke siang lokal sebelum dibandingkan
+    const upcoming = upcomingRaw.map((c) => ({
+      ...c,
+      dateISO: normalizeISOToLocalNoon(c.dateISO)!,
+    }));
+
+    const start = startOfDay(new Date()); // hari ini 00:00 lokal
     const end = startOfDay(new Date());
-    end.setDate(end.getDate() + 2); // +2 = total 3 hari
+    end.setDate(end.getDate() + 2); // +2 = total 3 hari (hari ini s/d lusa)
 
     const within3Days = upcoming.filter((c) => {
       if (!c.dateISO) return false;
@@ -112,11 +146,14 @@ export default function TeacherDashboard() {
     const src: (APIUpcomingClass | APITodayClass)[] =
       within3Days.length > 0 ? within3Days : (data?.todayClasses ?? []);
 
-    return src.map((c: any) => ({
-      time: c.time,
-      title: `${c.className} — ${c.subject}`,
-      room: c.dateISO ? `${fmtShort(c.dateISO)} • ${c.room ?? "-"}` : c.room,
-    }));
+    return src.map((c: any) => {
+      const datePart = c.dateISO ? fmtShort(c.dateISO) + " • " : "";
+      return {
+        time: c.time,
+        title: `${c.className} — ${c.subject}`,
+        room: c.dateISO ? `${datePart}${c.room ?? "-"}` : c.room,
+      };
+    });
   }, [data?.upcomingClasses, data?.todayClasses]);
 
   /* -------- Daftar Jadwal (mock terpisah untuk demo) -------- */
@@ -164,7 +201,6 @@ export default function TeacherDashboard() {
               : a
           )
         );
-        // TODO: await axios.put(`/api/u/announcements/${form.id}`, payload)
       } else {
         // ADD (sementara local)
         const id = `temp-${Date.now()}`;
@@ -178,7 +214,6 @@ export default function TeacherDashboard() {
           },
           ...prev,
         ]);
-        // TODO: await axios.post(`/api/u/announcements`, payload)
       }
 
       setAnnounceOpen(false);
@@ -271,9 +306,9 @@ export default function TeacherDashboard() {
       <ParentTopBar
         palette={palette}
         title="Dashboard Pengajar"
-        gregorianDate={data?.gregorianDate}
-        hijriDate={data?.hijriDate}
-        dateFmt={fmtLong}
+        gregorianDate={normalizedGregorianISO} // ✅ ISO “siang lokal”
+        hijriDate={hijriLong(normalizedGregorianISO)} // ✅ Umm al-Qura (stabil)
+        dateFmt={fmtLong} // ✅ formatter yang ada di file ini
       />
 
       {/* Modal: Tambah Jadwal */}
@@ -360,22 +395,12 @@ export default function TeacherDashboard() {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium">Pengumuman</h3>
-                {/* <Btn
-                  palette={palette}
-                  size="sm"
-                  onClick={() => {
-                    setAnnounceInitial(null);
-                    setAnnounceOpen(true);
-                  }}
-                >
-                  Tambah Pengumuman
-                </Btn> */}
               </div>
 
               <AnnouncementsList
                 palette={palette}
                 items={announcements}
-                dateFmt={fmtLong}
+                dateFmt={(iso) => fmtLong(normalizeISOToLocalNoon(iso))}
                 seeAllState={{ announcements }} // ⬅️ ini yang dibaca komponen di atas
                 seeAllPath="all-announcement-teacher"
                 getDetailHref={(a) =>

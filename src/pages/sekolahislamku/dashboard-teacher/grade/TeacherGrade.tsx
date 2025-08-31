@@ -31,6 +31,7 @@ import {
 import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
 import ModalGrading from "./components/ModalGrading";
+import ModalExportResult from "./components/ModalExportResult";
 
 /* ================= Types ================ */
 type Assignment = {
@@ -68,13 +69,18 @@ type GradingPayload = {
 /* ============ Fake API (ganti ke axios bila siap) ============ */
 async function fetchTeacherGrading(): Promise<GradingPayload> {
   const now = new Date();
-  const iso = now.toISOString();
+
+  // semua tanggal dibuat aman (siang lokal)
+  const iso = toLocalNoonISO(now);
+  const plusDays = (n: number) =>
+    toLocalNoonISO(new Date(now.getTime() + n * 864e5));
+
   const assignments: Assignment[] = [
     {
       id: "a1",
       title: "Evaluasi Wudhu",
       className: "TPA A",
-      dueDate: new Date(now.getTime() + 1 * 864e5).toISOString(),
+      dueDate: plusDays(1), // ✅
       submitted: 18,
       graded: 10,
       total: 22,
@@ -83,7 +89,7 @@ async function fetchTeacherGrading(): Promise<GradingPayload> {
       id: "a2",
       title: "Setoran Hafalan An-Naba 1–10",
       className: "TPA B",
-      dueDate: new Date(now.getTime() + 2 * 864e5).toISOString(),
+      dueDate: plusDays(2), // ✅
       submitted: 12,
       graded: 7,
       total: 20,
@@ -92,12 +98,13 @@ async function fetchTeacherGrading(): Promise<GradingPayload> {
       id: "a3",
       title: "Latihan Makhraj (ba-ta-tha)",
       className: "TPA A",
-      dueDate: new Date(now.getTime() + 3 * 864e5).toISOString(),
+      dueDate: plusDays(3), // ✅
       submitted: 5,
       graded: 0,
       total: 22,
     },
   ];
+
   const submissionsA1: Submission[] = [
     {
       id: "s1",
@@ -127,9 +134,10 @@ async function fetchTeacherGrading(): Promise<GradingPayload> {
     },
     { id: "b2", studentName: "Huda", status: "submitted", submittedAt: iso },
   ];
+
   return {
-    gregorianDate: iso,
-    hijriDate: "16 Muharram 1447 H",
+    gregorianDate: iso, // ✅ local-noon
+    hijriDate: hijriLong(iso), // ✅ konsisten Umm al-Qura
     classes: ["TPA A", "TPA B"],
     summary: {
       assignments: assignments.length,
@@ -145,7 +153,18 @@ async function fetchTeacherGrading(): Promise<GradingPayload> {
   };
 }
 
+
 /* ================= Helpers ================ */
+/* ================= Date helpers (timezone-safe) ================= */
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+
 const dateLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -164,7 +183,19 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
+/** Hijriah (Umm al-Qura) – selalu pakai ISO yang sudah local-noon */
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
+;
 
 /* =============== UI Components =============== */
 function StatCard({
@@ -394,6 +425,9 @@ export default function TeacherGrading() {
 
   const { slug } = useParams<{ slug: string }>();
 
+  // state modal export
+  const [exportOpen, setExportOpen] = useState(false);
+
   return (
     <div
       className="min-h-screen w-full"
@@ -402,9 +436,15 @@ export default function TeacherGrading() {
       <ParentTopBar
         palette={palette}
         title="Penilaian"
-        gregorianDate={data?.gregorianDate}
-        hijriDate={data?.hijriDate}
-        dateFmt={(iso) => dateLong(iso)}
+        gregorianDate={
+          normalizeISOToLocalNoon(data?.gregorianDate) ??
+          toLocalNoonISO(new Date())
+        }
+        hijriDate={hijriLong(
+          normalizeISOToLocalNoon(data?.gregorianDate) ??
+            toLocalNoonISO(new Date())
+        )}
+        dateFmt={dateLong}
       />
 
       {/* Modal Grading */}
@@ -421,6 +461,19 @@ export default function TeacherGrading() {
         onSubmit={(payload) => {
           alert(`Nilai disimpan: ${payload.id} = ${payload.score}`);
           // TODO: update state/API
+        }}
+      />
+
+      {/* modal export */}
+      <ModalExportResult
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        palette={palette}
+        defaultName={selected ? `rekap-${selected.title}` : "rekap-penilaian"}
+        onExport={(p) => {
+          // TODO: ganti dengan fungsi generate file (XLSX/CSV/PDF)
+          console.log("EXPORT PAYLOAD:", p);
+          setExportOpen(false);
         }}
       />
 
@@ -840,9 +893,10 @@ export default function TeacherGrading() {
                           Tandai Selesai
                         </Btn>
                         <Btn
+                          type="button"
                           palette={palette}
                           variant="outline"
-                          onClick={() => alert("Export hasil")}
+                          onClick={() => setExportOpen(true)}
                         >
                           <Download size={16} className="mr-2" />
                           Export Hasil
@@ -1169,10 +1223,11 @@ export default function TeacherGrading() {
                             Selesai
                           </Btn>
                           <Btn
+                            type="button"
                             palette={palette}
                             variant="outline"
                             className="flex-1"
-                            onClick={() => alert("Export hasil")}
+                            onClick={() => setExportOpen(true)}
                           >
                             Export
                           </Btn>

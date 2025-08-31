@@ -401,8 +401,9 @@ export default function StudentAbsence() {
 
               {/* Footer: kembali */}
               <div className="pt-6">
-                <Link to="/student/progress" className="block">
+                
                   <Btn
+                  onClick={() => navigate(-1)}
                     variant="outline"
                     size="sm"
                     palette={palette}
@@ -410,7 +411,7 @@ export default function StudentAbsence() {
                   >
                     <ArrowLeft className="mr-1" size={16} /> Kembali ke Detail
                   </Btn>
-                </Link>
+              
               </div>
             </SectionCard>
           </div>

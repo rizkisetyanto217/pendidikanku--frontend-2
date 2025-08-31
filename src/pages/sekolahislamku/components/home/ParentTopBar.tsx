@@ -65,18 +65,26 @@ const idIdFormat = (iso: string) =>
   }).format(new Date(iso));
 
 /** Hijri fallback (Umm al-Qura). Return "" bila tidak didukung browser */
+// ==== helpers ====
+/** Tanggal sipil: jam di-nolkan & di-UTC-kan agar stabil di semua zona */
+const toCivilUtcDate = (d: Date) =>
+  new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+
+/** Hijri (Umm al-Qura) stabil: selalu format di UTC & tanggal sipil */
 const formatHijriLocal = (d: Date) => {
   try {
     const fmt = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
       day: "numeric",
       month: "long",
       year: "numeric",
+      timeZone: "UTC",
     });
-    return `${fmt.format(d)} H`;
+    return `${fmt.format(toCivilUtcDate(d))} H`;
   } catch {
     return "";
   }
 };
+
 
 /* ===================== Nav Definitions (RELATIF) ===================== */
 const STUDENT_NAVS: NavItem[] = [

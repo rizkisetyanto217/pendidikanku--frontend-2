@@ -71,6 +71,7 @@ interface NoteLog {
 }
 
 interface FetchResult {
+  parentName: string;
   child: ChildDetail;
   stats: {
     hadirCount: number;
@@ -85,12 +86,56 @@ interface FetchResult {
   contacts: { teacherName: string; phone?: string; email?: string };
 }
 
-/* ===== Fake API ===== */
+/* ===== Date helpers (timezone-safe) ===== */
+// jadikan Date ke pukul 12:00 waktu lokal
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+
+// formatter tampilan (pakai ISO yang sudah “siang lokal”)
+const dateLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
+
+const dateShort = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "short",
+      })
+    : "-";
+
+// hijriah (Umm al-Qura)
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
+/* ===== Fake API (dibuat local-noon safe) ===== */
 async function fetchChildDetail(): Promise<FetchResult> {
-  const todayIso = new Date().toISOString();
-  const addDays = (n: number) => new Date(Date.now() - n * 864e5).toISOString();
+  const now = new Date();
+  const todayIso = toLocalNoonISO(now);
+  const minusDays = (n: number) =>
+    toLocalNoonISO(new Date(now.getTime() - n * 864e5));
 
   return {
+    parentName: "Bapak/Ibu",
     child: {
       id: "c1",
       name: "Ahmad",
@@ -119,23 +164,23 @@ async function fetchChildDetail(): Promise<FetchResult> {
     },
     attendanceHistory: [
       { date: todayIso, status: "hadir", mode: "onsite", time: "07:28" },
-      { date: addDays(1), status: "hadir", mode: "online", time: "07:35" },
-      { date: addDays(2), status: "izin" },
-      { date: addDays(3), status: "hadir", mode: "onsite", time: "07:31" },
-      { date: addDays(4), status: "sakit" },
-      { date: addDays(5), status: "hadir", mode: "onsite", time: "07:29" },
-      { date: addDays(6), status: "hadir", mode: "onsite", time: "07:33" },
+      { date: minusDays(1), status: "hadir", mode: "online", time: "07:35" },
+      { date: minusDays(2), status: "izin" },
+      { date: minusDays(3), status: "hadir", mode: "onsite", time: "07:31" },
+      { date: minusDays(4), status: "sakit" },
+      { date: minusDays(5), status: "hadir", mode: "onsite", time: "07:29" },
+      { date: minusDays(6), status: "hadir", mode: "onsite", time: "07:33" },
     ],
     notesHistory: [
       {
-        date: addDays(1),
+        date: minusDays(1),
         informasiUmum: "Latihan tajwid: mad thabi'i.",
         materiPersonal: "Muroja'ah Iqra 2 halaman 10–12",
         nilai: 90,
         pr: "Latihan bacaan mad pada Iqra 2 halaman 13–14",
       },
       {
-        date: addDays(3),
+        date: minusDays(3),
         informasiUmum: "Praktik adab di kelas.",
         penilaianPersonal:
           "Perlu diingatkan tidak bercanda saat teman membaca.",
@@ -150,21 +195,6 @@ async function fetchChildDetail(): Promise<FetchResult> {
   };
 }
 
-/* ===== Helpers ===== */
-const dateLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-const dateShort = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  });
-
 /* ===== Page ===== */
 export default function StudentProgress() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -178,6 +208,9 @@ export default function StudentProgress() {
 
   const child = data?.child;
 
+  // ISO untuk TopBar (local-noon)
+  const gregorianISO = toLocalNoonISO(new Date());
+
   return (
     <div
       className="min-h-screen w-full"
@@ -186,8 +219,10 @@ export default function StudentProgress() {
       {/* Top Bar */}
       <ParentTopBar
         palette={palette}
-        gregorianDate={new Date().toISOString()}
-        title="Kemajuan Murid"
+        title={data?.parentName}
+        gregorianDate={gregorianISO}
+        hijriDate={hijriLong(gregorianISO)}
+        dateFmt={dateLong}
       />
 
       {/* Content */}
@@ -216,7 +251,7 @@ export default function StudentProgress() {
                       </Badge>
                     </div>
                     <div className="text-sm" style={{ color: palette.silver2 }}>
-                      {dateLong(new Date().toISOString())}
+                      {dateLong(gregorianISO)}
                     </div>
                   </div>
                 </div>
@@ -454,7 +489,9 @@ export default function StudentProgress() {
                     }}
                   >
                     <div className="text-sm">
-                      <div className="font-medium">{dateShort(a.date)}</div>
+                      <div className="font-medium">
+                        {dateShort(normalizeISOToLocalNoon(a.date))}
+                      </div>
                       <div
                         className="text-xs"
                         style={{ color: palette.silver2 }}
@@ -533,7 +570,7 @@ export default function StudentProgress() {
                       className="text-xs mb-1"
                       style={{ color: palette.silver2 }}
                     >
-                      {dateLong(n.date)}
+                      {dateLong(normalizeISOToLocalNoon(n.date))}
                     </div>
                     <div className="space-y-1 text-sm">
                       <div>

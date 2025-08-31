@@ -175,6 +175,35 @@ const isoToInputDate = (iso: string) => (iso ? iso.slice(0, 10) : "");
 const inputDateToIsoUTC = (ymd: string) =>
   ymd ? new Date(`${ymd}T00:00:00.000Z`).toISOString() : "";
 
+/* ======== Timezone-safe date helpers (TopBar & display) ======== */
+// set ke 12:00 siang lokal untuk cegah geser hari
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+// tampilan panjang (Senin, 1 Januari 2025)
+const dateFmt = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
+// hijriah Umm al-Qura
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 /* ============ Small shared UI ============ */
 function Flash({
   palette,
@@ -343,23 +372,13 @@ async function fetchSchoolHome(): Promise<SchoolHome> {
   };
 }
 
-/* ============ Small helpers ============ */
+/* ============ Currency helper (dipakai card/tagihan) ============ */
 const formatIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(n);
-
-const dateFmt = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
 
 /* ============ Forms ============ */
 export type UpsertAnnouncementForm = {
@@ -698,8 +717,7 @@ export default function SchoolDashboard() {
   const statsQ = useLembagaStats();
   const todaySessionsQ = useTodaySessions();
   const announcementsQ = useAnnouncements();
-  const themesQ = useAnnouncementThemes(); // <-- tambahkan ini
-  // $1;
+  const themesQ = useAnnouncementThemes();
 
   // Add Theme modal state
   const [createThemeOpen, setCreateThemeOpen] = useState(false);
@@ -856,6 +874,9 @@ export default function SchoolDashboard() {
     return mockTodaySchedule;
   }, [todaySessionsQ.data]);
 
+  // TopBar date (stabil & konsisten): pakai local-noon sekarang
+  const topbarGregorianISO = toLocalNoonISO(new Date());
+
   return (
     <div
       className="min-h-screen w-full"
@@ -864,8 +885,8 @@ export default function SchoolDashboard() {
       <ParentTopBar
         palette={palette}
         title="Dashboard Sekolah"
-        gregorianDate={homeQ.data?.gregorianDate}
-        hijriDate={homeQ.data?.hijriDate}
+        gregorianDate={topbarGregorianISO}
+        hijriDate={hijriLong(topbarGregorianISO)}
         dateFmt={(iso) => dateFmt(iso)}
       />
 
@@ -935,7 +956,6 @@ export default function SchoolDashboard() {
                 )}
               </div>
 
-              {/* Keuangan */}
               {/* Keuangan */}
               <div className="md:col-span-1 lg:col-span-6 space-y-4 min-w-0">
                 <SectionCard palette={palette}>

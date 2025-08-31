@@ -49,23 +49,32 @@ export default function DetailAssignment() {
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
+
+
+
+
   const handleDelete = async () => {
     const title = data?.title ?? assignmentId;
     const res = await Swal.fire({
       title: "Hapus Tugas?",
       text: `Apakah Anda yakin ingin menghapus tugas "${title}"?`,
       icon: "warning",
+      iconColor: palette.warning1, // override spesifik (opsional)
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#aaa",
       confirmButtonText: "Ya, hapus!",
       cancelButtonText: "Batal",
     });
     if (!res.isConfirmed) return;
 
-    // TODO: panggil API delete dengan assignmentId
-    await Swal.fire("Terhapus!", "Tugas berhasil dihapus.", "success");
-    navigate(".."); // kembali ke /assignments
+    // TODO: panggil API delete
+    await Swal.fire({
+      title: "Terhapus!",
+      text: "Tugas berhasil dihapus.",
+      icon: "success",
+      iconColor: palette.success1,
+      confirmButtonText: "OK",
+    });
+    navigate("..");
   };
 
   const handleEditSubmit = (

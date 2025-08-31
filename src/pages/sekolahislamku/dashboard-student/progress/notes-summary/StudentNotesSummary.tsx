@@ -435,11 +435,11 @@ export default function StudentNotesSummary() {
 
               {/* Footer */}
               <div className="pt-6 flex items-center justify-between gap-3">
-                <Link to="/student/progress">
-                  <Btn variant="outline" palette={palette}>
+                
+                  <Btn onClick={() => navigate(-1)} variant="outline" palette={palette}>
                     <ArrowLeft size={16} className="mr-1" /> Kembali
                   </Btn>
-                </Link>
+        
               </div>
             </SectionCard>
           </div>

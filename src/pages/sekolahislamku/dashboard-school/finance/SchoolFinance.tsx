@@ -33,7 +33,60 @@ import Export from "./modal/Export";
 import Pembayaran from "./modal/Payment";
 import ParentSidebar from "../../components/home/ParentSideBar";
 
-/* ================= Types ================ */
+/* ================== Date helpers (timezone-safe) ================== */
+// Set ke 12:00 lokal agar aman dari pergeseran hari ketika di-string-kan ISO
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+
+// Untuk TopBar (panjang)
+const dateLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
+// Hijriah (Umm al-Qura) untuk TopBar
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
+/* ================= Currency & short date ================= */
+const idr = (n?: number) =>
+  n == null
+    ? "-"
+    : new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(n);
+
+// dipakai untuk kolom tabel/kartu (format singkat)
+const dateFmt = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
+/* ================= Types ================= */
 export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue";
 
 export interface InvoiceItem {
@@ -58,29 +111,14 @@ export interface PaymentItem {
   method?: string; // cash/transfer/virtual account
 }
 
-/* =============== Helpers =============== */
-const idr = (n?: number) =>
-  n == null
-    ? "-"
-    : new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        maximumFractionDigits: 0,
-      }).format(n);
-const dateFmt = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
-    : "-";
-
 /* =============== Main Page =============== */
 export default function SchoolFinance() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
+
+  // TopBar dates (stabil)
+  const gregorianISO = toLocalNoonISO(new Date());
 
   // state ModalTagihan
   const [openModal, setOpenModal] = useState(false);
@@ -212,7 +250,14 @@ export default function SchoolFinance() {
         }))}
       />
 
-      <ParentTopBar palette={palette} title="Keuangan" />
+      <ParentTopBar
+        palette={palette}
+        title="Keuangan"
+        gregorianDate={gregorianISO}
+        hijriDate={hijriLong(gregorianISO)}
+        dateFmt={dateLong}
+      />
+
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         {/* Sidebar kiri */}
         <ParentSidebar palette={palette} className="hidden lg:block" />
@@ -278,10 +323,8 @@ export default function SchoolFinance() {
               </Btn>
             </div>
 
-            {/* Actions: mobile (ringkas) */}
-
+            {/* Actions: mobile */}
             <div className="md:hidden flex flex-wrap gap-2">
-              {/* Buat Tagihan */}
               <Btn
                 onClick={() => setOpenModal(true)}
                 type="button"
@@ -293,8 +336,6 @@ export default function SchoolFinance() {
                 <Plus size={16} />
                 <span>Tagihan</span>
               </Btn>
-
-              {/* Rekam Pembayaran */}
               <Btn
                 palette={palette}
                 size="sm"
@@ -305,8 +346,6 @@ export default function SchoolFinance() {
                 <CreditCard size={16} />
                 <span>Pembayaran</span>
               </Btn>
-
-              {/* Export */}
               <Btn
                 onClick={() => setOpenExport(true)}
                 palette={palette}
@@ -625,93 +664,96 @@ export default function SchoolFinance() {
                     Belum ada tagihan.
                   </li>
                 )}
-                {invoices.map((inv) => (
-                  <li key={inv.id} className="py-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div
-                          className="font-medium"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {inv.title}
-                        </div>
-                        <div
-                          className="text-xs"
-                          style={{ color: palette.secondary }}
-                        >
-                          {inv.type ?? "-"} • {inv.class_name ?? "-"}
-                        </div>
-                        <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                          <div>
-                            <div
-                              className="text-xs"
-                              style={{ color: palette.secondary }}
-                            >
-                              Jatuh Tempo
-                            </div>
-                            <div style={{ color: palette.quaternary }}>
-                              {dateFmt(inv.due_date)}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div
-                              className="text-xs"
-                              style={{ color: palette.secondary }}
-                            >
-                              Nominal
-                            </div>
-                            <div
-                              className="font-medium"
-                              style={{ color: palette.quaternary }}
-                            >
-                              {idr(inv.amount)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-2">
-                          {inv.status === "paid" && (
-                            <Badge variant="success" palette={palette}>
-                              Lunas
-                            </Badge>
-                          )}
-                          {inv.status === "partial" && (
-                            <Badge variant="info" palette={palette}>
-                              Sebagian
-                            </Badge>
-                          )}
-                          {inv.status === "unpaid" && (
-                            <Badge variant="outline" palette={palette}>
-                              Belum Bayar
-                            </Badge>
-                          )}
-                          {inv.status === "overdue" && (
-                            <Badge variant="warning" palette={palette}>
-                              Terlambat
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                        <NavLink
-                          to={`/sekolah/keuangan/tagihan/${inv.id}`}
-                          className="underline text-sm"
-                          style={{ color: palette.primary }}
-                        >
-                          Detail
-                        </NavLink>
-                        {inv.status !== "paid" && (
-                          <Btn
-                            size="sm"
-                            palette={palette}
-                            onClick={() => markPaid.mutate({ id: inv.id })}
+                {invoices.map((inv) => {
+                  const due = normalizeISOToLocalNoon(inv.due_date);
+                  return (
+                    <li key={inv.id} className="py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div
+                            className="font-medium"
+                            style={{ color: palette.quaternary }}
                           >
-                            Tandai Lunas
-                          </Btn>
-                        )}
+                            {inv.title}
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: palette.secondary }}
+                          >
+                            {inv.type ?? "-"} • {inv.class_name ?? "-"}
+                          </div>
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <div
+                                className="text-xs"
+                                style={{ color: palette.secondary }}
+                              >
+                                Jatuh Tempo
+                              </div>
+                              <div style={{ color: palette.quaternary }}>
+                                {dateFmt(due)}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div
+                                className="text-xs"
+                                style={{ color: palette.secondary }}
+                              >
+                                Nominal
+                              </div>
+                              <div
+                                className="font-medium"
+                                style={{ color: palette.quaternary }}
+                              >
+                                {idr(inv.amount)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            {inv.status === "paid" && (
+                              <Badge variant="success" palette={palette}>
+                                Lunas
+                              </Badge>
+                            )}
+                            {inv.status === "partial" && (
+                              <Badge variant="info" palette={palette}>
+                                Sebagian
+                              </Badge>
+                            )}
+                            {inv.status === "unpaid" && (
+                              <Badge variant="outline" palette={palette}>
+                                Belum Bayar
+                              </Badge>
+                            )}
+                            {inv.status === "overdue" && (
+                              <Badge variant="warning" palette={palette}>
+                                Terlambat
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <NavLink
+                            to={`/sekolah/keuangan/tagihan/${inv.id}`}
+                            className="underline text-sm"
+                            style={{ color: palette.primary }}
+                          >
+                            Detail
+                          </NavLink>
+                          {inv.status !== "paid" && (
+                            <Btn
+                              size="sm"
+                              palette={palette}
+                              onClick={() => markPaid.mutate({ id: inv.id })}
+                            >
+                              Tandai Lunas
+                            </Btn>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
 
               {/* Desktop: table */}
@@ -773,90 +815,97 @@ export default function SchoolFinance() {
                       </tr>
                     )}
 
-                    {invoices.map((inv) => (
-                      <tr
-                        key={inv.id}
-                        className="border-t"
-                        style={{ borderColor: palette.white3 }}
-                      >
-                        <td className="py-3 align-top">
-                          <div
-                            className="font-medium"
+                    {invoices.map((inv) => {
+                      const due = normalizeISOToLocalNoon(inv.due_date);
+                      return (
+                        <tr
+                          key={inv.id}
+                          className="border-t"
+                          style={{ borderColor: palette.white3 }}
+                        >
+                          <td className="py-3 align-top">
+                            <div
+                              className="font-medium"
+                              style={{ color: palette.quaternary }}
+                            >
+                              {inv.title}
+                            </div>
+                            <div
+                              className="text-xs"
+                              style={{ color: palette.secondary }}
+                            >
+                              {inv.type ?? "-"}
+                            </div>
+                          </td>
+                          <td
+                            className="py-3 align-top"
                             style={{ color: palette.quaternary }}
                           >
-                            {inv.title}
-                          </div>
-                          <div
-                            className="text-xs"
-                            style={{ color: palette.secondary }}
+                            {inv.student_name ?? "-"}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.primary }}
                           >
-                            {inv.type ?? "-"}
-                          </div>
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {inv.student_name ?? "-"}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.primary }}
-                        >
-                          {inv.class_name ?? "-"}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {dateFmt(inv.due_date)}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {idr(inv.amount)}
-                        </td>
-                        <td className="py-3 align-top">
-                          {inv.status === "paid" && (
-                            <Badge variant="success" palette={palette}>
-                              Lunas
-                            </Badge>
-                          )}
-                          {inv.status === "partial" && (
-                            <Badge variant="info" palette={palette}>
-                              Sebagian
-                            </Badge>
-                          )}
-                          {inv.status === "unpaid" && (
-                            <Badge variant="outline" palette={palette}>
-                              Belum Bayar
-                            </Badge>
-                          )}
-                          {inv.status === "overdue" && (
-                            <Badge variant="warning" palette={palette}>
-                              Terlambat
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="py-3 align-top">
-                          <div className="flex items-center gap-2 justify-end">
-                            <NavLink to={`/sekolah/keuangan/tagihan/${inv.id}`}>
-                              Detail
-                            </NavLink>
-                            {inv.status !== "paid" && (
-                              <Btn
-                                size="sm"
-                                palette={palette}
-                                onClick={() => markPaid.mutate({ id: inv.id })}
-                              >
-                                Tandai Lunas
-                              </Btn>
+                            {inv.class_name ?? "-"}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {dateFmt(due)}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {idr(inv.amount)}
+                          </td>
+                          <td className="py-3 align-top">
+                            {inv.status === "paid" && (
+                              <Badge variant="success" palette={palette}>
+                                Lunas
+                              </Badge>
                             )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                            {inv.status === "partial" && (
+                              <Badge variant="info" palette={palette}>
+                                Sebagian
+                              </Badge>
+                            )}
+                            {inv.status === "unpaid" && (
+                              <Badge variant="outline" palette={palette}>
+                                Belum Bayar
+                              </Badge>
+                            )}
+                            {inv.status === "overdue" && (
+                              <Badge variant="warning" palette={palette}>
+                                Terlambat
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-3 align-top">
+                            <div className="flex items-center gap-2 justify-end">
+                              <NavLink
+                                to={`/sekolah/keuangan/tagihan/${inv.id}`}
+                              >
+                                Detail
+                              </NavLink>
+                              {inv.status !== "paid" && (
+                                <Btn
+                                  size="sm"
+                                  palette={palette}
+                                  onClick={() =>
+                                    markPaid.mutate({ id: inv.id })
+                                  }
+                                >
+                                  Tandai Lunas
+                                </Btn>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -917,32 +966,35 @@ export default function SchoolFinance() {
                     Belum ada pembayaran.
                   </li>
                 )}
-                {payments.map((p) => (
-                  <li key={p.id} className="py-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div
-                          className="font-medium"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {idr(p.amount)}
-                        </div>
-                        <div
-                          className="text-xs"
-                          style={{ color: palette.secondary }}
-                        >
-                          {p.method ?? "-"} • {p.invoice_title ?? "-"}
-                        </div>
-                        <div
-                          className="mt-2 text-sm"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {dateFmt(p.date)} — {p.payer_name ?? "-"}
+                {payments.map((p) => {
+                  const dt = normalizeISOToLocalNoon(p.date);
+                  return (
+                    <li key={p.id} className="py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div
+                            className="font-medium"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {idr(p.amount)}
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: palette.secondary }}
+                          >
+                            {p.method ?? "-"} • {p.invoice_title ?? "-"}
+                          </div>
+                          <div
+                            className="mt-2 text-sm"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {dateFmt(dt)} — {p.payer_name ?? "-"}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
 
               {/* Desktop: table */}
@@ -1002,44 +1054,47 @@ export default function SchoolFinance() {
                       </tr>
                     )}
 
-                    {payments.map((p) => (
-                      <tr
-                        key={p.id}
-                        className="border-t"
-                        style={{ borderColor: palette.white3 }}
-                      >
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
+                    {payments.map((p) => {
+                      const dt = normalizeISOToLocalNoon(p.date);
+                      return (
+                        <tr
+                          key={p.id}
+                          className="border-t"
+                          style={{ borderColor: palette.white3 }}
                         >
-                          {dateFmt(p.date)}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {p.payer_name ?? "-"}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.primary }}
-                        >
-                          {p.invoice_title ?? "-"}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {p.method ?? "-"}
-                        </td>
-                        <td
-                          className="py-3 align-top"
-                          style={{ color: palette.quaternary }}
-                        >
-                          {idr(p.amount)}
-                        </td>
-                      </tr>
-                    ))}
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {dateFmt(dt)}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {p.payer_name ?? "-"}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.primary }}
+                          >
+                            {p.invoice_title ?? "-"}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {p.method ?? "-"}
+                          </td>
+                          <td
+                            className="py-3 align-top"
+                            style={{ color: palette.quaternary }}
+                          >
+                            {idr(p.amount)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1064,11 +1119,10 @@ export default function SchoolFinance() {
           )}
 
           {/* FAB mobile */}
-          {/* FAB mobile */}
           <div className="md:hidden fixed right-4 bottom-20">
             <button
               type="button"
-              onClick={() => setOpenModal(true)} // ✅ buka modal
+              onClick={() => setOpenModal(true)}
               className="h-12 w-12 rounded-full grid place-items-center shadow-lg"
               style={{
                 background: palette.primary,

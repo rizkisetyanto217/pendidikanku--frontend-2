@@ -18,7 +18,7 @@ export type EditAssignmentPayload = {
 type Props = {
   open: boolean;
   onClose: () => void;
-  palette: Palette | typeof colors.light;
+  palette: Palette ;
   defaultValues?: {
     title?: string;
     kelas?: string;

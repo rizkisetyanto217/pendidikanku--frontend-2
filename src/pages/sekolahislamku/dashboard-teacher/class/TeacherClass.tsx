@@ -97,6 +97,17 @@ type ClassDetail = {
 };
 
 /* ================= Helpers ================ */
+/* ================= Helpers ================ */
+// ——— Local-noon safety core ———
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+
 const startOfDay = (d = new Date()) => {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -107,6 +118,8 @@ const addDays = (d: Date, n: number) => {
   x.setDate(x.getDate() + n);
   return x;
 };
+
+// ——— Display helpers (gunakan ISO yang sudah dinormalisasi) ———
 const dateLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -116,6 +129,7 @@ const dateLong = (iso?: string) =>
         day: "numeric",
       })
     : "-";
+
 const dateShort = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -123,8 +137,18 @@ const dateShort = (iso?: string) =>
         month: "short",
       })
     : "-";
-const percent = (a: number, b: number) =>
-  b > 0 ? Math.round((a / b) * 100) : 0;
+
+// ——— Hijriah (Umm al-Qura) ———
+const hijriLong = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+const percent = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
+
 
 /* ============ Fake API (ganti dgn axios) ============ */
 async function fetchClassDetail(classId: string): Promise<ClassDetail> {
@@ -411,10 +435,16 @@ export default function TeacherClass() {
     >
       <ParentTopBar
         palette={palette}
-        title={`Kelas ${data?.name ?? ""}`}
-        gregorianDate={data?.gregorianDate}
-        hijriDate={data?.hijriDate}
-        dateFmt={(iso) => dateLong(iso)}
+        title="Detail Kelas"
+        gregorianDate={
+          normalizeISOToLocalNoon(data?.gregorianDate) ??
+          toLocalNoonISO(new Date())
+        }
+        hijriDate={hijriLong(
+          normalizeISOToLocalNoon(data?.gregorianDate) ??
+            toLocalNoonISO(new Date())
+        )}
+        dateFmt={dateLong}
       />
 
       {/* ===== Modals ===== */}
@@ -466,12 +496,15 @@ export default function TeacherClass() {
             {/* Banner info kelas aktif — total siswa sinkron dg tabel */}
             <div
               className="rounded-xl p-3 md:p-4"
-              style={{ background: palette.primary2, color: palette.primary }}
+              style={{ background: palette.white1, color: palette.white1 }}
             >
-              <div className="text-sm" style={{ color: palette.primary }}>
+              <div className="text-sm" style={{ color: palette.black2 }}>
                 Anda sedang melihat:
               </div>
-              <div className="font-semibold text-base md:text-lg">
+              <div
+                className="font-semibold text-base md:text-lg"
+                style={{ color: palette.black2 }}
+              >
                 Kelas {data?.name ?? "-"}
                 {data?.room ? (
                   <span

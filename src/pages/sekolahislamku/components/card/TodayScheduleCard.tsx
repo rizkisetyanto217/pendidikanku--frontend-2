@@ -86,6 +86,7 @@ export default function TodayScheduleCard<TState = unknown>({
             variant="ghost"
             palette={palette}
             onClick={onAdd}
+           
             aria-label={addLabel}
           >
             {addLabel}
@@ -138,7 +139,12 @@ export default function TodayScheduleCard<TState = unknown>({
         <div className="pt-3">
           <Link to={seeAllPath} state={finalState}>
             <Link to={seeAllPath} state={finalState}>
-              <Btn variant="ghost" className="w-full" palette={palette}>
+              <Btn
+                variant="ghost"
+                className="w-full"
+                palette={palette}
+                style={{ background: palette.white2, color: palette.black1, borderColor: palette.silver1 }}
+              >
                 Lihat Jadwal <ChevronRight className="ml-1" size={16} />
               </Btn>
             </Link>

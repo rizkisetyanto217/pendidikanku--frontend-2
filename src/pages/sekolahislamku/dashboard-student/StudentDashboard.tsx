@@ -57,12 +57,50 @@ interface TodaySummary {
   pr?: string;
 }
 
+/* ---------- Date helpers (timezone-safe) ---------- */
+// jadikan Date ke pukul 12:00 waktu lokal
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const normalizeISOToLocalNoon = (iso?: string) =>
+  iso ? toLocalNoonISO(new Date(iso)) : undefined;
+
+// formatter tampilan (pakai ISO yang sudah “siang lokal”)
+const dateFmt = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
+
+// hijriah (Umm al-Qura)
+const hijriLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 /* ---------- Fake API ---------- */
 async function fetchParentHome() {
+  const now = new Date();
+  const todayISO = toLocalNoonISO(now); // ✅ “siang lokal”
+  const inDays = (n: number) => toLocalNoonISO(new Date(now.getTime() + n * 864e5));
+
   return Promise.resolve({
     parentName: "Bapak/Ibu",
-    hijriDate: "16 Muharram 1447 H",
-    gregorianDate: new Date().toISOString(),
+    // hijri dari server opsional — kita tetap hitung sendiri agar konsisten
+    hijriDate: hijriLong(todayISO),
+    gregorianDate: todayISO,
     child: {
       id: "c1",
       name: "Ahmad",
@@ -87,7 +125,7 @@ async function fetchParentHome() {
       {
         id: "a1",
         title: "Ujian Tahfiz Pekan Depan",
-        date: new Date().toISOString(),
+        date: todayISO, // ✅
         body: "Mohon dampingi anak dalam muraja'ah surat Al-Balad s.d. Asy-Syams.",
         type: "info",
       },
@@ -97,9 +135,7 @@ async function fetchParentHome() {
         id: "b1",
         title: "SPP Agustus 2025",
         amount: 150000,
-        dueDate: new Date(
-          new Date().setDate(new Date().getDate() + 5)
-        ).toISOString(),
+        dueDate: inDays(5), // ✅
         status: "unpaid",
       },
     ] as BillItem[],
@@ -107,12 +143,12 @@ async function fetchParentHome() {
       {
         class_attendance_sessions_title: "Tahsin Kelas",
         class_attendance_sessions_general_info: "Aula 1",
-        class_attendance_sessions_date: new Date().toISOString(),
+        class_attendance_sessions_date: todayISO, // ✅
       },
       {
         class_attendance_sessions_title: "Hafalan Juz 30",
         class_attendance_sessions_general_info: "R. Tahfiz",
-        class_attendance_sessions_date: new Date().toISOString(),
+        class_attendance_sessions_date: todayISO, // ✅
       },
     ],
   });
@@ -125,13 +161,6 @@ const formatIDR = (n: number) =>
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(n);
-const dateFmt = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
 /* ---------- Page ---------- */
 export default function StudentDashboard() {
@@ -144,9 +173,21 @@ export default function StudentDashboard() {
     staleTime: 60_000,
   });
 
-  const todayScheduleItems: TodayScheduleItem[] = data?.sessionsToday?.length
-    ? mapSessionsToTodaySchedule(data.sessionsToday)
-    : mockTodaySchedule;
+  // normalisasi dulu (jaga-jaga kalau nanti dari API nyata)
+  const gregorianISO =
+    normalizeISOToLocalNoon(data?.gregorianDate) ?? toLocalNoonISO(new Date());
+
+  const todayScheduleItems: TodayScheduleItem[] =
+    data?.sessionsToday?.length
+      ? mapSessionsToTodaySchedule(
+          // kalau mapper butuh ISO, pastikan “siang lokal”
+          data.sessionsToday.map((s) => ({
+            ...s,
+            class_attendance_sessions_date:
+              normalizeISOToLocalNoon(s.class_attendance_sessions_date)!,
+          }))
+        )
+      : mockTodaySchedule;
 
   return (
     <div
@@ -156,8 +197,8 @@ export default function StudentDashboard() {
       <ParentTopBar
         palette={palette}
         title={data?.parentName}
-        hijriDate={data?.hijriDate}
-        gregorianDate={data?.gregorianDate}
+        gregorianDate={gregorianISO}              
+        hijriDate={hijriLong(gregorianISO)}        
         dateFmt={dateFmt}
       />
 
@@ -185,7 +226,7 @@ export default function StudentDashboard() {
                 <BillsSectionCard
                   palette={palette}
                   bills={data?.bills ?? []}
-                  dateFmt={dateFmt}
+                  dateFmt={(iso) => dateFmt(normalizeISOToLocalNoon(iso))}
                   formatIDR={formatIDR}
                   seeAllPath="finnance-list"
                   getPayHref={(b) => `tagihan/${b.id}`}
@@ -206,7 +247,7 @@ export default function StudentDashboard() {
               <AnnouncementsList
                 palette={palette}
                 items={data?.announcements ?? []}
-                dateFmt={dateFmt}
+                dateFmt={(iso) => dateFmt(normalizeISOToLocalNoon(iso))}
                 seeAllPath="announcements"
                 seeAllState={{
                   items: data?.announcements,

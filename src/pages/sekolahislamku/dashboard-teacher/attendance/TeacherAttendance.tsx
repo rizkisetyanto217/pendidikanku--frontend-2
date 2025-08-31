@@ -52,6 +52,53 @@ type AttendancePayload = {
   students: StudentAttendance[];
 };
 
+/* ================= Date/Time Utils (timezone-safe) ================= */
+/** Jadikan Date pada pukul 12:00 waktu lokal (hindari crossing hari) */
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+/** ISO string yang aman (siang lokal) dari Date */
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+/** Normalisasi ISO string apapun menjadi ISO siang lokal (tetap tanggal yang sama secara lokal) */
+const normalizeISOToLocalNoon = (iso: string) => toLocalNoonISO(new Date(iso));
+/** Parse nilai input[type="date"] -> ISO siang lokal ("YYYY-MM-DD" -> "YYYY-MM-DDT12:00:00.xxxZ") */
+const parseDateInputToISO = (value: string) =>
+  new Date(`${value}T12:00:00`).toISOString();
+/** Untuk value input[type="date"] dari ISO: selalu tampilkan YYYY-MM-DD sesuai waktu lokal */
+const toDateInputValue = (iso: string) => {
+  const d = new Date(iso);
+  // geser ke "waktu lokal" agar slice(0,10) tidak kena offset
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+};
+/** Format tanggal panjang (Gregorian, lokal) */
+const dateLong = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+/** Format tanggal pendek (Gregorian, lokal) */
+const dateShort = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+  });
+/** YYYY-MM-DD untuk nama file (aman lokal) */
+/* tambahkan helper di blok Date/Time Utils (tepat di bawah dateShort) */
+const hijriLong = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+const dateForFilename = (iso: string) => toDateInputValue(iso);
+
 /* ================= Helpers/Constants ================= */
 const STATUS_LABEL: Record<AttendanceStatus, string> = {
   hadir: "Hadir",
@@ -70,20 +117,6 @@ const STATUS_BADGE: Record<
   sakit: "warning",
   alpa: "destructive",
 };
-
-const dateLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
-const dateShort = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-  });
 
 const percent = (a: number, b: number) =>
   b > 0 ? Math.round((a / b) * 100) : 0;
@@ -208,13 +241,7 @@ async function fetchTeacherAttendance({
     { total: 0, hadir: 0, online: 0, izin: 0, sakit: 0, alpa: 0 }
   );
 
-  return {
-    dateISO,
-    classes: CLASSES,
-    currentClass,
-    stats,
-    students,
-  };
+  return { dateISO, classes: CLASSES, currentClass, stats, students };
 }
 
 /* ================= Reusable row (mobile) ================= */
@@ -278,7 +305,12 @@ export default function TeacherAttendance() {
   const navigate = useNavigate();
   const { slug } = useParams();
 
-  const qDate = sp.get("date") ?? new Date().toISOString();
+  // Normalisasi qDate agar konsisten di siang lokal
+  const rawSpDate = sp.get("date");
+  const qDate = rawSpDate
+    ? normalizeISOToLocalNoon(rawSpDate)
+    : toLocalNoonISO(new Date());
+
   const classId = sp.get("class") ?? undefined;
   const status: AttendanceStatusFilter = toStatusFilter(sp.get("status"));
   const mode: AttendanceModeFilter = toModeFilter(sp.get("mode"));
@@ -341,18 +373,14 @@ export default function TeacherAttendance() {
       mode: "onsite" as AttendanceMode,
       time: r.time ?? "07:30",
     }));
-    download(
-      `rekap-${s.currentClass.id}-${new Date(qDate).toISOString().slice(0, 10)}-all-hadir.csv`,
-      toCSV(newRows)
-    );
+    const filename = `rekap-${s.currentClass.id}-${dateForFilename(qDate)}-all-hadir.csv`;
+    download(filename, toCSV(newRows));
     alert("Contoh aksi: semua ditandai hadir dan file CSV diunduh.");
   }, [s?.currentClass, filtered, qDate]);
 
   const exportCSV = useCallback(() => {
     if (!s?.currentClass) return;
-    const name = `rekap-${s.currentClass.id}-${new Date(qDate)
-      .toISOString()
-      .slice(0, 10)}.csv`;
+    const name = `rekap-${s.currentClass.id}-${dateForFilename(qDate)}.csv`;
     download(name, toCSV(filtered));
   }, [filtered, s?.currentClass, qDate]);
 
@@ -364,7 +392,8 @@ export default function TeacherAttendance() {
       <ParentTopBar
         palette={palette}
         title="Kehadiran"
-        gregorianDate={qDate}
+        gregorianDate={qDate} // sudah local-noon safe
+        hijriDate={hijriLong(qDate)} // ⬅️ paksa pakai Umm al-Qura, anti-geser
         dateFmt={(iso) => dateLong(iso)}
       />
 
@@ -506,10 +535,10 @@ export default function TeacherAttendance() {
                   </label>
                   <input
                     type="date"
-                    value={new Date(qDate).toISOString().slice(0, 10)}
+                    value={toDateInputValue(qDate)}
                     onChange={(e) => {
-                      const d = new Date(e.target.value);
-                      handleChange("date", d.toISOString());
+                      const iso = parseDateInputToISO(e.target.value);
+                      handleChange("date", iso);
                     }}
                     className="rounded-lg border px-3 py-2 bg-transparent"
                     style={{ borderColor: palette.silver1 }}

@@ -608,7 +608,7 @@ export default function AppRoutes() {
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
         <Route path="jadwal" element={<TeacherSchedule />} />
         <Route path="assignments" element={<AllAssignment />} />
-
+        <Route path="assignments/:id" element={<DetailStudent />} />
         <Route path="kelas/:id/score" element={<TaskScore />} />
         <Route
           path="attendance-management"
@@ -650,7 +650,7 @@ export default function AppRoutes() {
           <Route index element={<TeacherClass />} />
           <Route path=":id/material/:materialId" element={<DetailMateri />} />
           <Route path=":id/assignment/:id" element={<DetailAssignment />} />
-          <Route path=":id/student/:studentId" element={<DetailStudent />} />
+
           <Route
             path=":id/student/:studentId/score"
             element={<StudentScore />}
@@ -697,7 +697,7 @@ export default function AppRoutes() {
         </Route>
       </Route>
       {/* ==== 404 ==== */}
-      <Route path="*" element={<Test />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

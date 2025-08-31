@@ -13,24 +13,22 @@ export const Tabs = ({ tabs, value, onChange }: TabsProps) => {
   const theme = pickTheme(themeName as ThemeName, isDark);
 
   return (
-    <div
-      className="flex rounded-md overflow-hidden"
-      style={{
-        border: `1px solid ${theme.silver1}`,
-        backgroundColor: theme.white2,
-      }}
-    >
+    <div className="flex gap-1">
       {tabs.map((tab) => {
         const isActive = value === tab.value;
+
         return (
           <button
             key={tab.value}
             onClick={() => onChange(tab.value)}
-            className="flex-1 px-4 py-2 text-sm font-medium transition-all"
+            className="flex-1 px-4 py-2 text-sm font-medium transition-all rounded-md"
             style={{
               backgroundColor: isActive ? theme.white1 : theme.white2,
               color: isActive ? theme.black1 : theme.silver2,
-              borderBottom: isActive ? `2px solid ${theme.primary}` : "none",
+              border: `1px solid ${theme.silver1}`,
+              borderBottom: isActive
+                ? `2px solid ${theme.primary}`
+                : `1px solid ${theme.silver1}`,
             }}
           >
             {tab.label}
