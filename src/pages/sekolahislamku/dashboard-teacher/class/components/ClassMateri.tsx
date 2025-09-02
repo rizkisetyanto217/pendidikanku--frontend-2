@@ -30,6 +30,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import ModalAddClassMateri from "./ModalAddClassMateri";
+import ModalEditClassMateri, { EditClassMaterialInput } from "./ModalEditClassMateri";
 
 /* ====== Helpers tanggal ====== */
 const atLocalNoon = (d: Date) => {
@@ -276,43 +277,147 @@ export default function ClassMateri() {
     a.remove();
   };
   const [openModal, setOpenModal] = useState(false);
-  const handleAddMateri = (payload: any) => {
-    console.log("Materi baru:", payload);
-    // TODO: simpan ke backend
+  // ... di atas sudah ada: const qc = useQueryClient();
+
+  const handleAddMateri = async (payload: any) => {
+    try {
+      // Normalisasi payload minimal
+      const nowISO = new Date().toISOString();
+      const newItem: ClassMaterial = {
+        id: `m-${Date.now()}`, // id dummy unik
+        title: payload?.title ?? "Materi tanpa judul",
+        description: payload?.description ?? "",
+        type: (payload?.type as MaterialType) ?? "pdf",
+        createdAt: nowISO,
+        updatedAt: undefined,
+        attachments: Array.isArray(payload?.attachments)
+          ? payload.attachments
+          : payload?.attachment
+            ? [payload.attachment]
+            : [],
+        author: payload?.author ?? cls?.homeroom ?? "Guru",
+      };
+
+      // 1) Optimistic update: sisipkan ke list materi kelas aktif
+      qc.setQueryData<ClassMaterial[]>(QK.MATERIALS(id), (old = []) => [
+        newItem,
+        ...old,
+      ]);
+
+      // 2) (Opsional) Update count materi di list kelas
+      qc.setQueryData<TeacherClassSummary[]>(QK.CLASSES, (old = []) =>
+        old.map((c) =>
+          c.id === id
+            ? { ...c, materialsCount: (c.materialsCount ?? 0) + 1 }
+            : c
+        )
+      );
+
+      // 3) Tutup modal + toast sukses bertema
+      setOpenModal(false);
+      await Swal.fire({
+        title: "Materi ditambahkan",
+        text: "Materi baru berhasil ditambahkan.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+        background: palette.white1,
+        color: palette.black1,
+      });
+
+      // Catatan:
+      // Tidak perlu invalidateQuery karena kita belum pakai API.
+      // Kalau nanti sudah ada API, tinggal panggil mutate + invalidate.
+    } catch (e) {
+      await Swal.fire({
+        title: "Gagal menambahkan",
+        text: "Terjadi kesalahan saat menambahkan materi.",
+        icon: "error",
+        background: palette.white1,
+        color: palette.black1,
+        confirmButtonColor: (palette as any).destructive ?? "#ef4444",
+      });
+    }
   };
-  // ...
 
   // state dekete
-const handleDelete = async (m: ClassMaterial) => {
-  const res = await Swal.fire({
-    title: "Hapus materi?",
-    text: `"${m.title}" akan dihapus. Tindakan ini tidak bisa dibatalkan.`,
-    icon: "warning",
-    showCancelButton: true,
-    reverseButtons: true,
-    confirmButtonText: "Ya, hapus",
-    cancelButtonText: "Batal",
-    // ⬇️ tema dari palette
-    background: palette.white1,
-    color: palette.black1,
-    confirmButtonColor: (palette as any).destructive ?? "#ef4444", // fallback merah
-    cancelButtonColor: palette.primary,
-  });
+  const handleDelete = async (m: ClassMaterial) => {
+    const res = await Swal.fire({
+      title: "Hapus materi?",
+      text: `"${m.title}" akan dihapus. Tindakan ini tidak bisa dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      reverseButtons: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+      // ⬇️ tema dari palette
+      background: palette.white1,
+      color: palette.black1,
+      confirmButtonColor: (palette as any).destructive ?? "#ef4444", // fallback merah
+      cancelButtonColor: palette.primary,
+    });
 
-  if (!res.isConfirmed) return;
+    if (!res.isConfirmed) return;
 
+    try {
+      // TODO: panggil API hapus, misal:
+      // await api.delete(`/classes/${id}/materials/${m.id}`);
+
+      // Optimistic update cache list materi
+      qc.setQueryData<ClassMaterial[]>(QK.MATERIALS(id), (old = []) =>
+        old.filter((x) => x.id !== m.id)
+      );
+
+      await Swal.fire({
+        title: "Terhapus",
+        text: "Materi berhasil dihapus.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+        background: palette.white1,
+        color: palette.black1,
+      });
+    } catch (e) {
+      await Swal.fire({
+        title: "Gagal menghapus",
+        text: "Terjadi kesalahan saat menghapus materi.",
+        icon: "error",
+        background: palette.white1,
+        color: palette.black1,
+        confirmButtonColor: (palette as any).destructive ?? "#ef4444",
+      });
+    }
+  };
+  // state editclass materi
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editingItem, setEditingItem] = useState<ClassMaterial | null>(null);
+const handleEditMateri = async (payload: EditClassMaterialInput) => {
   try {
-    // TODO: panggil API hapus, misal:
-    // await api.delete(`/classes/${id}/materials/${m.id}`);
+    const nowISO = new Date().toISOString();
 
-    // Optimistic update cache list materi
+    // 1) Optimistic replace item berdasarkan id
     qc.setQueryData<ClassMaterial[]>(QK.MATERIALS(id), (old = []) =>
-      old.filter((x) => x.id !== m.id)
+      old.map((m) =>
+        m.id === payload.id
+          ? {
+              ...m,
+              title: payload.title,
+              description: payload.description,
+              type: payload.type as any,
+              attachments: payload.attachments ?? [],
+              author: payload.author ?? m.author,
+              updatedAt: nowISO,
+            }
+          : m
+      )
     );
 
+    setOpenEdit(false);
+    setEditingItem(null);
+
     await Swal.fire({
-      title: "Terhapus",
-      text: "Materi berhasil dihapus.",
+      title: "Perubahan disimpan",
+      text: "Materi berhasil diperbarui.",
       icon: "success",
       timer: 1400,
       showConfirmButton: false,
@@ -321,8 +426,8 @@ const handleDelete = async (m: ClassMaterial) => {
     });
   } catch (e) {
     await Swal.fire({
-      title: "Gagal menghapus",
-      text: "Terjadi kesalahan saat menghapus materi.",
+      title: "Gagal menyimpan",
+      text: "Terjadi kesalahan saat menyimpan perubahan.",
       icon: "error",
       background: palette.white1,
       color: palette.black1,
@@ -330,7 +435,6 @@ const handleDelete = async (m: ClassMaterial) => {
     });
   }
 };
-
 
 
   return (
@@ -351,6 +455,27 @@ const handleDelete = async (m: ClassMaterial) => {
         onClose={() => setOpenModal(false)}
         onSubmit={handleAddMateri}
         palette={palette}
+      />
+      <ModalEditClassMateri
+        open={openEdit}
+        onClose={() => {
+          setOpenEdit(false);
+          setEditingItem(null);
+        }}
+        onSubmit={handleEditMateri}
+        palette={palette}
+        initial={
+          editingItem
+            ? {
+                id: editingItem.id,
+                title: editingItem.title,
+                description: editingItem.description,
+                type: editingItem.type as any,
+                attachments: editingItem.attachments ?? [],
+                author: editingItem.author,
+              }
+            : undefined
+        }
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
@@ -544,10 +669,23 @@ const handleDelete = async (m: ClassMaterial) => {
                         Unduh
                       </Btn>
 
-                      <Btn palette={palette} size="sm">
+                      <Btn
+                        palette={palette}
+                        size="sm"
+                        onClick={() => {
+                          setEditingItem(m);
+                          setOpenEdit(true);
+                        }}
+                      >
                         Edit
                       </Btn>
-                      <Btn palette={palette} size="sm" variant="destructive" onClick={() => handleDelete(m)}>
+
+                      <Btn
+                        palette={palette}
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(m)}
+                      >
                         Hapus
                       </Btn>
                     </div>

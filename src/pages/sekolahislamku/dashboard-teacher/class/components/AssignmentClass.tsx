@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { pickTheme } from "@/constants/thema";
 
@@ -15,9 +15,6 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 
 import {
   CalendarDays,
-  Clock,
-  Users,
-  ClipboardList,
   ChevronRight,
   ArrowLeft,
   Plus,
@@ -26,50 +23,26 @@ import {
   Download,
 } from "lucide-react";
 
-/* ========= Helpers tanggal ========= */
-const atLocalNoon = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x;
-};
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+// ===== Reuse: data & tipe assignments
+import {
+  QK,
+  fetchAssignmentsByClass,
+  type Assignment,
+  type AssignmentStatus,
+} from "../types/assignments";
+import ModalEditAssignmentClass from "./ModalEditAssignmentClass";
+import { EditAssignmentPayload } from "./ModalEditAssignment";
+import Swal from "sweetalert2";
+import ModalAddAssignmentClass, { AddAssignmentClassPayload } from "./ModalAddAssignmentClass";
 
-const dateLong = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
-
-const dateShort = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "short",
-      })
-    : "-";
-
-const hijriLong = (iso: string) =>
-  new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
-/* ========= Types ========= */
+// ===== Dummy classes (biar tampilan header tetap work)
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
-
 type NextSession = {
   dateISO: string;
   time: string;
   title: string;
   room?: string;
 };
-
 type TeacherClassSummary = {
   id: string;
   name: string;
@@ -84,24 +57,6 @@ type TeacherClassSummary = {
   academicTerm: string;
   cohortYear: number;
 };
-
-type Attachment = { name: string; url?: string };
-
-type AssignmentStatus = "draft" | "terbit" | "selesai";
-type Assignment = {
-  id: string;
-  title: string;
-  description?: string;
-  createdAt: string; // ISO
-  dueDate?: string; // ISO
-  status: AssignmentStatus;
-  totalSubmissions?: number;
-  graded?: number;
-  attachments?: Attachment[];
-  author?: string;
-};
-
-/* ========= Dummy Fetch ========= */
 async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
   const now = new Date();
   const mk = (d: Date, addDay = 0) => {
@@ -109,7 +64,6 @@ async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
     x.setDate(x.getDate() + addDay);
     return x.toISOString();
   };
-
   return Promise.resolve([
     {
       id: "tpa-a",
@@ -149,84 +103,32 @@ async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
       academicTerm: "2025/2026 — Ganjil",
       cohortYear: 2025,
     },
-    {
-      id: "tpa-c",
-      name: "TPA C",
-      room: "Aula 2",
-      homeroom: "Ustadz Abu Bakar",
-      assistants: [],
-      studentsCount: 18,
-      todayAttendance: { hadir: 14, online: 0, sakit: 2, izin: 1, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 2),
-        time: "08:00",
-        title: "Latihan Makhraj",
-        room: "Aula 2",
-      },
-      materialsCount: 7,
-      assignmentsCount: 2,
-      academicTerm: "2024/2025 — Genap",
-      cohortYear: 2024,
-    },
   ]);
 }
 
-async function fetchAssignmentsByClass(classId: string): Promise<Assignment[]> {
-  const now = new Date();
-  const iso = (d: Date) => d.toISOString();
-  const tmr = new Date(now.getTime() + 864e5);
-  const yst = new Date(now.getTime() - 864e5);
-
-  const base: Record<string, Assignment[]> = {
-    "tpa-a": [
-      {
-        id: "a-001",
-        title: "Latihan Tajwid: Idgham",
-        description: "Kerjakan 10 soal tentang idgham bighunnah & bilaghunnah.",
-        createdAt: iso(yst),
-        dueDate: iso(tmr),
-        status: "terbit",
-        totalSubmissions: 18,
-        graded: 12,
-        attachments: [{ name: "soal-idgham.pdf" }],
-        author: "Ustadz Abdullah",
-      },
-      {
-        id: "a-002",
-        title: "Rekaman Bacaan QS. An-Naba 1–10",
-        description: "Upload rekaman suara bacaan masing-masing.",
-        createdAt: iso(now),
-        dueDate: iso(tmr),
-        status: "draft",
-        totalSubmissions: 0,
-        graded: 0,
-        attachments: [],
-        author: "Ustadzah Amina",
-      },
-    ],
-    "tpa-b": [
-      {
-        id: "a-101",
-        title: "Setoran Hafalan Juz 30 (Pekan Ini)",
-        createdAt: iso(yst),
-        dueDate: iso(tmr),
-        status: "terbit",
-        totalSubmissions: 14,
-        graded: 9,
-        attachments: [{ name: "format-penilaian.xlsx" }],
-        author: "Ustadz Salman",
-      },
-    ],
-  };
-  return Promise.resolve(base[classId] ?? []);
-}
-
-/* ========= Query Keys ========= */
-const QK = {
-  CLASSES: ["teacher-classes-list"] as const,
-  ASSIGNMENTS: (classId: string) =>
-    ["teacher-class-assignments", classId] as const,
+/* ========= Helpers tanggal ========= */
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
 };
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const dateLong = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "-";
+const dateShort = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "short",
+      })
+    : "-";
 
 /* ========= Page ========= */
 export default function AssignmentClass() {
@@ -234,8 +136,9 @@ export default function AssignmentClass() {
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName, isDark);
+  const qc = useQueryClient();
 
-  // kelas (pakai cache list/detail)
+  // kelas
   const { data: classes = [] } = useQuery({
     queryKey: QK.CLASSES,
     queryFn: fetchTeacherClasses,
@@ -276,18 +179,10 @@ export default function AssignmentClass() {
   /* ========= Actions ========= */
   const handleDownload = (a: Assignment) => {
     const att = a.attachments?.[0];
-    if (!att) {
-      alert("Tugas ini belum memiliki lampiran untuk diunduh.");
-      return;
-    }
-    if (att.url) {
-      window.open(att.url, "_blank", "noopener,noreferrer");
-      return;
-    }
+    if (!att) return alert("Tugas ini belum memiliki lampiran untuk diunduh.");
+    if (att.url) return window.open(att.url, "_blank", "noopener,noreferrer");
     const blob = new Blob(
-      [
-        `Tugas: ${a.title}\n\nTidak ada URL file sebenarnya. Ini contoh placeholder untuk "${att.name}".`,
-      ],
+      [`Tugas: ${a.title}\n\nPlaceholder untuk "${att.name}".`],
       { type: "text/plain;charset=utf-8" }
     );
     const link = document.createElement("a");
@@ -298,7 +193,166 @@ export default function AssignmentClass() {
     URL.revokeObjectURL(link.href);
     link.remove();
   };
-  
+  // state modal edit
+  // di dalam component AssignmentClass()
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editing, setEditing] = useState<Assignment | null>(null);
+
+  // buka modal
+  const onEdit = (a: Assignment) => {
+    setEditing(a);
+    setOpenEdit(true);
+  };
+
+  // mapping default values untuk modal
+  const editDefaults = useMemo(() => {
+    if (!editing) return undefined;
+    return {
+      title: editing.title,
+      dueDate: editing.dueDate,
+      // Modal pakai "total" & "submitted".
+      // Kita map ke schema kita (totalSubmissions & graded).
+      total: editing.totalSubmissions ?? 0,
+      submitted: editing.totalSubmissions, // isian "Terkumpul"
+    };
+  }, [editing]);
+
+  // submit dari modal -> update cache assignments
+  const handleEditSubmit = (payload: EditAssignmentPayload) => {
+    qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) =>
+      old.map((a) => {
+        if (a.id !== editing?.id) return a;
+
+        // prioritas: jika user isi "submitted", pakai itu jadi totalSubmissions,
+        // kalau tidak, pakai "total" sebagai fallback.
+        const newTotalSub =
+          payload.submitted ?? payload.total ?? a.totalSubmissions;
+
+        return {
+          ...a,
+          title: payload.title.trim(),
+          dueDate: payload.dueDate || a.dueDate,
+          totalSubmissions:
+            typeof newTotalSub === "number"
+              ? Math.max(0, newTotalSub)
+              : a.totalSubmissions,
+          // nilai graded kita biarkan apa adanya (bisa tambahin field baru di modal kalau mau edit terpisah)
+        };
+      })
+    );
+
+    setOpenEdit(false);
+    setEditing(null);
+  };
+
+  // function delete
+  const handleDelete = async (a: Assignment) => {
+    const res = await Swal.fire({
+      title: "Hapus tugas?",
+      text: `"${a.title}" akan dihapus. Tindakan ini tidak bisa dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      reverseButtons: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+      background: palette.white1,
+      color: palette.black1,
+      confirmButtonColor: (palette as any).destructive ?? "#ef4444",
+      cancelButtonColor: palette.primary,
+    });
+
+    if (!res.isConfirmed) return;
+
+    try {
+      // TODO: panggil API delete di sini kalau sudah ada
+      // await api.delete(`/classes/${id}/assignments/${a.id}`);
+
+      // Optimistic update: hapus dari cache daftar tugas
+      qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) =>
+        old.filter((x) => x.id !== a.id)
+      );
+
+      // (Opsional) kurangi counter assignments di info kelas agar konsisten
+      qc.setQueryData<TeacherClassSummary[]>(QK.CLASSES, (old = []) =>
+        old.map((c) =>
+          c.id === id
+            ? {
+                ...c,
+                assignmentsCount: Math.max(0, (c.assignmentsCount ?? 0) - 1),
+              }
+            : c
+        )
+      );
+
+      await Swal.fire({
+        title: "Terhapus",
+        text: "Tugas berhasil dihapus.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+        background: palette.white1,
+        color: palette.black1,
+      });
+    } catch (e) {
+      await Swal.fire({
+        title: "Gagal menghapus",
+        text: "Terjadi kesalahan saat menghapus tugas.",
+        icon: "error",
+        background: palette.white1,
+        color: palette.black1,
+        confirmButtonColor: (palette as any).destructive ?? "#ef4444",
+      });
+    }
+  };
+
+  // state add assignmentClass
+  // state modal add
+  const [openAdd, setOpenAdd] = useState(false);
+
+  // submit dari modal add -> tambah ke cache assignments + update counter kelas
+  const handleAddSubmit = (payload: AddAssignmentClassPayload) => {
+    const nowISO = new Date().toISOString();
+
+    const newItem: Assignment = {
+      id: `a-${Date.now()}`, // id dummy unik
+      title: payload.title,
+      description: "", // bisa diisi dari modal kalau ditambah field
+      createdAt: nowISO,
+      dueDate: payload.dueDate,
+      status: "draft", // default
+      totalSubmissions: payload.total ?? 0,
+      graded: 0,
+      attachments: [],
+      author: cls?.homeroom ?? "Guru",
+    };
+
+    // 1) sisipkan ke daftar tugas kelas aktif
+    qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) => [
+      newItem,
+      ...old,
+    ]);
+
+    // 2) update counter assignments di info kelas
+    qc.setQueryData<TeacherClassSummary[]>(QK.CLASSES, (old = []) =>
+      old.map((c) =>
+        c.id === id
+          ? { ...c, assignmentsCount: (c.assignmentsCount ?? 0) + 1 }
+          : c
+      )
+    );
+
+    // 3) tutup modal + (opsional) toast
+    setOpenAdd(false);
+    Swal.fire({
+      title: "Tugas ditambahkan",
+      text: "Tugas baru berhasil ditambahkan.",
+      icon: "success",
+      timer: 1400,
+      showConfirmButton: false,
+      background: palette.white1,
+      color: palette.black1,
+    });
+  };
 
   return (
     <div
@@ -309,8 +363,43 @@ export default function AssignmentClass() {
         palette={palette}
         title={cls ? `Tugas: ${cls.name}` : "Tugas Kelas"}
         gregorianDate={todayISO}
-        hijriDate={hijriLong(todayISO)}
+        hijriDate={new Date().toLocaleDateString(
+          "id-ID-u-ca-islamic-umalqura",
+          {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          }
+        )}
         dateFmt={dateLong}
+      />
+      <ModalEditAssignmentClass
+        open={openEdit}
+        onClose={() => {
+          setOpenEdit(false);
+          setEditing(null);
+        }}
+        palette={palette}
+        defaultValues={editDefaults}
+        onSubmit={handleEditSubmit}
+      />
+      <ModalAddAssignmentClass
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        palette={palette}
+        onSubmit={handleAddSubmit}
+      />
+
+      <ModalEditAssignmentClass
+        open={openEdit}
+        onClose={() => {
+          setOpenEdit(false);
+          setEditing(null);
+        }}
+        palette={palette}
+        defaultValues={editDefaults}
+        onSubmit={handleEditSubmit}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
@@ -350,7 +439,12 @@ export default function AssignmentClass() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Btn palette={palette} variant="secondary" size="sm">
+                  <Btn
+                    palette={palette}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setOpenAdd(true)} // <-- buka modal add
+                  >
                     <Plus size={16} className="mr-1" />
                     Buat Tugas
                   </Btn>
@@ -516,19 +610,27 @@ export default function AssignmentClass() {
                           Unduh
                         </Btn>
 
-                        {/* Link ke detail tugas.
-                           NOTE: route detail lama berada di /kelas/:id/assignment/:assignmentId
-                           karena halaman ini di /kelas/:id/tugas, pakai path relatif naik satu tingkat */}
+                        {/* Route detail: ../assignment/:assignmentId */}
                         <Link to={`../assignment/${a.id}`} relative="path">
                           <Btn palette={palette} size="sm">
                             Buka <ChevronRight size={16} className="ml-1" />
                           </Btn>
                         </Link>
 
-                        <Btn palette={palette} size="sm">
+                        <Btn
+                          palette={palette}
+                          size="sm"
+                          onClick={() => onEdit(a)}
+                        >
                           Edit
                         </Btn>
-                        <Btn palette={palette} size="sm" variant="destructive">
+
+                        <Btn
+                          palette={palette}
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(a)}
+                        >
                           Hapus
                         </Btn>
                       </div>

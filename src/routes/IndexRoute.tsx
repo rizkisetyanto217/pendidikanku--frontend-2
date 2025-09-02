@@ -655,7 +655,7 @@ export default function AppRoutes() {
           <Route path=":id" element={<DetailClass />} />
           <Route path=":id/absensi" element={<ClassAttandence />} />
           <Route path=":id/material/:materialId" element={<DetailMateri />} />
-          <Route path=":id/assignment/:id" element={<DetailAssignment />} />
+          {/* <Route path=":id/assignment/:id" element={<DetailAssignment />} /> */}
           <Route path=":id/materi" element={<ClassMateri />} />
           <Route path=":id/tugas" element={<AssignmentClass />} />
           <Route

@@ -1,5 +1,5 @@
 // src/pages/sekolahislamku/teacher/TeacherClassesList.tsx
-import { useEffect, useMemo, useState, useDeferredValue } from "react";
+import { useMemo, useState, useDeferredValue } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -78,7 +78,6 @@ const atLocalNoon = (d: Date) => {
   x.setHours(12, 0, 0, 0);
   return x;
 };
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 
 const dateLong = (iso?: string) =>
   iso
@@ -107,132 +106,155 @@ const hijriLong = (iso: string) =>
   });
 
 /* ==============================
-   Data: Fake API (tetap sama, bisa diganti backend)
+   FIXED DATA - Dibekukan secara statis
+============================== */
+// Bekukan tanggal hari ini
+const TODAY_FIXED = atLocalNoon(new Date("2025-09-02")); // Tanggal statis untuk konsistensi
+const TODAY_ISO = TODAY_FIXED.toISOString();
+
+// Bekukan tanggal-tanggal untuk jadwal
+const TOMORROW_ISO = (() => {
+  const tomorrow = new Date(TODAY_FIXED);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString();
+})();
+
+const DAY_AFTER_TOMORROW_ISO = (() => {
+  const dayAfter = new Date(TODAY_FIXED);
+  dayAfter.setDate(dayAfter.getDate() + 2);
+  return dayAfter.toISOString();
+})();
+
+const THREE_DAYS_LATER_ISO = (() => {
+  const threeDays = new Date(TODAY_FIXED);
+  threeDays.setDate(threeDays.getDate() + 3);
+  return threeDays.toISOString();
+})();
+
+// Data kelas yang dibekukan sepenuhnya
+const TEACHER_CLASSES_FIXED: TeacherClassSummary[] = [
+  {
+    id: "tpa-a",
+    name: "TPA A",
+    room: "Aula 1",
+    homeroom: "Ustadz Abdullah",
+    assistants: ["Ustadzah Amina"],
+    studentsCount: 22,
+    todayAttendance: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 },
+    nextSession: {
+      dateISO: TODAY_ISO,
+      time: "07:30",
+      title: "Tahsin — Tajwid & Makhraj",
+      room: "Aula 1",
+    },
+    materialsCount: 12,
+    assignmentsCount: 4,
+    academicTerm: "2025/2026 — Ganjil",
+    cohortYear: 2025,
+  },
+  {
+    id: "tpa-b",
+    name: "TPA B",
+    room: "R. Tahfiz",
+    homeroom: "Ustadz Salman",
+    assistants: ["Ustadzah Maryam"],
+    studentsCount: 20,
+    todayAttendance: { hadir: 15, online: 2, sakit: 1, izin: 1, alpa: 1 },
+    nextSession: {
+      dateISO: TOMORROW_ISO,
+      time: "09:30",
+      title: "Hafalan Juz 30",
+      room: "R. Tahfiz",
+    },
+    materialsCount: 9,
+    assignmentsCount: 3,
+    academicTerm: "2025/2026 — Ganjil",
+    cohortYear: 2025,
+  },
+  {
+    id: "tpa-c",
+    name: "TPA C",
+    room: "Aula 2",
+    homeroom: "Ustadz Abu Bakar",
+    assistants: [],
+    studentsCount: 18,
+    todayAttendance: { hadir: 14, online: 0, sakit: 2, izin: 1, alpa: 1 },
+    nextSession: {
+      dateISO: DAY_AFTER_TOMORROW_ISO,
+      time: "08:00",
+      title: "Latihan Makhraj",
+      room: "Aula 2",
+    },
+    materialsCount: 7,
+    assignmentsCount: 2,
+    academicTerm: "2024/2025 — Genap",
+    cohortYear: 2024,
+  },
+  {
+    id: "pra-tahfiz",
+    name: "Pra-Tahfiz",
+    room: "R. 101",
+    homeroom: "Ustadzah Khadijah",
+    assistants: ["Ustadzah Siti"],
+    studentsCount: 25,
+    todayAttendance: { hadir: 20, online: 1, sakit: 1, izin: 2, alpa: 1 },
+    nextSession: {
+      dateISO: TODAY_ISO,
+      time: "10:30",
+      title: "Pengenalan Hafalan",
+      room: "R. 101",
+    },
+    materialsCount: 5,
+    assignmentsCount: 1,
+    academicTerm: "2025/2026 — Ganjil",
+    cohortYear: 2025,
+  },
+  {
+    id: "tahsin-lanjutan",
+    name: "Tahsin Lanjutan",
+    room: "Lab Bahasa",
+    homeroom: "Ustadz Zaid",
+    assistants: [],
+    studentsCount: 16,
+    todayAttendance: { hadir: 12, online: 1, sakit: 0, izin: 2, alpa: 1 },
+    nextSession: {
+      dateISO: THREE_DAYS_LATER_ISO,
+      time: "13:00",
+      title: "Mad Thabi'i (contoh & latihan)",
+      room: "Lab Bahasa",
+    },
+    materialsCount: 14,
+    assignmentsCount: 5,
+    academicTerm: "2024/2025 — Genap",
+    cohortYear: 2023,
+  },
+  {
+    id: "tahfiz-juz-29",
+    name: "Tahfiz Juz 29",
+    room: "R. Tahfiz",
+    homeroom: "Ustadz Umar",
+    assistants: ["Ustadz Ali"],
+    studentsCount: 19,
+    todayAttendance: { hadir: 16, online: 0, sakit: 1, izin: 1, alpa: 1 },
+    nextSession: {
+      dateISO: TOMORROW_ISO,
+      time: "15:30",
+      title: "Setoran An-Naba 1–10",
+      room: "R. Tahfiz",
+    },
+    materialsCount: 11,
+    assignmentsCount: 3,
+    academicTerm: "2025/2026 — Ganjil",
+    cohortYear: 2024,
+  },
+];
+
+/* ==============================
+   Fake API (pure & deterministic)
 ============================== */
 async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
-  const now = new Date();
-  const mk = (d: Date, addDay = 0) => {
-    const x = new Date(d);
-    x.setDate(x.getDate() + addDay);
-    return x.toISOString();
-  };
-
-  return Promise.resolve([
-    {
-      id: "tpa-a",
-      name: "TPA A",
-      room: "Aula 1",
-      homeroom: "Ustadz Abdullah",
-      assistants: ["Ustadzah Amina"],
-      studentsCount: 22,
-      todayAttendance: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 0),
-        time: "07:30",
-        title: "Tahsin — Tajwid & Makhraj",
-        room: "Aula 1",
-      },
-      materialsCount: 12,
-      assignmentsCount: 4,
-      academicTerm: "2025/2026 — Ganjil",
-      cohortYear: 2025,
-    },
-    {
-      id: "tpa-b",
-      name: "TPA B",
-      room: "R. Tahfiz",
-      homeroom: "Ustadz Salman",
-      assistants: ["Ustadzah Maryam"],
-      studentsCount: 20,
-      todayAttendance: { hadir: 15, online: 2, sakit: 1, izin: 1, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 1),
-        time: "09:30",
-        title: "Hafalan Juz 30",
-        room: "R. Tahfiz",
-      },
-      materialsCount: 9,
-      assignmentsCount: 3,
-      academicTerm: "2025/2026 — Ganjil",
-      cohortYear: 2025,
-    },
-    {
-      id: "tpa-c",
-      name: "TPA C",
-      room: "Aula 2",
-      homeroom: "Ustadz Abu Bakar",
-      assistants: [],
-      studentsCount: 18,
-      todayAttendance: { hadir: 14, online: 0, sakit: 2, izin: 1, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 2),
-        time: "08:00",
-        title: "Latihan Makhraj",
-        room: "Aula 2",
-      },
-      materialsCount: 7,
-      assignmentsCount: 2,
-      academicTerm: "2024/2025 — Genap",
-      cohortYear: 2024,
-    },
-    {
-      id: "pra-tahfiz",
-      name: "Pra-Tahfiz",
-      room: "R. 101",
-      homeroom: "Ustadzah Khadijah",
-      assistants: ["Ustadzah Siti"],
-      studentsCount: 25,
-      todayAttendance: { hadir: 20, online: 1, sakit: 1, izin: 2, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 0),
-        time: "10:30",
-        title: "Pengenalan Hafalan",
-        room: "R. 101",
-      },
-      materialsCount: 5,
-      assignmentsCount: 1,
-      academicTerm: "2025/2026 — Ganjil",
-      cohortYear: 2025,
-    },
-    {
-      id: "tahsin-lanjutan",
-      name: "Tahsin Lanjutan",
-      room: "Lab Bahasa",
-      homeroom: "Ustadz Zaid",
-      assistants: [],
-      studentsCount: 16,
-      todayAttendance: { hadir: 12, online: 1, sakit: 0, izin: 2, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 3),
-        time: "13:00",
-        title: "Mad Thabi'i (contoh & latihan)",
-        room: "Lab Bahasa",
-      },
-      materialsCount: 14,
-      assignmentsCount: 5,
-      academicTerm: "2024/2025 — Genap",
-      cohortYear: 2023,
-    },
-    {
-      id: "tahfiz-juz-29",
-      name: "Tahfiz Juz 29",
-      room: "R. Tahfiz",
-      homeroom: "Ustadz Umar",
-      assistants: ["Ustadz Ali"],
-      studentsCount: 19,
-      todayAttendance: { hadir: 16, online: 0, sakit: 1, izin: 1, alpa: 1 },
-      nextSession: {
-        dateISO: mk(now, 1),
-        time: "15:30",
-        title: "Setoran An-Naba 1–10",
-        room: "R. Tahfiz",
-      },
-      materialsCount: 11,
-      assignmentsCount: 3,
-      academicTerm: "2025/2026 — Ganjil",
-      cohortYear: 2024,
-    },
-  ]);
+  // Kembalikan salinan yang sama setiap kali
+  return Promise.resolve(TEACHER_CLASSES_FIXED.map((x) => ({ ...x })));
 }
 
 /* ==============================
@@ -242,7 +264,12 @@ function useTeacherClasses() {
   return useQuery({
     queryKey: QK.LIST,
     queryFn: fetchTeacherClasses,
-    staleTime: 5 * 60_000,
+    // Bekukan data di cache (tidak pernah refetch otomatis)
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
@@ -251,7 +278,11 @@ function useClassStudents(classIds: string[]) {
     queryKey: QK.STUDENTS(classIds),
     queryFn: () => fetchStudentsByClasses(classIds),
     enabled: classIds.length > 0,
-    staleTime: 5 * 60_000,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
@@ -344,7 +375,7 @@ function useClassFilters(classes: TeacherClassSummary[]) {
 }
 
 /* ==============================
-   Small UI Components
+   Small UI Components (UI tetap sama)
 ============================== */
 function ViewModeToggle({
   palette,
@@ -475,37 +506,28 @@ function AttendanceBar({
 }
 
 /* ==============================
-   Class Card Component
+   Class Card Component (UI tetap)
 ============================== */
 function ClassCard({
   c,
   students,
   palette,
   viewMode,
-  isLoadingStudents,
 }: {
   c: TeacherClassSummary;
   students: StudentSummary[];
   palette: Palette;
   viewMode: ViewMode;
-  isLoadingStudents: boolean;
 }) {
   const totalFromStudents = students.length;
   const total = totalFromStudents || c.studentsCount || 0;
   const hadir = c.todayAttendance.hadir ?? 0;
   const pct = total ? Math.round((hadir / total) * 100) : 0;
 
-  const preview =
-    students
-      .slice(0, 3)
-      .map((s) => s.name)
-      .join(", ") || undefined;
-  const more = Math.max(0, total - 3);
-
   const isUpcomingToday =
     c.nextSession &&
     new Date(c.nextSession.dateISO).toDateString() ===
-      new Date().toDateString();
+      TODAY_FIXED.toDateString();
 
   return (
     <SectionCard
@@ -515,17 +537,13 @@ function ClassCard({
           ? "hover:shadow-lg hover:-translate-y-1"
           : "hover:shadow-xl hover:-translate-y-2"
       } ${isUpcomingToday ? "ring-2 ring-opacity-50" : ""}`}
-      // style={{
-      //   background: palette.white1,
-      //   border: `1px solid ${palette.silver1}`,
-      // }}
     >
       <div
         className={`p-5 md:p-6 flex flex-col gap-4 h-full ${
           viewMode === "simple" ? "gap-3" : "gap-4"
         }`}
       >
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div
@@ -568,23 +586,12 @@ function ClassCard({
               <MapPin size={12} />
               {c.room ?? "Belum ditentukan"}
             </Badge>
-            {/* <Badge
-              palette={palette}
-              variant="secondary"
-              className="flex items-center gap-1.5 font-semibold"
-            >
-              <Users size={12} />
-              {isLoadingStudents ? "..." : `${total} siswa`}
-            </Badge> */}
           </div>
         </div>
 
-      
-
-        {/* Content based on view mode */}
+        {/* Content */}
         {viewMode === "simple" ? (
           <div className="space-y-3">
-            {/* Next Session - Compact */}
             <div
               className="flex items-center gap-3 p-3 rounded-lg"
               style={{
@@ -619,20 +626,15 @@ function ClassCard({
                 )}
               </div>
             </div>
-
-            
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Attendance Section */}
             <AttendanceBar
               pct={pct}
               total={total}
               hadir={hadir}
               palette={palette}
             />
-
-            {/* Next Session - Detailed */}
             <div
               className="rounded-xl border p-4 space-y-3"
               style={{
@@ -686,18 +688,12 @@ function ClassCard({
                 </div>
               )}
             </div>
-
-           
           </div>
         )}
 
-        {/* Footer Actions */}
-        <div
-          className="mt-auto pt-4 "
-        
-        >
+        {/* Footer */}
+        <div className="mt-auto pt-4">
           <div className="flex items-center justify-end gap-3">
-           
             <Link
               to={`${c.id}`}
               state={{
@@ -723,7 +719,7 @@ function ClassCard({
 }
 
 /* ==============================
-   Filter Component
+   Filter Component (UI tetap)
 ============================== */
 function FilterControls({
   palette,
@@ -758,7 +754,6 @@ function FilterControls({
 }) {
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
       <div
         className="flex items-center gap-3 rounded-xl border px-4 py-3 shadow-sm"
         style={{
@@ -779,9 +774,7 @@ function FilterControls({
         />
       </div>
 
-      {/* Filter Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Room Filter */}
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
@@ -791,10 +784,7 @@ function FilterControls({
           </label>
           <div
             className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
-            style={{
-              borderColor: palette.silver1,
-              background: palette.white1,
-            }}
+            style={{ borderColor: palette.silver1, background: palette.white1 }}
           >
             <MapPin size={16} style={{ color: palette.primary }} />
             <select
@@ -812,7 +802,6 @@ function FilterControls({
           </div>
         </div>
 
-        {/* Academic Term Filter */}
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
@@ -822,10 +811,7 @@ function FilterControls({
           </label>
           <div
             className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
-            style={{
-              borderColor: palette.silver1,
-              background: palette.white1,
-            }}
+            style={{ borderColor: palette.silver1, background: palette.white1 }}
           >
             <CalendarDays size={16} style={{ color: palette.primary }} />
             <select
@@ -843,7 +829,6 @@ function FilterControls({
           </div>
         </div>
 
-        {/* Cohort Filter */}
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
@@ -853,10 +838,7 @@ function FilterControls({
           </label>
           <div
             className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
-            style={{
-              borderColor: palette.silver1,
-              background: palette.white1,
-            }}
+            style={{ borderColor: palette.silver1, background: palette.white1 }}
           >
             <GraduationCap size={16} style={{ color: palette.primary }} />
             <select
@@ -874,7 +856,6 @@ function FilterControls({
           </div>
         </div>
 
-        {/* Sort Filter */}
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
@@ -884,10 +865,7 @@ function FilterControls({
           </label>
           <div
             className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
-            style={{
-              borderColor: palette.silver1,
-              background: palette.white1,
-            }}
+            style={{ borderColor: palette.silver1, background: palette.white1 }}
           >
             <Filter size={16} style={{ color: palette.primary }} />
             <select
@@ -908,7 +886,7 @@ function FilterControls({
 }
 
 /* ==============================
-   Loading State Component
+   Loading State Component (UI tetap)
 ============================== */
 function LoadingCard({
   palette,
@@ -922,7 +900,6 @@ function LoadingCard({
       <div
         className={`p-5 md:p-6 space-y-4 ${viewMode === "simple" ? "space-y-3" : "space-y-4"}`}
       >
-        {/* Header skeleton */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div
@@ -946,7 +923,6 @@ function LoadingCard({
           </div>
         </div>
 
-        {/* Content skeleton */}
         {viewMode === "detailed" && (
           <>
             <div
@@ -966,7 +942,6 @@ function LoadingCard({
           </>
         )}
 
-        {/* Footer skeleton */}
         <div className="flex items-center justify-between pt-4">
           <div
             className="h-4 rounded w-24"
@@ -983,7 +958,7 @@ function LoadingCard({
 }
 
 /* ==============================
-   Summary Stats Component
+   Summary Stats (UI tetap)
 ============================== */
 function SummaryStats({
   classes,
@@ -1082,11 +1057,9 @@ export default function TeacherClassesList() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
-  // data kelas
   const { data: classes = [], isFetching: isFetchingClasses } =
     useTeacherClasses();
 
-  // filters + view mode (persist in memory instead of localStorage)
   const [viewMode, setViewMode] = useState<ViewMode>("detailed");
 
   const {
@@ -1106,12 +1079,10 @@ export default function TeacherClassesList() {
     filtered,
   } = useClassFilters(classes);
 
-  // siswa per kelas
+  // siswa per kelas — juga dibekukan (no auto-refetch)
   const classIds = useMemo(() => filtered.map((c) => c.id), [filtered]);
   const { data: studentsMap = {}, isFetching: isFetchingStudents } =
     useClassStudents(classIds);
-
-  const todayISO = toLocalNoonISO(new Date());
 
   return (
     <div
@@ -1121,8 +1092,8 @@ export default function TeacherClassesList() {
       <ParentTopBar
         palette={palette}
         title="Daftar Kelas Saya"
-        gregorianDate={todayISO}
-        hijriDate={hijriLong(todayISO)}
+        gregorianDate={TODAY_ISO}
+        hijriDate={hijriLong(TODAY_ISO)}
         dateFmt={dateLong}
       />
 
@@ -1132,12 +1103,10 @@ export default function TeacherClassesList() {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0 space-y-6">
-            {/* Summary Stats */}
             {!isFetchingClasses && classes.length > 0 && (
               <SummaryStats classes={classes} palette={palette} />
             )}
 
-            {/* Filter & Controls Section */}
             <SectionCard palette={palette}>
               <div className="p-5 md:p-6 space-y-6">
                 <div className="flex items-center justify-between flex-wrap gap-4">
@@ -1159,13 +1128,26 @@ export default function TeacherClassesList() {
                   />
                 </div>
 
-                
+                <FilterControls
+                  palette={palette}
+                  q={q}
+                  setQ={setQ}
+                  room={room}
+                  setRoom={setRoom}
+                  term={term}
+                  setTerm={setTerm}
+                  cohort={cohort}
+                  setCohort={setCohort}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  rooms={rooms}
+                  terms={terms}
+                  cohorts={cohorts}
+                />
               </div>
             </SectionCard>
 
-            {/* Results Section */}
             <div>
-              {/* Results Header */}
               {!isFetchingClasses && (
                 <div className="mb-4 flex items-center justify-between">
                   <div className="text-sm" style={{ color: palette.silver2 }}>
@@ -1184,7 +1166,6 @@ export default function TeacherClassesList() {
                 </div>
               )}
 
-              {/* Classes Grid */}
               <div
                 className={`grid gap-6 ${
                   viewMode === "simple"
@@ -1192,7 +1173,6 @@ export default function TeacherClassesList() {
                     : "grid-cols-1 lg:grid-cols-2"
                 }`}
               >
-                {/* Loading State */}
                 {isFetchingClasses && filtered.length === 0 && (
                   <>
                     {Array.from({ length: 4 }).map((_, i) => (
@@ -1205,7 +1185,6 @@ export default function TeacherClassesList() {
                   </>
                 )}
 
-                {/* Class Cards */}
                 {filtered.map((c) => (
                   <ClassCard
                     key={c.id}
@@ -1213,12 +1192,10 @@ export default function TeacherClassesList() {
                     students={(studentsMap as ClassStudentsMap)[c.id] ?? []}
                     palette={palette}
                     viewMode={viewMode}
-                    isLoadingStudents={isFetchingStudents}
                   />
                 ))}
               </div>
 
-              {/* Empty State */}
               {filtered.length === 0 && !isFetchingClasses && (
                 <SectionCard palette={palette}>
                   <div className="p-8 md:p-12 text-center space-y-4">
