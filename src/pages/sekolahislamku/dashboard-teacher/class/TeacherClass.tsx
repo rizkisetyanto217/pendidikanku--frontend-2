@@ -1,6 +1,6 @@
-// src/pages/sekolahislamku/teacher/TeacherClassDetail.tsx
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+// src/pages/sekolahislamku/teacher/TeacherClassesList.tsx
+import { useEffect, useMemo, useState, useDeferredValue } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -10,116 +10,76 @@ import {
   Badge,
   Btn,
   type Palette,
-  LinkBtn,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
-import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
 import {
   Users,
-  CheckSquare,
+  CalendarDays,
+  Clock,
   ClipboardList,
   BookOpen,
-  Plus,
-  Filter,
   Search,
+  Filter,
+  ChevronRight,
+  LayoutList,
+  LayoutGrid,
+  MapPin,
   GraduationCap,
 } from "lucide-react";
 
-import MiniBar from "../../components/ui/MiniBar";
-import StatPill from "../../components/ui/StatPill";
-import StudentsTable from "./components/StudentTable";
-import ModalAddStudent, {
-  type AddStudentPayload,
-} from "./components/ModalAddStudent";
-import ModalExport from "./components/ModalExport";
-import ModalAddMateri from "./components/ModalAddMateri";
-import ParentTopBar from "../../components/home/ParentTopBar";
-import ParentSidebar from "../../components/home/ParentSideBar";
-import AddSchedule from "../dashboard/AddSchedule";
+import {
+  fetchStudentsByClasses,
+  type ClassStudentsMap,
+  type StudentSummary,
+} from "./types/teacherClass";
 
-/* ================= Types ================ */
+/* ==============================
+   Types & Constants
+============================== */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
-type AttendanceMode = "onsite" | "online";
 
-type StudentRow = {
-  id: string;
-  name: string;
-  avatarUrl?: string;
-  statusToday?: AttendanceStatus | null;
-  mode?: AttendanceMode;
-  time?: string;
-  iqraLevel?: string;
-  juzProgress?: number;
-  lastScore?: number;
-};
-
-type Assignment = {
-  id: string;
-  title: string;
-  dueDate: string;
-  submitted: number;
-  total: number;
-  graded?: number;
-};
-
-type MaterialItem = {
-  id: string;
-  title: string;
-  date: string;
-  attachments?: number;
-};
-
-type UpcomingItem = {
+type NextSession = {
   dateISO: string;
   time: string;
   title: string;
   room?: string;
 };
 
-type ClassDetail = {
+export type TeacherClassSummary = {
   id: string;
   name: string;
   room?: string;
   homeroom: string;
   assistants?: string[];
-  /** ❗️Tidak lagi dipakai untuk ringkasan; biarkan tetap di tipe agar kompatibel dengan API */
   studentsCount: number;
-  scheduleToday: { time: string; title: string; room?: string }[];
-  upcomingSchedule: UpcomingItem[];
-  /** ❗️Tidak dipakai untuk ringkasan; ringkasan dihitung dari students */
-  attendanceToday: { byStatus: Record<AttendanceStatus, number> };
-  students: StudentRow[];
-  assignments: Assignment[];
-  materials: MaterialItem[];
-  gregorianDate: string;
-  hijriDate: string;
+  todayAttendance: Record<AttendanceStatus, number>;
+  nextSession?: NextSession;
+  materialsCount: number;
+  assignmentsCount: number;
+  academicTerm: string; // contoh: "2025/2026 — Ganjil"
+  cohortYear: number; // contoh: 2025 (angkatan masuk)
 };
 
-/* ================= Helpers ================ */
-/* ================= Helpers ================ */
-// ——— Local-noon safety core ———
+type ViewMode = "detailed" | "simple";
+
+const QK = {
+  LIST: ["teacher-classes-list"] as const,
+  STUDENTS: (ids: string[]) => ["teacher-class-students", ids] as const,
+};
+
+/* ==============================
+   Helpers (format & dates)
+============================== */
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
   return x;
 };
 const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
-const normalizeISOToLocalNoon = (iso?: string) =>
-  iso ? toLocalNoonISO(new Date(iso)) : undefined;
 
-const startOfDay = (d = new Date()) => {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
-};
-const addDays = (d: Date, n: number) => {
-  const x = new Date(d);
-  x.setDate(x.getDate() + n);
-  return x;
-};
-
-// ——— Display helpers (gunakan ISO yang sudah dinormalisasi) ———
 const dateLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -138,7 +98,6 @@ const dateShort = (iso?: string) =>
       })
     : "-";
 
-// ——— Hijriah (Umm al-Qura) ———
 const hijriLong = (iso: string) =>
   new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
     weekday: "long",
@@ -147,286 +106,1012 @@ const hijriLong = (iso: string) =>
     year: "numeric",
   });
 
-const percent = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
-
-
-/* ============ Fake API (ganti dgn axios) ============ */
-async function fetchClassDetail(classId: string): Promise<ClassDetail> {
+/* ==============================
+   Data: Fake API (tetap sama, bisa diganti backend)
+============================== */
+async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
   const now = new Date();
-  const todayISO = now.toISOString();
+  const mk = (d: Date, addDay = 0) => {
+    const x = new Date(d);
+    x.setDate(x.getDate() + addDay);
+    return x.toISOString();
+  };
 
-  const scheduleToday: ClassDetail["scheduleToday"] = [
-    { time: "07:30", title: "Tahsin — Tajwid & Makhraj", room: "Aula 1" },
-    { time: "09:30", title: "Hafalan Juz 30", room: "R. Tahfiz" },
-  ];
-
-  const upcomingSchedule: UpcomingItem[] = Array.from({ length: 7 }).flatMap(
-    (_, i) =>
-      scheduleToday.map((s) => ({
-        dateISO: addDays(startOfDay(now), i).toISOString(),
-        time: s.time,
-        title: s.title,
-        room: s.room,
-      }))
-  );
-
-  const students: StudentRow[] = [
-    {
-      id: "s1",
-      name: "Ahmad",
-      statusToday: "hadir",
-      time: "07:26",
-      iqraLevel: "Iqra 2",
-      juzProgress: 0.6,
-      lastScore: 88,
-    },
-    {
-      id: "s2",
-      name: "Fatimah",
-      statusToday: "hadir",
-      time: "07:30",
-      iqraLevel: "Iqra 3",
-      juzProgress: 1.2,
-      lastScore: 92,
-    },
-    {
-      id: "s3",
-      name: "Hasan",
-      statusToday: "online",
-      mode: "online",
-      time: "07:35",
-      iqraLevel: "Iqra 1",
-      juzProgress: 0.2,
-      lastScore: 75,
-    },
-    {
-      id: "s4",
-      name: "Aisyah",
-      statusToday: "sakit",
-      iqraLevel: "Iqra 2",
-      juzProgress: 0.5,
-      lastScore: 81,
-    },
-    {
-      id: "s5",
-      name: "Umar",
-      statusToday: "izin",
-      iqraLevel: "Iqra 2",
-      juzProgress: 0.4,
-      lastScore: 79,
-    },
-  ];
-
-  return Promise.resolve({
-    id: classId,
-    name: classId.toUpperCase().replace("-", " "),
-    room: classId === "tpa-b" ? "R. Tahfiz" : "Aula 1",
-    homeroom: "Ustadz Abdullah",
-    assistants: ["Ustadzah Amina"],
-    studentsCount: 22, // ❗️tidak dipakai sebagai sumber kebenaran
-    scheduleToday,
-    upcomingSchedule,
-    attendanceToday: {
-      byStatus: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 }, // ❗️tidak dipakai sebagai sumber kebenaran
-    },
-    students,
-    assignments: [
-      {
-        id: "t1",
-        title: "Evaluasi Wudhu",
-        dueDate: addDays(now, 1).toISOString(),
-        submitted: 18,
-        total: 22,
-        graded: 10,
-      },
-      {
-        id: "t2",
-        title: "Setoran Hafalan An-Naba 1–10",
-        dueDate: addDays(now, 2).toISOString(),
-        submitted: 12,
-        total: 22,
-        graded: 0,
-      },
-    ],
-    materials: [
-      {
-        id: "m1",
-        title: "Materi: Mad Thabi'i (contoh & latihan)",
-        date: todayISO,
-        attachments: 2,
-      },
-      { id: "m2", title: "Latihan Makhraj (ba, ta, tha)", date: todayISO },
-    ],
-    gregorianDate: todayISO,
-    hijriDate: "16 Muharram 1447 H",
-  });
-}
-
-/* ============ Class options (ganti dgn axios) ============ */
-type ClassOption = { id: string; name: string; room?: string };
-async function fetchClassOptions(): Promise<ClassOption[]> {
   return Promise.resolve([
-    { id: "tpa-a", name: "TPA A", room: "Aula 1" },
-    { id: "tpa-b", name: "TPA B", room: "R. Tahfiz" },
-    { id: "tpa-c", name: "TPA C", room: "Aula 2" },
+    {
+      id: "tpa-a",
+      name: "TPA A",
+      room: "Aula 1",
+      homeroom: "Ustadz Abdullah",
+      assistants: ["Ustadzah Amina"],
+      studentsCount: 22,
+      todayAttendance: { hadir: 18, online: 1, sakit: 1, izin: 1, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 0),
+        time: "07:30",
+        title: "Tahsin — Tajwid & Makhraj",
+        room: "Aula 1",
+      },
+      materialsCount: 12,
+      assignmentsCount: 4,
+      academicTerm: "2025/2026 — Ganjil",
+      cohortYear: 2025,
+    },
+    {
+      id: "tpa-b",
+      name: "TPA B",
+      room: "R. Tahfiz",
+      homeroom: "Ustadz Salman",
+      assistants: ["Ustadzah Maryam"],
+      studentsCount: 20,
+      todayAttendance: { hadir: 15, online: 2, sakit: 1, izin: 1, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 1),
+        time: "09:30",
+        title: "Hafalan Juz 30",
+        room: "R. Tahfiz",
+      },
+      materialsCount: 9,
+      assignmentsCount: 3,
+      academicTerm: "2025/2026 — Ganjil",
+      cohortYear: 2025,
+    },
+    {
+      id: "tpa-c",
+      name: "TPA C",
+      room: "Aula 2",
+      homeroom: "Ustadz Abu Bakar",
+      assistants: [],
+      studentsCount: 18,
+      todayAttendance: { hadir: 14, online: 0, sakit: 2, izin: 1, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 2),
+        time: "08:00",
+        title: "Latihan Makhraj",
+        room: "Aula 2",
+      },
+      materialsCount: 7,
+      assignmentsCount: 2,
+      academicTerm: "2024/2025 — Genap",
+      cohortYear: 2024,
+    },
+    {
+      id: "pra-tahfiz",
+      name: "Pra-Tahfiz",
+      room: "R. 101",
+      homeroom: "Ustadzah Khadijah",
+      assistants: ["Ustadzah Siti"],
+      studentsCount: 25,
+      todayAttendance: { hadir: 20, online: 1, sakit: 1, izin: 2, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 0),
+        time: "10:30",
+        title: "Pengenalan Hafalan",
+        room: "R. 101",
+      },
+      materialsCount: 5,
+      assignmentsCount: 1,
+      academicTerm: "2025/2026 — Ganjil",
+      cohortYear: 2025,
+    },
+    {
+      id: "tahsin-lanjutan",
+      name: "Tahsin Lanjutan",
+      room: "Lab Bahasa",
+      homeroom: "Ustadz Zaid",
+      assistants: [],
+      studentsCount: 16,
+      todayAttendance: { hadir: 12, online: 1, sakit: 0, izin: 2, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 3),
+        time: "13:00",
+        title: "Mad Thabi'i (contoh & latihan)",
+        room: "Lab Bahasa",
+      },
+      materialsCount: 14,
+      assignmentsCount: 5,
+      academicTerm: "2024/2025 — Genap",
+      cohortYear: 2023,
+    },
+    {
+      id: "tahfiz-juz-29",
+      name: "Tahfiz Juz 29",
+      room: "R. Tahfiz",
+      homeroom: "Ustadz Umar",
+      assistants: ["Ustadz Ali"],
+      studentsCount: 19,
+      todayAttendance: { hadir: 16, online: 0, sakit: 1, izin: 1, alpa: 1 },
+      nextSession: {
+        dateISO: mk(now, 1),
+        time: "15:30",
+        title: "Setoran An-Naba 1–10",
+        room: "R. Tahfiz",
+      },
+      materialsCount: 11,
+      assignmentsCount: 3,
+      academicTerm: "2025/2026 — Ganjil",
+      cohortYear: 2024,
+    },
   ]);
 }
 
-/* ============ Small inline component ============ */
-function ClassSelector({
+/* ==============================
+   Hooks
+============================== */
+function useTeacherClasses() {
+  return useQuery({
+    queryKey: QK.LIST,
+    queryFn: fetchTeacherClasses,
+    staleTime: 5 * 60_000,
+  });
+}
+
+function useClassStudents(classIds: string[]) {
+  return useQuery({
+    queryKey: QK.STUDENTS(classIds),
+    queryFn: () => fetchStudentsByClasses(classIds),
+    enabled: classIds.length > 0,
+    staleTime: 5 * 60_000,
+  });
+}
+
+function useClassFilters(classes: TeacherClassSummary[]) {
+  const [q, setQ] = useState("");
+  const deferredQ = useDeferredValue(q);
+  const [room, setRoom] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"name" | "students" | "time">("name");
+  const [term, setTerm] = useState<string>("all");
+  const [cohort, setCohort] = useState<string>("all");
+
+  const rooms = useMemo(() => {
+    const r = Array.from(new Set(classes.map((c) => c.room).filter(Boolean)));
+    return ["all", ...r] as string[];
+  }, [classes]);
+
+  const terms = useMemo(() => {
+    const t = Array.from(new Set(classes.map((c) => c.academicTerm)));
+    return ["all", ...t];
+  }, [classes]);
+
+  const cohorts = useMemo(() => {
+    const ys = Array.from(new Set(classes.map((c) => c.cohortYear))).sort(
+      (a, b) => b - a
+    );
+    return ["all", ...ys.map(String)];
+  }, [classes]);
+
+  const filtered = useMemo(() => {
+    let list = classes;
+
+    if (room !== "all") {
+      list = list.filter((c) => (c.room ?? "") === room);
+    }
+    if (term !== "all") {
+      list = list.filter((c) => c.academicTerm === term);
+    }
+    if (cohort !== "all") {
+      const y = Number(cohort);
+      list = list.filter((c) => c.cohortYear === y);
+    }
+
+    const qq = deferredQ.trim().toLowerCase();
+    if (qq) {
+      list = list.filter(
+        (c) =>
+          c.name.toLowerCase().includes(qq) ||
+          c.homeroom.toLowerCase().includes(qq) ||
+          c.academicTerm.toLowerCase().includes(qq) ||
+          String(c.cohortYear).includes(qq)
+      );
+    }
+
+    list = [...list].sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "students") return b.studentsCount - a.studentsCount;
+
+      const at =
+        a.nextSession?.dateISO && a.nextSession?.time
+          ? new Date(`${a.nextSession.dateISO}`).getTime() +
+            Number(a.nextSession.time.replace(":", ""))
+          : Number.MAX_SAFE_INTEGER;
+      const bt =
+        b.nextSession?.dateISO && b.nextSession?.time
+          ? new Date(`${b.nextSession.dateISO}`).getTime() +
+            Number(b.nextSession.time.replace(":", ""))
+          : Number.MAX_SAFE_INTEGER;
+      return at - bt;
+    });
+
+    return list;
+  }, [classes, deferredQ, room, sortBy, term, cohort]);
+
+  return {
+    q,
+    setQ,
+    room,
+    setRoom,
+    sortBy,
+    setSortBy,
+    term,
+    setTerm,
+    cohort,
+    setCohort,
+    rooms,
+    terms,
+    cohorts,
+    filtered,
+  };
+}
+
+/* ==============================
+   Small UI Components
+============================== */
+function ViewModeToggle({
   palette,
   value,
-  options,
   onChange,
 }: {
   palette: Palette;
-  value: string;
-  options: ClassOption[];
-  onChange: (v: string) => void;
+  value: ViewMode;
+  onChange: (v: ViewMode) => void;
 }) {
   return (
     <div
-      className="w-full rounded-xl border p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-      style={{ borderColor: palette.silver1, background: palette.white1 }}
+      className="rounded-xl border p-1 flex shadow-sm"
+      style={{
+        borderColor: palette.silver1,
+        background: palette.white1,
+      }}
+      aria-label="Mode tampilan"
     >
-      <div className="text-sm" style={{ color: palette.silver2 }}>
-        Pilih Kelas
+      <button
+        onClick={() => onChange("detailed")}
+        className="px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all duration-200 hover:scale-105"
+        style={{
+          background: value === "detailed" ? palette.primary : "transparent",
+          color: value === "detailed" ? palette.white1 : palette.black1,
+          boxShadow:
+            value === "detailed" ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+        }}
+        title="Tampilan Detail"
+      >
+        <LayoutGrid size={16} />
+        Detail
+      </button>
+      <button
+        onClick={() => onChange("simple")}
+        className="px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all duration-200 hover:scale-105"
+        style={{
+          background: value === "simple" ? palette.primary : "transparent",
+          color: value === "simple" ? palette.white1 : palette.black1,
+          boxShadow: value === "simple" ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+        }}
+        title="Tampilan Simple"
+      >
+        <LayoutList size={16} />
+        Simple
+      </button>
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  icon,
+  palette,
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+  palette: Palette;
+}) {
+  return (
+    <div
+      className="rounded-xl border p-3 flex items-center justify-between transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5"
+      style={{
+        borderColor: palette.silver1,
+        background: palette.white1,
+      }}
+    >
+      <div className="text-xs font-medium" style={{ color: palette.silver2 }}>
+        {label}
       </div>
       <div className="flex items-center gap-2">
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-10 rounded-lg px-3 border outline-none"
-          style={{
-            background: palette.white2,
-            color: palette.black1,
-            borderColor: palette.silver1,
-          }}
+        <div style={{ color: palette.primary }}>{icon}</div>
+        <span
+          className="text-sm font-semibold"
+          style={{ color: palette.black1 }}
         >
-          {options.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name} {opt.room ? `• ${opt.room}` : ""}
-            </option>
-          ))}
-        </select>
-        <Badge palette={palette} variant="outline">
-          Kelas aktif
-        </Badge>
+          {value}
+        </span>
       </div>
     </div>
   );
 }
 
-/* ================= Page ================= */
-export default function TeacherClass() {
-  const [addStudentOpen, setAddStudentOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
-  const navigate = useNavigate();
+function AttendanceBar({
+  pct,
+  total,
+  hadir,
+  palette,
+}: {
+  pct: number;
+  total: number;
+  hadir: number;
+  palette: Palette;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium" style={{ color: palette.black1 }}>
+          Kehadiran Hari Ini
+        </div>
+        <div
+          className="text-sm font-semibold"
+          style={{ color: palette.primary }}
+        >
+          {pct}%
+        </div>
+      </div>
+      <div
+        className="h-3 w-full rounded-full overflow-hidden shadow-inner"
+        style={{ background: palette.white2 }}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-500 ease-out"
+          style={{
+            width: `${pct}%`,
+            background: `linear-gradient(90deg, ${palette.secondary}, ${palette.primary})`,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          }}
+        />
+      </div>
+      <div className="text-xs" style={{ color: palette.silver2 }}>
+        <span className="font-medium">{hadir}</span> dari {total} siswa hadir
+      </div>
+    </div>
+  );
+}
 
-  const params = useParams<{ id: string }>();
-  const classIdFromUrl = params.id ?? "tpa-a";
+/* ==============================
+   Class Card Component
+============================== */
+function ClassCard({
+  c,
+  students,
+  palette,
+  viewMode,
+  isLoadingStudents,
+}: {
+  c: TeacherClassSummary;
+  students: StudentSummary[];
+  palette: Palette;
+  viewMode: ViewMode;
+  isLoadingStudents: boolean;
+}) {
+  const totalFromStudents = students.length;
+  const total = totalFromStudents || c.studentsCount || 0;
+  const hadir = c.todayAttendance.hadir ?? 0;
+  const pct = total ? Math.round((hadir / total) * 100) : 0;
 
+  const preview =
+    students
+      .slice(0, 3)
+      .map((s) => s.name)
+      .join(", ") || undefined;
+  const more = Math.max(0, total - 3);
+
+  const isUpcomingToday =
+    c.nextSession &&
+    new Date(c.nextSession.dateISO).toDateString() ===
+      new Date().toDateString();
+
+  return (
+    <SectionCard
+      palette={palette}
+      className={`transition-all duration-300 ${
+        viewMode === "simple"
+          ? "hover:shadow-lg hover:-translate-y-1"
+          : "hover:shadow-xl hover:-translate-y-2"
+      } ${isUpcomingToday ? "ring-2 ring-opacity-50" : ""}`}
+      // style={{
+      //   background: palette.white1,
+      //   border: `1px solid ${palette.silver1}`,
+      // }}
+    >
+      <div
+        className={`p-5 md:p-6 flex flex-col gap-4 h-full ${
+          viewMode === "simple" ? "gap-3" : "gap-4"
+        }`}
+      >
+        {/* Header Section */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div
+              className="font-bold text-lg md:text-xl mb-2"
+              style={{ color: palette.black1 }}
+            >
+              {c.name}
+            </div>
+            <div className="space-y-1">
+              <div
+                className="flex items-center gap-2 text-sm"
+                style={{ color: palette.silver2 }}
+              >
+                <GraduationCap size={14} />
+                <span className="truncate">Wali Kelas: {c.homeroom}</span>
+              </div>
+              <div
+                className="flex items-center gap-2 text-sm"
+                style={{ color: palette.silver2 }}
+              >
+                <CalendarDays size={14} />
+                <span className="truncate">{c.academicTerm}</span>
+              </div>
+              <div
+                className="flex items-center gap-2 text-sm"
+                style={{ color: palette.silver2 }}
+              >
+                <Users size={14} />
+                <span>Angkatan {c.cohortYear}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 items-end">
+            <Badge
+              palette={palette}
+              variant="outline"
+              className="flex items-center gap-1.5"
+            >
+              <MapPin size={12} />
+              {c.room ?? "Belum ditentukan"}
+            </Badge>
+            {/* <Badge
+              palette={palette}
+              variant="secondary"
+              className="flex items-center gap-1.5 font-semibold"
+            >
+              <Users size={12} />
+              {isLoadingStudents ? "..." : `${total} siswa`}
+            </Badge> */}
+          </div>
+        </div>
+
+      
+
+        {/* Content based on view mode */}
+        {viewMode === "simple" ? (
+          <div className="space-y-3">
+            {/* Next Session - Compact */}
+            <div
+              className="flex items-center gap-3 p-3 rounded-lg"
+              style={{
+                background: isUpcomingToday ? palette.primary2 : palette.white2,
+                border: `1px solid ${palette.silver1}`,
+              }}
+            >
+              <div style={{ color: palette.primary }}>
+                <Clock size={18} />
+              </div>
+              <div className="flex-1 min-w-0">
+                {c.nextSession ? (
+                  <div>
+                    <div
+                      className="text-sm font-medium truncate"
+                      style={{ color: palette.black1 }}
+                    >
+                      {c.nextSession.title}
+                    </div>
+                    <div
+                      className="text-xs mt-0.5"
+                      style={{ color: palette.silver2 }}
+                    >
+                      {dateShort(c.nextSession.dateISO)} • {c.nextSession.time}
+                      {c.nextSession.room && ` • ${c.nextSession.room}`}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    Belum ada jadwal
+                  </div>
+                )}
+              </div>
+            </div>
+
+            
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Attendance Section */}
+            <AttendanceBar
+              pct={pct}
+              total={total}
+              hadir={hadir}
+              palette={palette}
+            />
+
+            {/* Next Session - Detailed */}
+            <div
+              className="rounded-xl border p-4 space-y-3"
+              style={{
+                borderColor: isUpcomingToday ? palette.white1 : palette.silver1,
+                background: isUpcomingToday ? palette.primary2 : palette.white1,
+              }}
+            >
+              <div
+                className="flex items-center gap-2 text-sm font-semibold"
+                style={{ color: palette.black1 }}
+              >
+                <CalendarDays size={16} style={{ color: palette.primary }} />
+                Jadwal Terdekat
+                {isUpcomingToday && (
+                  <Badge
+                    palette={palette}
+                    variant="secondary"
+                    className="text-xs"
+                  >
+                    Hari ini
+                  </Badge>
+                )}
+              </div>
+              {c.nextSession ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock size={14} style={{ color: palette.primary }} />
+                    <span className="font-medium">
+                      {dateLong(c.nextSession.dateISO)} • {c.nextSession.time}
+                    </span>
+                  </div>
+                  <div
+                    className="text-sm font-medium"
+                    style={{ color: palette.black1 }}
+                  >
+                    {c.nextSession.title}
+                  </div>
+                  {c.nextSession.room && (
+                    <div
+                      className="flex items-center gap-2 text-sm"
+                      style={{ color: palette.silver2 }}
+                    >
+                      <MapPin size={14} />
+                      <span>{c.nextSession.room}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm" style={{ color: palette.silver2 }}>
+                  Belum ada jadwal yang terjadwal.
+                </div>
+              )}
+            </div>
+
+           
+          </div>
+        )}
+
+        {/* Footer Actions */}
+        <div
+          className="mt-auto pt-4 "
+        
+        >
+          <div className="flex items-center justify-end gap-3">
+           
+            <Link
+              to={`${c.id}`}
+              state={{
+                academicTerm: c.academicTerm,
+                cohortYear: c.cohortYear,
+              }}
+              className="flex-shrink-0"
+            >
+              <Btn
+                palette={palette}
+                size="sm"
+                className="flex items-center gap-2 hover:gap-3 transition-all duration-200"
+              >
+                Buka Kelas
+                <ChevronRight size={16} />
+              </Btn>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+/* ==============================
+   Filter Component
+============================== */
+function FilterControls({
+  palette,
+  q,
+  setQ,
+  room,
+  setRoom,
+  term,
+  setTerm,
+  cohort,
+  setCohort,
+  sortBy,
+  setSortBy,
+  rooms,
+  terms,
+  cohorts,
+}: {
+  palette: Palette;
+  q: string;
+  setQ: (q: string) => void;
+  room: string;
+  setRoom: (room: string) => void;
+  term: string;
+  setTerm: (term: string) => void;
+  cohort: string;
+  setCohort: (cohort: string) => void;
+  sortBy: "name" | "students" | "time";
+  setSortBy: (sort: "name" | "students" | "time") => void;
+  rooms: string[];
+  terms: string[];
+  cohorts: string[];
+}) {
+  return (
+    <div className="space-y-4">
+      {/* Search Bar */}
+      <div
+        className="flex items-center gap-3 rounded-xl border px-4 py-3 shadow-sm"
+        style={{
+          borderColor: palette.silver1,
+          background: palette.white1,
+        }}
+      >
+        <Search size={20} style={{ color: palette.primary }} />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Cari berdasarkan nama kelas, wali kelas, tahun ajaran, atau angkatan..."
+          className="bg-transparent outline-none text-sm w-full placeholder:text-opacity-60"
+          style={{
+            color: palette.black1,
+            fontSize: "14px",
+          }}
+        />
+      </div>
+
+      {/* Filter Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Room Filter */}
+        <div className="space-y-2">
+          <label
+            className="text-xs font-medium"
+            style={{ color: palette.silver2 }}
+          >
+            Ruang Kelas
+          </label>
+          <div
+            className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white1,
+            }}
+          >
+            <MapPin size={16} style={{ color: palette.primary }} />
+            <select
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+              className="bg-transparent outline-none text-sm w-full"
+              style={{ color: palette.black1 }}
+            >
+              {rooms.map((r) => (
+                <option key={r} value={r}>
+                  {r === "all" ? "Semua ruang" : r}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Academic Term Filter */}
+        <div className="space-y-2">
+          <label
+            className="text-xs font-medium"
+            style={{ color: palette.silver2 }}
+          >
+            Tahun Ajaran
+          </label>
+          <div
+            className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white1,
+            }}
+          >
+            <CalendarDays size={16} style={{ color: palette.primary }} />
+            <select
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              className="bg-transparent outline-none text-sm w-full"
+              style={{ color: palette.black1 }}
+            >
+              {terms.map((t) => (
+                <option key={t} value={t}>
+                  {t === "all" ? "Semua tahun ajaran" : t}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Cohort Filter */}
+        <div className="space-y-2">
+          <label
+            className="text-xs font-medium"
+            style={{ color: palette.silver2 }}
+          >
+            Angkatan
+          </label>
+          <div
+            className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white1,
+            }}
+          >
+            <GraduationCap size={16} style={{ color: palette.primary }} />
+            <select
+              value={cohort}
+              onChange={(e) => setCohort(e.target.value)}
+              className="bg-transparent outline-none text-sm w-full"
+              style={{ color: palette.black1 }}
+            >
+              {cohorts.map((y) => (
+                <option key={y} value={y}>
+                  {y === "all" ? "Semua angkatan" : `Angkatan ${y}`}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Sort Filter */}
+        <div className="space-y-2">
+          <label
+            className="text-xs font-medium"
+            style={{ color: palette.silver2 }}
+          >
+            Urutkan
+          </label>
+          <div
+            className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+            style={{
+              borderColor: palette.silver1,
+              background: palette.white1,
+            }}
+          >
+            <Filter size={16} style={{ color: palette.primary }} />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="bg-transparent outline-none text-sm w-full"
+              style={{ color: palette.black1 }}
+            >
+              <option value="name">Nama Kelas</option>
+              <option value="students">Jumlah Siswa</option>
+              <option value="time">Jadwal Terdekat</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==============================
+   Loading State Component
+============================== */
+function LoadingCard({
+  palette,
+  viewMode,
+}: {
+  palette: Palette;
+  viewMode: ViewMode;
+}) {
+  return (
+    <SectionCard palette={palette} className="animate-pulse">
+      <div
+        className={`p-5 md:p-6 space-y-4 ${viewMode === "simple" ? "space-y-3" : "space-y-4"}`}
+      >
+        {/* Header skeleton */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div
+              className="h-6 rounded-lg w-32"
+              style={{ background: palette.silver1 }}
+            />
+            <div
+              className="h-4 rounded w-48"
+              style={{ background: palette.silver1 }}
+            />
+          </div>
+          <div className="space-y-2">
+            <div
+              className="h-6 rounded-lg w-20"
+              style={{ background: palette.silver1 }}
+            />
+            <div
+              className="h-6 rounded-lg w-16"
+              style={{ background: palette.silver1 }}
+            />
+          </div>
+        </div>
+
+        {/* Content skeleton */}
+        {viewMode === "detailed" && (
+          <>
+            <div
+              className="h-16 rounded-xl"
+              style={{ background: palette.silver1 }}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                className="h-12 rounded-xl"
+                style={{ background: palette.silver1 }}
+              />
+              <div
+                className="h-12 rounded-xl"
+                style={{ background: palette.silver1 }}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Footer skeleton */}
+        <div className="flex items-center justify-between pt-4">
+          <div
+            className="h-4 rounded w-24"
+            style={{ background: palette.silver1 }}
+          />
+          <div
+            className="h-8 rounded-lg w-20"
+            style={{ background: palette.silver1 }}
+          />
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+/* ==============================
+   Summary Stats Component
+============================== */
+function SummaryStats({
+  classes,
+  palette,
+}: {
+  classes: TeacherClassSummary[];
+  palette: Palette;
+}) {
+  const totalClasses = classes.length;
+  const totalStudents = classes.reduce((sum, c) => sum + c.studentsCount, 0);
+  const totalTodayAttendance = classes.reduce(
+    (sum, c) => sum + c.todayAttendance.hadir,
+    0
+  );
+  const avgAttendanceRate =
+    totalStudents > 0
+      ? Math.round((totalTodayAttendance / totalStudents) * 100)
+      : 0;
+
+  return (
+    <SectionCard palette={palette} className="mb-6">
+      <div className="p-5 md:p-6">
+        <div
+          className="font-semibold text-lg mb-4"
+          style={{ color: palette.black1 }}
+        >
+          Ringkasan Kelas Hari Ini
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div
+            className="text-center p-4 rounded-xl"
+            style={{ background: palette.white1 }}
+          >
+            <div
+              className="text-2xl font-bold mb-1"
+              style={{ color: palette.primary }}
+            >
+              {totalClasses}
+            </div>
+            <div className="text-sm" style={{ color: palette.silver2 }}>
+              Total Kelas
+            </div>
+          </div>
+          <div
+            className="text-center p-4 rounded-xl"
+            style={{ background: palette.white1 }}
+          >
+            <div
+              className="text-2xl font-bold mb-1"
+              style={{ color: palette.secondary }}
+            >
+              {totalStudents}
+            </div>
+            <div className="text-sm" style={{ color: palette.silver2 }}>
+              Total Siswa
+            </div>
+          </div>
+          <div
+            className="text-center p-4 rounded-xl"
+            style={{ background: palette.white2 }}
+          >
+            <div
+              className="text-2xl font-bold mb-1"
+              style={{ color: palette.primary }}
+            >
+              {totalTodayAttendance}
+            </div>
+            <div className="text-sm" style={{ color: palette.silver2 }}>
+              Hadir Hari Ini
+            </div>
+          </div>
+          <div
+            className="text-center p-4 rounded-xl"
+            style={{ background: palette.white2 }}
+          >
+            <div
+              className="text-2xl font-bold mb-1"
+              style={{ color: palette.secondary }}
+            >
+              {avgAttendanceRate}%
+            </div>
+            <div className="text-sm" style={{ color: palette.silver2 }}>
+              Rata-rata Kehadiran
+            </div>
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+/* ==============================
+   Main Page Component
+============================== */
+export default function TeacherClassesList() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
-  // Opsi kelas
-  const { data: classOptions = [] } = useQuery({
-    queryKey: ["teacher-class-options"],
-    queryFn: () => fetchClassOptions(),
-    staleTime: 5 * 60_000,
-  });
+  // data kelas
+  const { data: classes = [], isFetching: isFetchingClasses } =
+    useTeacherClasses();
 
-  // Kelas terpilih (default dari URL)
-  const [selectedClassId, setSelectedClassId] =
-    useState<string>(classIdFromUrl);
-  useEffect(() => setSelectedClassId(classIdFromUrl), [classIdFromUrl]);
+  // filters + view mode (persist in memory instead of localStorage)
+  const [viewMode, setViewMode] = useState<ViewMode>("detailed");
 
-  // Detail kelas
-  const { data } = useQuery({
-    queryKey: ["teacher-class-detail", selectedClassId],
-    queryFn: () => fetchClassDetail(selectedClassId),
-    staleTime: 60_000,
-    enabled: !!selectedClassId,
-  });
+  const {
+    q,
+    setQ,
+    room,
+    setRoom,
+    sortBy,
+    setSortBy,
+    term,
+    setTerm,
+    cohort,
+    setCohort,
+    rooms,
+    terms,
+    cohorts,
+    filtered,
+  } = useClassFilters(classes);
 
-  // === Konsolidasi ringkasan dari students (Sumber Kebenaran Tunggal) ===
-  const attendanceFromStudents = useMemo(() => {
-    const counts: Record<AttendanceStatus, number> = {
-      hadir: 0,
-      online: 0,
-      sakit: 0,
-      izin: 0,
-      alpa: 0,
-    };
-    const list = data?.students ?? [];
-    for (const s of list) {
-      if (!s.statusToday) continue;
-      counts[s.statusToday] = (counts[s.statusToday] ?? 0) + 1;
-    }
-    return { byStatus: counts, total: list.length };
-  }, [data?.students]);
+  // siswa per kelas
+  const classIds = useMemo(() => filtered.map((c) => c.id), [filtered]);
+  const { data: studentsMap = {}, isFetching: isFetchingStudents } =
+    useClassStudents(classIds);
 
-  // Jadwal 7 hari ke depan (today..+6)
-  const next7DaysItems = useMemo(() => {
-    const start = startOfDay(new Date());
-    const end = startOfDay(addDays(new Date(), 6));
-    const src = data?.upcomingSchedule ?? [];
-
-    return src
-      .filter((it) => {
-        const d = startOfDay(new Date(it.dateISO));
-        return d >= start && d <= end;
-      })
-      .sort((a, b) => {
-        const ad =
-          new Date(a.dateISO).getTime() - new Date(b.dateISO).getTime();
-        if (ad !== 0) return ad;
-        return a.time.localeCompare(b.time);
-      })
-      .map((it) => ({
-        time: it.time,
-        title: it.title,
-        room: `${dateShort(it.dateISO)}${it.room ? ` • ${it.room}` : ""}`,
-      }));
-  }, [data?.upcomingSchedule]);
-
-  // Jadwal manual (local)
-  const [showTambahJadwal, setShowTambahJadwal] = useState(false);
-  const [listScheduleItems, setListScheduleItems] = useState<
-    { time: string; title: string; room?: string; slug?: string }[]
-  >([]);
-  const combinedUpcoming = useMemo(
-    () => [...next7DaysItems, ...listScheduleItems],
-    [next7DaysItems, listScheduleItems]
-  );
-
-  // ===== Students filter/search =====
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<AttendanceStatus | "all">(
-    "all"
-  );
-
-  const filteredStudents = useMemo(() => {
-    const base = data?.students ?? [];
-    const byStatus =
-      statusFilter === "all"
-        ? base
-        : base.filter((s) => s.statusToday === statusFilter);
-    const qStr = q.trim().toLowerCase();
-    return qStr
-      ? byStatus.filter((s) => s.name.toLowerCase().includes(qStr))
-      : byStatus;
-  }, [data?.students, q, statusFilter]);
-
-  // Handlers
-  const handleAddStudent = async (payload: AddStudentPayload) => {
-    alert(`Siswa baru: ${payload.name}`);
-  };
-  const handleExport = (file: File) => {
-    alert(`File diupload: ${file.name}`);
-    setExportOpen(false);
-  };
+  const todayISO = toLocalNoonISO(new Date());
 
   return (
     <div
@@ -435,546 +1120,146 @@ export default function TeacherClass() {
     >
       <ParentTopBar
         palette={palette}
-        title="Detail Kelas"
-        gregorianDate={
-          normalizeISOToLocalNoon(data?.gregorianDate) ??
-          toLocalNoonISO(new Date())
-        }
-        hijriDate={hijriLong(
-          normalizeISOToLocalNoon(data?.gregorianDate) ??
-            toLocalNoonISO(new Date())
-        )}
+        title="Daftar Kelas Saya"
+        gregorianDate={todayISO}
+        hijriDate={hijriLong(todayISO)}
         dateFmt={dateLong}
       />
 
-      {/* ===== Modals ===== */}
-      <ModalAddStudent
-        open={addStudentOpen}
-        onClose={() => setAddStudentOpen(false)}
-        palette={palette}
-        onSubmit={handleAddStudent}
-      />
-      <ModalExport
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-        onSubmit={handleExport}
-        palette={palette}
-      />
-      <ModalAddMateri
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        palette={palette}
-        onSubmit={(form) => {
-          console.log("Materi baru:", form);
-        }}
-      />
-      <AddSchedule
-        open={showTambahJadwal}
-        onClose={() => setShowTambahJadwal(false)}
-        palette={palette}
-        onSubmit={(item) => {
-          setListScheduleItems((prev) =>
-            [...prev, item].sort((a, b) => a.time.localeCompare(b.time))
-          );
-        }}
-      />
-
-      {/* ===== Content + Sidebar ===== */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
+      <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
+        <div className="lg:flex lg:items-start lg:gap-6">
           <ParentSidebar palette={palette} />
 
-          {/* Main content */}
+          {/* Main Content */}
           <div className="flex-1 min-w-0 space-y-6">
-            <ClassSelector
-              palette={palette}
-              value={selectedClassId}
-              options={classOptions}
-              onChange={(nextId) => setSelectedClassId(nextId)}
-            />
+            {/* Summary Stats */}
+            {!isFetchingClasses && classes.length > 0 && (
+              <SummaryStats classes={classes} palette={palette} />
+            )}
 
-            {/* Banner info kelas aktif — total siswa sinkron dg tabel */}
-            <div
-              className="rounded-xl p-3 md:p-4"
-              style={{ background: palette.white1, color: palette.white1 }}
-            >
-              <div className="text-sm" style={{ color: palette.black2 }}>
-                Anda sedang melihat:
+            {/* Filter & Controls Section */}
+            <SectionCard palette={palette}>
+              <div className="p-5 md:p-6 space-y-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <h2
+                      className="font-bold text-xl md:text-2xl mb-1"
+                      style={{ color: palette.black1 }}
+                    >
+                      Kelas yang Saya Ajar
+                    </h2>
+                    <p className="text-sm" style={{ color: palette.silver2 }}>
+                      Kelola dan pantau semua kelas yang Anda ampu
+                    </p>
+                  </div>
+                  <ViewModeToggle
+                    palette={palette}
+                    value={viewMode}
+                    onChange={setViewMode}
+                  />
+                </div>
+
+                
               </div>
+            </SectionCard>
+
+            {/* Results Section */}
+            <div>
+              {/* Results Header */}
+              {!isFetchingClasses && (
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    Menampilkan {filtered.length} dari {classes.length} kelas
+                  </div>
+                  {filtered.length > 0 && (
+                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                      Diurutkan berdasarkan:{" "}
+                      {sortBy === "name"
+                        ? "Nama Kelas"
+                        : sortBy === "students"
+                          ? "Jumlah Siswa"
+                          : "Jadwal Terdekat"}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Classes Grid */}
               <div
-                className="font-semibold text-base md:text-lg"
-                style={{ color: palette.black2 }}
+                className={`grid gap-6 ${
+                  viewMode === "simple"
+                    ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                    : "grid-cols-1 lg:grid-cols-2"
+                }`}
               >
-                Kelas {data?.name ?? "-"}
-                {data?.room ? (
-                  <span
-                    className="font-normal"
-                    style={{ color: palette.black1 }}
-                  >
-                    {" "}
-                    • Ruang {data.room}
-                  </span>
-                ) : null}
-              </div>
-              <div className="text-sm" style={{ color: palette.silver2 }}>
-                Wali Kelas: {data?.homeroom ?? "-"} •{" "}
-                {attendanceFromStudents.total} siswa
-              </div>
-            </div>
-
-            {/* ===== Header info + Actions ===== */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              {/* Jadwal 7 hari ke depan */}
-              <div className="lg:col-span-7">
-                <TodayScheduleCard
-                  palette={palette}
-                  items={combinedUpcoming.slice(0, 3)}
-                  title="Jadwal 7 Hari Kedepan"
-                  addLabel="Tambah Jadwal"
-                  onAdd={() => setShowTambahJadwal(true)}
-                  seeAllPath="schedule-seven-days"
-                  seeAllState={{ upcoming: combinedUpcoming }}
-                />
-              </div>
-
-              {/* Wali kelas card */}
-              <SectionCard
-                palette={palette}
-                className="lg:col-span-5"
-                onClick={() =>
-                  navigate("homeroom", {
-                    state: {
-                      homeroom: data?.homeroom,
-                      assistants: data?.assistants,
-                      room: data?.room,
-                      studentsCount: attendanceFromStudents.total,
-                    },
-                  })
-                }
-              >
-                <div className="p-4 md:p-6 flex flex-col gap-3">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
-                    <div className="space-y-1.5">
-                      <div
-                        className="text-sm"
-                        style={{ color: palette.silver2 }}
-                      >
-                        Wali Kelas
-                      </div>
-                      <div className="font-semibold text-lg leading-snug break-words">
-                        {data?.homeroom}
-                      </div>
-                      {data?.assistants?.length ? (
-                        <div
-                          className="text-sm leading-relaxed"
-                          style={{ color: palette.silver2 }}
-                        >
-                          Pendamping: {data.assistants.join(", ")}
-                        </div>
-                      ) : null}
-                    </div>
-                    <div className="flex flex-wrap gap-2 sm:gap-3 sm:self-start mt-2 sm:mt-0">
-                      <Badge palette={palette} variant="outline">
-                        {data?.room ?? "-"}
-                      </Badge>
-                      <Badge palette={palette} variant="outline">
-                        <Users className="mr-1" size={14} />
-                        {attendanceFromStudents.total} siswa
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </SectionCard>
-            </section>
-
-            {/* ===== Assignments ===== */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-12">
-                <div className="p-4 md:p-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="font-medium flex items-center gap-2">
-                      <ClipboardList size={16} /> Tugas Kelas
-                    </div>
-                    <Link
-                      to="../assignments"
-                      state={{
-                        assignments: data?.assignments ?? [],
-                        className: data?.name ?? "",
-                        heading: `Tugas ${data?.name ?? ""}`,
-                      }}
-                    >
-                      <Btn palette={palette} size="sm" variant="ghost">
-                        Lihat semua
-                      </Btn>
-                    </Link>
-                  </div>
-
-                  <div className="mt-3 grid gap-3">
-                    {(data?.assignments ?? []).map((t) => {
-                      const pct = percent(t.submitted, t.total);
-                      return (
-                        <div
-                          key={t.id}
-                          className="p-3 rounded-xl border"
-                          style={{
-                            borderColor: palette.silver1,
-                            background: palette.white1,
-                          }}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <div className="font-medium truncate">
-                                {t.title}
-                              </div>
-                              <div
-                                className="text-xs mt-0.5"
-                                style={{ color: palette.silver2 }}
-                              >
-                                {t.submitted}/{t.total} terkumpul • batas{" "}
-                                {dateShort(t.dueDate)}
-                              </div>
-                            </div>
-                            <Badge
-                              palette={palette}
-                              variant="outline"
-                              className="shrink-0"
-                            >
-                              {pct}%
-                            </Badge>
-                          </div>
-                          <div
-                            className="mt-2 h-2 w-full rounded-full overflow-hidden"
-                            style={{ background: palette.white2 }}
-                          >
-                            <div
-                              className="h-full"
-                              style={{
-                                width: `${pct}%`,
-                                background: palette.secondary,
-                              }}
-                            />
-                          </div>
-                          <div className="mt-3 flex gap-2">
-                            <Btn
-                              palette={palette}
-                              size="sm"
-                              onClick={() =>
-                                navigate(`../kelas/${selectedClassId}/score`, {
-                                  state: {
-                                    assignment: {
-                                      id: t.id,
-                                      title: t.title,
-                                      dueDate: t.dueDate,
-                                      submitted: t.submitted,
-                                      total: t.total,
-                                    },
-                                  },
-                                })
-                              }
-                            >
-                              Nilai
-                            </Btn>
-
-                            <LinkBtn
-                              palette={palette}
-                              size="sm"
-                              variant="ghost"
-                              to={`${selectedClassId}/assignment/${t.id}`}
-                              state={{ assignment: t }}
-                            >
-                              Detail
-                            </LinkBtn>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {(!data?.assignments || data.assignments.length === 0) && (
-                      <div
-                        className="text-sm"
-                        style={{ color: palette.silver2 }}
-                      >
-                        Belum ada tugas.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </SectionCard>
-            </section>
-
-            {/* ===== Materials + Attendance Summary ===== */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-7">
-                <div className="p-4 md:p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium flex items-center gap-2">
-                      <BookOpen size={16} /> Materi
-                    </div>
-                    <Btn
-                      palette={palette}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setOpenModal(true)}
-                    >
-                      <Plus className="mr-1" size={16} /> Tambah
-                    </Btn>
-                  </div>
-
-                  <div className="mt-3 grid gap-2">
-                    {(data?.materials ?? []).map((m) => (
-                      <div
-                        key={m.id}
-                        className="p-3 rounded-xl border flex items-center justify-between gap-2"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white2,
-                        }}
-                      >
-                        <div className="min-w-0">
-                          <div className="font-medium truncate">{m.title}</div>
-                          <div
-                            className="text-xs"
-                            style={{ color: palette.silver2 }}
-                          >
-                            {dateLong(m.date)}
-                            {typeof m.attachments === "number"
-                              ? ` • ${m.attachments} lampiran`
-                              : ""}
-                          </div>
-                        </div>
-
-                        <Link
-                          to={`${selectedClassId}/material/${m.id}`}
-                          state={{ material: m, className: data?.name }}
-                        >
-                          <Btn palette={palette} variant="white1" size="sm">
-                            Buka
-                          </Btn>
-                        </Link>
-                      </div>
-                    ))}
-                    {(!data?.materials || data.materials.length === 0) && (
-                      <div
-                        className="text-sm"
-                        style={{ color: palette.silver2 }}
-                      >
-                        Belum ada materi.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </SectionCard>
-
-              {/* Ringkasan Kehadiran — sinkron dari students */}
-              <SectionCard palette={palette} className="lg:col-span-5">
-                <div className="p-4 md:p-5">
-                  <div className="font-medium mb-2 flex items-center gap-2">
-                    <CheckSquare size={16} /> Ringkasan Kehadiran Hari Ini
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <StatPill
-                      palette={palette}
-                      label="Total Siswa"
-                      value={attendanceFromStudents.total}
-                    />
-                    <StatPill
-                      palette={palette}
-                      label="Hadir"
-                      value={attendanceFromStudents.byStatus.hadir}
-                    />
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    {(
-                      [
-                        "hadir",
-                        "online",
-                        "sakit",
-                        "izin",
-                        "alpa",
-                      ] as AttendanceStatus[]
-                    ).map((k) => (
-                      <MiniBar
-                        key={k}
+                {/* Loading State */}
+                {isFetchingClasses && filtered.length === 0 && (
+                  <>
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <LoadingCard
+                        key={i}
                         palette={palette}
-                        label={k.toUpperCase()}
-                        value={attendanceFromStudents.byStatus[k]}
-                        total={attendanceFromStudents.total}
+                        viewMode={viewMode}
                       />
                     ))}
-                  </div>
+                  </>
+                )}
 
-                  <div className="mt-4">
+                {/* Class Cards */}
+                {filtered.map((c) => (
+                  <ClassCard
+                    key={c.id}
+                    c={c}
+                    students={(studentsMap as ClassStudentsMap)[c.id] ?? []}
+                    palette={palette}
+                    viewMode={viewMode}
+                    isLoadingStudents={isFetchingStudents}
+                  />
+                ))}
+              </div>
+
+              {/* Empty State */}
+              {filtered.length === 0 && !isFetchingClasses && (
+                <SectionCard palette={palette}>
+                  <div className="p-8 md:p-12 text-center space-y-4">
+                    <div
+                      className="mx-auto w-16 h-16 rounded-full flex items-center justify-center"
+                      style={{ background: palette.white2 }}
+                    >
+                      <Search size={24} style={{ color: palette.silver2 }} />
+                    </div>
+                    <div>
+                      <div
+                        className="font-medium text-lg mb-2"
+                        style={{ color: palette.black1 }}
+                      >
+                        Tidak ada kelas ditemukan
+                      </div>
+                      <div
+                        className="text-sm max-w-md mx-auto"
+                        style={{ color: palette.silver2 }}
+                      >
+                        Tidak ada kelas yang cocok dengan filter yang dipilih.
+                        Coba ubah kriteria pencarian atau filter untuk melihat
+                        lebih banyak kelas.
+                      </div>
+                    </div>
                     <Btn
                       palette={palette}
-                      size="sm"
-                      onClick={() =>
-                        navigate("../attendance-management", {
-                          state: {
-                            className: data?.name,
-                            students: (data?.students ?? []).map((s) => ({
-                              id: s.id,
-                              name: s.name,
-                              status: (s.statusToday ?? "alpa") as
-                                | "hadir"
-                                | "online"
-                                | "sakit"
-                                | "izin"
-                                | "alpa",
-                            })),
-                          },
-                        })
-                      }
+                      variant="outline"
+                      onClick={() => {
+                        setQ("");
+                        setRoom("all");
+                        setTerm("all");
+                        setCohort("all");
+                      }}
                     >
-                      Kelola Absen
+                      Reset Filter
                     </Btn>
                   </div>
-                </div>
-              </SectionCard>
-            </section>
-
-            {/* ===== Students table ===== */}
-            <section>
-              <SectionCard palette={palette}>
-                <div className="p-4 md:p-5">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="font-medium flex items-center gap-2">
-                      <GraduationCap size={16} /> Daftar Siswa
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {/* Search */}
-                      <div
-                        className="flex items-center gap-2 rounded-xl border px-3 h-10"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white2,
-                        }}
-                      >
-                        <Search size={16} />
-                        <input
-                          value={q}
-                          onChange={(e) => setQ(e.target.value)}
-                          placeholder="Cari nama…"
-                          className="bg-transparent outline-none text-sm"
-                          style={{ color: palette.black1 }}
-                        />
-                      </div>
-                      {/* Filter */}
-                      <div className="flex items-center gap-2">
-                        <Badge palette={palette} variant="outline">
-                          <Filter size={14} className="mr-1" />
-                          Status
-                        </Badge>
-                        <div className="hidden sm:flex gap-1">
-                          {(
-                            [
-                              "all",
-                              "hadir",
-                              "online",
-                              "sakit",
-                              "izin",
-                              "alpa",
-                            ] as (AttendanceStatus | "all")[]
-                          ).map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setStatusFilter(s)}
-                              className="px-3 h-8 rounded-full border text-sm"
-                              style={{
-                                background:
-                                  statusFilter === s
-                                    ? palette.primary2
-                                    : palette.white2,
-                                color:
-                                  statusFilter === s
-                                    ? palette.primary
-                                    : palette.black1,
-                                borderColor:
-                                  statusFilter === s
-                                    ? palette.primary
-                                    : palette.silver1,
-                              }}
-                            >
-                              {s.toUpperCase()}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <StudentsTable
-                    palette={palette}
-                    rows={filteredStudents}
-                    onDetail={(id) => {
-                      const s = (data?.students ?? []).find((x) => x.id === id);
-                      if (!s) return;
-
-                      navigate(`${selectedClassId}/student/${s.id}`, {
-                        state: {
-                          student: {
-                            id: s.id,
-                            name: s.name,
-                            avatarUrl: s.avatarUrl,
-                            statusToday: s.statusToday,
-                            mode: s.mode,
-                            time: s.time,
-                            iqraLevel: s.iqraLevel,
-                            juzProgress: s.juzProgress,
-                            lastScore: s.lastScore,
-                            className: data?.name,
-                          },
-                        },
-                      });
-                    }}
-                    onGrade={(id) => {
-                      const s = (data?.students ?? []).find((x) => x.id === id);
-                      if (!s) return;
-                      // siapkan daftar tugas (opsional, boleh tidak dikirim)
-                      const tasks = (data?.assignments ?? []).map((t) => ({
-                        id: t.id,
-                        title: t.title,
-                        dueDate: t.dueDate,
-                      }));
-
-                      navigate(`${selectedClassId}/student/${id}/score`, {
-                        state: {
-                          student: {
-                            id: s.id,
-                            name: s.name,
-                            className: data?.name,
-                          },
-                          assignments: tasks,
-                        },
-                      });
-                    }}
-                  />
-                  {/* Footer actions */}
-                  <div className="mt-4 flex justify-between items-center">
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
-                      Total: {filteredStudents.length} siswa
-                    </div>
-                    <div className="flex gap-2">
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setExportOpen(true)}
-                      >
-                        Export CSV
-                      </Btn>
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        onClick={() => setAddStudentOpen(true)}
-                      >
-                        <Plus className="mr-1" size={16} /> Tambah Siswa
-                      </Btn>
-                    </div>
-                  </div>
-                </div>
-              </SectionCard>
-            </section>
+                </SectionCard>
+              )}
+            </div>
           </div>
         </div>
       </main>

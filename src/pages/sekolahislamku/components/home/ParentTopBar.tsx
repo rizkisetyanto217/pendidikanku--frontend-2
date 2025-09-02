@@ -31,16 +31,15 @@ import {
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
+import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
 /* ===================== Types ===================== */
 interface ParentTopBarProps {
   palette: Palette;
-  /** Bila diberikan, pakai ini; jika tidak akan dihitung lokal */
-  hijriDate?: string;
-  gregorianDate?: string; // ISO; fallback: today
-  /** Custom formatter utk Masehi; default: id-ID lengkap */
-  dateFmt?: (iso: string) => string;
   title?: ReactNode;
+  hijriDate?: string; // opsional override label Hijriah
+  gregorianDate?: string; // ISO string, default now
+  dateFmt?: (iso: string) => string; // custom formatter untuk Masehi
 }
 
 type NavItem = {
@@ -50,13 +49,11 @@ type NavItem = {
   end?: boolean;
 };
 
-/* ===================== Helpers ===================== */
-const buildBase = (
-  slug: string | undefined,
-  root: "sekolah" | "murid" | "guru"
-) => (slug ? `/${slug}/${root}` : `/${root}`);
+/* ===================== Date helpers ===================== */
+const toCivilUtcDate = (d: Date) =>
+  new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 
-const idIdFormat = (iso: string) =>
+const formatIDGregorian = (iso: string) =>
   new Intl.DateTimeFormat("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -64,13 +61,6 @@ const idIdFormat = (iso: string) =>
     year: "numeric",
   }).format(new Date(iso));
 
-/** Hijri fallback (Umm al-Qura). Return "" bila tidak didukung browser */
-// ==== helpers ====
-/** Tanggal sipil: jam di-nolkan & di-UTC-kan agar stabil di semua zona */
-const toCivilUtcDate = (d: Date) =>
-  new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-
-/** Hijri (Umm al-Qura) stabil: selalu format di UTC & tanggal sipil */
 const formatHijriLocal = (d: Date) => {
   try {
     const fmt = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
@@ -78,6 +68,7 @@ const formatHijriLocal = (d: Date) => {
       month: "long",
       year: "numeric",
       timeZone: "UTC",
+      weekday: "long",
     });
     return `${fmt.format(toCivilUtcDate(d))} H`;
   } catch {
@@ -85,13 +76,12 @@ const formatHijriLocal = (d: Date) => {
   }
 };
 
-
-/* ===================== Nav Definitions (RELATIF) ===================== */
+/* ===================== Nav definitions ===================== */
 const STUDENT_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
   { path: "finance", label: "Pembayaran", icon: Wallet },
-  { path: "jadwal", label: "Jadwal", icon: Megaphone }, // bisa ganti ke CalendarDays kalau dipakai
+  { path: "jadwal", label: "Jadwal", icon: Megaphone },
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   { path: "rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
 ];
@@ -116,7 +106,7 @@ const TEACHER_NAVS: NavItem[] = [
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
 ];
 
-/* ===================== Tiny UI ===================== */
+/* ===================== Small UI ===================== */
 function NavLinkItem({
   to,
   icon: Icon,
@@ -174,19 +164,16 @@ function MobileDrawer({
   hijriLabel,
   navs,
   palette,
+  isDark,
 }: {
   open: boolean;
   onClose: () => void;
   brand: ReactNode;
   formattedGregorian: string;
   hijriLabel: string;
-  navs: {
-    to: string;
-    label: string;
-    icon: ComponentType<any>;
-    end?: boolean;
-  }[];
+  navs: NavItem[];
   palette: Palette;
+  isDark: boolean;
 }) {
   if (!open) return null;
   return (
@@ -233,7 +220,10 @@ function MobileDrawer({
           {formattedGregorian}
           <span
             className="ml-2 inline-flex items-center rounded-full px-2 py-0.5"
-            style={{ background: palette.secondary, color: palette.white1 }}
+            style={{
+              background: palette.secondary,
+              color: isDark ? "#fff" : palette.white1,
+            }}
           >
             {hijriLabel || "—"}
           </span>
@@ -241,10 +231,10 @@ function MobileDrawer({
 
         <nav className="px-2 pb-4" aria-label="Navigasi">
           <ul className="space-y-2">
-            {navs.map(({ to, label, icon, end }) => (
-              <li key={to}>
+            {navs.map(({ path, label, icon, end }) => (
+              <li key={path}>
                 <NavLinkItem
-                  to={to}
+                  to={path}
                   icon={icon}
                   label={label}
                   end={end}
@@ -260,7 +250,13 @@ function MobileDrawer({
   );
 }
 
-/* ===================== Main Component ===================== */
+/* ===================== Utils ===================== */
+const buildBase = (
+  slug: string | undefined,
+  root: "sekolah" | "murid" | "guru"
+) => (slug ? `/${slug}/${root}` : `/${root}`);
+
+/* ===================== Main ===================== */
 export default function ParentTopBar({
   palette,
   hijriDate,
@@ -268,8 +264,9 @@ export default function ParentTopBar({
   dateFmt,
   title,
 }: ParentTopBarProps) {
+  const { isDark } = useHtmlDarkMode();
   const [open, setOpen] = useState(false);
-  const [midnightTick, setMidnightTick] = useState(0); // trigger re-render after midnight
+  const [midnightTick, setMidnightTick] = useState(0);
   const { pathname } = useLocation();
 
   // slug awareness
@@ -277,37 +274,38 @@ export default function ParentTopBar({
   const match = useMatch("/:slug/*");
   const slug = params.slug ?? match?.params.slug ?? "";
 
-  // Tentukan jenis halaman (sekolah/murid/guru)
+  // page kind
   const pageKind: "sekolah" | "murid" | "guru" = pathname.includes("/sekolah")
     ? "sekolah"
     : pathname.includes("/guru")
       ? "guru"
       : "murid";
 
-  // Base URL untuk semua link di nav (slug-aware)
   const base = buildBase(slug, pageKind);
 
-  // Sumber nav sesuai jenis halaman
-  const navs = useMemo(() => {
+  // navs
+  const navs = useMemo<NavItem[]>(() => {
     const source =
       pageKind === "sekolah"
         ? SCHOOL_NAVS
         : pageKind === "guru"
           ? TEACHER_NAVS
           : STUDENT_NAVS;
+
+    // konversi ke absolute path berbasis slug
     return source.map(({ path, label, icon, end }) => ({
-      to: path === "." ? base : `${base}/${path}`,
+      path: path === "." ? base : `${base}/${path}`,
       label,
       icon,
       end,
     }));
   }, [pageKind, base]);
 
-  // Dates (always available)
+  // dates
   const now = useMemo(() => new Date(), [pathname, midnightTick]);
   const gIso = gregorianDate ?? now.toISOString();
   const formattedGregorian = useMemo(
-    () => (dateFmt ? dateFmt(gIso) : idIdFormat(gIso)),
+    () => (dateFmt ? dateFmt(gIso) : formatIDGregorian(gIso)),
     [gIso, dateFmt]
   );
   const hijriLabel = useMemo(
@@ -315,7 +313,7 @@ export default function ParentTopBar({
     [hijriDate, now]
   );
 
-  // Lock scroll when drawer open
+  // lock scroll when drawer opens
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -323,7 +321,7 @@ export default function ParentTopBar({
     return () => void (document.body.style.overflow = prev);
   }, [open]);
 
-  // Auto update after midnight (supaya tanggal ganti otomatis)
+  // tick after midnight to refresh dates
   useEffect(() => {
     const d = new Date();
     const msUntilMidnight =
@@ -336,7 +334,7 @@ export default function ParentTopBar({
     return () => clearTimeout(t);
   }, [midnightTick]);
 
-  // Judul default sesuai jenis dashboard
+  // default title
   const brandNode =
     title ??
     (pageKind === "sekolah"
@@ -356,7 +354,7 @@ export default function ParentTopBar({
         }}
       >
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3">
-          {/* Left: Brand & subtitle (Masehi kecil) */}
+          {/* Left */}
           <div className="flex items-center gap-2">
             <button
               className="md:hidden -ml-1 mr-1 grid place-items-center h-9 w-9 rounded-xl"
@@ -368,7 +366,6 @@ export default function ParentTopBar({
               <Menu size={18} />
             </button>
 
-            {/* Judul kiri */}
             <div className="flex items-center gap-2">
               {!title && <GraduationCap size={22} color={palette.black1} />}
               <div className="leading-tight">
@@ -392,7 +389,11 @@ export default function ParentTopBar({
           >
             <span
               className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-              style={{ background: palette.secondary, color: palette.white1 }}
+              style={{
+                background: palette.secondary,
+                // ⬇️ fix: teks putih saat dark
+                color: isDark ? "#fff" : palette.white1,
+              }}
               aria-label="Tanggal Hijriah"
               title={hijriLabel}
             >
@@ -401,13 +402,11 @@ export default function ParentTopBar({
             <PublicUserDropdown variant="icon" withBg={false} />
           </div>
 
-          {/* Right (mobile) */}
+          {/* Right (mobile icon) */}
           <div className="md:hidden">
             <PublicUserDropdown variant="icon" withBg={false} />
           </div>
         </div>
-
-        {/* (Opsional) Mobile inline dates – disembunyikan untuk ringkas */}
       </div>
 
       {/* Mobile Drawer */}
@@ -419,6 +418,7 @@ export default function ParentTopBar({
         hijriLabel={hijriLabel}
         navs={navs}
         palette={palette}
+        isDark={isDark}
       />
     </>
   );

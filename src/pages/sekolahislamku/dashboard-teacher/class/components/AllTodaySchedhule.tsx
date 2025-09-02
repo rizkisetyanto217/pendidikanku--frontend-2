@@ -28,7 +28,7 @@ import {
   type TeacherHomeResponse,
   type TodayClass,
   type UpcomingClass,
-} from "../../class/teacher";
+} from "../types/teacher";
 
 import TambahJadwal from "../../dashboard/AddSchedule";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";

@@ -19,7 +19,7 @@ import {
   type TeacherHomeResponse,
   type TodayClass,
   type UpcomingClass,
-} from "../teacher";
+} from "../types/teacher";
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";

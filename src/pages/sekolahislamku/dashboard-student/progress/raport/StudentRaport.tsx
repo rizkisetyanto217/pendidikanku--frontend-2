@@ -148,6 +148,22 @@ const topbarDateFmt = (iso: string) =>
     day: "numeric",
   });
 
+  // --- timezone-safe helpers (pakai “siang lokal”)
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const hijriWithWeekday = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
 function grade(num: number) {
   if (num >= 90) return { label: "A", variant: "success" as const };
   if (num >= 80) return { label: "B", variant: "info" as const };
@@ -178,7 +194,7 @@ export default function StudentRaport() {
         title="Rapor Nilai"
         gregorianDate={new Date().toISOString()}
         dateFmt={topbarDateFmt}
-        // hijriDate="16 Muharram 1447 H" // opsional
+        hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
       {/* Content + Sidebar */}

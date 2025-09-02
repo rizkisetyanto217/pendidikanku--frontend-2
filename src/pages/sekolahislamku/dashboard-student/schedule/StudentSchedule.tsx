@@ -78,6 +78,23 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 0,
   }).format(amount);
 
+// 👉 aman timezone: pakai “siang lokal” utk display/hijriah
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const hijriWithWeekday = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 /* =============== API Functions =============== */
 async function fetchClasses(): Promise<ClassesResponse> {
   const token =
@@ -128,10 +145,10 @@ async function fetchSchedule(
 
   const items: ScheduleItem[] = filtered.map((cls) => ({
     id: cls.class_id,
-    time: "07:30", // default jam, bisa disesuaikan kalau API punya field jam
+    time: "07:30",
     title: cls.class_name,
     room: "Kelas offline",
-    teacher: "-", // isi jika API ada data pengajar
+    teacher: "-",
     type: "class",
     description: cls.class_description,
     class_id: cls.class_id,
@@ -147,7 +164,7 @@ async function fetchSchedule(
 
   return {
     selected: make(selected, items),
-    nextDays: [], // bisa dikembangkan untuk generate jadwal ke depan
+    nextDays: [],
   };
 }
 
@@ -192,8 +209,8 @@ function ClassLevelBadge({
         level === "Dasar"
           ? "success"
           : level === "Menengah"
-            ? "warning"
-            : "info"
+          ? "warning"
+          : "info"
       }
       palette={palette}
       className="h-6"
@@ -370,6 +387,9 @@ export default function StudentSchedule() {
   const onToday = () => setDateStr(toISODate(new Date()));
   const isLoading = isLoadingClasses || isLoadingSchedule;
 
+  // ISO aman untuk TopBar + hijriah (siang lokal)
+  const qISO = toLocalNoonISO(new Date());
+
   return (
     <div
       className="min-h-screen w-full"
@@ -377,8 +397,9 @@ export default function StudentSchedule() {
     >
       <ParentTopBar
         palette={palette}
-        gregorianDate={new Date().toISOString()}
         title="Jadwal"
+        gregorianDate={qISO}
+        hijriDate={hijriWithWeekday(qISO)} 
       />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">

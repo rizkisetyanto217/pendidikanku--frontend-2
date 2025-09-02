@@ -83,6 +83,23 @@ const DEFAULT_SUBJECTS = [
   "Agama",
 ];
 
+// --- timezone-safe helpers (pakai “siang lokal”)
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+// const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const hijriWithWeekday = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 /* ================= Components kecil ================= */
 const PageHeader = ({
   palette,
@@ -632,7 +649,11 @@ export default function TeachersPage() {
         palette={palette}
       />
 
-      <ParentTopBar palette={palette} title="Guru" />
+      <ParentTopBar
+        palette={palette}
+        title="Guru"
+        hijriDate={hijriWithWeekday(new Date().toISOString())}
+      />
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         <ParentSidebar palette={palette} className="hidden lg:block" />
 

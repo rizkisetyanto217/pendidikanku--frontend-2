@@ -77,6 +77,23 @@ const dateLong = (iso?: string) =>
       })
     : "";
 
+    // --- timezone-safe helpers (pakai “siang lokal”)
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+
+const hijriWithWeekday = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 /* ============== Data Hook: /api/a/books ============== */
 function useBooksList(params: { limit: number; offset: number }) {
   const { limit, offset } = params;
@@ -417,7 +434,7 @@ export default function SchoolBooks() {
         palette={palette}
         title="Buku Pelajaran"
         gregorianDate={new Date().toISOString()}
-        hijriDate={undefined}
+        hijriDate={hijriWithWeekday(new Date().toISOString())}
         dateFmt={dateLong}
       />
 

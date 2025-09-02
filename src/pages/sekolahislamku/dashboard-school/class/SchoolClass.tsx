@@ -116,6 +116,23 @@ const dateLong = (iso?: string) =>
       })
     : "";
 
+    // --- timezone-safe helpers (pakai “siang lokal”)
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+
+const hijriWithWeekday = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
 const parseGrade = (code?: string | null, name?: string): string => {
   const from = (code ?? name ?? "").toString();
   const m = from.match(/\d+/);
@@ -293,8 +310,8 @@ export default function SchoolClasses() {
         palette={palette}
         title="Kelas"
         gregorianDate={new Date().toISOString()}
-        hijriDate={undefined}
         dateFmt={dateLong}
+        hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6">

@@ -13,7 +13,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import { Calendar, Clock, MapPin, Plus, ArrowLeft } from "lucide-react";
 
-import { fetchTeacherHome } from "../../class/teacher";
+import { fetchTeacherHome } from "../types/teacher";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 import AddSchedule from "../../dashboard/AddSchedule";

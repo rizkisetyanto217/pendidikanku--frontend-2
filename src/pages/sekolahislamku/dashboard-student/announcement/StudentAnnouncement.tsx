@@ -10,8 +10,9 @@ import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import ParentTopBar from "../../components/home/ParentTopBar"; // ⬅️ pakai ParentTopBar
+import ParentTopBar from "../../components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
+
 /* ========= Types ========= */
 type AnnType = "info" | "warning" | "success";
 type Announcement = {
@@ -31,6 +32,23 @@ const dateLong = (iso: string) =>
     month: "long",
     day: "numeric",
   });
+
+// --- timezone-safe helpers (pakai “siang lokal”)
+const atLocalNoon = (d: Date) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  return x;
+};
+const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+const hijriWithWeekday = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
 
 /* ======== Fake API ======== */
 async function fetchAnnouncements({
@@ -106,16 +124,20 @@ export default function StudentAnnouncement() {
     success: "success",
   };
 
+  // ISO untuk TopBar (siang lokal) + Hijriah + hari
+  const qISO = toLocalNoonISO(new Date());
+
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar: brand + tanggal (otomatis highlight menu via NavLink di drawer) */}
+      {/* Top Bar */}
       <ParentTopBar
         palette={palette}
-        gregorianDate={new Date().toISOString()}
+        gregorianDate={qISO}
         title="Pengumuman"
+        hijriDate={hijriWithWeekday(qISO)} // ✅ Hijriah + nama hari
       />
 
       {/* Content + Sidebar */}

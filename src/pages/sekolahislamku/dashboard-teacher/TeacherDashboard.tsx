@@ -23,7 +23,7 @@ import {
   fetchTeacherHome,
   TEACHER_HOME_QK,
   type Announcement,
-} from "../../../pages/sekolahislamku/dashboard-teacher/class/teacher";
+} from "./class/types/teacher";
 import ParentTopBar from "../components/home/ParentTopBar";
 import ParentSidebar from "../components/home/ParentSideBar";
 import AddSchedule from "./dashboard/AddSchedule";
@@ -75,7 +75,7 @@ const hijriLong = (iso?: string) =>
       })
     : "";
 
-    /* tambahkan helper di blok Date/Time Utils (tepat di bawah dateShort) */
+/* tambahkan helper di blok Date/Time Utils (tepat di bawah dateShort) */
 
 /* ================= Local Types (UI) ================ */
 type UIScheduleItem = {

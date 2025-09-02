@@ -203,6 +203,11 @@ import AnnouncementsStudent from "@/pages/sekolahislamku/dashboard-student/dashb
 import AllScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/AllScheduleStudent";
 import DetailScheduleStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/DetailScheduleStudent";
 import Test from "@/pages/Test";
+import DetailClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailClass";
+import ClassAttandence from "@/pages/sekolahislamku/dashboard-teacher/class/components/ClassAttandence";
+import ClassMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/ClassMateri";
+import AssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/AssignmentClass";
+import DetailAssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignmentClass";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -604,7 +609,6 @@ export default function AppRoutes() {
 
         <Route path="penilaian" element={<TeacherGrading />} />
         <Route path="penilaian/:id" element={<DetailGrading />} />
-
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
         <Route path="jadwal" element={<TeacherSchedule />} />
         <Route path="assignments" element={<AllAssignment />} />
@@ -648,9 +652,16 @@ export default function AppRoutes() {
         {/* ===== DALAM /kelas ===== */}
         <Route path="kelas">
           <Route index element={<TeacherClass />} />
+          <Route path=":id" element={<DetailClass />} />
+          <Route path=":id/absensi" element={<ClassAttandence />} />
           <Route path=":id/material/:materialId" element={<DetailMateri />} />
           <Route path=":id/assignment/:id" element={<DetailAssignment />} />
-
+          <Route path=":id/materi" element={<ClassMateri />} />
+          <Route path=":id/tugas" element={<AssignmentClass />} />
+          <Route
+            path=":id/assignment/:assignmentId"
+            element={<DetailAssignmentClass />}
+          />
           <Route
             path=":id/student/:studentId/score"
             element={<StudentScore />}

@@ -15,7 +15,7 @@ import Swal from "sweetalert2";
 // import axios from "@/lib/axios"; // aktifkan bila sambung ke backend
 
 // ========== Types ==========
-import type { Announcement as ApiAnnouncement } from "../class/teacher";
+import type { Announcement as ApiAnnouncement } from "../class/types/teacher";
 import InputField from "@/components/common/main/InputField";
 
 export type PriorityLevel = "Rendah" | "Sedang" | "Tinggi" | "Urgent";
