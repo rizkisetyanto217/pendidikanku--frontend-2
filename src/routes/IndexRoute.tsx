@@ -208,6 +208,7 @@ import ClassAttandence from "@/pages/sekolahislamku/dashboard-teacher/class/comp
 import ClassMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/ClassMateri";
 import AssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/AssignmentClass";
 import DetailAssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignmentClass";
+import Bill from "@/pages/sekolahislamku/dashboard-school/finance/modal/Bill";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -692,6 +693,7 @@ export default function AppRoutes() {
           element={<DetailSchedule />}
         />
         <Route path="all-invoices" element={<AllInvoices />} />
+       
         <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
         <Route path="all-announcement" element={<AllAnnouncement />} />
         <Route path="guru" element={<SchoolTeacher />} />

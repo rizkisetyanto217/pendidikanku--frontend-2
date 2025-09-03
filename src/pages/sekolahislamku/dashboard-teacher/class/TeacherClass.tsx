@@ -774,7 +774,7 @@ function FilterControls({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 ">
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
@@ -783,7 +783,7 @@ function FilterControls({
             Ruang Kelas
           </label>
           <div
-            className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+            className="flex items-center gap-2 rounded-xl border px-3 py-2.5  "
             style={{ borderColor: palette.silver1, background: palette.white1 }}
           >
             <MapPin size={16} style={{ color: palette.primary }} />
@@ -795,7 +795,7 @@ function FilterControls({
             >
               {rooms.map((r) => (
                 <option key={r} value={r}>
-                  {r === "all" ? "Semua ruang" : r}
+                  {r === "all" ? "Semua" : r}
                 </option>
               ))}
             </select>
@@ -822,7 +822,7 @@ function FilterControls({
             >
               {terms.map((t) => (
                 <option key={t} value={t}>
-                  {t === "all" ? "Semua tahun ajaran" : t}
+                  {t === "all" ? "Semua" : t}
                 </option>
               ))}
             </select>
@@ -837,7 +837,7 @@ function FilterControls({
             Angkatan
           </label>
           <div
-            className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+            className="flex items-center gap-2 rounded-xl border px-3 py-2"
             style={{ borderColor: palette.silver1, background: palette.white1 }}
           >
             <GraduationCap size={16} style={{ color: palette.primary }} />
@@ -848,8 +848,8 @@ function FilterControls({
               style={{ color: palette.black1 }}
             >
               {cohorts.map((y) => (
-                <option key={y} value={y}>
-                  {y === "all" ? "Semua angkatan" : `Angkatan ${y}`}
+                <option className="capitalize" key={y} value={y}>
+                  {y === "all" ? "Semua" : `Angkatan ${y}`}
                 </option>
               ))}
             </select>

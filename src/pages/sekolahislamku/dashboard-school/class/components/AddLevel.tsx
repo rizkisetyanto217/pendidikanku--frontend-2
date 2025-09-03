@@ -15,12 +15,7 @@ type Props = {
   onCreated?: () => void; // refetch setelah sukses
 };
 
-export default function AddLevel({
-  open,
-  palette,
-  onClose,
-  onCreated,
-}: Props) {
+export default function AddLevel({ open, palette, onClose, onCreated }: Props) {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [saving, setSaving] = useState(false);
