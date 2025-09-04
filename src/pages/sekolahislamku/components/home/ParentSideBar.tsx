@@ -69,6 +69,7 @@ const DEFAULT_NAVS: NavDict = {
   guru: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "kelas", label: "Kelas Saya", icon: Users },
+    { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     // { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
     // { path: "penilaian", label: "Penilaian", icon: ClipboardList },
     // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },

@@ -492,7 +492,7 @@ export default function AppRoutes() {
             <Route index element={<DKMLecture />} />
             <Route path="tambah-edit" element={<DKMAddEditLecture />} />
             <Route path="tambah-edit/:id" element={<DKMAddEditLecture />} />
-            {/* ✅ Tambahan */}
+            {/* Tambahan */}
             <Route path="tema-detail/:id" element={<DKMDetailLecture />} />
             <Route
               path="tema-detail/:id/semua-kajian"

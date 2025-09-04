@@ -222,7 +222,7 @@ function MobileDrawer({
             className="ml-2 inline-flex items-center rounded-full px-2 py-0.5"
             style={{
               background: palette.secondary,
-              color: isDark ? "#fff" : palette.white1,
+              color: isDark ? "#fff" : palette.black1,
             }}
           >
             {hijriLabel || "—"}
