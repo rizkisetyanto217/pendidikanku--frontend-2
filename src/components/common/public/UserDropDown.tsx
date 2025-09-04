@@ -1,5 +1,4 @@
-// src/components/common/public/UserDropDown.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   LogOut,
@@ -8,6 +7,7 @@ import {
   MoreVertical,
   Moon,
   Sun,
+  User,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -17,11 +17,58 @@ import SharePopover from "./SharePopover";
 import { useResponsive } from "@/hooks/isResponsive";
 import { apiLogout } from "@/lib/axios";
 
+import MyProfile, { MyProfileData } from "./MyProfile";
+import ModalEditProfile, { EditProfileData } from "./ModalEditProfile";
+
 interface PublicUserDropdownProps {
   variant?: "default" | "icon";
   withBg?: boolean;
 }
 
+/* ================= Helpers ================= */
+const buildMyProfileData = (u: any): MyProfileData | undefined => {
+  if (!u) return undefined;
+  const p = u.profile || {};
+  return {
+    user: {
+      full_name: u.full_name ?? u.name ?? "",
+      email: u.email ?? "",
+    },
+    profile: {
+      donation_name: p.donation_name ?? u.donation_name,
+      photo_url: p.photo_url ?? u.avatar_url ?? u.avatarUrl,
+      date_of_birth: p.date_of_birth,
+      gender: p.gender,
+      location: p.location,
+      occupation: p.occupation,
+      phone_number: p.phone_number,
+      bio: p.bio,
+    },
+  };
+};
+
+const buildInitialEdit = (u: any): EditProfileData | undefined => {
+  if (!u) return undefined;
+  const p = u.profile || {};
+  return {
+    user: {
+      full_name: u.full_name ?? u.name ?? "",
+      email: u.email ?? "",
+    },
+    profile: {
+      donation_name: p.donation_name,
+      photo_url: p.photo_url,
+      date_of_birth: p.date_of_birth,
+      gender: p.gender,
+      location: p.location,
+      occupation: p.occupation,
+      phone_number: p.phone_number,
+      bio: p.bio,
+    },
+  };
+};
+
+/* ================= Component ================= */
 export default function PublicUserDropdown({
   variant = "default",
   withBg = true,
@@ -31,15 +78,32 @@ export default function PublicUserDropdown({
 
   const { data: user } = useCurrentUser();
   const isLoggedIn = !!user;
+  const profileData = useMemo(() => buildMyProfileData(user as any), [user]);
+
   const navigate = useNavigate();
   const { slug } = useParams();
-
-  const base = `/masjid/${slug}`;
-  const [open, setOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
+
+  const base = `/masjid/${slug}`;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [open, setOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Modal states
+  const [profileOpen, setProfileOpen] = useState(false);
+  // state
+  const [editOpen, setEditOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editInitial, setEditInitial] = useState<EditProfileData | undefined>();
+
+  // converter dari MyProfileData -> EditProfileData
+ const fromMyProfileToEdit = (d: MyProfileData): EditProfileData => ({
+   user: { full_name: d.user?.full_name, email: d.user?.email },
+   profile: d.profile ? { ...d.profile } : undefined, // ⬅️ aman bila undefined
+ });
+
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -48,14 +112,14 @@ export default function PublicUserDropdown({
       await apiLogout();
       queryClient.removeQueries({ queryKey: ["currentUser"], exact: true });
       navigate(slug ? `${base}/login` : "/login", { replace: true });
-    } catch (err: any) {
-      console.error("Logout error (ignored):", err?.response ?? err);
+    } catch {
       navigate(slug ? `${base}/login` : "/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
   };
 
+  // close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -80,7 +144,7 @@ export default function PublicUserDropdown({
     <div className="relative" ref={dropdownRef}>
       {/* Trigger */}
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((v) => !v)}
         className={`h-9 w-9 grid place-items-center rounded-xl transition ${
           variant === "default" ? "px-2" : ""
         }`}
@@ -153,6 +217,21 @@ export default function PublicUserDropdown({
                 onMouseOut={outStyle}
               >
                 <HelpCircle className="w-4 h-4" /> Bantuan
+              </button>
+            </li>
+
+            {/* Profil Saya */}
+            <li>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  setProfileOpen(true);
+                }}
+                className={menuItemClass}
+                onMouseOver={hoverStyle}
+                onMouseOut={outStyle}
+              >
+                <User className="w-4 h-4" /> Profil Saya
               </button>
             </li>
 
@@ -263,6 +342,38 @@ export default function PublicUserDropdown({
             )}
           </ul>
         </div>
+      )}
+
+      {/* ===== Modals ===== */}
+      <MyProfile
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        data={profileData}
+        onEdit={(mp) => {
+          // ⬅️ sekarang MyProfile mengirim snapshot
+          setProfileOpen(false);
+          setEditInitial(fromMyProfileToEdit(mp)); // placeholder dari snapshot
+          setEditOpen(true);
+        }}
+      />
+      {editInitial && (
+        <ModalEditProfile
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          initial={editInitial}
+          loading={isSaving}
+          onSave={async (payload, opts = {}) => {
+            // ⬅️ default {}
+            const { photoFile } = opts; // aman walau tidak dikirim
+            try {
+              setIsSaving(true);
+              // TODO: kirim ke API…
+            } finally {
+              setIsSaving(false);
+              setEditOpen(false);
+            }
+          }}
+        />
       )}
     </div>
   );
