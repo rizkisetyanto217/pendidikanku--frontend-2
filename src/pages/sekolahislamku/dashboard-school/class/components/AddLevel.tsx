@@ -79,7 +79,7 @@ export default function AddLevel({ open, palette, onClose, onCreated }: Props) {
             </div>
             <div
               className="font-semibold"
-              style={{ color: palette.quaternary }}
+              style={{ color: palette.black2 }}
             >
               Tambah Level / Tingkat
             </div>
@@ -88,7 +88,7 @@ export default function AddLevel({ open, palette, onClose, onCreated }: Props) {
             onClick={onClose}
             className="p-2 rounded-lg"
             aria-label="Tutup"
-            style={{ color: palette.secondary }}
+            style={{ color: palette.secondary, background: palette.white3 }}
           >
             <X size={18} />
           </button>

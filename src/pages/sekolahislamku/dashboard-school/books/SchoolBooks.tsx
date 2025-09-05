@@ -461,7 +461,7 @@ export default function SchoolBooks() {
                 </span>
                 <div>
                   <div className="text-lg font-semibold">Buku Pelajaran</div>
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Sumber buku dan pemakaiannya di kelas/section.
                   </div>
                 </div>
@@ -483,7 +483,7 @@ export default function SchoolBooks() {
                 <div className="lg:col-span-2">
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Pencarian
                   </div>
@@ -505,7 +505,7 @@ export default function SchoolBooks() {
             </SectionCard>
 
             {/* Ringkasan */}
-            <div className="text-xs px-1" style={{ color: palette.silver2 }}>
+            <div className="text-xs px-1" style={{ color: palette.black2 }}>
               {yyyyMmDdLocal()} •{" "}
               {booksQ.isFetching ? "memuat…" : `${total} total`}
             </div>

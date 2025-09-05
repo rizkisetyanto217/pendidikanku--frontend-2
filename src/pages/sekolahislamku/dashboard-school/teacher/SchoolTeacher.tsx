@@ -127,7 +127,7 @@ const PageHeader = ({
         </h1>
         <p
           className="text-xs sm:text-sm line-clamp-1"
-          style={{ color: palette.silver2 }}
+          style={{ color: palette.black2 }}
         >
           Kelola data pengajar, filter, dan tindakan cepat.
         </p>
@@ -198,7 +198,7 @@ const StatsGrid = ({
   stats: TeacherStats;
   palette: Palette;
 }) => (
-  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3" style={{ color: palette.black1 }}>
     <StatCard
       title="Total Guru"
       value={stats.total}

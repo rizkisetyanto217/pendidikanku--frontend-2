@@ -483,7 +483,7 @@ const handleLevelCreated = (payload?: any) => {
               </span>
               <div>
                 <div className="text-lg font-semibold">Kelas & Tingkat</div>
-                <div className="text-sm" style={{ color: palette.silver2 }}>
+                <div className="text-sm" style={{ color: palette.black2 }}>
                   Kelola level (tingkat) dan kelas/section di bawahnya.
                 </div>
               </div>
@@ -546,7 +546,10 @@ const handleLevelCreated = (payload?: any) => {
             </SectionCard>
 
             {/* KPI mini */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <section
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+              style={{ color: palette.black2 }}
+            >
               <MiniKPI
                 palette={palette}
                 icon={<Users size={16} />}

@@ -115,7 +115,7 @@ const Payment: React.FC<PaymentModalProps> = ({
     >
       <div
         className="w-full sm:max-w-lg max-h-[92vh] overflow-auto rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 space-y-4"
-        style={{ background: palette.white1, color: palette.quaternary }}
+        style={{ background: palette.white1, color: palette.black1 }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -127,7 +127,8 @@ const Payment: React.FC<PaymentModalProps> = ({
             onClick={onClose}
             className="h-9 w-9 grid place-items-center rounded-full"
             aria-label="Tutup modal"
-            style={{ border: `1px solid ${palette.silver1}` }}
+            style={{ border: `1px solid ${palette.silver1}, background: ${palette.white3}` }}
+
           >
             <X size={18} />
           </button>

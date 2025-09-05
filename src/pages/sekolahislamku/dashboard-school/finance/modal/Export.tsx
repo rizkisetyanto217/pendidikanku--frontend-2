@@ -79,7 +79,7 @@ const Export: React.FC<ExportModalProps> = ({
     >
       <div
         className="w-full max-w-md rounded-2xl shadow-xl p-6 space-y-5"
-        style={{ background: palette.white1, color: palette.quaternary }}
+        style={{ background: palette.white1, color: palette.black1 }}
       >
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -88,6 +88,7 @@ const Export: React.FC<ExportModalProps> = ({
             onClick={onClose}
             className="p-1 rounded hover:opacity-70"
             aria-label="Tutup"
+            style={{ background: palette.white3 }}
           >
             <X size={18} />
           </button>

@@ -1,11 +1,13 @@
-// src/pages/sekolahislamku/finance/FinancePage.tsx
-import { useMemo, useState } from "react";
+// React & libs
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { NavLink } from "react-router-dom";
+
+// Theme & utils
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 
+// UI primitives
 import {
   SectionCard,
   Badge,
@@ -13,28 +15,27 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
+// Layout
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
+// Icons (hanya yang dipakai)
 import {
   Wallet,
   CreditCard,
   AlertTriangle,
-  Filter,
   Download,
   Plus,
   Calendar,
-  Search,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
-import Tagihan from "./modal/Bill";
+
+// Modals
 import Export from "./modal/Export";
 import Pembayaran from "./modal/Payment";
-import ParentSidebar from "../../components/home/ParentSideBar";
+import CreateInvoiceModal from "./modal/SchoolBill";
 
-/* ================== Date helpers (timezone-safe) ================== */
-// Set ke 12:00 lokal agar aman dari pergeseran hari ketika di-string-kan ISO
+/* ================== Date helpers ================== */
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -44,7 +45,6 @@ const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 const normalizeISOToLocalNoon = (iso?: string) =>
   iso ? toLocalNoonISO(new Date(iso)) : undefined;
 
-// Untuk TopBar (panjang)
 const dateLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -55,7 +55,6 @@ const dateLong = (iso?: string) =>
       })
     : "-";
 
-// Hijriah (Umm al-Qura) untuk TopBar
 const hijriLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -66,7 +65,6 @@ const hijriLong = (iso?: string) =>
       })
     : "-";
 
-/* ================= Currency & short date ================= */
 const idr = (n?: number) =>
   n == null
     ? "-"
@@ -76,7 +74,6 @@ const idr = (n?: number) =>
         maximumFractionDigits: 0,
       }).format(n);
 
-// dipakai untuk kolom tabel/kartu (format singkat)
 const dateFmt = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -91,57 +88,50 @@ export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue";
 
 export interface InvoiceItem {
   id: string;
-  title: string; // e.g. SPP Agustus - Kelas 6A
+  title: string;
   student_id?: string;
   student_name?: string;
   class_name?: string;
   due_date: string; // ISO
-  amount: number; // nominal
-  paid_amount?: number; // sudah dibayar
+  amount: number;
+  paid_amount?: number;
   status: InvoiceStatus;
-  type?: string; // SPP/Seragam/Daftar Ulang
+  type?: string;
 }
 
 export interface PaymentItem {
   id: string;
   date: string; // ISO
-  payer_name?: string; // siswa/ortu
+  payer_name?: string;
   invoice_title?: string;
   amount: number;
-  method?: string; // cash/transfer/virtual account
+  method?: string;
 }
 
-/* =============== Main Page =============== */
+/* =============== Page =============== */
 export default function SchoolFinance() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
 
-  // TopBar dates (stabil)
   const gregorianISO = toLocalNoonISO(new Date());
 
-  // state ModalTagihan
-  const [openModal, setOpenModal] = useState(false);
-  // state Export
+  // ===== MODALS =====
   const [openExport, setOpenExport] = useState(false);
-  // state pembayaran
   const [openPay, setOpenPay] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
 
-  // filters
+  // ===== Filters & Tabs =====
   const today = new Date();
-  const ym = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}`; // YYYY-MM
+  const ym = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
   const [month, setMonth] = useState<string>(ym);
   const [kelas, setKelas] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<InvoiceStatus | "semua">("semua");
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"invoices" | "payments">("invoices");
   const [type, setType] = useState<string | undefined>(undefined);
-  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
-  // ====== Summary (snapshot)
+  // ===== Summary =====
   const summary = useQuery({
     queryKey: ["finance-summary", { month }],
     queryFn: async () => {
@@ -149,15 +139,15 @@ export default function SchoolFinance() {
         params: { month },
       });
       return res.data as {
-        billed: number; // total tertagih bulan ini
-        collected: number; // total pembayaran masuk bulan ini
-        outstanding: number; // total tunggakan (across invoices)
-        alerts?: number; // jumlah tagihan perlu perhatian
+        billed: number;
+        collected: number;
+        outstanding: number;
+        alerts?: number;
       };
     },
   });
 
-  // ====== Invoices
+  // ===== Invoices =====
   const invoicesQuery = useQuery({
     queryKey: ["invoices", { month, kelas, status, q, type }],
     queryFn: async () => {
@@ -175,6 +165,7 @@ export default function SchoolFinance() {
     },
   });
 
+  // ===== Payments =====
   const paymentsQuery = useQuery({
     queryKey: ["payments", { month, q }],
     queryFn: async () => {
@@ -185,7 +176,7 @@ export default function SchoolFinance() {
 
   const invoices = invoicesQuery.data?.list ?? [];
   const payments = paymentsQuery.data?.list ?? [];
-  const classes = invoicesQuery.data?.classes ?? ["1A", "1B", "2A", "2B", "3A"]; // fallback demo
+  const classes = invoicesQuery.data?.classes ?? ["1A", "1B", "2A", "2B", "3A"];
   const types = invoicesQuery.data?.types ?? [
     "SPP",
     "Seragam",
@@ -193,16 +184,7 @@ export default function SchoolFinance() {
     "Daftar Ulang",
   ];
 
-  // ====== Actions
-  const exportMutation = useMutation({
-    mutationFn: async () => {
-      return axios.get("/api/a/finance/export", {
-        params: { month },
-        responseType: "blob",
-      });
-    },
-  });
-
+  // ===== Actions =====
   const markPaid = useMutation({
     mutationFn: async (payload: { id: string }) =>
       axios.post(`/api/a/invoices/${payload.id}/mark-paid`),
@@ -212,36 +194,47 @@ export default function SchoolFinance() {
     },
   });
 
-  const billed = summary.data?.billed ?? 0;
-  const collected = summary.data?.collected ?? 0;
-  const outstanding = summary.data?.outstanding ?? 0;
+  // Create (BUAT) invoice
+  const createInvoice = useMutation({
+    mutationFn: async (payload: {
+      title: string;
+      amount: number;
+      due_date: string; // yyyy-mm-dd atau ISO—sesuaikan backend
+      class_name?: string;
+      type?: string;
+      student_id?: string;
+      description?: string;
+    }) => axios.post("/api/a/invoices", payload),
+    onSuccess: () => {
+      setOpenCreate(false);
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      qc.invalidateQueries({ queryKey: ["finance-summary"] });
+    },
+  });
+
+  const onDetail = (inv: InvoiceItem) => {
+    // TODO: buka modal detail tagihan kalau sudah tersedia
+    console.log("Detail invoice:", inv);
+  };
 
   return (
     <>
-      {/* <Tagihan
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        onSubmit={(data) => {
-          console.log("Data tagihan baru:", data);
-          // TODO: panggil API create invoice
-        }}
-        palette={palette}
-      /> */}
+      {/* Export */}
       <Export
         open={openExport}
         onClose={() => setOpenExport(false)}
         palette={palette}
-        // onSubmit opsional; kalau di-skip, modal cuma console.log & close
         onSubmit={({ month, format, file }) => {
           console.log("UI ONLY:", { month, format, file });
         }}
       />
+
+      {/* Rekam Pembayaran */}
       <Pembayaran
         open={openPay}
         onClose={() => setOpenPay(false)}
         onSubmit={(data) => {
           console.log("Pembayaran baru:", data);
-          // TODO: panggil API create payment
         }}
         palette={palette}
         invoiceOptions={invoices.map((inv) => ({
@@ -250,6 +243,7 @@ export default function SchoolFinance() {
         }))}
       />
 
+      {/* TopBar */}
       <ParentTopBar
         palette={palette}
         title="Keuangan"
@@ -279,11 +273,11 @@ export default function SchoolFinance() {
               <div>
                 <h1
                   className="text-lg md:text-xl font-semibold"
-                  style={{ color: palette.quaternary }}
+                 
                 >
                   Keuangan
                 </h1>
-                <p className="text-sm" style={{ color: palette.secondary }}>
+                <p className="text-sm" style={{ color: palette.black2 }}>
                   Kelola tagihan & pembayaran.
                 </p>
               </div>
@@ -299,10 +293,9 @@ export default function SchoolFinance() {
               >
                 <Download size={16} /> Export
               </Btn>
-
               <Btn
                 type="button"
-                onClick={() => setOpenModal(true)}
+                onClick={() => setOpenCreate(true)}
                 palette={palette}
                 size="sm"
                 variant="default"
@@ -311,7 +304,6 @@ export default function SchoolFinance() {
                 <Plus size={16} />
                 <span className="sm:inline">Tagihan</span>
               </Btn>
-
               <Btn
                 palette={palette}
                 size="sm"
@@ -326,12 +318,12 @@ export default function SchoolFinance() {
             {/* Actions: mobile */}
             <div className="md:hidden flex flex-wrap gap-2">
               <Btn
-                onClick={() => setOpenModal(true)}
                 type="button"
                 palette={palette}
                 size="sm"
                 variant="default"
                 className="flex items-center gap-2 flex-1 justify-center"
+                onClick={() => setOpenCreate(true)}
               >
                 <Plus size={16} />
                 <span>Tagihan</span>
@@ -364,14 +356,14 @@ export default function SchoolFinance() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs" style={{ color: palette.secondary }}>
+                  <p className="text-xs" style={{ color: palette.black2 }}>
                     Tertagih Bulan Ini
                   </p>
                   <div
                     className="text-xl md:text-2xl font-semibold"
                     style={{ color: palette.quaternary }}
                   >
-                    {idr(billed)}
+                    {idr(summary.data?.billed)}
                   </div>
                 </div>
                 <Calendar size={18} />
@@ -380,14 +372,14 @@ export default function SchoolFinance() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs" style={{ color: palette.secondary }}>
+                  <p className="text-xs" style={{ color: palette.black2 }}>
                     Tunggakan
                   </p>
                   <div
                     className="text-xl md:text-2xl font-semibold"
                     style={{ color: palette.quaternary }}
                   >
-                    {idr(outstanding)}
+                    {idr(summary.data?.outstanding)}
                   </div>
                 </div>
                 <Badge variant="warning" palette={palette}>
@@ -398,14 +390,14 @@ export default function SchoolFinance() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs" style={{ color: palette.secondary }}>
+                  <p className="text-xs" style={{ color: palette.black2 }}>
                     Pembayaran Masuk
                   </p>
                   <div
                     className="text-xl md:text-2xl font-semibold"
                     style={{ color: palette.quaternary }}
                   >
-                    {idr(collected)}
+                    {idr(summary.data?.collected)}
                   </div>
                 </div>
                 <CheckCircle2 size={18} />
@@ -413,221 +405,10 @@ export default function SchoolFinance() {
             </SectionCard>
           </div>
 
-          {/* Filter bar */}
-          <SectionCard palette={palette} className="p-3 md:p-4">
-            {/* Header filter untuk mobile */}
-            <div className="md:hidden mb-2">
-              <button
-                onClick={() => setShowFiltersMobile((s) => !s)}
-                className="w-full flex items-center justify-between rounded-xl border px-3 py-2 text-sm"
-                style={{
-                  borderColor: palette.white3,
-                  background: palette.white1,
-                  color: palette.quaternary,
-                }}
-                aria-expanded={showFiltersMobile}
-                aria-controls="filters-area"
-              >
-                <div className="flex items-center gap-2">
-                  <Filter size={16} />
-                  Filter
-                </div>
-                {showFiltersMobile ? (
-                  <ChevronUp size={16} />
-                ) : (
-                  <ChevronDown size={16} />
-                )}
-              </button>
-            </div>
-
-            <div
-              id="filters-area"
-              className={`grid gap-3 ${
-                showFiltersMobile
-                  ? "grid-rows-[1fr]"
-                  : "grid-rows-[0fr] md:grid-rows-[1fr]"
-              } overflow-hidden transition-[grid-template-rows] duration-200 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-4`}
-            >
-              <div
-                className="min-h-0 flex items-center gap-2 rounded-xl px-3 py-2 border"
-                style={{
-                  borderColor: palette.white3,
-                  background: palette.white1,
-                }}
-              >
-                <Search size={16} />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={
-                    tab === "invoices"
-                      ? "Cari tagihan / siswa…"
-                      : "Cari pembayaran…"
-                  }
-                  className="w-full bg-transparent outline-none"
-                  style={{ color: palette.quaternary }}
-                  aria-label="Pencarian"
-                />
-              </div>
-
-              <div
-                className="min-h-0 rounded-xl border px-3 py-2"
-                style={{
-                  borderColor: palette.white3,
-                  background: palette.white1,
-                  color: palette.quaternary,
-                }}
-              >
-                <div className="text-xs" style={{ color: palette.secondary }}>
-                  Bulan
-                </div>
-                <input
-                  type="month"
-                  value={month}
-                  onChange={(e) => setMonth(e.target.value)}
-                  className="bg-transparent outline-none w-full"
-                />
-              </div>
-
-              {tab === "invoices" && (
-                <>
-                  <div
-                    className="min-h-0 rounded-xl border px-3 py-2"
-                    style={{
-                      borderColor: palette.white3,
-                      background: palette.white1,
-                      color: palette.quaternary,
-                    }}
-                  >
-                    <div
-                      className="text-xs"
-                      style={{ color: palette.secondary }}
-                    >
-                      Kelas
-                    </div>
-                    <select
-                      value={kelas ?? ""}
-                      onChange={(e) => setKelas(e.target.value || undefined)}
-                      className="bg-transparent outline-none w-full"
-                    >
-                      <option value="">Semua</option>
-                      {classes.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div
-                    className="min-h-0 rounded-xl border px-3 py-2"
-                    style={{
-                      borderColor: palette.white3,
-                      background: palette.white1,
-                      color: palette.quaternary,
-                    }}
-                  >
-                    <div
-                      className="text-xs"
-                      style={{ color: palette.secondary }}
-                    >
-                      Jenis
-                    </div>
-                    <select
-                      value={type ?? ""}
-                      onChange={(e) => setType(e.target.value || undefined)}
-                      className="bg-transparent outline-none w-full"
-                    >
-                      <option value="">Semua</option>
-                      {types.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div
-                    className="min-h-0 rounded-xl border px-3 py-2"
-                    style={{
-                      borderColor: palette.white3,
-                      background: palette.white1,
-                      color: palette.quaternary,
-                    }}
-                  >
-                    <div
-                      className="text-xs"
-                      style={{ color: palette.secondary }}
-                    >
-                      Status
-                    </div>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value as any)}
-                      className="bg-transparent outline-none w-full"
-                    >
-                      <option value="semua">Semua</option>
-                      <option value="unpaid">Belum Bayar</option>
-                      <option value="partial">Sebagian</option>
-                      <option value="paid">Lunas</option>
-                      <option value="overdue">Terlambat</option>
-                    </select>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="mt-3 flex items-center justify-end">
-              <Btn
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={() => {
-                  invoicesQuery.refetch();
-                  paymentsQuery.refetch();
-                }}
-                palette={palette}
-              >
-                <Filter size={16} /> Terapkan
-              </Btn>
-            </div>
-          </SectionCard>
-
-          {/* Tabs */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setTab("invoices")}
-              className="flex-1 md:flex-none px-3 py-2 rounded-xl text-sm border"
-              style={{
-                borderColor: palette.silver1,
-                color:
-                  tab === "invoices" ? palette.quaternary : palette.secondary,
-                background:
-                  tab === "invoices" ? palette.white2 : palette.white1,
-                fontWeight: tab === "invoices" ? 600 : 500,
-              }}
-              aria-pressed={tab === "invoices"}
-            >
-              Tagihan
-            </button>
-            <button
-              onClick={() => setTab("payments")}
-              className="flex-1 md:flex-none px-3 py-2 rounded-xl text-sm border"
-              style={{
-                borderColor: palette.silver1,
-                color:
-                  tab === "payments" ? palette.quaternary : palette.secondary,
-                background:
-                  tab === "payments" ? palette.white2 : palette.white1,
-                fontWeight: tab === "payments" ? 600 : 500,
-              }}
-              aria-pressed={tab === "payments"}
-            >
-              Pembayaran
-            </button>
-          </div>
-
           {/* Content */}
           {tab === "invoices" ? (
             <SectionCard palette={palette} className="p-2 md:p-4">
-              {/* Mobile: card list */}
+              {/* Mobile list */}
               <ul
                 className="md:hidden divide-y"
                 style={{ borderColor: palette.white3 }}
@@ -733,13 +514,14 @@ export default function SchoolFinance() {
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2 shrink-0">
-                          <NavLink
-                            to={`/sekolah/keuangan/tagihan/${inv.id}`}
+                          <button
+                            type="button"
                             className="underline text-sm"
                             style={{ color: palette.primary }}
+                            onClick={() => onDetail(inv)}
                           >
                             Detail
-                          </NavLink>
+                          </button>
                           {inv.status !== "paid" && (
                             <Btn
                               size="sm"
@@ -756,7 +538,7 @@ export default function SchoolFinance() {
                 })}
               </ul>
 
-              {/* Desktop: table */}
+              {/* Desktop table */}
               <div className="hidden md:block overflow-auto">
                 <table className="min-w-[950px] w-full">
                   <thead>
@@ -885,11 +667,14 @@ export default function SchoolFinance() {
                           </td>
                           <td className="py-3 align-top">
                             <div className="flex items-center gap-2 justify-end">
-                              <NavLink
-                                to={`/sekolah/keuangan/tagihan/${inv.id}`}
+                              <button
+                                type="button"
+                                className="underline"
+                                style={{ color: palette.primary }}
+                                onClick={() => onDetail(inv)}
                               >
                                 Detail
-                              </NavLink>
+                              </button>
                               {inv.status !== "paid" && (
                                 <Btn
                                   size="sm"
@@ -929,7 +714,7 @@ export default function SchoolFinance() {
             </SectionCard>
           ) : (
             <SectionCard palette={palette} className="p-2 md:p-4">
-              {/* Mobile: card list */}
+              {/* payments view */}
               <ul
                 className="md:hidden divide-y"
                 style={{ borderColor: palette.white3 }}
@@ -970,26 +755,24 @@ export default function SchoolFinance() {
                   const dt = normalizeISOToLocalNoon(p.date);
                   return (
                     <li key={p.id} className="py-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div
-                            className="font-medium"
-                            style={{ color: palette.quaternary }}
-                          >
-                            {idr(p.amount)}
-                          </div>
-                          <div
-                            className="text-xs"
-                            style={{ color: palette.secondary }}
-                          >
-                            {p.method ?? "-"} • {p.invoice_title ?? "-"}
-                          </div>
-                          <div
-                            className="mt-2 text-sm"
-                            style={{ color: palette.quaternary }}
-                          >
-                            {dateFmt(dt)} — {p.payer_name ?? "-"}
-                          </div>
+                      <div className="min-w-0">
+                        <div
+                          className="font-medium"
+                          style={{ color: palette.quaternary }}
+                        >
+                          {idr(p.amount)}
+                        </div>
+                        <div
+                          className="text-xs"
+                          style={{ color: palette.secondary }}
+                        >
+                          {p.method ?? "-"} • {p.invoice_title ?? "-"}
+                        </div>
+                        <div
+                          className="mt-2 text-sm"
+                          style={{ color: palette.quaternary }}
+                        >
+                          {dateFmt(dt)} — {p.payer_name ?? "-"}
                         </div>
                       </div>
                     </li>
@@ -997,7 +780,6 @@ export default function SchoolFinance() {
                 })}
               </ul>
 
-              {/* Desktop: table */}
               <div className="hidden md:block overflow-auto">
                 <table className="min-w-[850px] w-full">
                   <thead>
@@ -1053,7 +835,6 @@ export default function SchoolFinance() {
                         </td>
                       </tr>
                     )}
-
                     {payments.map((p) => {
                       const dt = normalizeISOToLocalNoon(p.date);
                       return (
@@ -1122,7 +903,7 @@ export default function SchoolFinance() {
           <div className="md:hidden fixed right-4 bottom-20">
             <button
               type="button"
-              onClick={() => setOpenModal(true)}
+              onClick={() => setOpenCreate(true)}
               className="h-12 w-12 rounded-full grid place-items-center shadow-lg"
               style={{
                 background: palette.primary,
@@ -1136,6 +917,33 @@ export default function SchoolFinance() {
           </div>
         </main>
       </div>
+
+      {/* ====== Modals (render di akhir) ====== */}
+      <CreateInvoiceModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        palette={palette}
+        classOptions={classes}
+        typeOptions={types}
+        studentOptions={[]}
+        loading={createInvoice.isPending}
+        error={
+          (createInvoice.error as any)?.response?.data?.message ??
+          (createInvoice.error as any)?.message ??
+          null
+        }
+        onSubmit={(data) => {
+          createInvoice.mutate({
+            title: data.title,
+            amount: Number(data.amount),
+            due_date: data.due_date,
+            class_name: data.class_name || undefined,
+            type: data.type || undefined,
+            student_id: data.student_id || undefined,
+            description: data.description || undefined,
+          });
+        }}
+      />
     </>
   );
 }

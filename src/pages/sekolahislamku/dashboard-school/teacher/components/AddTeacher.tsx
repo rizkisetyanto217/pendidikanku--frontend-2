@@ -188,11 +188,11 @@ export default function AddTeacher({
             <div>
               <div
                 className="font-semibold"
-                style={{ color: palette.quaternary }}
+                style={{ color: palette.black2 }}
               >
                 Tambah Guru
               </div>
-              <div className="text-xs" style={{ color: palette.secondary }}>
+              <div className="text-xs" style={{ color: palette.black2 }}>
                 Cari user terdaftar (min 3 karakter) lalu pilih.
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function AddTeacher({
         <div className="px-4 py-4 space-y-4">
           {/* Pencarian user */}
           <div className="space-y-2">
-            <label className="text-xs" style={{ color: palette.secondary }}>
+            <label className="text-xs" style={{ color: palette.black2 }}>
               Cari User (min 3 karakter)
             </label>
             <input
@@ -261,7 +261,7 @@ export default function AddTeacher({
                         key={u.id}
                         className="px-3 py-2 cursor-pointer hover:opacity-80 flex items-center justify-between"
                         onClick={() => handleSelectUser(u)}
-                        style={{ color: palette.quaternary }}
+                        style={{ color: palette.black2 }}
                       >
                         <div className="truncate">
                           <div className="text-sm font-medium truncate">
@@ -276,7 +276,7 @@ export default function AddTeacher({
                         </div>
                         <span
                           className="text-xs"
-                          style={{ color: palette.secondary }}
+                          style={{ color: palette.black2 }}
                         >
                           Pilih
                         </span>
@@ -312,7 +312,7 @@ export default function AddTeacher({
           </div>
 
           {/* (Opsional) field tambahan – tidak dipakai POST saat ini, tapi tetap ditampilkan */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ color: palette.black2 }}>
             <Field
               label="NIP"
               value={form.nip}
@@ -329,6 +329,7 @@ export default function AddTeacher({
               value={form.subject}
               onChange={(v) => setForm({ ...form, subject: v })}
               palette={palette}
+              
             />
           </div>
 

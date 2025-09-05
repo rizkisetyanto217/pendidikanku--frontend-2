@@ -119,7 +119,7 @@ export default function AddClass({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-lg font-semibold">Tambah Kelas</div>
-                <div className="text-xs" style={{ color: palette.silver2 }}>
+                <div className="text-xs" style={{ color: palette.black2 }}>
                   Lengkapi informasi kelas di bawah ini.
                 </div>
               </div>

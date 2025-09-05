@@ -208,7 +208,7 @@ import ClassAttandence from "@/pages/sekolahislamku/dashboard-teacher/class/comp
 import ClassMateri from "@/pages/sekolahislamku/dashboard-teacher/class/components/ClassMateri";
 import AssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/AssignmentClass";
 import DetailAssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignmentClass";
-import Bill from "@/pages/sekolahislamku/dashboard-school/finance/modal/Bill";
+import Bill from "@/pages/sekolahislamku/dashboard-school/finance/Bill";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
