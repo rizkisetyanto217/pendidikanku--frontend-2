@@ -18,11 +18,16 @@ export interface BillItem {
 
 interface BillsSectionCardProps {
   palette: Palette;
-  bills?: BillItem[]; // made optional + safe default
+  bills?: BillItem[];
   dateFmt: (iso: string) => string;
   formatIDR: (n: number) => string;
-  seeAllPath?: string; // target route "lihat semua"
-  seeAllState?: unknown; // state opsional untuk dikirim ke route tujuan
+
+  /** prefix untuk route sekolah, contoh: `/${slug}/sekolah` */
+  basePath?: string;
+
+  /** override opsional */
+  seeAllPath?: string;
+  seeAllState?: unknown;
   getPayHref?: (bill: BillItem) => string;
   className?: string;
 }
@@ -98,8 +103,8 @@ function BillCard({
           <Link
             to={getPayHref(bill)}
             state={{
-              bill, // kirim objek bill
-              parentName: undefined, // opsional: bisa isi dari dashboard
+              bill,
+              parentName: undefined,
               hijriDate: undefined,
               gregorianDate: undefined,
             }}
@@ -131,12 +136,22 @@ export default function BillsSectionCard({
   bills = [],
   dateFmt,
   formatIDR,
-  seeAllPath = "/tagihan",
+  basePath = "",
+  seeAllPath,
   seeAllState,
-  getPayHref = (b) => `/tagihan/${b.id}`,
+  getPayHref,
   className = "",
 }: BillsSectionCardProps) {
   const unpaidBills = bills.filter((bill) => bill.status !== "paid");
+
+  // Default path yang konsisten dengan router di bawah
+  // Default path yang konsisten dengan router di bawah
+  const _seeAllPath =
+    seeAllPath ?? (basePath ? `${basePath}/all-invoices` : `all-invoices`);
+  const _getPayHref =
+    getPayHref ??
+    ((b: BillItem) =>
+      basePath ? `${basePath}/all-invoices/${b.id}` : `all-invoices/${b.id}`);
 
   return (
     <SectionCard
@@ -151,8 +166,7 @@ export default function BillsSectionCard({
         </h3>
 
         <Link
-          to={seeAllPath}
-          // ✅ perbaikan: state harus berupa objek
+          to={_seeAllPath}
           state={seeAllState ?? { bills, heading: "Semua Tagihan" }}
         >
           <Btn
@@ -179,7 +193,7 @@ export default function BillsSectionCard({
               palette={palette}
               dateFmt={dateFmt}
               formatIDR={formatIDR}
-              getPayHref={getPayHref}
+              getPayHref={_getPayHref}
             />
           ))
         )}

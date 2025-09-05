@@ -692,8 +692,12 @@ export default function AppRoutes() {
           path="all-schedule/detail/:scheduleId"
           element={<DetailSchedule />}
         />
-        <Route path="all-invoices" element={<AllInvoices />} />
-       
+        {/* ✅ Tagihan */}
+        <Route path="all-invoices">
+          <Route index element={<AllInvoices />} />
+          <Route path=":id" element={<Bill />} /> {/* detail/bayar */}
+        </Route>
+
         <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
         <Route path="all-announcement" element={<AllAnnouncement />} />
         <Route path="guru" element={<SchoolTeacher />} />

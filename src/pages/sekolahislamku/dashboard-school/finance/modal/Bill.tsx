@@ -1,214 +1,338 @@
-// src/pages/sekolahislamku/finance/modal/Tagihan.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { X } from "lucide-react";
-import { Btn } from "@/pages/sekolahislamku/components/ui/Primitives";
-import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
+import * as React from "react";
+import {
+  SectionCard,
+  Btn,
+  Badge,
+  type Palette,
+} from "@/pages/sekolahislamku/components/ui/Primitives";
+import { colors } from "@/constants/colorsThema";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  Wallet,
+  ArrowLeft,
+  Calendar as CalendarIcon,
+  Receipt,
+  ShieldCheck,
+} from "lucide-react";
 
-type Props = {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (p: {
-    title: string;
-    amount: number;
-    due_date: string;
-    class_name: string;
-    type: string;
-  }) => void;
-  palette: Palette;
+import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
+
+/* ===================== Types ===================== */
+export interface BillItem {
+  id: string;
+  title: string;
+  amount: number;
+  dueDate: string; // ISO
+  status: "unpaid" | "paid" | "overdue";
+  description?: string;
+  invoiceNo?: string;
+}
+
+/* ===================== Helpers ===================== */
+const badgeVariants = {
+  unpaid: "secondary",
+  overdue: "destructive",
+  paid: "success",
+} as const;
+
+const statusText: Record<BillItem["status"], string> = {
+  unpaid: "Belum bayar",
+  overdue: "Terlambat",
+  paid: "Lunas",
 };
 
-const Bill: React.FC<Props> = ({ open, onClose, onSubmit, palette }) => {
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState<number>(0);
-  const [due, setDue] = useState("");
-  const [kelas, setKelas] = useState("");
-  const [jenis, setJenis] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+const formatIDR = (n: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(n);
 
-  // Reset form tiap kali modal ditutup
-  useEffect(() => {
-    if (!open) {
-      setTitle("");
-      setAmount(0);
-      setDue("");
-      setKelas("");
-      setJenis("");
+const dateFmt = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+/** TODO: sambungkan ke API-mu kalau mau fallback fetch by id */
+async function fetchBillById(id: string): Promise<BillItem | null> {
+  console.warn("[Bill] fetchBillById belum diimplementasikan. ID:", id);
+  return null;
+}
+
+/* ===================== Page ===================== */
+export default function Bill({
+  palette: paletteProp,
+}: { palette?: Palette } = {}) {
+  const { id, slug } = useParams<{ id: string; slug: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const linkState = (location.state ?? {}) as {
+    bill?: BillItem;
+    payUrl?: string;
+    basePath?: string;
+  };
+
+  const palette: Palette = paletteProp ?? colors.light;
+
+  const [bill, setBill] = React.useState<BillItem | null | undefined>(
+    linkState.bill
+  );
+  const [loading, setLoading] = React.useState<boolean>(
+    !linkState.bill && !!id
+  );
+  const [error, setError] = React.useState<string | null>(null);
+  const payUrl = linkState.payUrl ?? null;
+
+  React.useEffect(() => {
+    let mounted = true;
+    if (!bill && id) {
+      (async () => {
+        try {
+          setLoading(true);
+          const res = await fetchBillById(id);
+          if (!mounted) return;
+          if (res) setBill(res);
+          else setError("Data tagihan tidak ditemukan.");
+        } catch (e) {
+          console.error(e);
+          if (mounted) setError("Gagal memuat data tagihan.");
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      })();
     }
-  }, [open]);
-
-  // Kunci scroll body + fokus ke judul saat open
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    // autofocus sedikit ditunda agar element sudah ter-mount
-    const t = setTimeout(() => inputRef.current?.focus(), 0);
     return () => {
-      clearTimeout(t);
-      document.body.style.overflow = prev;
+      mounted = false;
     };
-  }, [open]);
+  }, [bill, id]);
 
-  // Tutup dengan tombol ESC
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  const isPaid = bill?.status === "paid";
+  const backHref =
+    linkState.basePath ?? (slug ? `/${slug}/sekolah/all-invoices` : "..");
 
-  if (!open) return null;
-
-  const handleOverlayClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    // klik di area overlay (bukan di dalam card) → tutup
-    if (e.target === e.currentTarget) onClose();
+  const handleBayar = () => {
+    if (isPaid || !bill) return;
+    if (payUrl) {
+      window.location.href = payUrl;
+      return;
+    }
+    alert("Integrasi pembayaran belum dikonfigurasi.");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      title,
-      amount,
-      due_date: due,
-      class_name: kelas,
-      type: jenis,
-    });
-    onClose();
-  };
-
-  const node = (
+  return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-3"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-tagihan-title"
-      onMouseDown={handleOverlayClick}
+      className="min-h-screen w-full"
+      style={{ background: palette.white2, color: palette.black1 }}
     >
-      <div
-        className="w-full max-w-lg rounded-2xl shadow-lg p-5 relative"
-        style={{ background: palette.white1, color: palette.black1 }}
-        // stop propagate supaya klik dalam card tidak menutup modal
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 id="modal-tagihan-title" className="text-lg font-semibold">
-            Buat Tagihan Baru
-          </h2>
-          <button
-            onClick={onClose}
-            className="h-8 w-8 grid place-items-center rounded-full"
-            aria-label="Tutup modal"
-          >
-            <X size={18} />
-          </button>
-        </div>
+      {/* TopBar sama seperti dashboard */}
+      <ParentTopBar palette={palette} title="Tagihan & Pembayaran" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1">Judul</label>
-            <input
-              ref={inputRef}
-              className="w-full rounded-xl border px-3 py-2 outline-none"
-              style={{
-                borderColor: palette.silver1,
-                background: palette.white2,
-              }}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
+      {/* ====== CONTAINER LAYOUT SAMA ====== */}
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Sidebar kiri */}
+          <aside className="lg:col-span-3">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div>
-            <label className="block text-sm mb-1">Nominal</label>
-            <input
-              type="number"
-              className="w-full rounded-xl border px-3 py-2 outline-none"
-              style={{
-                borderColor: palette.silver1,
-                background: palette.white2,
-              }}
-              value={Number.isNaN(amount) ? 0 : amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              required
-              min={0}
-              inputMode="numeric"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Jatuh Tempo</label>
-            <input
-              type="date"
-              className="w-full rounded-xl border px-3 py-2 outline-none"
-              style={{
-                borderColor: palette.silver1,
-                background: palette.white2,
-              }}
-              value={due}
-              onChange={(e) => setDue(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm mb-1">Kelas</label>
-              <input
-                className="w-full rounded-xl border px-3 py-2 outline-none"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white2,
-                }}
-                value={kelas}
-                onChange={(e) => setKelas(e.target.value)}
-                placeholder="Mis. 6A"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Jenis</label>
-              <select
-                className="w-full rounded-xl border px-3 py-2 outline-none"
-                style={{
-                  borderColor: palette.silver1,
-                  background: palette.white2,
-                }}
-                value={jenis}
-                onChange={(e) => setJenis(e.target.value)}
+          {/* Konten kanan */}
+          <section className="lg:col-span-9 space-y-6 min-w-0">
+            {/* Breadcrumb kecil */}
+            <div className="flex items-center gap-2">
+              <Btn
+                variant="ghost"
+                size="sm"
+                palette={palette}
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-2"
               >
-                <option value="">Pilih jenis</option>
-                <option value="SPP">SPP</option>
-                <option value="Seragam">Seragam</option>
-                <option value="Buku">Buku</option>
-                <option value="Daftar Ulang">Daftar Ulang</option>
-              </select>
+                <ArrowLeft size={16} />
+                Kembali
+              </Btn>
+              {/* <Link
+                to={backHref}
+                className="text-sm underline"
+                style={{ color: palette.secondary }}
+              >
+                Lihat semua tagihan
+              </Link> */}
             </div>
-          </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Btn
-              type="button"
-              palette={palette}
-              variant="outline"
-              onClick={onClose}
-            >
-              Batal
-            </Btn>
-            <Btn type="submit" palette={palette} variant="default">
-              Simpan
-            </Btn>
-          </div>
-        </form>
-      </div>
+            {/* Kartu Detail Tagihan */}
+            <SectionCard palette={palette} className="w-full">
+              {/* Header card */}
+              <div
+                className="p-4 md:p-5 flex items-center justify-between"
+                style={{ borderBottom: `1px solid ${palette.silver1}` }}
+              >
+                <div className="flex items-center gap-2">
+                  <Wallet size={22} color={palette.quaternary} />
+                  <h2 className="text-lg md:text-xl font-semibold">
+                    Detail Tagihan
+                  </h2>
+                </div>
+                {bill && (
+                  <Badge
+                    variant={badgeVariants[bill.status]}
+                    palette={palette}
+                    className="shrink-0"
+                  >
+                    {statusText[bill.status]}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Body */}
+              <div className="px-4 md:px-5 py-5">
+                {loading && (
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    Memuat data tagihan…
+                  </div>
+                )}
+                {!loading && error && (
+                  <div className="text-sm" style={{ color: palette.error1 }}>
+                    {error}
+                  </div>
+                )}
+                {!loading && !error && !bill && (
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                    Data tagihan tidak tersedia.
+                  </div>
+                )}
+
+                {bill && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    {/* Info */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <div
+                        className="rounded-2xl border p-4"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white2,
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-base md:text-lg font-semibold truncate">
+                              {bill.title}
+                            </div>
+                            {bill.invoiceNo && (
+                              <div
+                                className="text-xs"
+                                style={{ color: palette.black2 }}
+                              >
+                                No. Invoice: {bill.invoiceNo}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="text-right">
+                            <div
+                              className="text-xs"
+                              style={{ color: palette.black2 }}
+                            >
+                              Total
+                            </div>
+                            <div className="text-xl md:text-2xl font-bold">
+                              {formatIDR(bill.amount)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="flex items-center gap-2 text-sm">
+                            <CalendarIcon size={16} />
+                            <span>Jatuh tempo: {dateFmt(bill.dueDate)}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Receipt size={16} />
+                            <span>Status: {statusText[bill.status]}</span>
+                          </div>
+                        </div>
+
+                        {bill.description && (
+                          <p
+                            className="mt-3 text-sm leading-relaxed"
+                            style={{ color: palette.black2 }}
+                          >
+                            {bill.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <div
+                        className="rounded-2xl border p-4 flex items-start gap-3"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white2,
+                        }}
+                      >
+                        <ShieldCheck
+                          size={18}
+                          className="mt-0.5"
+                          color={palette.quaternary}
+                        />
+                        <p
+                          className="text-sm"
+                          style={{ color: palette.black2 }}
+                        >
+                          Pembayaran diproses secara aman. Simpan bukti
+                          transaksi setelah berhasil.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="space-y-3">
+                      <div
+                        className="rounded-2xl border p-4 sticky top-20"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: palette.white2,
+                        }}
+                      >
+                        <div
+                          className="mb-2 text-sm"
+                          style={{ color: palette.black2 }}
+                        >
+                          Total Pembayaran
+                        </div>
+                        <div className="mb-4 text-2xl font-bold">
+                          {bill ? formatIDR(bill.amount) : "-"}
+                        </div>
+
+                        <Btn
+                          size="lg"
+                          palette={palette}
+                          className="w-full"
+                          disabled={isPaid}
+                          onClick={handleBayar}
+                        >
+                          {isPaid ? "Sudah Dibayar" : "Bayar Sekarang"}
+                        </Btn>
+
+                        {!isPaid && payUrl && (
+                          <a
+                            href={payUrl}
+                            className="block text-center text-sm underline mt-2"
+                            style={{ color: palette.secondary }}
+                          >
+                            Buka tautan pembayaran
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+          </section>
+        </div>
+      </main>
     </div>
   );
-
-  return typeof document !== "undefined"
-    ? createPortal(node, document.body)
-    : node;
-};
-
-export default Bill;
+}
