@@ -218,7 +218,7 @@ export default function SchoolFinance() {
 
   return (
     <>
-      <Tagihan
+      {/* <Tagihan
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={(data) => {
@@ -226,7 +226,7 @@ export default function SchoolFinance() {
           // TODO: panggil API create invoice
         }}
         palette={palette}
-      />
+      /> */}
       <Export
         open={openExport}
         onClose={() => setOpenExport(false)}
