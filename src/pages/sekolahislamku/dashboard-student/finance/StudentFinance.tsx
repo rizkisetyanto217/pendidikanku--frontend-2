@@ -1,17 +1,11 @@
+import React, { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Wallet,
-  FileText,
-  Printer,
-  CheckCircle2,
-} from "lucide-react";
+import { Wallet, FileText, CheckCircle2 } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
   SectionCard,
-  Badge,
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -42,7 +36,6 @@ interface BillDetail {
 /* =========================
    Date helpers (timezone-safe)
 ========================= */
-// set jam ke 12:00 siang lokal supaya tidak geser hari saat toISOString()
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -58,9 +51,8 @@ const dateLong = (iso?: string) =>
         month: "long",
         day: "numeric",
       })
-    : "-";
+    : "—";
 
-// Hijriah (Umm al-Qura)
 const hijriLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -69,7 +61,7 @@ const hijriLong = (iso?: string) =>
         month: "long",
         year: "numeric",
       })
-    : "-";
+    : "—";
 
 /* =========================
    Currency
@@ -158,14 +150,27 @@ function Row({
   right,
   palette,
   boldRight,
+  className,
+  style,
+  ...rest
 }: {
   left: React.ReactNode;
   right: React.ReactNode;
   palette: Palette;
   boldRight?: boolean;
-}) {
+} & React.HTMLAttributes<HTMLDivElement>) {
+  // default teks hitam; masih bisa dioverride
+  const mergedStyle: React.CSSProperties = {
+    color: palette.black2,
+    ...(style || {}),
+  };
+
   return (
-    <div className="flex items-center justify-between py-1 text-sm">
+    <div
+      className={`flex items-center justify-between py-1 text-sm ${className ?? ""}`}
+      style={mergedStyle}
+      {...rest}
+    >
       <span style={{ color: palette.silver2 }}>{left}</span>
       <span style={{ fontWeight: boldRight ? 700 : 500 }}>{right}</span>
     </div>
@@ -191,7 +196,7 @@ function FinanceHeaderCard({
           </div>
           <div>
             <div className="font-semibold">{data?.title ?? "—"}</div>
-            <div className="text-sm" style={{ color: palette.silver2 }}>
+            <div className="text-sm" style={{ color: palette.black2 }}>
               {data
                 ? `Invoice ${data.invoiceNo} • Jatuh tempo ${dateLong(data.dueDate)}`
                 : "—"}
@@ -245,30 +250,43 @@ function ItemsTable({
       >
         <div
           className="grid grid-cols-12 px-3 py-2 text-xs"
-          style={{ color: palette.silver2 }}
+          style={{ color: palette.black2 }}
         >
-          <div className="col-span-7">Item</div>
+          <div className="col-span-7">Item==</div>
           <div className="col-span-2 text-right">Qty</div>
           <div className="col-span-3 text-right">Jumlah</div>
         </div>
 
         {loading && (
-          <div className="px-3 py-3 text-sm" style={{ color: palette.silver2 }}>
+          <div
+            className="px-3 py-3 text-sm"
+            style={{ color: palette.silver2 }}
+            aria-live="polite"
+          >
             Memuat...
           </div>
         )}
 
-        {(items ?? []).map((it) => (
-          <div
-            key={it.id}
-            className="grid grid-cols-12 px-3 py-2 border-t"
-            style={{ borderColor: palette.silver1 }}
-          >
-            <div className="col-span-7">{it.name}</div>
-            <div className="col-span-2 text-right">{it.qty ?? 1}x</div>
-            <div className="col-span-3 text-right">{formatIDR(it.amount)}</div>
+        {!loading &&
+          (items ?? []).map((it) => (
+            <div
+              key={it.id}
+              className="grid grid-cols-12 px-3 py-2 border-t"
+              style={{ borderColor: palette.silver1 }}
+            >
+              <div className="col-span-7">{it.name}</div>
+              <div className="col-span-2 text-right">{it.qty ?? 1}x</div>
+              <div className="col-span-3 text-right">
+                {formatIDR(it.amount)}
+              </div>
+            </div>
+          ))}
+
+        {!loading && (!items || items.length === 0) && (
+          <div className="px-3 py-3 text-sm" style={{ color: palette.silver2 }}>
+            Tidak ada item.
           </div>
-        ))}
+        )}
       </div>
     </SectionCard>
   );
@@ -281,9 +299,9 @@ function SummaryCard({
   palette: Palette;
   data?: BillDetail;
 }) {
-  const subtotal = (data?.items ?? []).reduce(
-    (a, b) => a + b.amount * (b.qty ?? 1),
-    0
+  const subtotal = useMemo(
+    () => (data?.items ?? []).reduce((a, b) => a + b.amount * (b.qty ?? 1), 0),
+    [data?.items]
   );
 
   return (
@@ -291,7 +309,11 @@ function SummaryCard({
       <div className="font-medium mb-2">Ringkasan</div>
       <div
         className="rounded-xl border p-3"
-        style={{ borderColor: palette.silver1, background: palette.white2 }}
+        style={{
+          borderColor: palette.silver1,
+          background: palette.white2,
+          color: palette.black2,
+        }}
       >
         <Row
           left="Siswa"
@@ -308,6 +330,7 @@ function SummaryCard({
           right={data ? dateLong(data.dueDate) : "—"}
           palette={palette}
         />
+
         <div
           className="my-2 border-t"
           style={{ borderColor: palette.silver1 }}
@@ -333,6 +356,7 @@ function SummaryCard({
           className="mt-2 border-t"
           style={{ borderColor: palette.silver1 }}
         />
+
         <Row
           left={<span className="font-semibold">Total</span>}
           right={formatIDR(data?.total ?? 0)}
@@ -367,9 +391,9 @@ function SummaryCard({
   );
 }
 
-// =========================
-// Page
-// =========================
+/* =========================
+   Page
+========================= */
 export default function StudentFinance() {
   const { billId: billIdParam } = useParams();
   const billId = billIdParam || "default";
@@ -377,21 +401,19 @@ export default function StudentFinance() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["bill-detail", billId],
     queryFn: () => fetchBillDetail(billId),
     staleTime: 60_000,
   });
 
-  // TopBar: gunakan local-noon agar stabil & tampilkan Hijriah
-  const topbarGregorianISO = toLocalNoonISO(new Date());
+  const topbarGregorianISO = useMemo(() => toLocalNoonISO(new Date()), []);
 
   return (
     <div
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* Top Bar */}
       <ParentTopBar
         palette={palette}
         gregorianDate={topbarGregorianISO}
@@ -400,24 +422,31 @@ export default function StudentFinance() {
         dateFmt={dateLong}
       />
 
-      {/* Content + Sidebar */}
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri (sticky di desktop) */}
           <ParentSidebar palette={palette} />
 
-          {/* Konten utama */}
           <div className="flex-1 space-y-6">
-            <FinanceHeaderCard palette={palette} data={data} />
+            {error ? (
+              <SectionCard palette={palette} className="p-4">
+                <div style={{ color: palette.primary }}>
+                  Gagal memuat data tagihan.
+                </div>
+              </SectionCard>
+            ) : (
+              <>
+                <FinanceHeaderCard palette={palette} data={data} />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <ItemsTable
-                palette={palette}
-                items={data?.items}
-                loading={isLoading}
-              />
-              <SummaryCard palette={palette} data={data} />
-            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <ItemsTable
+                    palette={palette}
+                    items={data?.items}
+                    loading={isLoading}
+                  />
+                  <SummaryCard palette={palette} data={data} />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </main>

@@ -503,10 +503,13 @@ const handleEditMateri = async (payload: EditClassMaterialInput) => {
                   </div>
                   <div
                     className="mt-1 flex flex-wrap items-center gap-2 text-sm"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     <Badge variant="outline" palette={palette}>
-                      {cls?.room ?? "-"}
+                      <h1 style={{ color: palette.black2 }}>
+                        {" "}
+                        {cls?.room ?? "-"}
+                      </h1>
                     </Badge>
                     <span>Wali Kelas: {cls?.homeroom ?? "-"}</span>
                     <span>• {cls?.academicTerm ?? "-"}</span>
@@ -599,7 +602,7 @@ const handleEditMateri = async (payload: EditClassMaterialInput) => {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <div className="text-base font-semibold truncate">
-                            {m.title}
+                            <h1 style={{ color: palette.black2 }}>{m.title}</h1>
                           </div>
                           <Badge
                             palette={palette}
@@ -631,7 +634,7 @@ const handleEditMateri = async (payload: EditClassMaterialInput) => {
 
                         <div
                           className="mt-2 flex flex-wrap items-center gap-2 text-xs"
-                          style={{ color: palette.silver2 }}
+                          style={{ color: palette.black2 }}
                         >
                           <CalendarDays size={14} />
                           <span>Dibuat: {dateLong(m.createdAt)}</span>
@@ -655,7 +658,7 @@ const handleEditMateri = async (payload: EditClassMaterialInput) => {
                     className="px-4 md:px-5 pb-4 md:pb-5 pt-3 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                     style={{ borderColor: palette.silver1 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Aksi cepat untuk materi ini
                     </div>
                     <div className="flex gap-2">

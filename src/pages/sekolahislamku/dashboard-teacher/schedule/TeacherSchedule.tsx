@@ -487,7 +487,7 @@ export default function TeacherSchedule() {
                                   palette={palette}
                                   className="hidden md:inline-flex"
                                 >
-                                  {s.time}
+                                  <p style={{ color: palette.black2 }}>{s.time}</p>
                                 </Badge>
                                 <span className="hidden md:inline-flex">
                                   <TypeBadge t={s.type} palette={palette} />
@@ -495,7 +495,7 @@ export default function TeacherSchedule() {
                               </div>
                               <div
                                 className="mt-1 text-xs flex flex-wrap items-center gap-2"
-                                style={{ color: palette.silver2 }}
+                                style={{ color: palette.black2 }}
                               >
                                 <span>{s.room ?? "-"}</span>
                                 {s.teacher && <span>• {s.teacher}</span>}
@@ -765,7 +765,7 @@ function RoutineSection({
               </div>
               <div className="p-3 grid gap-2">
                 {arr.length === 0 && (
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
+                  <div className="text-xs" style={{ color: palette.black2 }}>
                     Belum ada.
                   </div>
                 )}
@@ -1029,7 +1029,7 @@ function DailyReportSection({ palette }: { palette: Palette }) {
         {/* List laporan hari ini */}
         <div className="p-4 grid gap-2">
           {reports.length === 0 && (
-            <div className="text-sm" style={{ color: palette.silver2 }}>
+            <div className="text-sm" style={{ color: palette.black2 }}>
               Belum ada laporan untuk tanggal ini.
             </div>
           )}

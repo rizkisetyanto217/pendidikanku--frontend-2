@@ -201,7 +201,7 @@ export default function StudentAnnouncement() {
                       <div className="font-medium">{a.title}</div>
                       <div
                         className="text-xs"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         {dateLong(a.date)}
                       </div>

@@ -110,14 +110,14 @@ export default function AllScheduleStudent() {
                           <span className="inline-flex items-center gap-1">
                             <Clock size={14} />
                             <Badge palette={palette} variant="outline">
-                              {it.time}
+                              <p style={{ color: palette.black2 }}>{it.time}</p>
                             </Badge>
                           </span>
                           {it.room && (
                             <span className="inline-flex items-center gap-1">
                               <MapPin size={14} />
                               <Badge palette={palette} variant="outline">
-                                {it.room}
+                                <p style={{ color: palette.black2 }}>{it.room}</p>
                               </Badge>
                             </span>
                           )}

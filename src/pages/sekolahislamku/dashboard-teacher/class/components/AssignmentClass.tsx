@@ -427,10 +427,10 @@ export default function AssignmentClass() {
                   </div>
                   <div
                     className="mt-1 flex flex-wrap items-center gap-2 text-sm"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     <Badge variant="outline" palette={palette}>
-                      {cls?.room ?? "-"}
+                      <h1 style={{color: palette.black2}}>{cls?.room ?? "-"}</h1>
                     </Badge>
                     <span>Wali Kelas: {cls?.homeroom ?? "-"}</span>
                     <span>• {cls?.academicTerm ?? "-"}</span>
@@ -528,7 +528,10 @@ export default function AssignmentClass() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="text-base font-semibold truncate">
+                            <div
+                              className="text-base font-semibold truncate"
+                              style={{ color: palette.black2 }}
+                            >
                               {a.title}
                             </div>
                             <Badge
@@ -546,7 +549,7 @@ export default function AssignmentClass() {
                             </Badge>
                             {a.dueDate && (
                               <Badge palette={palette} variant="outline">
-                                Jatuh tempo: {dueBadge}
+                                <h1 style={{color: palette.black2}}> Jatuh tempo: {dueBadge}</h1>
                               </Badge>
                             )}
                           </div>
@@ -562,10 +565,10 @@ export default function AssignmentClass() {
 
                           <div
                             className="mt-2 flex flex-wrap items-center gap-2 text-xs"
-                            style={{ color: palette.silver2 }}
+                            style={{ color: palette.black2 }}
                           >
                             <CalendarDays size={14} />
-                            <span>Dibuat: {dateLong(a.createdAt)}</span>
+                            <span >Dibuat: {dateLong(a.createdAt)}</span>
                             {a.author && <span>• Oleh {a.author}</span>}
                             {(a.totalSubmissions ?? 0) > 0 && (
                               <>
@@ -595,7 +598,7 @@ export default function AssignmentClass() {
                     >
                       <div
                         className="text-xs"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         Aksi cepat untuk tugas ini
                       </div>

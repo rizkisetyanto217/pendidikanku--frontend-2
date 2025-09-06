@@ -163,7 +163,8 @@ export default function AnnouncementsStudent() {
                   items.map((a) => (
                     <Link
                       key={a.id}
-                      to={`/murid/pengumuman/detail/${a.id}`}
+                      to={`${a.id}`}
+                      state={{ item: a }}
                       className="block rounded-xl border p-4 hover:shadow-sm transition"
                       style={{
                         borderColor: palette.silver1,
@@ -175,7 +176,7 @@ export default function AnnouncementsStudent() {
                           <div className="font-medium truncate">{a.title}</div>
                           <div
                             className="text-xs mt-0.5"
-                            style={{ color: palette.silver2 }}
+                            style={{ color: palette.black2 }}
                           >
                             {dateFmt(a.date)}
                           </div>

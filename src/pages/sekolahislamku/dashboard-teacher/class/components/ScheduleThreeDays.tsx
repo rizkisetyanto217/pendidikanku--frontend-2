@@ -469,7 +469,7 @@ export default function ScheduleThreeDays() {
                     <div
                       className="px-4 py-3 text-sm"
                       style={{
-                        color: palette.silver2,
+                        color: palette.black2,
                         background: palette.white1,
                       }}
                     >

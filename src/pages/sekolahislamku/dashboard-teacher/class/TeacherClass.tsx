@@ -498,7 +498,7 @@ function AttendanceBar({
           }}
         />
       </div>
-      <div className="text-xs" style={{ color: palette.silver2 }}>
+      <div className="text-xs" style={{ color: palette.black2 }}>
         <span className="font-medium">{hadir}</span> dari {total} siswa hadir
       </div>
     </div>
@@ -536,7 +536,7 @@ function ClassCard({
         viewMode === "simple"
           ? "hover:shadow-lg hover:-translate-y-1"
           : "hover:shadow-xl hover:-translate-y-2"
-      } ${isUpcomingToday ? "ring-2 ring-opacity-50" : ""}`}
+      } ${isUpcomingToday ? "ring-2 ring-opacity-90" : ""}`}
     >
       <div
         className={`p-5 md:p-6 flex flex-col gap-4 h-full ${
@@ -548,28 +548,28 @@ function ClassCard({
           <div className="min-w-0 flex-1">
             <div
               className="font-bold text-lg md:text-xl mb-2"
-              style={{ color: palette.black1 }}
+              style={{ color: palette.black2 }}
             >
               {c.name}
             </div>
             <div className="space-y-1">
               <div
                 className="flex items-center gap-2 text-sm"
-                style={{ color: palette.silver2 }}
+                style={{ color: palette.black2 }}
               >
                 <GraduationCap size={14} />
                 <span className="truncate">Wali Kelas: {c.homeroom}</span>
               </div>
               <div
                 className="flex items-center gap-2 text-sm"
-                style={{ color: palette.silver2 }}
+                style={{ color: palette.black2 }}
               >
                 <CalendarDays size={14} />
                 <span className="truncate">{c.academicTerm}</span>
               </div>
               <div
                 className="flex items-center gap-2 text-sm"
-                style={{ color: palette.silver2 }}
+                style={{ color: palette.black2 }}
               >
                 <Users size={14} />
                 <span>Angkatan {c.cohortYear}</span>
@@ -583,8 +583,11 @@ function ClassCard({
               variant="outline"
               className="flex items-center gap-1.5"
             >
-              <MapPin size={12} />
-              {c.room ?? "Belum ditentukan"}
+              <MapPin size={12} style={{ color: palette.black2 }} />
+
+              <h1 style={{ color: palette.black2 }}>
+                {c.room ?? "Belum ditentukan"}
+              </h1>
             </Badge>
           </div>
         </div>
@@ -607,13 +610,13 @@ function ClassCard({
                   <div>
                     <div
                       className="text-sm font-medium truncate"
-                      style={{ color: palette.black1 }}
+                      style={{ color: palette.black2 }}
                     >
                       {c.nextSession.title}
                     </div>
                     <div
                       className="text-xs mt-0.5"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       {dateShort(c.nextSession.dateISO)} • {c.nextSession.time}
                       {c.nextSession.room && ` • ${c.nextSession.room}`}
@@ -668,14 +671,14 @@ function ClassCard({
                   </div>
                   <div
                     className="text-sm font-medium"
-                    style={{ color: palette.black1 }}
+                    style={{ color: palette.black2 }}
                   >
                     {c.nextSession.title}
                   </div>
                   {c.nextSession.room && (
                     <div
                       className="flex items-center gap-2 text-sm"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       <MapPin size={14} />
                       <span>{c.nextSession.room}</span>
@@ -768,7 +771,7 @@ function FilterControls({
           placeholder="Cari berdasarkan nama kelas, wali kelas, tahun ajaran, atau angkatan..."
           className="bg-transparent outline-none text-sm w-full placeholder:text-opacity-60"
           style={{
-            color: palette.black1,
+            color: palette.black2,
             fontSize: "14px",
           }}
         />
@@ -778,7 +781,7 @@ function FilterControls({
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             Ruang Kelas
           </label>
@@ -791,7 +794,7 @@ function FilterControls({
               value={room}
               onChange={(e) => setRoom(e.target.value)}
               className="bg-transparent outline-none text-sm w-full"
-              style={{ color: palette.black1 }}
+              style={{ color: palette.black2 }}
             >
               {rooms.map((r) => (
                 <option key={r} value={r}>
@@ -805,7 +808,7 @@ function FilterControls({
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             Tahun Ajaran
           </label>
@@ -832,7 +835,7 @@ function FilterControls({
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             Angkatan
           </label>
@@ -859,7 +862,7 @@ function FilterControls({
         <div className="space-y-2">
           <label
             className="text-xs font-medium"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             Urutkan
           </label>
@@ -990,7 +993,7 @@ function SummaryStats({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div
             className="text-center p-4 rounded-xl"
-            style={{ background: palette.white1 }}
+            style={{ background: palette.white2 }}
           >
             <div
               className="text-2xl font-bold mb-1"
@@ -998,21 +1001,21 @@ function SummaryStats({
             >
               {totalClasses}
             </div>
-            <div className="text-sm" style={{ color: palette.silver2 }}>
+            <div className="text-sm" style={{ color: palette.black2 }}>
               Total Kelas
             </div>
           </div>
           <div
             className="text-center p-4 rounded-xl"
-            style={{ background: palette.white1 }}
+            style={{ background: palette.white2 }}
           >
             <div
               className="text-2xl font-bold mb-1"
-              style={{ color: palette.secondary }}
+              style={{ color: palette.primary }}
             >
               {totalStudents}
             </div>
-            <div className="text-sm" style={{ color: palette.silver2 }}>
+            <div className="text-sm" style={{ color: palette.black2 }}>
               Total Siswa
             </div>
           </div>
@@ -1026,7 +1029,7 @@ function SummaryStats({
             >
               {totalTodayAttendance}
             </div>
-            <div className="text-sm" style={{ color: palette.silver2 }}>
+            <div className="text-sm" style={{ color: palette.black2 }}>
               Hadir Hari Ini
             </div>
           </div>
@@ -1036,11 +1039,11 @@ function SummaryStats({
           >
             <div
               className="text-2xl font-bold mb-1"
-              style={{ color: palette.secondary }}
+              style={{ color: palette.primary }}
             >
               {avgAttendanceRate}%
             </div>
-            <div className="text-sm" style={{ color: palette.silver2 }}>
+            <div className="text-sm" style={{ color: palette.black2 }}>
               Rata-rata Kehadiran
             </div>
           </div>
@@ -1102,7 +1105,10 @@ export default function TeacherClassesList() {
           <ParentSidebar palette={palette} />
 
           {/* Main Content */}
-          <div className="flex-1 min-w-0 space-y-6">
+          <div
+            className="flex-1 min-w-0 space-y-6"
+            style={{ color: palette.black2 }}
+          >
             {!isFetchingClasses && classes.length > 0 && (
               <SummaryStats classes={classes} palette={palette} />
             )}
@@ -1117,7 +1123,7 @@ export default function TeacherClassesList() {
                     >
                       Kelas yang Saya Ajar
                     </h2>
-                    <p className="text-sm" style={{ color: palette.silver2 }}>
+                    <p className="text-sm" style={{ color: palette.black2 }}>
                       Kelola dan pantau semua kelas yang Anda ampu
                     </p>
                   </div>
@@ -1150,11 +1156,11 @@ export default function TeacherClassesList() {
             <div>
               {!isFetchingClasses && (
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Menampilkan {filtered.length} dari {classes.length} kelas
                   </div>
                   {filtered.length > 0 && (
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Diurutkan berdasarkan:{" "}
                       {sortBy === "name"
                         ? "Nama Kelas"
@@ -1203,7 +1209,7 @@ export default function TeacherClassesList() {
                       className="mx-auto w-16 h-16 rounded-full flex items-center justify-center"
                       style={{ background: palette.white2 }}
                     >
-                      <Search size={24} style={{ color: palette.silver2 }} />
+                      <Search size={24} style={{ color: palette.black2 }} />
                     </div>
                     <div>
                       <div
@@ -1214,7 +1220,7 @@ export default function TeacherClassesList() {
                       </div>
                       <div
                         className="text-sm max-w-md mx-auto"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         Tidak ada kelas yang cocok dengan filter yang dipilih.
                         Coba ubah kriteria pencarian atau filter untuk melihat

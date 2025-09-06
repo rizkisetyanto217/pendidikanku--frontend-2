@@ -1051,13 +1051,13 @@ export default function AllAnnouncementTeacher({
                 <h1 className="text-2xl font-bold mb-2">
                   {title}
                   {classId ? (
-                    <span className="text-base font-normal opacity-70">
+                    <span className="text-base font-normal opacity-80">
                       {" "}
                       • {classId}
                     </span>
                   ) : null}
                 </h1>
-                <p className="opacity-70 mb-6">
+                <p className="opacity-80 mb-6">
                   Informasi terbaru seputar kegiatan Tahfidz, Tahsin, dan Kajian
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
@@ -1068,7 +1068,7 @@ export default function AllAnnouncementTeacher({
                     <p className="text-2xl font-bold text-blue-600">
                       {stats.total}
                     </p>
-                    <p className="text-xs opacity-70">Total</p>
+                    <p className="text-xs opacity-90">Total</p>
                   </div>
                   <div
                     className="text-center p-3 rounded-lg"
@@ -1077,7 +1077,7 @@ export default function AllAnnouncementTeacher({
                     <p className="text-2xl font-bold text-green-600">
                       {stats.aktif}
                     </p>
-                    <p className="text-xs opacity-70">Aktif</p>
+                    <p className="text-xs opacity-90">Aktif</p>
                   </div>
                   <div
                     className="text-center p-3 rounded-lg"
@@ -1086,7 +1086,7 @@ export default function AllAnnouncementTeacher({
                     <p className="text-2xl font-bold text-emerald-600">
                       {stats.tahfidz}
                     </p>
-                    <p className="text-xs opacity-70">Tahfidz</p>
+                    <p className="text-xs opacity-990">Tahfidz</p>
                   </div>
                   <div
                     className="text-center p-3 rounded-lg"
@@ -1095,7 +1095,7 @@ export default function AllAnnouncementTeacher({
                     <p className="text-2xl font-bold text-cyan-600">
                       {stats.tahsin}
                     </p>
-                    <p className="text-xs opacity-70">Tahsin</p>
+                    <p className="text-xs opacity-90">Tahsin</p>
                   </div>
                   <div
                     className="text-center p-3 rounded-lg"
@@ -1104,7 +1104,7 @@ export default function AllAnnouncementTeacher({
                     <p className="text-2xl font-bold text-purple-600">
                       {stats.kajian}
                     </p>
-                    <p className="text-xs opacity-70">Kajian</p>
+                    <p className="text-xs opacity-90">Kajian</p>
                   </div>
                   <div
                     className="text-center p-3 rounded-lg"
@@ -1113,7 +1113,7 @@ export default function AllAnnouncementTeacher({
                     <p className="text-2xl font-bold text-red-600">
                       {stats.urgent}
                     </p>
-                    <p className="text-xs opacity-70">Urgent</p>
+                    <p className="text-xs opacity-90">Urgent</p>
                   </div>
                 </div>
               </div>
@@ -1128,7 +1128,7 @@ export default function AllAnnouncementTeacher({
 
             {/* Info hasil */}
             <div className="flex items-center justify-between">
-              <p className="text-sm opacity-70">
+              <p className="text-sm opacity-90">
                 Menampilkan {filtered.length} dari {data.length} pengumuman
               </p>
               {(filters.kategori ||

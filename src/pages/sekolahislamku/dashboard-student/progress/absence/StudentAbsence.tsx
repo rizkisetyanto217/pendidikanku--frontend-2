@@ -242,7 +242,7 @@ export default function StudentAbsence() {
                       >
                         <div
                           className="text-xs"
-                          style={{ color: palette.silver2 }}
+                          style={{ color: palette.black2 }}
                         >
                           {label}
                         </div>
@@ -252,7 +252,7 @@ export default function StudentAbsence() {
                           </Badge>
                           <span
                             className="text-xs inline-flex items-center gap-1"
-                            style={{ color: palette.silver2 }}
+                            style={{ color: palette.black2 }}
                           >
                             <Percent size={12} /> {pct}%
                           </span>
@@ -269,12 +269,12 @@ export default function StudentAbsence() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Total Sesi
                     </div>
                     <div className="mt-1">
                       <Badge variant="outline" palette={palette}>
-                        {s.stats.total}
+                        <p style={{ color: palette.black2 }}>{s.stats.total}</p>
                       </Badge>
                     </div>
                   </SectionCard>
@@ -290,7 +290,7 @@ export default function StudentAbsence() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.silver2 }}>
+                  <label className="text-xs" style={{ color: palette.black2 }}>
                     Periode
                   </label>
                   <select
@@ -306,7 +306,7 @@ export default function StudentAbsence() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.silver2 }}>
+                  <label className="text-xs" style={{ color: palette.black2 }}>
                     Status
                   </label>
                   <select
@@ -325,14 +325,14 @@ export default function StudentAbsence() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.silver2 }}>
+                  <label className="text-xs" style={{ color: palette.black2 }}>
                     Mode
                   </label>
                   <select
                     value={mode}
                     onChange={(e) => handleChange("mode", e.target.value)}
                     className="rounded-lg border px-3 py-2 bg-transparent"
-                    style={{ borderColor: palette.silver1 }}
+                    style={{ borderColor: palette.silver1, color: palette.black2 }}
                   >
                     <option value="all">Semua</option>
                     <option value="onsite">Tatap muka</option>
@@ -356,7 +356,7 @@ export default function StudentAbsence() {
                     style={{
                       borderColor: palette.silver1,
                       background: palette.white2,
-                      color: palette.silver2,
+                      color: palette.black2,
                     }}
                   >
                     Tidak ada data untuk filter saat ini.
@@ -376,7 +376,7 @@ export default function StudentAbsence() {
                       <div className="font-medium">{dateShort(a.date)}</div>
                       <div
                         className="text-xs"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         {a.mode
                           ? a.mode === "onsite"
@@ -387,7 +387,7 @@ export default function StudentAbsence() {
                       </div>
                       <div
                         className="text-xs mt-1"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         {dateLong(a.date)}
                       </div>
@@ -397,21 +397,6 @@ export default function StudentAbsence() {
                     </Badge>
                   </div>
                 ))}
-              </div>
-
-              {/* Footer: kembali */}
-              <div className="pt-6">
-                
-                  <Btn
-                  onClick={() => navigate(-1)}
-                    variant="outline"
-                    size="sm"
-                    palette={palette}
-                    className="w-full justify-center"
-                  >
-                    <ArrowLeft className="mr-1" size={16} /> Kembali ke Detail
-                  </Btn>
-              
               </div>
             </SectionCard>
           </div>

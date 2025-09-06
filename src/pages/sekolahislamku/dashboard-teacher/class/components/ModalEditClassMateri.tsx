@@ -153,8 +153,8 @@ export default function ModalEditClassMateri({
             <button
               type="button"
               onClick={onClose}
-              className="text-sm"
-              style={{ color: palette.silver2 }}
+              className="text-sm p-2 rounded-xl border "
+              style={{ color: palette.black2, borderColor: palette.silver1 }}
             >
               Tutup
             </button>
@@ -205,7 +205,7 @@ export default function ModalEditClassMateri({
                 style={{
                   borderColor: palette.silver1,
                   background: palette.white1,
-                  color: palette.black1,
+                  color: palette.black2,
                 }}
               />
             </div>

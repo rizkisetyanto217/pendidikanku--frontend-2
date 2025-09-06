@@ -91,7 +91,7 @@ export default function ScheduleEditorModal({
           <span>{initial ? "Edit Jadwal" : "Tambah Jadwal"}</span>
           <span
             className="text-xs font-normal"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             {prettyDate}
           </span>
@@ -104,7 +104,7 @@ export default function ScheduleEditorModal({
       <div className="grid gap-3">
         <div className="grid md:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs" style={{ color: palette.silver2 }}>
+            <label className="text-xs" style={{ color: palette.black2 }}>
               Waktu
             </label>
             <input
@@ -121,7 +121,7 @@ export default function ScheduleEditorModal({
             />
           </div>
           <div>
-            <label className="text-xs" style={{ color: palette.silver2 }}>
+            <label className="text-xs" style={{ color: palette.black2 }}>
               Jenis
             </label>
             <select
@@ -144,7 +144,7 @@ export default function ScheduleEditorModal({
         </div>
 
         <div>
-          <label className="text-xs" style={{ color: palette.silver2 }}>
+          <label className="text-xs" style={{ color: palette.black2 }}>
             Judul
           </label>
           <input
@@ -163,7 +163,7 @@ export default function ScheduleEditorModal({
 
         <div className="grid md:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs" style={{ color: palette.silver2 }}>
+            <label className="text-xs" style={{ color: palette.black2 }}>
               Ruang/Tempat
             </label>
             <input
@@ -179,7 +179,7 @@ export default function ScheduleEditorModal({
             />
           </div>
           <div>
-            <label className="text-xs" style={{ color: palette.silver2 }}>
+            <label className="text-xs" style={{ color: palette.black2 }}>
               Pengajar
             </label>
             <input
@@ -199,7 +199,7 @@ export default function ScheduleEditorModal({
         </div>
 
         <div>
-          <label className="text-xs" style={{ color: palette.silver2 }}>
+          <label className="text-xs" style={{ color: palette.black2 }}>
             Catatan Singkat
           </label>
           <input
@@ -216,7 +216,7 @@ export default function ScheduleEditorModal({
         </div>
 
         <div>
-          <label className="text-xs" style={{ color: palette.silver2 }}>
+          <label className="text-xs" style={{ color: palette.black2 }}>
             Deskripsi
           </label>
           <textarea

@@ -456,7 +456,7 @@ function MyClassItem({
     >
       <div className="min-w-0">
         <div className="font-medium truncate">{name}</div>
-        <div className="text-xs truncate" style={{ color: palette.silver2 }}>
+        <div className="text-xs truncate" style={{ color: palette.black2 }}>
           {typeof students === "number" ? `${students} siswa` : "—"}{" "}
           {lastSubject ? `• ${lastSubject}` : ""}
         </div>
@@ -466,6 +466,7 @@ function MyClassItem({
         palette={palette}
         size="sm"
         variant="ghost"
+        
         onClick={() =>
           navigate(`/${slug}/guru/management-class/${name}`, {
             state: { className: name, students, lastSubject },

@@ -307,7 +307,7 @@ const handleSave = () => {
                   <CheckSquare size={18} color={palette.quaternary} />
                   <div>
                     <div className="font-semibold">Absensi Hari Ini</div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       <CalendarDays size={12} className="inline mr-1" />
                       {dateLong(todayISO)} — {hijriLong(todayISO)}
                     </div>
@@ -389,7 +389,7 @@ const handleSave = () => {
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 space-y-2">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     <Users size={14} className="inline mr-1" />
                     {filtered.length} siswa
                     {isFetching ? " • memuat…" : ""}

@@ -170,7 +170,10 @@ const ManagementClass = () => {
                 <h1 className="text-2xl font-bold">
                   Kelas {info?.className ?? String(className)}
                 </h1>
-                <p className="text-sm opacity-70 mt-1">
+                <p
+                  className="text-sm opacity-90 mt-1"
+                  style={{ color: palette.black2 }}
+                >
                   Kelola informasi dan data kelas
                 </p>
               </div>
@@ -197,10 +200,13 @@ const ManagementClass = () => {
                 <div className="grid gap-6 md:grid-cols-3">
                   {/* Nama Kelas */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-medium opacity-60">
+                    <div className="flex items-center gap-2 text-xs font-medium opacity-80">
                       <div
                         className="w-2 h-2 rounded-full"
-                        style={{ background: palette.primary2 }}
+                        style={{
+                          background: palette.primary2,
+                          color: palette.black2,
+                        }}
                       />
                       NAMA KELAS
                     </div>
@@ -211,15 +217,24 @@ const ManagementClass = () => {
 
                   {/* Jumlah Siswa */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-medium opacity-60">
+                    <div
+                      className="flex items-center gap-2 text-xs font-medium opacity-80"
+                      style={{ color: palette.black2 }}
+                    >
                       <Users size={12} />
                       JUMLAH SISWA
                     </div>
-                    <p className="text-xl font-bold flex items-center gap-2">
+                    <p
+                      className="text-xl font-bold flex items-center gap-2"
+                      style={{ color: palette.black2 }}
+                    >
                       {typeof info?.students === "number" ? (
                         <>
                           {info?.students}
-                          <span className="text-sm font-normal opacity-60">
+                          <span
+                            className="text-sm font-normal opacity-80"
+                            style={{ color: palette.black2 }}
+                          >
                             siswa
                           </span>
                         </>
@@ -233,7 +248,10 @@ const ManagementClass = () => {
 
                   {/* Pelajaran Terakhir */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-medium opacity-60">
+                    <div
+                      className="flex items-center gap-2 text-xs font-medium opacity-80"
+                      style={{ color: palette.black2 }}
+                    >
                       <Calendar size={12} />
                       PELAJARAN TERAKHIR
                     </div>
@@ -290,31 +308,40 @@ const ManagementClass = () => {
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ background: palette.primary2 }}
+                    style={{ background: palette.black2 }}
                   />
                   Statistik Singkat
                 </h3>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm opacity-70">Status Kelas</span>
+                  <div
+                    className="flex justify-between items-center py-2"
+                    style={{ color: palette.black2 }}
+                  >
+                    <span className="text-sm opacity-90">Status Kelas</span>
                     <span
                       className="px-3 py-1 rounded-full text-xs font-medium"
                       style={{
                         background: `${palette.primary2}20`,
-                        color: palette.primary2,
+                        color: palette.black2,
                       }}
                     >
                       Aktif
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm opacity-70">
+                    <span
+                      className="text-sm opacity-90"
+                      style={{ color: palette.black2 }}
+                    >
                       Kehadiran Hari Ini
                     </span>
                     <span className="font-medium">-</span>
                   </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm opacity-70">Tugas Pending</span>
+                  <div
+                    className="flex justify-between items-center py-2"
+                    style={{ color: palette.black2 }}
+                  >
+                    <span className="text-sm opacity-90">Tugas Pending</span>
                     <span className="font-medium">-</span>
                   </div>
                 </div>
@@ -325,7 +352,7 @@ const ManagementClass = () => {
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ background: palette.primary2 }}
+                    style={{ background: palette.primary2, color: palette.black2 }}
                   />
                   Aksi Cepat
                 </h3>
@@ -339,7 +366,10 @@ const ManagementClass = () => {
                     onClick={() => alert("Lihat daftar siswa")}
                   >
                     <div className="font-medium">Lihat Daftar Siswa</div>
-                    <div className="text-xs opacity-60 mt-1">
+                    <div
+                      className="text-xs opacity-90 mt-1"
+                      style={{ color: palette.black2 }}
+                    >
                       Kelola data siswa dalam kelas
                     </div>
                   </button>
@@ -352,7 +382,10 @@ const ManagementClass = () => {
                     onClick={() => alert("Buat jadwal")}
                   >
                     <div className="font-medium">Atur Jadwal Pelajaran</div>
-                    <div className="text-xs opacity-60 mt-1">
+                    <div
+                      className="text-xs opacity-90 mt-1"
+                      style={{ color: palette.black2 }}
+                    >
                       Kelola jadwal mata pelajaran
                     </div>
                   </button>

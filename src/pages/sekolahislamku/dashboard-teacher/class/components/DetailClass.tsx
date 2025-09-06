@@ -249,12 +249,15 @@ export default function DetailClass() {
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0">
-                  <div className="text-lg md:text-xl font-semibold">
+                  <div
+                    className="text-lg md:text-xl font-semibold"
+                    style={{ color: palette.black2 }}
+                  >
                     {cls?.name ?? (loadingAny ? "Memuat…" : "—")}
                   </div>
                   <div
                     className="mt-1 flex flex-wrap items-center gap-2 text-sm"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     <Badge variant="outline" palette={palette}>
                       {cls?.room ?? "-"}
@@ -305,7 +308,7 @@ export default function DetailClass() {
               <SectionCard palette={palette} className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Jumlah Siswa
                     </div>
                     <div className="text-xl font-semibold">
@@ -315,7 +318,7 @@ export default function DetailClass() {
                     {students.length === 0 && fallbackTotal > 0 && (
                       <div
                         className="text-xs mt-0.5"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         (fallback: {fallbackTotal})
                       </div>
@@ -329,7 +332,7 @@ export default function DetailClass() {
               <SectionCard palette={palette} className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Kehadiran Hari Ini
                     </div>
                     <div className="text-xl font-semibold">
@@ -344,7 +347,7 @@ export default function DetailClass() {
               <SectionCard palette={palette} className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Materi • Tugas
                     </div>
                     <div className="text-xl font-semibold">
@@ -361,7 +364,7 @@ export default function DetailClass() {
               <div className="p-4 md:p-5">
                 <div
                   className="text-sm mb-2"
-                  style={{ color: palette.silver2 }}
+                  style={{ color: palette.black2 }}
                 >
                   Ringkasan Kehadiran Hari Ini
                 </div>
@@ -419,7 +422,7 @@ export default function DetailClass() {
                   </div>
                   <div
                     className="mt-1 text-xs"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     {hadir}/{total || 0} hadir • {pct}%
                   </div>

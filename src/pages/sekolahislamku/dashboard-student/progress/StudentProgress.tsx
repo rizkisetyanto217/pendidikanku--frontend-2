@@ -250,7 +250,7 @@ export default function StudentProgress() {
                         {child?.className ?? "Kelas"}
                       </Badge>
                     </div>
-                    <div className="text-sm" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       {dateLong(gregorianISO)}
                     </div>
                   </div>
@@ -271,7 +271,7 @@ export default function StudentProgress() {
                   className="p-3"
                   style={{ background: palette.white2 }}
                 >
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
+                  <div className="text-xs" style={{ color: palette.black2 }}>
                     Kehadiran
                   </div>
                   <div className="mt-1 text-sm">
@@ -284,7 +284,7 @@ export default function StudentProgress() {
                   className="p-3"
                   style={{ background: palette.white2 }}
                 >
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
+                  <div className="text-xs" style={{ color: palette.black2 }}>
                     Hafalan
                   </div>
                   <div className="mt-2">
@@ -297,7 +297,7 @@ export default function StudentProgress() {
                     />
                     <div
                       className="mt-1 text-xs"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       ~ {data?.stats.memorizationJuz ?? 0} Juz
                     </div>
@@ -309,7 +309,7 @@ export default function StudentProgress() {
                   className="p-3"
                   style={{ background: palette.white2 }}
                 >
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
+                  <div className="text-xs" style={{ color: palette.black2 }}>
                     Nilai Rata-rata
                   </div>
                   <div className="mt-1 text-lg font-semibold">
@@ -334,7 +334,7 @@ export default function StudentProgress() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Absensi
                     </div>
                     <div className="mt-2 flex items-center gap-2">
@@ -390,7 +390,7 @@ export default function StudentProgress() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Nilai
                     </div>
                     <div className="mt-2 text-lg font-semibold">
@@ -406,7 +406,7 @@ export default function StudentProgress() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Hafalan
                     </div>
                     <div className="mt-2 text-sm">
@@ -420,7 +420,7 @@ export default function StudentProgress() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       PR
                     </div>
                     <div className="mt-2 text-sm">{data.today.pr ?? "-"}</div>
@@ -434,7 +434,7 @@ export default function StudentProgress() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-xs" style={{ color: palette.black2 }}>
                       Informasi Umum
                     </div>
                     <p className="mt-1 text-sm">{data.today.informasiUmum}</p>
@@ -449,7 +449,7 @@ export default function StudentProgress() {
                     >
                       <div
                         className="text-xs"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         Catatan Personal
                       </div>
@@ -494,7 +494,7 @@ export default function StudentProgress() {
                       </div>
                       <div
                         className="text-xs"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         {a.mode
                           ? a.mode === "onsite"
@@ -556,7 +556,7 @@ export default function StudentProgress() {
                 <NotebookPen size={18} color={palette.quaternary} /> Riwayat
                 Catatan & Hafalan
               </div>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-3" style={{ color: palette.black2 }}>
                 {(data?.notesHistory ?? []).map((n, i) => (
                   <div
                     key={i}
@@ -564,11 +564,12 @@ export default function StudentProgress() {
                     style={{
                       borderColor: palette.silver1,
                       background: palette.white2,
+                      color: palette.black2
                     }}
                   >
                     <div
                       className="text-xs mb-1"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       {dateLong(normalizeISOToLocalNoon(n.date))}
                     </div>
@@ -637,7 +638,7 @@ export default function StudentProgress() {
                   </div>
                   <div
                     className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     {data?.contacts.phone && (
                       <a

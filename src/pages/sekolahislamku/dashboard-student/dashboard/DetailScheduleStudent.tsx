@@ -86,14 +86,16 @@ export default function DetailScheduleStudent() {
                     <span className="inline-flex items-center gap-2">
                       <Clock size={14} />
                       <Badge variant="outline" palette={palette}>
-                        {item.time || "-"}
+                        <p style={{ color: palette.black2 }}>
+                          {item.time || "-"}
+                        </p>
                       </Badge>
                     </span>
                     {item.room && (
                       <span className="inline-flex items-center gap-2">
                         <MapPin size={14} />
                         <Badge variant="outline" palette={palette}>
-                          {item.room}
+                          <p style={{ color: palette.black2 }}>{item.room}</p>
                         </Badge>
                       </span>
                     )}
