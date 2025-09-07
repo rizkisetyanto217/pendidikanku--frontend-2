@@ -28,6 +28,7 @@ import {
   GraduationCap,
   Menu,
   X,
+  School,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -94,7 +95,7 @@ const SCHOOL_NAVS: NavItem[] = [
   { path: "kehadiran", label: "Absensi", icon: CheckSquare },
   { path: "buku", label: "Buku", icon: BookOpen },
   { path: "keuangan", label: "Keuangan", icon: Wallet },
-  { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+  { path: "profil-sekolah", label: "Profil", icon: School },
 ];
 
 const TEACHER_NAVS: NavItem[] = [

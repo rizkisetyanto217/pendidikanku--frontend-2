@@ -210,6 +210,10 @@ import AssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/comp
 import DetailAssignmentClass from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailAssignmentClass";
 import Bill from "@/pages/sekolahislamku/dashboard-school/finance/Bill";
 import DetailAnnouncementStudent from "@/pages/sekolahislamku/dashboard-student/dashboard/DetailAnnouncementStudent";
+import SchoolProfile from "@/pages/sekolahislamku/dashboard-school/profile/SchoolProfile";
+import AcademicSchool from "@/pages/sekolahislamku/dashboard-school/academic/AcademicSchool";
+import DetailAcademic from "@/pages/sekolahislamku/dashboard-school/academic/components/DetailAcademic";
+import ManagementAcademic from "@/pages/sekolahislamku/dashboard-school/academic/components/ManagementAcademic";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -693,6 +697,13 @@ export default function AppRoutes() {
         <Route index element={<SchoolDashboard />} />
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="all-schedule" element={<AllSchedule />} />
+        <Route path="profil-sekolah" element={<SchoolProfile />} />
+        <Route path="academic">
+          <Route index element={<AcademicSchool />} />
+          <Route path="detail" element={<DetailAcademic />} />
+          <Route path="manage" element={<ManagementAcademic />} />
+        </Route>
+
         <Route
           path="all-schedule/detail/:scheduleId"
           element={<DetailSchedule />}

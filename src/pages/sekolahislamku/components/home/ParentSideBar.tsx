@@ -20,6 +20,7 @@ import {
   ClipboardList,
   // NotebookPen,
   Bell,
+  School,
 } from "lucide-react";
 
 /* =============== Types =============== */
@@ -56,7 +57,8 @@ const DEFAULT_NAVS: NavDict = {
     // { path: "kehadiran", label: "Absensi", icon: CheckSquare },
     { path: "buku", label: "Buku", icon: Book },
     { path: "keuangan", label: "Keuangan", icon: Wallet },
-    // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+    { path: "profil-sekolah", label: "Profil", icon: School },
+    { path: "academic", label: "Akademik", icon: FileSpreadsheet },
   ],
   murid: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -64,7 +66,6 @@ const DEFAULT_NAVS: NavDict = {
     { path: "finance", label: "Pembayaran", icon: Wallet },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "pengumuman", label: "Pengumuman", icon: Bell },
-    { path: "progress/raport", label: "Rapor Nilai", icon: FileSpreadsheet },
   ],
   guru: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
