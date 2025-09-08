@@ -21,6 +21,16 @@ import {
   // NotebookPen,
   Bell,
   School,
+  RemoveFormatting,
+  ChartBar,
+  Landmark,
+  Wallet2,
+  Webcam,
+  SwatchBook,
+  Rows3,
+  Calendar1,
+  ChartLine,
+  Settings,
 } from "lucide-react";
 
 /* =============== Types =============== */
@@ -52,6 +62,7 @@ export type ParentSidebarProps = {
 const DEFAULT_NAVS: NavDict = {
   sekolah: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "guru", label: "Guru", icon: UserCog },
     { path: "kelas", label: "Kelas", icon: BookOpen },
     // { path: "kehadiran", label: "Absensi", icon: CheckSquare },
@@ -62,6 +73,7 @@ const DEFAULT_NAVS: NavDict = {
   ],
   murid: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
     { path: "finance", label: "Pembayaran", icon: Wallet },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
@@ -69,8 +81,10 @@ const DEFAULT_NAVS: NavDict = {
   ],
   guru: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
+    { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "kelas", label: "Kelas Saya", icon: Users },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+
     // { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
     // { path: "penilaian", label: "Penilaian", icon: ClipboardList },
     // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },

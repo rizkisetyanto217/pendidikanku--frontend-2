@@ -214,6 +214,9 @@ import SchoolProfile from "@/pages/sekolahislamku/dashboard-school/profile/Schoo
 import AcademicSchool from "@/pages/sekolahislamku/dashboard-school/academic/AcademicSchool";
 import DetailAcademic from "@/pages/sekolahislamku/dashboard-school/academic/components/DetailAcademic";
 import ManagementAcademic from "@/pages/sekolahislamku/dashboard-school/academic/components/ManagementAcademic";
+import SchoolMenuGrids from "@/pages/sekolahislamku/dashboard-school/menu-utama/SchoolMenuGrids";
+import TeacherMenuGrids from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/TeacherMenuGrids";
+import StudentMenuGrids from "@/pages/sekolahislamku/dashboard-student/menu-utama/StudentMenuGrids";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -585,6 +588,7 @@ export default function AppRoutes() {
         <Route index element={<StudentDashboard />} />
         <Route path="progress" element={<StudentProgressDetail />} />
         <Route path="all-schedule" element={<AllScheduleStudent />} />
+        <Route path="menu-utama" element={<StudentMenuGrids />} />
         <Route
           path="all-schedule/detail/:scheduleId"
           element={<DetailScheduleStudent />}
@@ -616,7 +620,7 @@ export default function AppRoutes() {
         <Route index element={<TeacherDashboard />} />
         <Route path="kehadiran" element={<TeacherAttendance />} />
         <Route path="kehadiran/:id" element={<AttendanceDetail />} />
-
+        <Route path="menu-utama" element={<TeacherMenuGrids />} />
         <Route path="penilaian" element={<TeacherGrading />} />
         <Route path="penilaian/:id" element={<DetailGrading />} />
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
@@ -698,6 +702,12 @@ export default function AppRoutes() {
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="all-schedule" element={<AllSchedule />} />
         <Route path="profil-sekolah" element={<SchoolProfile />} />
+        <Route path="menu-utama">
+          <Route index element={<SchoolMenuGrids />} />
+          <Route path="academic" element={<AcademicSchool />} />
+          <Route path="profil-sekolah" element={<SchoolProfile />} />
+        </Route>
+
         <Route path="academic">
           <Route index element={<AcademicSchool />} />
           <Route path="detail" element={<DetailAcademic />} />

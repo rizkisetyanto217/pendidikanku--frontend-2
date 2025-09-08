@@ -29,6 +29,8 @@ import {
   Menu,
   X,
   School,
+  ChartBar,
+  Calendar1,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -38,9 +40,9 @@ import useHtmlDarkMode from "@/hooks/useHTMLThema";
 interface ParentTopBarProps {
   palette: Palette;
   title?: ReactNode;
-  hijriDate?: string; // opsional override label Hijriah
-  gregorianDate?: string; // ISO string, default now
-  dateFmt?: (iso: string) => string; // custom formatter untuk Masehi
+  hijriDate?: string; // opsional: override label Hijriah (sudah berformat)
+  gregorianDate?: string; // ISO string; default: now
+  dateFmt?: (iso: string) => string; // custom formatter Gregorian
 }
 
 type NavItem = {
@@ -62,16 +64,16 @@ const formatIDGregorian = (iso: string) =>
     year: "numeric",
   }).format(new Date(iso));
 
+/** Formatter Hijriah – TIDAK menambahkan "H" manual agar tidak dobel */
 const formatHijriLocal = (d: Date) => {
   try {
-    const fmt = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
+    return new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
       day: "numeric",
       month: "long",
       year: "numeric",
       timeZone: "UTC",
       weekday: "long",
-    });
-    return `${fmt.format(toCivilUtcDate(d))} H`;
+    }).format(toCivilUtcDate(d));
   } catch {
     return "";
   }
@@ -80,15 +82,17 @@ const formatHijriLocal = (d: Date) => {
 /* ===================== Nav definitions ===================== */
 const STUDENT_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
   { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
   { path: "finance", label: "Pembayaran", icon: Wallet },
-  { path: "jadwal", label: "Jadwal", icon: Megaphone },
+  { path: "jadwal", label: "Jadwal", icon: Calendar1 },
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   { path: "rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
 ];
 
 const SCHOOL_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
   { path: "murid", label: "Siswa", icon: Users },
   { path: "guru", label: "Guru", icon: UserCog },
   { path: "kelas", label: "Kelas", icon: BookOpen },
@@ -96,10 +100,13 @@ const SCHOOL_NAVS: NavItem[] = [
   { path: "buku", label: "Buku", icon: BookOpen },
   { path: "keuangan", label: "Keuangan", icon: Wallet },
   { path: "profil-sekolah", label: "Profil", icon: School },
+  { path: "academic", label: "Akademik", icon: FileSpreadsheet },
+  { path: "room", label: "Ruangan", icon: ChartBar },
 ];
 
 const TEACHER_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
   { path: "kelas", label: "Kelas Saya", icon: Users },
   { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
   { path: "penilaian", label: "Penilaian", icon: ClipboardList },
@@ -292,8 +299,6 @@ export default function ParentTopBar({
         : pageKind === "guru"
           ? TEACHER_NAVS
           : STUDENT_NAVS;
-
-    // konversi ke absolute path berbasis slug
     return source.map(({ path, label, icon, end }) => ({
       path: path === "." ? base : `${base}/${path}`,
       label,
@@ -335,7 +340,6 @@ export default function ParentTopBar({
     return () => clearTimeout(t);
   }, [midnightTick]);
 
-  // default title
   const brandNode =
     title ??
     (pageKind === "sekolah"
@@ -392,13 +396,12 @@ export default function ParentTopBar({
               className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
               style={{
                 background: palette.secondary,
-                // ⬇️ fix: teks putih saat dark
-                color: isDark ? "#fff" : palette.white1,
+                color: isDark ? "#fff" : palette.silver1, // ✅ perbaikan warna teks
               }}
               aria-label="Tanggal Hijriah"
               title={hijriLabel}
             >
-              {hijriLabel || "—"}
+              {hijriLabel || "—"} {/* ✅ tidak ada tambahan "H" manual */}
             </span>
             <PublicUserDropdown variant="icon" withBg={false} />
           </div>
