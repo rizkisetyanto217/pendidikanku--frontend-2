@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
-
+import { useNavigate } from "react-router-dom";
 import {
   SectionCard,
   Badge,
@@ -24,6 +24,7 @@ import {
   GraduationCap,
   Mail,
   Phone,
+  ArrowLeft,
 } from "lucide-react";
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
@@ -56,7 +57,7 @@ const genderLabel = (g?: "L" | "P") =>
 export default function StudentsPage() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-
+  const navigate = useNavigate();
   // === Modal states (mutually exclusive)
   const [openAdd, setOpenAdd] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
@@ -134,7 +135,18 @@ export default function StudentsPage() {
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
         {/* Konten kanan */}
-        <main className="flex-1 mx-auto max-w-6xl px-4 py-6 space-y-5">
+        <main className="flex-1 mx-auto max-w-6xl px-4 space-y-5">
+          {/* Back button biasa */}
+          <div className="mx-auto max-w-6xl ">
+            <Btn
+              palette={palette}
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2"
+            >
+              <ArrowLeft size={16} /> Kembali
+            </Btn>
+          </div>
           {/* Header + actions */}
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
@@ -142,7 +154,7 @@ export default function StudentsPage() {
                 className="h-10 w-10 rounded-xl flex items-center justify-center"
                 style={{
                   background: palette.white3,
-                  color: palette.quaternary,
+                  color: palette.black2,
                 }}
               >
                 <Users size={20} />
@@ -150,7 +162,7 @@ export default function StudentsPage() {
               <div>
                 <h1
                   className="text-xl font-semibold"
-                  style={{ color: palette.quaternary }}
+                  style={{ color: palette.black2 }}
                 >
                   Siswa
                 </h1>
@@ -162,7 +174,7 @@ export default function StudentsPage() {
 
             <div className="flex items-center gap-2">
               <Btn
-                variant="default"
+                variant="ghost"
                 onClick={openUploadCSV}
                 className="flex items-center gap-2"
                 size="sm"

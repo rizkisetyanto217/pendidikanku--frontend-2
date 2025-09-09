@@ -1,7 +1,10 @@
+
+
 // src/pages/sekolahislamku/school/SchoolProfile.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import { useNavigate } from "react-router-dom";
 import {
   SectionCard,
   Badge,
@@ -18,11 +21,11 @@ import {
   Mail,
   Globe,
   UserCog,
-  CalendarDays,
   ExternalLink,
   Navigation,
   Image as ImageIcon,
   X,
+  ArrowLeft,
 } from "lucide-react";
 
 /* ================= Helpers ================= */
@@ -54,6 +57,10 @@ const fullAddress = (p?: SchoolProfileForm["address"]) => {
   ].filter(Boolean);
   return parts.length ? parts.join(", ") : "-";
 };
+
+const isoToYmd = (iso?: string | null) => (iso ? iso.slice(0, 10) : "");
+const ymdToIsoUTC = (ymd: string | null | undefined) =>
+  ymd ? new Date(`${ymd}T00:00:00.000Z`).toISOString() : null;
 
 /* ================= Types ================= */
 export type SchoolProfileForm = {
@@ -90,11 +97,26 @@ export type SchoolProfileForm = {
   mapEmbedUrl?: string | null;
   gallery?: Array<{ id: string; url: string; caption?: string }>;
 };
+type SchoolProfileProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
+};
 
 /* ================= Page ================= */
-const SchoolProfile: React.FC = () => {
+const SchoolProfile: React.FC<SchoolProfileProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+
+  const navigate = useNavigate();
+  const handleBack = () => {
+    if (backTo) navigate(backTo);
+    else navigate(-1);
+  };
 
   // ------ DATA DUMMY disimpan di state ------
   const [data, setData] = useState<SchoolProfileForm>({
@@ -153,11 +175,8 @@ const SchoolProfile: React.FC = () => {
   const nowISO = toLocalNoonISO(new Date());
   const foundedYear = useMemo(() => {
     if (!data?.foundedAt) return "-";
-    try {
-      return new Date(data.foundedAt).getFullYear();
-    } catch {
-      return "-";
-    }
+    const d = new Date(data.foundedAt);
+    return Number.isNaN(d.getTime()) ? "-" : d.getFullYear();
   }, [data?.foundedAt]);
 
   return (
@@ -181,6 +200,23 @@ const SchoolProfile: React.FC = () => {
 
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
+            {/* Back button (opsional via props) */}
+            {showBack && (
+              <div className="mx-auto max-w-6xl px-4 ">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={handleBack}
+                  className="inline-flex items-center gap-2"
+                  aria-label={backLabel}
+                  title={backLabel}
+                >
+                  <ArrowLeft size={16} />
+                  {backLabel}
+                </Btn>
+              </div>
+            )}
+
             {/* Header Card */}
             <SectionCard palette={palette} className="overflow-hidden">
               <div
@@ -248,7 +284,7 @@ const SchoolProfile: React.FC = () => {
             <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SectionCard palette={palette} className="p-5">
                 <div className="font-semibold mb-3 flex items-center gap-2">
-                  <CalendarDays size={18} />
+                  <Phone size={18} />
                   Kontak Sekolah
                 </div>
                 <div
@@ -364,6 +400,8 @@ const SchoolProfile: React.FC = () => {
                       width="100%"
                       height="260"
                       loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      allowFullScreen
                     />
                   </div>
                 ) : (
@@ -392,6 +430,7 @@ const SchoolProfile: React.FC = () => {
                           src={g.url}
                           alt={g.caption ?? "Foto"}
                           className="w-full h-36 object-cover"
+                          loading="lazy"
                         />
                         {g.caption && (
                           <figcaption
@@ -435,7 +474,7 @@ const SchoolProfile: React.FC = () => {
         palette={palette}
         initial={data}
         onSubmit={(v) => {
-          // TODO: ganti ke API PUT; untuk sekarang update state lokal
+          // di sini nanti ganti ke PUT API; untuk sekarang update state lokal
           setData(v);
           setEditOpen(false);
         }}
@@ -461,7 +500,7 @@ function InfoRow({
       <span className="mt-0.5">{icon}</span>
       <div className="min-w-0">
         <div className="text-xs opacity-70">{label}</div>
-        <div className="text-sm">{value}</div>
+        <div className="text-sm break-words">{value}</div>
       </div>
     </div>
   );
@@ -488,7 +527,7 @@ function EmptyBlock({
 }
 
 /* =========================================================
-   ModalEditProfilSchool - FIXED VERSION
+   ModalEditProfilSchool - REFACTORED
    ========================================================= */
 function ModalEditProfilSchool({
   open,
@@ -508,14 +547,14 @@ function ModalEditProfilSchool({
   error?: string | null;
 }) {
   const [form, setForm] = useState<SchoolProfileForm>(initial);
-  const [missionText, setMissionText] = useState(
-    (initial.mission ?? []).join("\n")
-  );
+  const [missionText, setMissionText] = useState((initial.mission ?? []).join("\n"));
 
   useEffect(() => {
     if (!open) return;
     setForm(initial);
     setMissionText((initial.mission ?? []).join("\n"));
+
+    // lock scroll
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -523,47 +562,37 @@ function ModalEditProfilSchool({
     };
   }, [open, initial]);
 
-  // ESC key handler
+  // ESC close
   useEffect(() => {
     if (!open) return;
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   if (!open) return null;
 
   const canSubmit = !!form.name && !saving;
 
-  const set = <K extends keyof SchoolProfileForm>(
-    k: K,
-    v: SchoolProfileForm[K]
-  ) => setForm((s) => ({ ...s, [k]: v }));
+  const set = <K extends keyof SchoolProfileForm>(k: K, v: SchoolProfileForm[K]) =>
+    setForm((s) => ({ ...s, [k]: v }));
 
   const setAddr = <K extends keyof NonNullable<SchoolProfileForm["address"]>>(
     k: K,
     v: NonNullable<SchoolProfileForm["address"]>[K]
   ) => setForm((s) => ({ ...s, address: { ...(s.address ?? {}), [k]: v } }));
 
-  const setContact = <
-    K extends keyof NonNullable<SchoolProfileForm["contact"]>,
-  >(
+  const setContact = <K extends keyof NonNullable<SchoolProfileForm["contact"]>>(
     k: K,
     v: NonNullable<SchoolProfileForm["contact"]>[K]
   ) => setForm((s) => ({ ...s, contact: { ...(s.contact ?? {}), [k]: v } }));
 
-  const setHead = <
-    K extends keyof NonNullable<SchoolProfileForm["headmaster"]>,
-  >(
+  const setHead = <K extends keyof NonNullable<SchoolProfileForm["headmaster"]>>(
     k: K,
     v: NonNullable<SchoolProfileForm["headmaster"]>[K]
-  ) =>
-    setForm((s) => ({ ...s, headmaster: { ...(s.headmaster ?? {}), [k]: v } }));
+  ) => setForm((s) => ({ ...s, headmaster: { ...(s.headmaster ?? {}), [k]: v } }));
 
-  const toInputDate = (iso?: string | null) => (iso ? iso.slice(0, 10) : "");
-  const fromTextareaToArray = (s: string) =>
+  const missionsFromText = (s: string) =>
     s
       .split("\n")
       .map((x) => x.trim())
@@ -581,14 +610,11 @@ function ModalEditProfilSchool({
     >
       <SectionCard
         palette={palette}
-        className="w-full max-w-4xl max-h-[85vh] rounded-2xl shadow-2xl flex flex-col"
+        className="w-full max-w-4xl max-h-[85vh] rounded-2xl shadow-2xl flex flex-direction-col flex-col"
         style={{ background: palette.white1, color: palette.black1 }}
       >
-        {/* Header - Fixed */}
-        <div
-          className="px-6 py-4 flex items-center justify-between border-b shrink-0"
-          style={{ borderColor: palette.silver1 }}
-        >
+        {/* Header */}
+        <div className="px-6 py-4 flex items-center justify-between border-b shrink-0" style={{ borderColor: palette.silver1 }}>
           <div className="flex items-center gap-3">
             <Building2 size={20} color={palette.quaternary} />
             <h2 className="text-lg font-semibold">Edit Profil Sekolah</h2>
@@ -597,26 +623,17 @@ function ModalEditProfilSchool({
             aria-label="Tutup"
             onClick={onClose}
             className="h-10 w-10 grid place-items-center rounded-full hover:bg-black hover:bg-opacity-5 transition-colors"
-            style={{
-              border: `1px solid ${palette.silver1}`,
-              background: palette.white2,
-            }}
+            style={{ border: `1px solid ${palette.silver1}`, background: palette.white2 }}
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Body - Scrollable */}
-        <div
-          className="flex-1 overflow-y-auto px-6 py-6"
-          style={{ scrollBehavior: "smooth" }}
-        >
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-6" style={{ scrollBehavior: "smooth" }}>
           <div className="space-y-8">
             {!!error && (
-              <div
-                className="rounded-lg px-4 py-3 text-sm"
-                style={{ background: palette.error2, color: palette.error1 }}
-              >
+              <div className="rounded-lg px-4 py-3 text-sm" style={{ background: palette.error2, color: palette.error1 }}>
                 {error}
               </div>
             )}
@@ -625,31 +642,15 @@ function ModalEditProfilSchool({
             <section>
               <BlockTitle title="Identitas Sekolah" />
               <div className="grid md:grid-cols-2 gap-4">
-                <FieldText
-                  label="Nama Sekolah"
-                  value={form.name}
-                  onChange={(v) => set("name", v)}
-                  palette={palette}
-                  required
-                />
-                <FieldText
-                  label="NPSN"
-                  value={form.npsn ?? ""}
-                  onChange={(v) => set("npsn", v)}
-                  palette={palette}
-                />
+                <FieldText label="Nama Sekolah" value={form.name} onChange={(v) => set("name", v)} palette={palette} required />
+                <FieldText label="NPSN" value={form.npsn ?? ""} onChange={(v) => set("npsn", v)} palette={palette} />
                 <div className="grid gap-2">
                   <label className="text-sm font-medium">Akreditasi</label>
                   <select
                     value={form.accreditation ?? ""}
-                    onChange={(e) =>
-                      set("accreditation", (e.target.value || null) as any)
-                    }
+                    onChange={(e) => set("accreditation", (e.target.value || null) as any)}
                     className="w-full rounded-xl px-3 py-2.5 border outline-none focus:ring-2 focus:ring-opacity-20 transition-all"
-                    style={{
-                      borderColor: palette.silver1,
-                      background: palette.white2,
-                    }}
+                    style={{ borderColor: palette.silver1, background: palette.white2 }}
                   >
                     <option value="">—</option>
                     <option value="A">A</option>
@@ -659,16 +660,13 @@ function ModalEditProfilSchool({
                   </select>
                 </div>
                 <div className="grid gap-2">
-                  <label className="text-sm font-medium">Tahun Berdiri</label>
+                  <label className="text-sm font-medium">Tanggal Berdiri</label>
                   <input
                     type="date"
-                    value={toInputDate(form.foundedAt)}
-                    onChange={(e) => set("foundedAt", e.target.value)}
+                    value={isoToYmd(form.foundedAt)}
+                    onChange={(e) => set("foundedAt", ymdToIsoUTC(e.target.value))}
                     className="w-full rounded-xl px-3 py-2.5 border outline-none focus:ring-2 focus:ring-opacity-20 transition-all"
-                    style={{
-                      borderColor: palette.silver1,
-                      background: palette.white2,
-                    }}
+                    style={{ borderColor: palette.silver1, background: palette.white2 }}
                   />
                 </div>
               </div>
@@ -678,42 +676,12 @@ function ModalEditProfilSchool({
             <section>
               <BlockTitle title="Alamat" />
               <div className="grid md:grid-cols-2 gap-4">
-                <FieldText
-                  label="Alamat"
-                  value={form.address?.line ?? ""}
-                  onChange={(v) => setAddr("line", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Kelurahan / Desa"
-                  value={form.address?.village ?? ""}
-                  onChange={(v) => setAddr("village", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Kecamatan"
-                  value={form.address?.district ?? ""}
-                  onChange={(v) => setAddr("district", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Kota / Kabupaten"
-                  value={form.address?.city ?? ""}
-                  onChange={(v) => setAddr("city", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Provinsi"
-                  value={form.address?.province ?? ""}
-                  onChange={(v) => setAddr("province", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Kode Pos"
-                  value={form.address?.postal ?? ""}
-                  onChange={(v) => setAddr("postal", v)}
-                  palette={palette}
-                />
+                <FieldText label="Alamat" value={form.address?.line ?? ""} onChange={(v) => setAddr("line", v)} palette={palette} />
+                <FieldText label="Kelurahan / Desa" value={form.address?.village ?? ""} onChange={(v) => setAddr("village", v)} palette={palette} />
+                <FieldText label="Kecamatan" value={form.address?.district ?? ""} onChange={(v) => setAddr("district", v)} palette={palette} />
+                <FieldText label="Kota / Kabupaten" value={form.address?.city ?? ""} onChange={(v) => setAddr("city", v)} palette={palette} />
+                <FieldText label="Provinsi" value={form.address?.province ?? ""} onChange={(v) => setAddr("province", v)} palette={palette} />
+                <FieldText label="Kode Pos" value={form.address?.postal ?? ""} onChange={(v) => setAddr("postal", v)} palette={palette} />
               </div>
             </section>
 
@@ -721,31 +689,10 @@ function ModalEditProfilSchool({
             <section>
               <BlockTitle title="Kontak" />
               <div className="grid md:grid-cols-2 gap-4">
-                <FieldText
-                  label="Telepon"
-                  value={form.contact?.phone ?? ""}
-                  onChange={(v) => setContact("phone", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Email"
-                  value={form.contact?.email ?? ""}
-                  onChange={(v) => setContact("email", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Website"
-                  value={form.contact?.website ?? ""}
-                  onChange={(v) => setContact("website", v)}
-                  palette={palette}
-                  placeholder="https://…"
-                />
-                <FieldText
-                  label="URL Logo (opsional)"
-                  value={form.logoUrl ?? ""}
-                  onChange={(v) => set("logoUrl", v)}
-                  palette={palette}
-                />
+                <FieldText label="Telepon" value={form.contact?.phone ?? ""} onChange={(v) => setContact("phone", v)} palette={palette} />
+                <FieldText label="Email" value={form.contact?.email ?? ""} onChange={(v) => setContact("email", v)} palette={palette} />
+                <FieldText label="Website" value={form.contact?.website ?? ""} onChange={(v) => setContact("website", v)} palette={palette} placeholder="https://…" />
+                <FieldText label="URL Logo (opsional)" value={form.logoUrl ?? ""} onChange={(v) => set("logoUrl", v)} palette={palette} />
               </div>
             </section>
 
@@ -753,24 +700,9 @@ function ModalEditProfilSchool({
             <section>
               <BlockTitle title="Kepala Sekolah" />
               <div className="grid md:grid-cols-2 gap-4">
-                <FieldText
-                  label="Nama"
-                  value={form.headmaster?.name ?? ""}
-                  onChange={(v) => setHead("name", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Telepon"
-                  value={form.headmaster?.phone ?? ""}
-                  onChange={(v) => setHead("phone", v)}
-                  palette={palette}
-                />
-                <FieldText
-                  label="Email"
-                  value={form.headmaster?.email ?? ""}
-                  onChange={(v) => setHead("email", v)}
-                  palette={palette}
-                />
+                <FieldText label="Nama" value={form.headmaster?.name ?? ""} onChange={(v) => setHead("name", v)} palette={palette} />
+                <FieldText label="Telepon" value={form.headmaster?.phone ?? ""} onChange={(v) => setHead("phone", v)} palette={palette} />
+                <FieldText label="Email" value={form.headmaster?.email ?? ""} onChange={(v) => setHead("email", v)} palette={palette} />
               </div>
             </section>
 
@@ -785,48 +717,31 @@ function ModalEditProfilSchool({
                     value={form.vision ?? ""}
                     onChange={(e) => set("vision", e.target.value)}
                     className="w-full rounded-xl px-3 py-2.5 border outline-none focus:ring-2 focus:ring-opacity-20 transition-all resize-none"
-                    style={{
-                      borderColor: palette.silver1,
-                      background: palette.white2,
-                    }}
+                    style={{ borderColor: palette.silver1, background: palette.white2 }}
                     placeholder="Tulis visi sekolah…"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <label className="text-sm font-medium">
-                    Misi (satu baris satu poin)
-                  </label>
+                  <label className="text-sm font-medium">Misi (satu baris satu poin)</label>
                   <textarea
                     rows={5}
                     value={missionText}
                     onChange={(e) => setMissionText(e.target.value)}
                     className="w-full rounded-xl px-3 py-2.5 border outline-none focus:ring-2 focus:ring-opacity-20 transition-all resize-none"
-                    style={{
-                      borderColor: palette.silver1,
-                      background: palette.white2,
-                    }}
+                    style={{ borderColor: palette.silver1, background: palette.white2 }}
                     placeholder={"Tulis misi 1\nTulis misi 2\n…"}
                   />
                 </div>
               </div>
             </section>
 
-            {/* Extra spacing at bottom */}
-            <div className="h-4"></div>
+            <div className="h-4" />
           </div>
         </div>
 
-        {/* Footer - Fixed */}
-        <div
-          className="px-6 py-4 flex items-center justify-end gap-3 border-t shrink-0"
-          style={{ borderColor: palette.silver1 }}
-        >
-          <Btn
-            palette={palette}
-            variant="ghost"
-            onClick={onClose}
-            disabled={saving}
-          >
+        {/* Footer */}
+        <div className="px-6 py-4 flex items-center justify-end gap-3 border-t shrink-0" style={{ borderColor: palette.silver1 }}>
+          <Btn palette={palette} variant="ghost" onClick={onClose} disabled={saving}>
             Batal
           </Btn>
           <Btn
@@ -835,7 +750,10 @@ function ModalEditProfilSchool({
             onClick={() =>
               onSubmit({
                 ...form,
-                mission: fromTextareaToArray(missionText),
+                // normalisasi nilai kosong agar konsisten
+                npsn: form.npsn?.trim() || null,
+                vision: (form.vision?.trim() || null) as string | null,
+                mission: missionsFromText(missionText),
               })
             }
           >
@@ -873,10 +791,7 @@ function FieldText({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full rounded-xl px-3 py-2.5 border outline-none focus:ring-2 focus:ring-opacity-20 transition-all"
-        style={{
-          borderColor: palette.silver1,
-          background: palette.white2,
-        }}
+        style={{ borderColor: palette.silver1, background: palette.white2 }}
       />
     </div>
   );

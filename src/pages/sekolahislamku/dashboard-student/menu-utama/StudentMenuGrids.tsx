@@ -47,25 +47,25 @@ export default function StudentMenuGrids() {
       {
         key: "kelas-saya",
         label: "Kelas Saya",
-        to: "/murid/kelas",
+        to: "progress",
         icon: <BookOpen />,
       },
       {
         key: "pengumuman",
         label: "Pengumuman",
-        to: "/murid/pengumuman",
+        to: "announcements",
         icon: <Megaphone />,
       },
       {
         key: "pembayaran",
         label: "Pembayaran",
-        to: "/murid/finance",
+        to: "finance",
         icon: <Wallet />,
       },
       {
         key: "jadwal",
         label: "Jadwal",
-        to: "/murid/jadwal",
+        to: "jadwal",
         icon: <CalendarDays />,
       },
       {

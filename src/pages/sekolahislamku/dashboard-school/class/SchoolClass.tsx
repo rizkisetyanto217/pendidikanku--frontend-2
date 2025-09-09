@@ -2,6 +2,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, Link, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Users,
@@ -11,6 +12,7 @@ import {
   Plus,
   Layers,
   ChevronDown,
+  ArrowLeft,
 } from "lucide-react";
 
 import { pickTheme, ThemeName } from "@/constants/thema";
@@ -102,6 +104,11 @@ type Level = {
   is_active: boolean;
 };
 
+type SchoolClassProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
+};
 /* ================= Helpers ================= */
 const dateLong = (iso?: string) =>
   iso
@@ -265,9 +272,16 @@ function SelectBox({
 }
 
 /* ================= Page ================= */
-export default function SchoolClasses() {
+const SchoolClass: React.FC<SchoolClassProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+
+  const navigate = useNavigate();
+  
 
   const [sp, setSp] = useSearchParams();
   const qc = useQueryClient();
@@ -417,27 +431,27 @@ export default function SchoolClasses() {
     (s || "level-baru").toLowerCase().trim().replace(/\s+/g, "-");
 
   // >>> GANTI handler lamamu dengan ini:
-const handleLevelCreated = (payload?: any) => {
-  const lvl: Level = {
-    id: payload?.id ?? payload?.class_id ?? payload?.level_id ?? uid("lv"),
-    name: payload?.name ?? payload?.class_name ?? "Level Baru",
-    slug:
-      payload?.slug ??
-      payload?.class_slug ??
-      toSlug(payload?.name ?? payload?.class_name ?? ""),
-    level: payload?.level ?? payload?.class_level ?? null,
-    fee: payload?.fee ?? payload?.class_fee_monthly_idr ?? null,
-    is_active:
-      typeof payload?.is_active === "boolean"
-        ? payload.is_active
-        : typeof payload?.class_is_active === "boolean"
-          ? payload.class_is_active
-          : true,
-  };
+  const handleLevelCreated = (payload?: any) => {
+    const lvl: Level = {
+      id: payload?.id ?? payload?.class_id ?? payload?.level_id ?? uid("lv"),
+      name: payload?.name ?? payload?.class_name ?? "Level Baru",
+      slug:
+        payload?.slug ??
+        payload?.class_slug ??
+        toSlug(payload?.name ?? payload?.class_name ?? ""),
+      level: payload?.level ?? payload?.class_level ?? null,
+      fee: payload?.fee ?? payload?.class_fee_monthly_idr ?? null,
+      is_active:
+        typeof payload?.is_active === "boolean"
+          ? payload.is_active
+          : typeof payload?.class_is_active === "boolean"
+            ? payload.class_is_active
+            : true,
+    };
 
-  qc.setQueryData<Level[]>(["levels"], (old = []) => [lvl, ...old]);
-  setOpenTambahLevel(false);
-};
+    qc.setQueryData<Level[]>(["levels"], (old = []) => [lvl, ...old]);
+    setOpenTambahLevel(false);
+  };
 
   const handleClassCreated = (row: NewClassRow) => {
     const dummy = mapNewClassToApiSection(row, levelId || undefined);
@@ -465,11 +479,26 @@ const handleLevelCreated = (payload?: any) => {
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-2">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
+            {showBack && (
+              <div className="mx-auto max-w-6xl px-4">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                  aria-label={backLabel}
+                  title={backLabel}
+                >
+                  <ArrowLeft size={16} />
+                  {backLabel}
+                </Btn>
+              </div>
+            )}
             {/* Header */}
             <section className="flex items-start gap-3">
               <span
@@ -776,4 +805,6 @@ const handleLevelCreated = (payload?: any) => {
       />
     </div>
   );
-}
+};
+
+export default SchoolClass;

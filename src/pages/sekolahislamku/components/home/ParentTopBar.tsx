@@ -88,6 +88,7 @@ const STUDENT_NAVS: NavItem[] = [
   { path: "jadwal", label: "Jadwal", icon: Calendar1 },
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   { path: "rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
+  { path: "profil-murid", label: "Profil", icon: Users },
 ];
 
 const SCHOOL_NAVS: NavItem[] = [
@@ -112,6 +113,7 @@ const TEACHER_NAVS: NavItem[] = [
   { path: "penilaian", label: "Penilaian", icon: ClipboardList },
   { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+  { path: "profil-guru", label: "Profil", icon: Users },
 ];
 
 /* ===================== Small UI ===================== */

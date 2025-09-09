@@ -1,7 +1,7 @@
 // React & libs
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
+import { useNavigate } from "react-router-dom";
 // Theme & utils
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -28,6 +28,7 @@ import {
   Plus,
   Calendar,
   CheckCircle2,
+  ArrowLeft,
 } from "lucide-react";
 
 // Modals
@@ -108,10 +109,21 @@ export interface PaymentItem {
   method?: string;
 }
 
+type SchoolFinnanceProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
+};
+
 /* =============== Page =============== */
-export default function SchoolFinance() {
+const SchoolFinance: React.FC<SchoolFinnanceProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const gregorianISO = toLocalNoonISO(new Date());
@@ -257,8 +269,23 @@ export default function SchoolFinance() {
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
         {/* Konten kanan */}
-        <main className="flex-1 mx-auto w-full max-w-6xl py-4 md:py-6 space-y-5 px-3 md:px-0">
+        <main className="flex-1 mx-auto w-full max-w-6xl space-y-5 px-3 md:px-0">
           {/* Header + actions */}
+          {showBack && (
+            <div className="mx-auto max-w-6xl px-4">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-2"
+                aria-label={backLabel}
+                title={backLabel}
+              >
+                <ArrowLeft size={16} />
+                {backLabel}
+              </Btn>
+            </div>
+          )}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
               <div
@@ -271,12 +298,7 @@ export default function SchoolFinance() {
                 <Wallet size={20} />
               </div>
               <div>
-                <h1
-                  className="text-lg md:text-xl font-semibold"
-                 
-                >
-                  Keuangan
-                </h1>
+                <h1 className="text-lg md:text-xl font-semibold">Keuangan</h1>
                 <p className="text-sm" style={{ color: palette.black2 }}>
                   Kelola tagihan & pembayaran.
                 </p>
@@ -946,4 +968,6 @@ export default function SchoolFinance() {
       />
     </>
   );
-}
+};
+
+export default SchoolFinance;

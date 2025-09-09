@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ImageOff,
+  ArrowLeft,
 } from "lucide-react";
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
@@ -59,6 +60,12 @@ export type BookAPI = {
 export type BooksResponse = {
   data: BookAPI[];
   pagination: { limit: number; offset: number; total: number };
+};
+
+type SchoolBooksProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
 };
 
 /* ============== Helpers ============== */
@@ -146,9 +153,15 @@ function CardSkeleton({ palette }: { palette: Palette }) {
 }
 
 /* ============== Page ============== */
-export default function SchoolBooks() {
+const SchoolBooks: React.FC<SchoolBooksProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+
+  const navigate = useNavigate();
   useEffectiveMasjidId();
 
   const [sp, setSp] = useSearchParams();
@@ -447,6 +460,21 @@ export default function SchoolBooks() {
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6 min-w-0">
+            {showBack && (
+              <div className="mx-auto max-w-6xl px-4">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                  aria-label={backLabel}
+                  title={backLabel}
+                >
+                  <ArrowLeft size={16} />
+                  {backLabel}
+                </Btn>
+              </div>
+            )}
             {/* Header */}
             <section className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div className="flex items-start gap-3">
@@ -601,3 +629,5 @@ export default function SchoolBooks() {
     </div>
   );
 }
+
+export default SchoolBooks;

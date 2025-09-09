@@ -49,7 +49,7 @@ export default function TeacherMenuGrids() {
       {
         key: "kelas-saya",
         label: "Kelas Saya",
-        to: "/guru/kelas",
+        to: "kelas",
         icon: <Users />,
       },
       {
@@ -73,7 +73,7 @@ export default function TeacherMenuGrids() {
       {
         key: "jadwal",
         label: "Jadwal",
-        to: "/guru/jadwal",
+        to: "jadwal",
         icon: <CalendarDays />,
       },
       {

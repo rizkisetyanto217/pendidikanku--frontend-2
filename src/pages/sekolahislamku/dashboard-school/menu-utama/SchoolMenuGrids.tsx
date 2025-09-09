@@ -70,7 +70,7 @@ export default function SchoolMenuGrids() {
   // Susun item menu di sini. Ubah "to" sesuai rute di apps-mu.
   const items: MenuItem[] = useMemo(
     () => [
-      { key: "beranda", label: "Beranda", to: ".", icon: Home },
+      { key: "beranda", label: "Beranda", to: "sekolah", icon: Home },
 
       {
         key: "periode",
@@ -81,10 +81,10 @@ export default function SchoolMenuGrids() {
       {
         key: "ruangan",
         label: "Ruangan",
-        to: "/akademik/ruang",
+        to: "room-school",
         icon: Building2,
       },
-      { key: "kelas-all", label: "Seluruh Kelas", to: "/kelas", icon: Layers },
+      { key: "kelas-all", label: "Seluruh Kelas", to: "kelas", icon: Layers },
       {
         key: "kelas-aktif",
         label: "Kelas Aktif",
@@ -92,14 +92,14 @@ export default function SchoolMenuGrids() {
         icon: CheckCircle2,
       },
 
-      { key: "keuangan", label: "Keuangan", to: "/keuangan", icon: CreditCard },
-      { key: "spp", label: "SPP", to: "/keuangan/spp", icon: Banknote },
+      { key: "keuangan", label: "Keuangan", to: "keuangan", icon: CreditCard },
+      { key: "spp", label: "SPP", to: "spp", icon: Banknote },
 
-      { key: "guru", label: "Guru", to: "/guru", icon: UserCog },
+      { key: "guru", label: "Guru", to: "guru", icon: UserCog },
       {
         key: "murid",
         label: "Murid",
-        to: "/murid",
+        to: "murid",
         icon: Users,
         note: "Cari Murid",
       },
@@ -112,14 +112,14 @@ export default function SchoolMenuGrids() {
       },
       { key: "website", label: "Website", to: "/website", icon: Globe },
 
-      { key: "buku", label: "Buku", to: "/buku", icon: BookOpen },
+      { key: "buku", label: "Buku", to: "buku", icon: BookOpen },
       {
         key: "pelajaran",
         label: "Pelajaran",
-        to: "/pelajaran",
+        to: "pelajaran",
         icon: LibraryBig,
       },
-      { key: "pengumuman", label: "Pengumuman", to: "/pengumuman", icon: Bell },
+      { key: "pengumuman", label: "Pengumuman", to: "all-announcement", icon: Bell },
       {
         key: "sertifikat",
         label: "Sertifikat",

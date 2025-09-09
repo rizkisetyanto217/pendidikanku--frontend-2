@@ -77,13 +77,15 @@ const DEFAULT_NAVS: NavDict = {
     { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
     { path: "finance", label: "Pembayaran", icon: Wallet },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
-    { path: "pengumuman", label: "Pengumuman", icon: Bell },
+    { path: "profil-murid", label: "Profil", icon: Users },
+    // { path: "pengumuman", label: "Pengumuman", icon: Bell },
   ],
   guru: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "kelas", label: "Kelas Saya", icon: Users },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+    { path: "profil-guru", label: "Profil", icon: Users },
 
     // { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
     // { path: "penilaian", label: "Penilaian", icon: ClipboardList },

@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import { useNavigate } from "react-router-dom";
 
 import {
   SectionCard,
@@ -26,8 +27,10 @@ import {
   Layers,
   Grid,
   Info,
+  ArrowLeft,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 
 /* ===================== Types ===================== */
 type AcademicTerm = {
@@ -51,6 +54,12 @@ type ClassRoom = {
   class_rooms_description?: string;
   class_rooms_is_active?: boolean;
   class_rooms_features?: string[];
+};
+
+type SchoolAcademicProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
 };
 
 /* ===================== Dummy Data ===================== */
@@ -117,10 +126,14 @@ const dateShort = (iso?: string) =>
     : "-";
 
 /* ===================== Page ===================== */
-export default function AcademicSchool() {
+const AcademicSchool: React.FC<SchoolAcademicProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-
+const navigate = useNavigate()
   // State kecil untuk filter rooms
   const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
 
@@ -161,6 +174,21 @@ export default function AcademicSchool() {
 
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
+            {showBack && (
+              <div className="mx-auto max-w-6xl px-4">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                  aria-label={backLabel}
+                  title={backLabel}
+                >
+                  <ArrowLeft size={16} />
+                  {backLabel}
+                </Btn>
+              </div>
+            )}
             {/* ===== Periode Akademik (active term) ===== */}
             <SectionCard palette={palette} className="overflow-hidden">
               <div
@@ -170,7 +198,11 @@ export default function AcademicSchool() {
                 <School size={20} color={palette.quaternary} />
                 <div className="font-semibold">Periode Akademik Aktif</div>
                 {DUMMY_TERM.academic_terms_is_active && (
-                  <Badge palette={palette} variant="success" className="ml-auto">
+                  <Badge
+                    palette={palette}
+                    variant="success"
+                    className="ml-auto"
+                  >
                     Aktif
                   </Badge>
                 )}
@@ -185,7 +217,10 @@ export default function AcademicSchool() {
                     {DUMMY_TERM.academic_terms_academic_year} —{" "}
                     {DUMMY_TERM.academic_terms_name}
                   </div>
-                  <div className="text-sm flex items-center gap-2" style={{ color: palette.black2 }}>
+                  <div
+                    className="text-sm flex items-center gap-2"
+                    style={{ color: palette.black2 }}
+                  >
                     <CalendarDays size={16} />
                     {dateShort(DUMMY_TERM.academic_terms_start_date)} s/d{" "}
                     {dateShort(DUMMY_TERM.academic_terms_end_date)}
@@ -199,9 +234,13 @@ export default function AcademicSchool() {
                   <div className="text-xl font-semibold">
                     {DUMMY_TERM.academic_terms_angkatan}
                   </div>
-                  <div className="text-sm flex items-center gap-2" style={{ color: palette.black2 }}>
+                  <div
+                    className="text-sm flex items-center gap-2"
+                    style={{ color: palette.black2 }}
+                  >
                     <CheckCircle2 size={16} />
-                    Status: {DUMMY_TERM.academic_terms_is_active ? "Aktif" : "Nonaktif"}
+                    Status:{" "}
+                    {DUMMY_TERM.academic_terms_is_active ? "Aktif" : "Nonaktif"}
                   </div>
                 </div>
               </div>
@@ -254,12 +293,18 @@ export default function AcademicSchool() {
                       onClick={() => setFilter(f)}
                       className="px-3 py-1.5 rounded-lg border text-sm"
                       style={{
-                        background: filter === f ? palette.primary2 : palette.white1,
+                        background:
+                          filter === f ? palette.primary2 : palette.white1,
                         color: filter === f ? palette.primary : palette.black1,
-                        borderColor: filter === f ? palette.primary : palette.silver1,
+                        borderColor:
+                          filter === f ? palette.primary : palette.silver1,
                       }}
                     >
-                      {f === "all" ? "Semua" : f === "physical" ? "Fisik" : "Virtual"}
+                      {f === "all"
+                        ? "Semua"
+                        : f === "physical"
+                          ? "Fisik"
+                          : "Virtual"}
                     </button>
                   ))}
                 </div>
@@ -270,7 +315,10 @@ export default function AcademicSchool() {
                 {rooms.length === 0 ? (
                   <div
                     className="rounded-xl border p-4 text-sm flex items-center gap-2"
-                    style={{ borderColor: palette.silver1, color: palette.silver2 }}
+                    style={{
+                      borderColor: palette.silver1,
+                      color: palette.silver2,
+                    }}
                   >
                     <Info size={16} />
                     Tidak ada ruang untuk filter ini.
@@ -398,3 +446,4 @@ function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
     </div>
   );
 }
+export default AcademicSchool;

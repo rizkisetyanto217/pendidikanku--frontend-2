@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
@@ -26,6 +27,7 @@ import {
   Mail,
   Phone,
   Briefcase,
+  ArrowLeft,
 } from "lucide-react";
 import TambahGuru from "./components/AddTeacher";
 import UploadFileGuru from "./components/UploadFileTeacher";
@@ -68,6 +70,12 @@ type TeachersByMasjidResponse = {
       masjid_teachers_updated_at: string;
     }>;
   };
+};
+
+type SchoolTeacherProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
 };
 
 /* ================= Helpers ================= */
@@ -198,7 +206,10 @@ const StatsGrid = ({
   stats: TeacherStats;
   palette: Palette;
 }) => (
-  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3" style={{ color: palette.black1 }}>
+  <div
+    className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3"
+    style={{ color: palette.black1 }}
+  >
     <StatCard
       title="Total Guru"
       value={stats.total}
@@ -545,10 +556,14 @@ const TeachersTable = ({
 );
 
 /* ================= Main Component ================= */
-export default function TeachersPage() {
+const TeachersPage: React.FC<SchoolTeacherProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-
+  const navigate = useNavigate();
   // Modal
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
@@ -657,7 +672,24 @@ export default function TeachersPage() {
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
-        <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
+        <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4  sm:space-y-5">
+          <div className="flex-1  min-w-0">
+            {showBack && (
+              <div className="mx-auto max-w-6xl ">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                  aria-label={backLabel}
+                  title={backLabel}
+                >
+                  <ArrowLeft size={16} />
+                  {backLabel}
+                </Btn>
+              </div>
+            )}
+          </div>
           <PageHeader
             palette={palette}
             onImportClick={() => setOpenImport(true)}
@@ -690,4 +722,5 @@ export default function TeachersPage() {
       </div>
     </>
   );
-}
+};
+export default TeachersPage;
