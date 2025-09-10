@@ -220,6 +220,9 @@ import StudentMenuGrids from "@/pages/sekolahislamku/dashboard-student/menu-utam
 import RoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/RoomSchool";
 import SchoolSpp from "@/pages/sekolahislamku/dashboard-school/spp/SchoolSpp";
 import SchoolSubject from "@/pages/sekolahislamku/dashboard-school/rsc/SchoolSubject";
+import SchoolCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/SchoolCertificate";
+import DetailCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/components/DetailCertificate";
+import CalenderAcademic from "@/pages/sekolahislamku/dashboard-school/calender/CalenderAcademic";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -797,7 +800,12 @@ export default function AppRoutes() {
           <Route path="room-school" element={<RoomSchool />} />
           <Route path="spp" element={<SchoolSpp />} />
           <Route path="pelajaran" element={<SchoolSubject />} />
-
+          <Route path="sertifikat" element={<SchoolCertificate />} />
+          <Route path="kalender"  element={<CalenderAcademic/> }/>
+          <Route
+            path="sertifikat/detail/:classId/:studentId"
+            element={<DetailCertificate />}
+          />
           <Route path="murid" element={<SchoolStudent />} />
 
           <Route path="buku">

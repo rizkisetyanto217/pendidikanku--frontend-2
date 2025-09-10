@@ -123,14 +123,14 @@ export default function SchoolMenuGrids() {
       {
         key: "sertifikat",
         label: "Sertifikat",
-        to: "/sertifikat",
+        to: "sertifikat",
         icon: Award,
       },
 
       {
         key: "kalender",
         label: "Kalender Akademik",
-        to: "/akademik/kalender",
+        to: "kalender",
         icon: CalendarRange,
       },
       {
