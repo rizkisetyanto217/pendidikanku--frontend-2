@@ -136,28 +136,19 @@ export default function StudentsPage() {
 
         {/* Konten kanan */}
         <main className="flex-1 mx-auto max-w-6xl px-4 space-y-5">
-          {/* Back button biasa */}
-          <div className="mx-auto max-w-6xl ">
-            <Btn
-              palette={palette}
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-2"
-            >
-              <ArrowLeft size={16} /> Kembali
-            </Btn>
-          </div>
           {/* Header + actions */}
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <div
-                className="h-10 w-10 rounded-xl flex items-center justify-center"
-                style={{
-                  background: palette.white3,
-                  color: palette.black2,
-                }}
-              >
-                <Users size={20} />
+              {/* Back button biasa */}
+              <div className="mx-auto max-w-6xl ">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} />
+                </Btn>
               </div>
               <div>
                 <h1
@@ -166,7 +157,7 @@ export default function StudentsPage() {
                 >
                   Siswa
                 </h1>
-                <p className="text-sm" style={{ color: palette.secondary }}>
+                <p className="text-sm" style={{ color: palette.black2 }}>
                   Kelola data siswa, filter, dan tindakan cepat.
                 </p>
               </div>
@@ -199,7 +190,7 @@ export default function StudentsPage() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: palette.secondary }}>
+                  <p className="text-sm" style={{ color: palette.black2 }}>
                     Total Siswa
                   </p>
                   <p
@@ -215,7 +206,7 @@ export default function StudentsPage() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: palette.secondary }}>
+                  <p className="text-sm" style={{ color: palette.black2 }}>
                     Aktif
                   </p>
                   <p
@@ -233,7 +224,7 @@ export default function StudentsPage() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: palette.secondary }}>
+                  <p className="text-sm" style={{ color: palette.black2 }}>
                     Laki-laki
                   </p>
                   <p
@@ -249,7 +240,7 @@ export default function StudentsPage() {
             <SectionCard palette={palette} className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm" style={{ color: palette.secondary }}>
+                  <p className="text-sm" style={{ color: palette.black2 }}>
                     Perempuan
                   </p>
                   <p
@@ -293,7 +284,7 @@ export default function StudentsPage() {
                     color: palette.quaternary,
                   }}
                 >
-                  <div className="text-xs" style={{ color: palette.secondary }}>
+                  <div className="text-xs" style={{ color: palette.black2 }}>
                     Kelas
                   </div>
                   <select
@@ -318,7 +309,7 @@ export default function StudentsPage() {
                     color: palette.quaternary,
                   }}
                 >
-                  <div className="text-xs" style={{ color: palette.secondary }}>
+                  <div className="text-xs" style={{ color: palette.black2 }}>
                     Status
                   </div>
                   <select

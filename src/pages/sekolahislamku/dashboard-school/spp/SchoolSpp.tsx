@@ -171,15 +171,16 @@ const SchoolSpp: React.FC = () => {
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
             {/* Back button biasa */}
-            <div className="mx-auto max-w-6xl ">
+            <div className="mx-auto max-w-6xl flex gap-4 items-center">
               <Btn
                 palette={palette}
                 variant="ghost"
                 onClick={() => navigate(-1)}
                 className="inline-flex items-center gap-2"
               >
-                <ArrowLeft size={16} /> Kembali
+                <ArrowLeft size={16} /> 
               </Btn>
+              <h1 className="font-semibold text-lg">SPP</h1>
             </div>
             {/* KPI */}
             <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">

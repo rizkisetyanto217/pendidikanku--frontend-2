@@ -178,10 +178,17 @@ const SchoolSubject: React.FC = () => {
             {/* Header */}
             <section className="flex items-start gap-3">
               <span
-                className="h-10 w-10 grid place-items-center rounded-xl"
-                style={{ background: palette.primary2, color: palette.primary }}
+                className="hidden sm:inline-flex items-center gap-1.5"
+                
               >
-                <LibraryBig size={18} />
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} />
+                </Btn>
               </span>
               <div>
                 <div className="text-lg font-semibold">Mata Pelajaran</div>
@@ -189,17 +196,7 @@ const SchoolSubject: React.FC = () => {
                   Kelola daftar mapel, level, dan pengampu.
                 </div>
               </div>
-              {/* Back button biasa */}
-              <div className="ml-auto max-w-6xl px-4 flex justify-end">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
-                >
-                  <ArrowLeft size={16} /> Kembali
-                </Btn>
-              </div>
+              
             </section>
 
             {/* Filter */}

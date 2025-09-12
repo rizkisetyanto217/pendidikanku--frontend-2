@@ -88,7 +88,7 @@ export default function SchoolMenuGrids() {
       {
         key: "kelas-aktif",
         label: "Kelas Aktif",
-        to: "/kelas/aktif",
+        to: "kelas-aktif",
         icon: CheckCircle2,
       },
 
@@ -136,13 +136,13 @@ export default function SchoolMenuGrids() {
       {
         key: "statistik",
         label: "Statistik",
-        to: "/statistik",
+        to: "statistik",
         icon: BarChart2,
       },
       {
         key: "pengaturan",
         label: "Pengaturan",
-        to: "/pengaturan",
+        to: "pengaturan",
         icon: Settings,
       },
     ],

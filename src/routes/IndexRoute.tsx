@@ -219,10 +219,13 @@ import TeacherMenuGrids from "@/pages/sekolahislamku/dashboard-teacher/menu-utam
 import StudentMenuGrids from "@/pages/sekolahislamku/dashboard-student/menu-utama/StudentMenuGrids";
 import RoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/RoomSchool";
 import SchoolSpp from "@/pages/sekolahislamku/dashboard-school/spp/SchoolSpp";
-import SchoolSubject from "@/pages/sekolahislamku/dashboard-school/rsc/SchoolSubject";
+import SchoolSubject from "@/pages/sekolahislamku/dashboard-school/subject/SchoolSubject";
 import SchoolCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/SchoolCertificate";
 import DetailCertificate from "@/pages/sekolahislamku/dashboard-school/certificate/components/DetailCertificate";
 import CalenderAcademic from "@/pages/sekolahislamku/dashboard-school/calender/CalenderAcademic";
+import SchoolStatistik from "@/pages/sekolahislamku/dashboard-school/statistik/SchoolStatistik";
+import SchoolSettings from "@/pages/sekolahislamku/dashboard-school/settings/SchoolSettings";
+import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/active-class/SchoolActiveClass";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -801,7 +804,11 @@ export default function AppRoutes() {
           <Route path="spp" element={<SchoolSpp />} />
           <Route path="pelajaran" element={<SchoolSubject />} />
           <Route path="sertifikat" element={<SchoolCertificate />} />
-          <Route path="kalender"  element={<CalenderAcademic/> }/>
+          <Route path="kalender" element={<CalenderAcademic />} />
+          <Route path="statistik" element={<SchoolStatistik />} />
+          <Route path="pengaturan" element={<SchoolSettings />} />
+          <Route path="kelas-aktif" element={<SchoolActiveClass />} />
+
           <Route
             path="sertifikat/detail/:classId/:studentId"
             element={<DetailCertificate />}

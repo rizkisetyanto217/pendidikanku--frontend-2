@@ -201,21 +201,6 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
             {/* Back button (opsional via props) */}
-            {showBack && (
-              <div className="mx-auto max-w-6xl px-4 ">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={handleBack}
-                  className="inline-flex items-center gap-2"
-                  aria-label={backLabel}
-                  title={backLabel}
-                >
-                  <ArrowLeft size={16} />
-                  {backLabel}
-                </Btn>
-              </div>
-            )}
 
             {/* Header Card */}
             <SectionCard palette={palette} className="overflow-hidden">
@@ -223,7 +208,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
                 className="px-5 py-4 border-b flex items-center gap-3"
                 style={{ borderColor: palette.silver1 }}
               >
-                <Building2 size={20} color={palette.quaternary} />
+                {showBack && <ArrowLeft className="cursor-pointer" onClick={handleBack} size={20} />}
                 <div className="font-semibold">Identitas Sekolah</div>
                 <div className="ml-auto flex items-center gap-2">
                   {data?.accreditation && (

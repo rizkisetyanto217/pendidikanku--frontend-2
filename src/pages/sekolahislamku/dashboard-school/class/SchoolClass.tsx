@@ -484,38 +484,31 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
           <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
-            {showBack && (
-              <div className="mx-auto max-w-6xl px-4">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
-                  aria-label={backLabel}
-                  title={backLabel}
-                >
-                  <ArrowLeft size={16} />
-                  {backLabel}
-                </Btn>
-              </div>
-            )}
             {/* Header */}
-            <section className="flex items-start gap-3">
+            <section className="flex items-center gap-6">
               <span
                 className="h-10 w-10 grid place-items-center rounded-xl"
-                style={{
-                  background: palette.primary2,
-                  color: palette.primary,
-                }}
+                
               >
-                <BookOpen size={18} />
+                {showBack && (
+                  <div className="mx-auto max-w-6xl flex items-center">
+                    <Btn
+                      palette={palette}
+                      variant="ghost"
+                      onClick={() => navigate(-1)}
+                      className="inline-flex items-center gap-2"
+                      aria-label={backLabel}
+                      title={backLabel}
+                    >
+                      <ArrowLeft size={18} />
+                    </Btn>
+                  </div>
+                )}
               </span>
-              <div>
+            
                 <div className="text-lg font-semibold">Kelas & Tingkat</div>
-                <div className="text-sm" style={{ color: palette.black2 }}>
-                  Kelola level (tingkat) dan kelas/section di bawahnya.
-                </div>
-              </div>
+                
+          
             </section>
 
             {/* Panel Tingkat */}

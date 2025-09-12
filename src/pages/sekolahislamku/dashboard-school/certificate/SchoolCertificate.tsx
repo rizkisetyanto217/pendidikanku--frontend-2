@@ -417,12 +417,16 @@ const SchoolCertificate: React.FC = () => {
             )}
 
             {/* Header */}
-            <section className="flex items-start gap-3">
-              <span
-                className="h-10 w-10 grid place-items-center rounded-xl"
-                style={{ background: palette.primary2, color: palette.primary }}
-              >
-                <Award size={18} />
+            <section className="flex items-start gap-6">
+              <span className="h-10 w-10 grid place-items-center rounded-xl">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ArrowLeft size={16} />
+                </Btn>
               </span>
 
               <div className="min-w-0">
@@ -464,7 +468,7 @@ const SchoolCertificate: React.FC = () => {
                   <div>
                     <div
                       className="text-xs mb-1"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       Bulan Terbit
                     </div>
@@ -496,7 +500,10 @@ const SchoolCertificate: React.FC = () => {
             {/* View 1: grid kelas */}
             {!selectedClass && (
               <>
-                <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                <section
+                  className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3"
+                  style={{ color: palette.black2 }}
+                >
                   <KpiTile
                     palette={palette}
                     label="Total Kelas"
@@ -640,7 +647,7 @@ const SchoolCertificate: React.FC = () => {
                   <table className="w-full text-sm min-w-[1060px]">
                     <thead
                       className="text-left"
-                      style={{ color: palette.silver2 }}
+                      style={{ color: palette.black2 }}
                     >
                       <tr
                         className="border-b"
@@ -877,7 +884,7 @@ function KpiTile({
           {icon ?? <Award size={18} />}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
+          <div className="text-xs" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>

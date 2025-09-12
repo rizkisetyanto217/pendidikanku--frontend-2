@@ -715,16 +715,18 @@ export default function RoomSchool() {
 
           {/* Content */}
           <section className="lg:col-span-9 space-y-5 min-w-0">
-            <div className="mx-auto max-w-6xl">
+            
+            <div className="mx-auto max-w-5xl flex items-center gap-3">
               <Btn
                 palette={palette}
                 variant="ghost"
                 onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2"
+                className="inline-flex items-center "
               >
-                <ArrowLeft size={16} />
-                Kembali
+                <ArrowLeft size={20} />
+                
               </Btn>
+              <h1 className="font-semibold text-lg">Ruangan</h1>
             </div>
             {/* KPIs */}
             <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">

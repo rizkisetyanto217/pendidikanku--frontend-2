@@ -271,37 +271,27 @@ const SchoolFinance: React.FC<SchoolFinnanceProps> = ({
         {/* Konten kanan */}
         <main className="flex-1 mx-auto w-full max-w-6xl space-y-5 px-3 md:px-0">
           {/* Header + actions */}
-          {showBack && (
-            <div className="mx-auto max-w-6xl px-4">
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2"
-                aria-label={backLabel}
-                title={backLabel}
-              >
-                <ArrowLeft size={16} />
-                {backLabel}
-              </Btn>
-            </div>
-          )}
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div
-                className="h-10 w-10 rounded-xl grid place-items-center"
-                style={{
-                  background: palette.white3,
-                  color: palette.quaternary,
-                }}
-              >
-                <Wallet size={20} />
-              </div>
+              {showBack && (
+                <div className="mx-auto max-w-6xl">
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2"
+                    aria-label={backLabel}
+                    title={backLabel}
+                  >
+                    <ArrowLeft size={18} />
+                    {backLabel}
+                  </Btn>
+                </div>
+              )}
               <div>
                 <h1 className="text-lg md:text-xl font-semibold">Keuangan</h1>
-                <p className="text-sm" style={{ color: palette.black2 }}>
-                  Kelola tagihan & pembayaran.
-                </p>
+                
               </div>
             </div>
 

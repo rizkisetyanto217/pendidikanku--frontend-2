@@ -123,7 +123,8 @@ type BtnVariant =
   | "destructive"
   | "success"
   | "black1" // NEW
-  | "white1"; // NEW
+  | "white1" // NEW
+  | "silver";
 
 type BtnSize = "sm" | "md" | "lg" | "icon";
 
@@ -205,6 +206,11 @@ export function Btn({
       background: palette.white1,
       color: palette.black1,
       border: `1px solid ${palette.silver1}`,
+    },
+    silver: {
+      background: palette.silver1,
+      color: palette.black1,
+      border: `1px solid ${palette.white1}`,
     },
   };
 
@@ -324,7 +330,9 @@ export function LinkBtn({
     | "destructive"
     | "success"
     | "black1"
-    | "white1";
+    | "white1"
+    | "silver"
+
   size?: "sm" | "md" | "lg" | "icon";
   tone?: "normal" | "inverted";
   block?: boolean;
@@ -395,11 +403,17 @@ export function LinkBtn({
                         color: palette.black1,
                         border: `1px solid ${palette.silver1}`,
                       }
-                    : {
-                        background: palette.primary,
-                        color: palette.white1,
-                        border: `1px solid ${palette.primary}`,
-                      }),
+                    : variant === "silver"
+                      ? {
+                          background: palette.silver1,
+                          color: palette.silver2,
+                          border: `1px solid ${palette.silver1}`,
+                        }
+                      : {
+                          background: palette.primary,
+                          color: palette.white1,
+                          border: `1px solid ${palette.primary}`,
+                        }),
     ...(tone === "inverted" && variant === "outline"
       ? { color: palette.white1, border: `1px solid ${palette.white3}` }
       : {}),

@@ -1,17 +1,16 @@
 // src/pages/sekolahislamku/pages/academic/CalenderAcademic.tsx
 import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import axios from "@/lib/axios"; // tetap ada kalau nanti ganti ke backend asli
 
 // Theme & utils
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import axios from "@/lib/axios";
 
 // UI primitives & layout
 import {
   SectionCard,
-  Badge,
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -20,24 +19,25 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 
 // Icons
 import {
-  CalendarRange,
   CalendarDays,
-  Filter as FilterIcon,
-  RefreshCcw,
-  ArrowLeft,
   Plus,
   Pencil,
   Trash2,
-  Download,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ArrowLeft,
 } from "lucide-react";
 
-/* ================== Date & format helpers ================== */
-const atLocalNoon = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x;
+/* ================= Helpers ================= */
+type EventRow = {
+  id: string;
+  title: string;
+  date: string; // ISO
+  level?: string;
+  category?: string;
 };
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
+
 const dateLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -56,171 +56,157 @@ const hijriLong = (iso?: string) =>
         year: "numeric",
       })
     : "-";
-const dateOnly = (iso?: string) =>
-  iso ? new Date(iso).toLocaleDateString("id-ID") : "-";
-
-const formatRange = (start?: string, end?: string) => {
-  if (!start) return "-";
-  if (!end || dateOnly(start) === dateOnly(end)) return dateOnly(start);
-  return `${dateOnly(start)} – ${dateOnly(end)}`;
+const toMonthStr = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+const monthLabel = (month: string) => {
+  const [y, m] = month.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, 1).toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
+};
+const toLocalInputValue = (iso: string) => {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-/* ================= Types ================= */
-export type EventStatus = "planned" | "done" | "cancelled";
+/* ================= Dummy API (in-memory) ================= */
+// Storage per-bulan: key "YYYY-MM" -> EventRow[]
+const store = new Map<string, EventRow[]>();
 
-export type AcademicEvent = {
-  id: string;
-  title: string;
-  start_date: string; // ISO
-  end_date?: string; // ISO (opsional utk rentang)
-  level?: string; // contoh: "1", "2", ... "6", atau "Semua"
-  category?: "Akademik" | "Libur" | "Ujian" | "Kegiatan";
-  status: EventStatus;
-  location?: string;
+function uid() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms));
+
+const fakeApi = {
+  async list(month: string): Promise<EventRow[]> {
+    await delay();
+    // seed contoh kalau kosong
+    if (!store.has(month)) {
+      const [y, m] = month.split("-").map(Number);
+      store.set(month, [
+        {
+          id: uid(),
+          title: "Contoh: Ujian",
+          date: new Date(y, m - 1, 10, 7).toISOString(),
+          category: "Ujian",
+        },
+        {
+          id: uid(),
+          title: "Contoh: Rapat",
+          date: new Date(y, m - 1, 15, 13).toISOString(),
+          category: "Kegiatan",
+        },
+      ]);
+    }
+    return JSON.parse(JSON.stringify(store.get(month)!));
+  },
+  async create(
+    month: string,
+    payload: Omit<EventRow, "id">
+  ): Promise<EventRow> {
+    await delay();
+    const curr = store.get(month) || [];
+    const row: EventRow = { id: uid(), ...payload };
+    store.set(month, [...curr, row]);
+    return JSON.parse(JSON.stringify(row));
+  },
+  async update(month: string, payload: EventRow): Promise<EventRow> {
+    await delay();
+    const curr = store.get(month) || [];
+    const idx = curr.findIndex((x) => x.id === payload.id);
+    if (idx >= 0) curr[idx] = { ...payload };
+    store.set(month, curr);
+    return JSON.parse(JSON.stringify(payload));
+  },
+  async remove(month: string, id: string): Promise<void> {
+    await delay();
+    const curr = store.get(month) || [];
+    store.set(
+      month,
+      curr.filter((x) => x.id !== id)
+    );
+  },
 };
+/* ========================================================= */
 
-type ApiCalendarResp = {
-  list: AcademicEvent[];
-  levels?: string[]; // opsi filter level
-  categories?: string[];
-};
-
-/* =============== Page =============== */
 const CalenderAcademic: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
+  const qc = useQueryClient();
 
-  const gregorianISO = toLocalNoonISO(new Date());
+  const [month, setMonth] = useState<string>(toMonthStr());
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [editing, setEditing] = useState<EventRow | null>(null);
 
-  // ==== Filters ====
-  const [q, setQ] = useState<string>("");
-  const [level, setLevel] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
-  const [status, setStatus] = useState<EventStatus | "semua">("semua");
-  const [month, setMonth] = useState<string>(() => {
-    const t = new Date();
-    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}`;
-  });
-
-  // ==== Data (dummy fallback jika API belum siap) ====
+  // List events (dummy)
   const eventsQ = useQuery({
-    queryKey: ["academic-calendar", { q, level, category, status, month }],
-    queryFn: async (): Promise<ApiCalendarResp> => {
-      // Jika endpoint sudah ada, gunakan ini:
-      // const { data } = await axios.get("/api/a/academic/calendar", {
-      //   params: { q, level, category, status, month }
-      // });
-      // return data;
-
-      const base = new Date(`${month}-01T00:00:00`);
-      const mkISO = (d: Date, plusDay = 0) => {
-        const x = new Date(d);
-        x.setDate(x.getDate() + plusDay);
-        return x.toISOString();
-      };
-
-      const dummy: ApiCalendarResp = {
-        list: [
-          {
-            id: "ev-1",
-            title: "Masa Orientasi Siswa",
-            start_date: mkISO(base, 1),
-            end_date: mkISO(base, 3),
-            level: "Semua",
-            category: "Kegiatan",
-            status: "planned",
-            location: "Aula Sekolah",
-          },
-          {
-            id: "ev-2",
-            title: "Ujian Tengah Semester",
-            start_date: mkISO(base, 10),
-            end_date: mkISO(base, 14),
-            level: "4",
-            category: "Ujian",
-            status: "planned",
-          },
-          {
-            id: "ev-3",
-            title: "Libur Maulid",
-            start_date: mkISO(base, 18),
-            level: "Semua",
-            category: "Libur",
-            status: "done",
-          },
-          {
-            id: "ev-4",
-            title: "Rapat Orang Tua",
-            start_date: mkISO(base, 22),
-            level: "Semua",
-            category: "Kegiatan",
-            status: "planned",
-            location: "Ruang Pertemuan",
-          },
-          {
-            id: "ev-5",
-            title: "Pembagian Rapor",
-            start_date: mkISO(base, 28),
-            level: "Semua",
-            category: "Akademik",
-            status: "planned",
-          },
-        ],
-        levels: ["Semua", "1", "2", "3", "4", "5", "6"],
-        categories: ["Akademik", "Libur", "Ujian", "Kegiatan"],
-      };
-
-      return dummy;
-    },
-    staleTime: 60_000,
+    queryKey: ["acad-events", month],
+    queryFn: () => fakeApi.list(month),
+    staleTime: 30_000,
   });
 
-  // ==== Derived rows ====
-  const rows = useMemo(() => {
-    let list = eventsQ.data?.list ?? [];
-    if (level) list = list.filter((r) => (r.level || "Semua") === level);
-    if (category) list = list.filter((r) => (r.category || "") === category);
-    if (status !== "semua") list = list.filter((r) => r.status === status);
-    if (q.trim()) {
-      const qq = q.toLowerCase();
-      list = list.filter(
-        (r) =>
-          r.title.toLowerCase().includes(qq) ||
-          (r.location || "").toLowerCase().includes(qq)
-      );
+  const byDate = useMemo(() => {
+    const map = new Map<string, EventRow[]>();
+    (eventsQ.data ?? []).forEach((e) => {
+      const d = new Date(e.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      map.set(key, [...(map.get(key) || []), e]);
+    });
+    return map;
+  }, [eventsQ.data]);
+
+  // CRUD (dummy)
+  const createMut = useMutation({
+    mutationFn: (payload: Omit<EventRow, "id">) =>
+      fakeApi.create(month, payload),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ["acad-events", month] });
+      setSelectedDay(row.date.slice(0, 10));
+    },
+  });
+  const updateMut = useMutation({
+    mutationFn: (payload: EventRow) => fakeApi.update(month, payload),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ["acad-events", month] });
+      setSelectedDay(row.date.slice(0, 10));
+    },
+  });
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => fakeApi.remove(month, id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["acad-events", month] }),
+  });
+
+  // Calendar grid
+  const days = useMemo(() => {
+    const [y, m] = month.split("-").map(Number);
+    const first = new Date(y, (m || 1) - 1, 1);
+    const firstWeekday = (first.getDay() + 6) % 7; // Mon=0
+    const total = new Date(y, m, 0).getDate();
+    const cells: { label: number | null; dateKey: string | null }[] = [];
+    for (let i = 0; i < firstWeekday; i++)
+      cells.push({ label: null, dateKey: null });
+    for (let d = 1; d <= total; d++) {
+      const key = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      cells.push({ label: d, dateKey: key });
     }
-    // sort by start_date ascending
-    return [...list].sort(
-      (a, b) =>
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
-    );
-  }, [eventsQ.data?.list, q, level, category, status]);
+    while (cells.length % 7 !== 0) cells.push({ label: null, dateKey: null });
+    return cells;
+  }, [month]);
 
-  const levelOptions = eventsQ.data?.levels ?? [
-    "Semua",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-  ];
-  const categoryOptions = eventsQ.data?.categories ?? [
-    "Akademik",
-    "Libur",
-    "Ujian",
-    "Kegiatan",
-  ];
+  const gotoPrev = () => {
+    const [y, m] = month.split("-").map(Number);
+    setMonth(toMonthStr(new Date(y, m - 2, 1)));
+  };
+  const gotoNext = () => {
+    const [y, m] = month.split("-").map(Number);
+    setMonth(toMonthStr(new Date(y, m, 1)));
+  };
 
-  // KPI kecil
-  const kpi = useMemo(() => {
-    const total = rows.length;
-    const planned = rows.filter((r) => r.status === "planned").length;
-    const done = rows.filter((r) => r.status === "done").length;
-    const cancelled = rows.filter((r) => r.status === "cancelled").length;
-    return { total, planned, done, cancelled };
-  }, [rows]);
+  const nowISO = new Date().toISOString();
 
   return (
     <div
@@ -230,22 +216,27 @@ const CalenderAcademic: React.FC = () => {
       <ParentTopBar
         palette={palette}
         title="Kalender Akademik"
-        gregorianDate={gregorianISO}
-        hijriDate={hijriLong(gregorianISO)}
+        gregorianDate={nowISO}
+        hijriDate={hijriLong(nowISO)}
         dateFmt={dateLong}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Sidebar */}
           <aside className="lg:col-span-3">
             <ParentSidebar palette={palette} />
           </aside>
 
-          {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
             {/* Header */}
             <section className="flex items-start gap-3">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft size={20} />
+              </Btn>
               <span
                 className="h-10 w-10 grid place-items-center rounded-xl"
                 style={{ background: palette.primary2, color: palette.primary }}
@@ -255,346 +246,322 @@ const CalenderAcademic: React.FC = () => {
               <div>
                 <div className="text-lg font-semibold">Kalender Akademik</div>
                 <div className="text-sm" style={{ color: palette.black2 }}>
-                  Daftar agenda & kegiatan sekolah berdasarkan bulan.
+                  Klik tanggal untuk melihat/menambah acara.
                 </div>
               </div>
-              <div className="ml-auto">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
-                >
-                  <ArrowLeft size={16} /> Kembali
+              <div className="ml-auto flex items-center gap-2">
+                <Btn palette={palette} variant="outline" onClick={gotoPrev}>
+                  <ChevronLeft size={16} />
+                </Btn>
+                <div className="px-2 text-sm font-medium">
+                  {monthLabel(month)}
+                </div>
+                <Btn palette={palette} variant="outline" onClick={gotoNext}>
+                  <ChevronRight size={16} />
                 </Btn>
               </div>
             </section>
 
-            {/* KPI ringkas */}
-            <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <KpiTile
-                palette={palette}
-                label="Total Agenda"
-                value={kpi.total}
-                icon={<CalendarRange size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Terjadwal"
-                value={kpi.planned}
-              />
-              <KpiTile
-                palette={palette}
-                label="Selesai"
-                value={kpi.done}
-                tone="success"
-              />
-              <KpiTile
-                palette={palette}
-                label="Dibatalkan"
-                value={kpi.cancelled}
-                tone="danger"
-              />
-            </section>
-
-            {/* Filter */}
+            {/* Kalender */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
-                <FilterIcon size={18} /> Filter
-              </div>
-              <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-6 gap-4">
-                {/* Bulan */}
-                <div className="md:col-span-2">
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Bulan
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="month"
-                      value={month}
-                      onChange={(e) => setMonth(e.target.value)}
-                      className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                      style={{
-                        borderColor: palette.silver1,
-                        color: palette.black1,
-                      }}
-                    />
-                    <Btn
-                      palette={palette}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => eventsQ.refetch()}
-                    >
-                      <RefreshCcw size={16} />
-                    </Btn>
-                  </div>
-                </div>
-
-                {/* Level */}
-                <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Level/Kelas
-                  </div>
-                  <select
-                    value={level}
-                    onChange={(e) => setLevel(e.target.value)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
-                  >
-                    <option value="">Semua</option>
-                    {levelOptions.map((lv) => (
-                      <option key={lv} value={lv}>
-                        {lv}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Kategori */}
-                <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Kategori
-                  </div>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
-                  >
-                    <option value="">Semua</option>
-                    {categoryOptions.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status */}
-                <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Status
-                  </div>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
-                  >
-                    <option value="semua">Semua</option>
-                    <option value="planned">Terjadwal</option>
-                    <option value="done">Selesai</option>
-                    <option value="cancelled">Dibatalkan</option>
-                  </select>
-                </div>
-
-                {/* Pencarian */}
-                <div className="md:col-span-2">
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
-                  >
-                    Cari (judul/lokasi)
-                  </div>
-                  <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Ketik kata kunci…"
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
-                  />
-                </div>
-              </div>
-            </SectionCard>
-
-            {/* Tabel Agenda */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-                <div className="font-medium">Daftar Agenda Bulan Ini</div>
-                <div className="flex items-center gap-2">
-                  <Btn
-                    palette={palette}
-                    size="sm"
-                    variant="outline"
-                    className="gap-1"
-                  >
-                    <Download size={16} /> Ekspor
-                  </Btn>
-                  <Btn palette={palette} size="sm" className="gap-1">
-                    <Plus size={16} /> Tambah
-                  </Btn>
-                </div>
-              </div>
-
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="w-full text-sm min-w-[940px]">
-                  <thead
-                    className="text-left"
-                    style={{ color: palette.silver2 }}
-                  >
-                    <tr
-                      className="border-b"
-                      style={{ borderColor: palette.silver1 }}
-                    >
-                      <th className="py-2 pr-4">Tanggal</th>
-                      <th className="py-2 pr-4">Judul</th>
-                      <th className="py-2 pr-4">Level</th>
-                      <th className="py-2 pr-4">Kategori</th>
-                      <th className="py-2 pr-4">Lokasi</th>
-                      <th className="py-2 pr-4">Status</th>
-                      <th className="py-2 pr-2 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    className="divide-y"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    {rows.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="py-8 text-center"
-                          style={{ color: palette.silver2 }}
-                        >
-                          Tidak ada agenda untuk filter ini.
-                        </td>
-                      </tr>
-                    ) : (
-                      rows.map((r) => (
-                        <tr key={r.id} className="align-middle">
-                          <td className="py-3 pr-4 font-medium">
-                            {formatRange(r.start_date, r.end_date)}
-                          </td>
-                          <td className="py-3 pr-4">{r.title}</td>
-                          <td className="py-3 pr-4">{r.level ?? "Semua"}</td>
-                          <td className="py-3 pr-4">{r.category ?? "-"}</td>
-                          <td className="py-3 pr-4">{r.location ?? "-"}</td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              palette={palette}
-                              variant={
-                                r.status === "done"
-                                  ? "success"
-                                  : r.status === "cancelled"
-                                    ? "warning"
-                                    : "outline"
-                              }
-                            >
-                              {r.status === "planned"
-                                ? "Terjadwal"
-                                : r.status === "done"
-                                  ? "Selesai"
-                                  : "Dibatalkan"}
-                            </Badge>
-                          </td>
-                          <td className="py-3 pr-2">
-                            <div className="flex justify-end gap-2">
-                              <Btn
-                                palette={palette}
-                                size="sm"
-                                variant="ghost"
-                                className="gap-1"
-                              >
-                                <Pencil size={14} />
-                              </Btn>
-                              <Btn
-                                palette={palette}
-                                size="sm"
-                                variant="destructive"
-                                className="gap-1"
-                              >
-                                <Trash2 size={14} />
-                              </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-
+              <div className="p-4 md:p-5">
                 <div
-                  className="pt-3 text-xs"
+                  className="grid grid-cols-7 gap-2 text-xs mb-2"
                   style={{ color: palette.silver2 }}
                 >
-                  Menampilkan {rows.length} agenda
+                  {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map(
+                    (d) => (
+                      <div key={d} className="text-center">
+                        {d}
+                      </div>
+                    )
+                  )}
+                </div>
+
+                <div className="grid grid-cols-7 gap-2">
+                  {days.map((c, i) => {
+                    const has = c.dateKey ? byDate.get(c.dateKey) : undefined;
+                    const selected = selectedDay === c.dateKey;
+                    return (
+                      <button
+                        key={i}
+                        disabled={!c.dateKey}
+                        onClick={() => setSelectedDay(c.dateKey!)}
+                        className="h-24 rounded-lg border p-2 text-left relative transition disabled:opacity-50"
+                        style={{
+                          borderColor: palette.silver1,
+                          background: selected
+                            ? palette.primary2
+                            : palette.white1,
+                        }}
+                      >
+                        <div className="text-xs font-medium">
+                          {c.label ?? ""}
+                        </div>
+                        {!!has && has.length > 0 && (
+                          <div className="absolute right-2 top-2 flex gap-1">
+                            {has.slice(0, 3).map((_, idx) => (
+                              <span
+                                key={idx}
+                                className="h-1.5 w-1.5 rounded-full"
+                                style={{ background: palette.primary }}
+                              />
+                            ))}
+                            {has.length > 3 && (
+                              <span
+                                className="text-[10px]"
+                                style={{ color: palette.black2 }}
+                              >
+                                +{has.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {has && has[0] && (
+                          <div
+                            className="mt-2 text-xs line-clamp-3"
+                            style={{ color: palette.black2 }}
+                          >
+                            {has[0].title}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </SectionCard>
+
+            {/* Panel hari terpilih */}
+            {selectedDay && (
+              <SectionCard palette={palette}>
+                <div className="p-4 md:p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium">
+                      Agenda {new Date(selectedDay).toLocaleDateString("id-ID")}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Btn
+                        palette={palette}
+                        size="sm"
+                        onClick={() =>
+                          setEditing({
+                            id: "",
+                            title: "",
+                            date: new Date(
+                              selectedDay + "T07:00:00"
+                            ).toISOString(),
+                          })
+                        }
+                        className="gap-1"
+                      >
+                        <Plus size={16} />
+                      </Btn>
+                      <Btn
+                        palette={palette}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedDay(null)}
+                      >
+                        <X size={16} />
+                      </Btn>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {(byDate.get(selectedDay) ?? []).map((ev) => (
+                      <div
+                        key={ev.id}
+                        className="flex items-center justify-between rounded-lg border px-3 py-2"
+                        style={{ borderColor: palette.silver1 }}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            {ev.title}
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: palette.black2 }}
+                          >
+                            {new Date(ev.date).toLocaleTimeString("id-ID", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                            {ev.category ? ` • ${ev.category}` : ""}{" "}
+                            {ev.level ? `• Kelas ${ev.level}` : ""}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="ghost"
+                            className="gap-1"
+                            onClick={() => setEditing(ev)}
+                          >
+                            <Pencil size={14} />
+                          </Btn>
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="destructive"
+                            className="gap-1"
+                            onClick={() => deleteMut.mutate(ev.id)}
+                            disabled={deleteMut.isPending}
+                          >
+                            <Trash2 size={14} />
+                          </Btn>
+                        </div>
+                      </div>
+                    ))}
+                    {(byDate.get(selectedDay) ?? []).length === 0 && (
+                      <div
+                        className="text-sm"
+                        style={{ color: palette.silver2 }}
+                      >
+                        Belum ada agenda pada tanggal ini.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SectionCard>
+            )}
           </section>
         </div>
       </main>
+
+      {/* Modal */}
+      {editing && (
+        <EditModal
+          palette={palette}
+          value={editing}
+          onClose={() => setEditing(null)}
+          onSubmit={(val) => {
+            if (!val.title.trim()) return;
+            if (val.id) {
+              updateMut.mutate(val, { onSuccess: () => setEditing(null) });
+            } else {
+              const { id, ...payload } = val;
+              createMut.mutate(payload, { onSuccess: () => setEditing(null) });
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
 
 export default CalenderAcademic;
 
-/* ================= Small UI helpers ================= */
-function KpiTile({
+/* =============== Modal Ringkas =============== */
+function EditModal({
   palette,
-  label,
   value,
-  icon,
-  tone,
+  onClose,
+  onSubmit,
 }: {
   palette: Palette;
-  label: string;
-  value: number | string;
-  icon?: React.ReactNode;
-  tone?: "success" | "warning" | "danger";
+  value: EventRow;
+  onClose: () => void;
+  onSubmit: (v: EventRow) => void;
 }) {
-  const toneBg =
-    tone === "success"
-      ? "#DCFCE7"
-      : tone === "warning"
-        ? "#FEF3C7"
-        : tone === "danger"
-          ? "#FEE2E2"
-          : undefined;
+  const [form, setForm] = useState<EventRow>(value);
+  const set = (k: keyof EventRow, v: any) => setForm((s) => ({ ...s, [k]: v }));
+
   return (
-    <SectionCard palette={palette}>
-      <div className="p-4 md:p-5 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{
-            background: toneBg ?? palette.primary2,
-            color: palette.primary,
-          }}
-        >
-          {icon ?? <CalendarDays size={18} />}
-        </span>
-        <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
-            {label}
+    <div className="fixed inset-0 z-50 grid place-items-center">
+      <div
+        className="absolute inset-0"
+        style={{ background: "rgba(0,0,0,0.2)" }}
+        onClick={onClose}
+      />
+      <div
+        className="relative w-full max-w-md rounded-xl border p-4"
+        style={{
+          borderColor: palette.silver1,
+          background: palette.white1,
+          color: palette.black1,
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-semibold text-sm">
+            {form.id ? "Ubah Agenda" : "Tambah Agenda"}
           </div>
-          <div className="text-xl font-semibold">{value}</div>
+          <button onClick={onClose} className="p-1">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-3 text-sm">
+          <div>
+            <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+              Judul
+            </div>
+            <input
+              value={form.title}
+              onChange={(e) => set("title", e.target.value)}
+              className="w-full h-10 rounded-lg border px-3 bg-transparent"
+              style={{ borderColor: palette.silver1 }}
+              placeholder="Contoh: Ujian Tengah Semester"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+                Tanggal & Waktu
+              </div>
+              <input
+                type="datetime-local"
+                value={toLocalInputValue(form.date)}
+                onChange={(e) =>
+                  set("date", new Date(e.target.value).toISOString())
+                }
+                className="w-full h-10 rounded-lg border px-3 bg-transparent"
+                style={{ borderColor: palette.silver1 }}
+              />
+            </div>
+            <div>
+              <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+                Kategori (opsional)
+              </div>
+              <input
+                value={form.category || ""}
+                onChange={(e) => set("category", e.target.value)}
+                className="w-full h-10 rounded-lg border px-3 bg-transparent"
+                style={{ borderColor: palette.silver1 }}
+                placeholder="Akademik/Libur/Ujian…"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+              Level/Kelas (opsional)
+            </div>
+            <input
+              value={form.level || ""}
+              onChange={(e) => set("level", e.target.value)}
+              className="w-full h-10 rounded-lg border px-3 bg-transparent"
+              style={{ borderColor: palette.silver1 }}
+              placeholder="Semua / 1 / 2 / …"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex justify-end gap-2">
+          <Btn palette={palette} variant="ghost" onClick={onClose}>
+            Batal
+          </Btn>
+          <Btn
+            palette={palette}
+            onClick={() => onSubmit(form)}
+            className="gap-1"
+          >
+            {form.id ? <Pencil size={16} /> : <Plus size={16} />} Simpan
+          </Btn>
         </div>
       </div>
-    </SectionCard>
+    </div>
   );
 }

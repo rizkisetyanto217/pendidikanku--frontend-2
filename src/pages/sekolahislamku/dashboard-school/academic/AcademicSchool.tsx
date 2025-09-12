@@ -174,28 +174,26 @@ const navigate = useNavigate()
 
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
-            {showBack && (
-              <div className="mx-auto max-w-6xl px-4">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
-                  aria-label={backLabel}
-                  title={backLabel}
-                >
-                  <ArrowLeft size={16} />
-                  {backLabel}
-                </Btn>
-              </div>
-            )}
             {/* ===== Periode Akademik (active term) ===== */}
             <SectionCard palette={palette} className="overflow-hidden">
               <div
                 className="px-5 py-4 border-b flex items-center gap-3"
                 style={{ borderColor: palette.silver1 }}
               >
-                <School size={20} color={palette.quaternary} />
+                {showBack && (
+
+                 
+                      <ArrowLeft
+                        onClick={() => navigate(-1)}
+                        aria-label={backLabel}
+                        // title={backLabel}
+                        className="cursor-pointer"
+                        size={20}
+                      />
+                 
+                 
+                 
+                )}
                 <div className="font-semibold">Periode Akademik Aktif</div>
                 {DUMMY_TERM.academic_terms_is_active && (
                   <Badge

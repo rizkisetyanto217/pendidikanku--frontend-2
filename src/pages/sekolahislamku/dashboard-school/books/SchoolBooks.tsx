@@ -84,7 +84,7 @@ const dateLong = (iso?: string) =>
       })
     : "";
 
-    // --- timezone-safe helpers (pakai “siang lokal”)
+// --- timezone-safe helpers (pakai “siang lokal”)
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -460,33 +460,23 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
           {/* Konten utama */}
           <div className="flex-1 space-y-6 min-w-0">
-            {showBack && (
-              <div className="mx-auto max-w-6xl px-4">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
-                  aria-label={backLabel}
-                  title={backLabel}
-                >
-                  <ArrowLeft size={16} />
-                  {backLabel}
-                </Btn>
-              </div>
-            )}
             {/* Header */}
             <section className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="flex items-start gap-3">
-                <span
-                  className="h-10 w-10 grid place-items-center rounded-xl"
-                  style={{
-                    background: palette.primary2,
-                    color: palette.primary,
-                  }}
-                >
-                  <BookOpen size={18} />
-                </span>
+              <div className="flex items-start gap-2">
+                {showBack && (
+                  <div className="mx-auto max-w-6xl ">
+                    <Btn
+                      palette={palette}
+                      variant="ghost"
+                      onClick={() => navigate(-1)}
+                      className="inline-flex items-center gap-2"
+                      aria-label={backLabel}
+                      title={backLabel}
+                    >
+                      <ArrowLeft size={20} />
+                    </Btn>
+                  </div>
+                )}
                 <div>
                   <div className="text-lg font-semibold">Buku Pelajaran</div>
                   <div className="text-sm" style={{ color: palette.black2 }}>
@@ -628,6 +618,6 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
       />
     </div>
   );
-}
+};
 
 export default SchoolBooks;

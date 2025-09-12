@@ -113,19 +113,29 @@ const PageHeader = ({
   palette,
   onImportClick,
   onAddClick,
+  onBackClick, // NEW
+  backLabel = "Kembali", // NEW
 }: {
   palette: Palette;
   onImportClick: () => void;
   onAddClick: () => void;
+  onBackClick?: () => void;
+  backLabel?: string;
 }) => (
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+    {/* Kiri: Back + Title */}
     <div className="flex items-center gap-3">
-      <div
-        className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl grid place-items-center flex-shrink-0"
-        style={{ background: palette.primary2, color: palette.primary }}
-      >
-        <UserCog size={16} className="sm:w-5 sm:h-5" />
-      </div>
+      {onBackClick && (
+        <Btn
+          palette={palette}
+          variant="ghost"
+          onClick={onBackClick}
+          className="flex items-center gap-1.5"
+        >
+          <ArrowLeft size={20} />
+          <span className="hidden sm:inline"></span>
+        </Btn>
+      )}
       <div className="min-w-0 flex-1">
         <h1
           className="text-lg sm:text-xl font-semibold truncate"
@@ -142,6 +152,7 @@ const PageHeader = ({
       </div>
     </div>
 
+    {/* Kanan: Action buttons */}
     <div className="flex items-center gap-2 flex-wrap">
       <Btn
         onClick={onImportClick}
@@ -169,6 +180,7 @@ const PageHeader = ({
     </div>
   </div>
 );
+
 
 const StatCard = ({
   title,
@@ -673,27 +685,18 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
         <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4  sm:space-y-5">
-          <div className="flex-1  min-w-0">
-            {showBack && (
-              <div className="mx-auto max-w-6xl ">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
-                  aria-label={backLabel}
-                  title={backLabel}
-                >
-                  <ArrowLeft size={16} />
-                  {backLabel}
-                </Btn>
-              </div>
-            )}
-          </div>
+
+           
           <PageHeader
             palette={palette}
             onImportClick={() => setOpenImport(true)}
             onAddClick={() => setOpenAdd(true)}
+            onBackClick={
+              showBack
+                ? () => (backTo ? navigate(backTo) : navigate(-1))
+                : undefined
+            }
+            backLabel={backLabel}
           />
 
           <StatsGrid stats={stats} palette={palette} />
