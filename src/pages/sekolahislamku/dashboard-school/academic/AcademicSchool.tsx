@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-
 /* ===================== Types ===================== */
 type AcademicTerm = {
   academic_terms_masjid_id: string;
@@ -133,13 +132,15 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
 }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-const navigate = useNavigate()
+  const navigate = useNavigate();
   // State kecil untuk filter rooms
   const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
 
   const rooms = useMemo(() => {
-    if (filter === "physical") return DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual);
-    if (filter === "virtual") return DUMMY_ROOMS.filter((r) => r.class_rooms_is_virtual);
+    if (filter === "physical")
+      return DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual);
+    if (filter === "virtual")
+      return DUMMY_ROOMS.filter((r) => r.class_rooms_is_virtual);
     return DUMMY_ROOMS;
   }, [filter]);
 
@@ -148,7 +149,10 @@ const navigate = useNavigate()
     totalRooms: DUMMY_ROOMS.length,
     physical: DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual).length,
     virtual: DUMMY_ROOMS.filter((r) => r.class_rooms_is_virtual).length,
-    capacitySum: DUMMY_ROOMS.reduce((s, r) => s + (r.class_rooms_capacity || 0), 0),
+    capacitySum: DUMMY_ROOMS.reduce(
+      (s, r) => s + (r.class_rooms_capacity || 0),
+      0
+    ),
   };
 
   const topbarISO = toLocalNoonISO(new Date());
@@ -173,42 +177,35 @@ const navigate = useNavigate()
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
-            {/* ===== Periode Akademik (active term) ===== */}
-            <SectionCard palette={palette} className="overflow-hidden">
-              <div
-                className="px-5 py-4 border-b flex items-center gap-3"
-                style={{ borderColor: palette.silver1 }}
-              >
-                {showBack && (
-
-                 
+          <section className="lg:col-span-9 space-y-5 min-w-0">
+            <div className="flex items-center justify-between py-2">
+              <div className="font-semibold text-lg flex items-center ">
+                <div className="  flex items-center gap-x-3 ">
+                  {showBack && (
+                    <Btn
+                      palette={palette}
+                      onClick={() => navigate(-1)}
+                      variant="ghost"
+                      className="cursor-pointer mr-3"
+                    >
                       <ArrowLeft
-                        onClick={() => navigate(-1)}
                         aria-label={backLabel}
                         // title={backLabel}
-                        className="cursor-pointer"
+
                         size={20}
                       />
-                 
-                 
-                 
-                )}
-                <div className="font-semibold">Periode Akademik Aktif</div>
-                {DUMMY_TERM.academic_terms_is_active && (
-                  <Badge
-                    palette={palette}
-                    variant="success"
-                    className="ml-auto"
-                  >
-                    Aktif
-                  </Badge>
-                )}
+                    </Btn>
+                  )}
+                </div>
+                <h1 className="flex items-center ">Periode Akademik Aktif</h1>
               </div>
-
+              
+            </div>
+            {/* ===== Periode Akademik (active term) ===== */}
+            <SectionCard palette={palette} className="overflow-hidden">
               <div className="p-5 grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Tahun Ajaran
                   </div>
                   <div className="text-xl font-semibold">
@@ -226,7 +223,7 @@ const navigate = useNavigate()
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Angkatan
                   </div>
                   <div className="text-xl font-semibold">
@@ -245,7 +242,7 @@ const navigate = useNavigate()
             </SectionCard>
 
             {/* ===== KPI kecil untuk rooms ===== */}
-            <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <MiniKPI
                 palette={palette}
                 icon={<Grid size={16} />}
@@ -270,7 +267,7 @@ const navigate = useNavigate()
                 label="Total Kapasitas"
                 value={kpIs.capacitySum}
               />
-            </section>
+            </section> */}
 
             {/* ===== Daftar Rooms ===== */}
             <SectionCard palette={palette}>
@@ -337,7 +334,7 @@ const navigate = useNavigate()
       </main>
     </div>
   );
-}
+};
 
 /* ===================== Small UI ===================== */
 function MiniKPI({
@@ -361,7 +358,7 @@ function MiniKPI({
           {icon}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
+          <div className="text-xs" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>
@@ -382,7 +379,7 @@ function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="font-semibold truncate">{room.class_rooms_name}</div>
-          <div className="text-xs mt-0.5" style={{ color: palette.silver2 }}>
+          <div className="text-xs mt-0.5" style={{ color: palette.black2 }}>
             Kode: {room.class_rooms_code}
           </div>
         </div>

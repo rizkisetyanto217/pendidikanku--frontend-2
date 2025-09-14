@@ -209,7 +209,7 @@ const SchoolSubject: React.FC = () => {
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Level/Kelas
                   </div>
@@ -235,7 +235,7 @@ const SchoolSubject: React.FC = () => {
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Status
                   </div>
@@ -258,7 +258,7 @@ const SchoolSubject: React.FC = () => {
                 <div className="md:col-span-3">
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Cari (nama/kode/pengampu)
                   </div>

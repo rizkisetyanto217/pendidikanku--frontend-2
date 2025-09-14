@@ -267,7 +267,7 @@ const CalenderAcademic: React.FC = () => {
               <div className="p-4 md:p-5">
                 <div
                   className="grid grid-cols-7 gap-2 text-xs mb-2"
-                  style={{ color: palette.silver2 }}
+                  style={{ color: palette.black2 }}
                 >
                   {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map(
                     (d) => (

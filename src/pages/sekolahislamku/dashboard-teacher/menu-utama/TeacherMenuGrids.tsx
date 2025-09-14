@@ -55,7 +55,7 @@ export default function TeacherMenuGrids() {
       {
         key: "kelas-all",
         label: "Seluruh Kelas",
-        to: "/guru/kelas/semua",
+        to: "all-classes",
         icon: <Layers />,
       },
       {

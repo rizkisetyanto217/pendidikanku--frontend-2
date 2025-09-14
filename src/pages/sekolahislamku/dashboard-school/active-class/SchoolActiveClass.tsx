@@ -117,12 +117,16 @@ const SchoolActiveClass: React.FC = () => {
 
           {/* Main */}
 
-          <section className="lg:col-span-9 space-y-3 min-w-0">
+          <section className="lg:col-span-9 space-y-6 min-w-0">
             {/* Header */}
 
             <section className="flex items-center gap-7 ">
               <span className="h-10 w-10 grid place-items-center rounded-xl rounded-t-none font-bold ">
-                <Btn onClick={() => navigate(-1)} palette={palette }variant="ghost" >
+                <Btn
+                  onClick={() => navigate(-1)}
+                  palette={palette}
+                  variant="ghost"
+                >
                   <ArrowLeft size={20} className="cursor-pointer" />
                 </Btn>
               </span>

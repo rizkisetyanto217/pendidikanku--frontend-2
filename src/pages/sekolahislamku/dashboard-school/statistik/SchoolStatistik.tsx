@@ -253,7 +253,9 @@ const SchoolStatistik: React.FC = () => {
                           />
                           <span>Guru</span>
                           <Badge palette={palette} variant="outline">
-                            {donutData.pctTeachers}%
+                            <p style={{ color: palette.black2 }}>
+                              {donutData.pctTeachers}%
+                            </p>
                           </Badge>
                         </div>
                         <div className="flex items-center gap-2">
@@ -263,7 +265,9 @@ const SchoolStatistik: React.FC = () => {
                           />
                           <span>Siswa</span>
                           <Badge palette={palette} variant="outline">
-                            {donutData.pctStudents}%
+                            <p style={{ color: palette.black2 }}>
+                              {donutData.pctStudents}%
+                            </p>
                           </Badge>
                         </div>
                       </div>

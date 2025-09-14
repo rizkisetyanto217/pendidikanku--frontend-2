@@ -715,21 +715,15 @@ export default function RoomSchool() {
 
           {/* Content */}
           <section className="lg:col-span-9 space-y-5 min-w-0">
-            
             <div className="mx-auto max-w-5xl flex items-center gap-3">
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center "
-              >
-                <ArrowLeft size={20} />
-                
+              <Btn palette={palette} variant="ghost" onClick={() => navigate(-1)}>
+                <ArrowLeft className="cursor-pointer" size={20} />
               </Btn>
+
               <h1 className="font-semibold text-lg">Ruangan</h1>
             </div>
             {/* KPIs */}
-            <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {/* <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               <KpiTile
                 palette={palette}
                 label="Total Ruangan"
@@ -756,7 +750,7 @@ export default function RoomSchool() {
                 icon={<MapPin size={18} />}
                 tone="success"
               />
-            </section>
+            </section> */}
 
             {/* Toolbar */}
             <SectionCard palette={palette}>
@@ -908,7 +902,7 @@ export default function RoomSchool() {
                     <div className="flex items-center gap-2">
                       <Btn
                         palette={palette}
-                        variant="ghost"
+                        variant="default"
                         onClick={() => gotoPage(page - 1)}
                         disabled={page <= 1}
                       >
@@ -916,7 +910,7 @@ export default function RoomSchool() {
                       </Btn>
                       <Btn
                         palette={palette}
-                        variant="ghost"
+                        variant="default"
                         onClick={() => gotoPage(page + 1)}
                         disabled={page >= pageCount}
                       >

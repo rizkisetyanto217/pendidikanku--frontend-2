@@ -181,7 +181,7 @@ export default function AddTeacher({
           <div className="flex items-center gap-2">
             <div
               className="h-9 w-9 rounded-xl flex items-center justify-center"
-              style={{ background: palette.white3, color: palette.quaternary }}
+              style={{ background: palette.white3, color: palette.black2 }}
             >
               <UserPlus size={18} />
             </div>
@@ -316,6 +316,7 @@ export default function AddTeacher({
             <Field
               label="NIP"
               value={form.nip}
+              
               onChange={(v) => setForm({ ...form, nip: v })}
               palette={palette}
             />
@@ -387,7 +388,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs" style={{ color: palette.secondary }}>
+      <label className="text-xs" style={{ color: palette.black2 }}>
         {label}
       </label>
       {type === "select" ? (
@@ -398,7 +399,7 @@ function Field({
           style={{
             borderColor: palette.white3,
             background: palette.white1,
-            color: palette.quaternary,
+            color: palette.black2,
           }}
         >
           {(options ?? []).map((op) => (

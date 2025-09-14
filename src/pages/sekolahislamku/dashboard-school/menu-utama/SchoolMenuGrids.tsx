@@ -70,7 +70,7 @@ export default function SchoolMenuGrids() {
   // Susun item menu di sini. Ubah "to" sesuai rute di apps-mu.
   const items: MenuItem[] = useMemo(
     () => [
-      { key: "beranda", label: "Beranda", to: "sekolah", icon: Home },
+      // { key: "beranda", label: "Beranda", to: "sekolah", icon: Home },
 
       {
         key: "periode",

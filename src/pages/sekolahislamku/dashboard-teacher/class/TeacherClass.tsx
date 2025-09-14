@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/TeacherClassesList.tsx
 import { useMemo, useState, useDeferredValue } from "react";
-import { Link } from "react-router-dom";
+import { Link , useNavigate} from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -28,6 +28,7 @@ import {
   LayoutGrid,
   MapPin,
   GraduationCap,
+  ArrowLeft,
 } from "lucide-react";
 
 import {
@@ -68,6 +69,12 @@ type ViewMode = "detailed" | "simple";
 const QK = {
   LIST: ["teacher-classes-list"] as const,
   STUDENTS: (ids: string[]) => ["teacher-class-students", ids] as const,
+};
+
+type TeacherClassesProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
 };
 
 /* ==============================
@@ -426,40 +433,7 @@ function ViewModeToggle({
   );
 }
 
-function MiniStat({
-  label,
-  value,
-  icon,
-  palette,
-}: {
-  label: string;
-  value: number | string;
-  icon: React.ReactNode;
-  palette: Palette;
-}) {
-  return (
-    <div
-      className="rounded-xl border p-3 flex items-center justify-between transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5"
-      style={{
-        borderColor: palette.silver1,
-        background: palette.white1,
-      }}
-    >
-      <div className="text-xs font-medium" style={{ color: palette.silver2 }}>
-        {label}
-      </div>
-      <div className="flex items-center gap-2">
-        <div style={{ color: palette.primary }}>{icon}</div>
-        <span
-          className="text-sm font-semibold"
-          style={{ color: palette.black1 }}
-        >
-          {value}
-        </span>
-      </div>
-    </div>
-  );
-}
+
 
 function AttendanceBar({
   pct,
@@ -960,105 +934,19 @@ function LoadingCard({
   );
 }
 
-/* ==============================
-   Summary Stats (UI tetap)
-============================== */
-function SummaryStats({
-  classes,
-  palette,
-}: {
-  classes: TeacherClassSummary[];
-  palette: Palette;
-}) {
-  const totalClasses = classes.length;
-  const totalStudents = classes.reduce((sum, c) => sum + c.studentsCount, 0);
-  const totalTodayAttendance = classes.reduce(
-    (sum, c) => sum + c.todayAttendance.hadir,
-    0
-  );
-  const avgAttendanceRate =
-    totalStudents > 0
-      ? Math.round((totalTodayAttendance / totalStudents) * 100)
-      : 0;
 
-  return (
-    <SectionCard palette={palette} className="mb-6">
-      <div className="p-5 md:p-6">
-        <div
-          className="font-semibold text-lg mb-4"
-          style={{ color: palette.black1 }}
-        >
-          Ringkasan Kelas Hari Ini
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div
-            className="text-center p-4 rounded-xl"
-            style={{ background: palette.white2 }}
-          >
-            <div
-              className="text-2xl font-bold mb-1"
-              style={{ color: palette.primary }}
-            >
-              {totalClasses}
-            </div>
-            <div className="text-sm" style={{ color: palette.black2 }}>
-              Total Kelas
-            </div>
-          </div>
-          <div
-            className="text-center p-4 rounded-xl"
-            style={{ background: palette.white2 }}
-          >
-            <div
-              className="text-2xl font-bold mb-1"
-              style={{ color: palette.primary }}
-            >
-              {totalStudents}
-            </div>
-            <div className="text-sm" style={{ color: palette.black2 }}>
-              Total Siswa
-            </div>
-          </div>
-          <div
-            className="text-center p-4 rounded-xl"
-            style={{ background: palette.white2 }}
-          >
-            <div
-              className="text-2xl font-bold mb-1"
-              style={{ color: palette.primary }}
-            >
-              {totalTodayAttendance}
-            </div>
-            <div className="text-sm" style={{ color: palette.black2 }}>
-              Hadir Hari Ini
-            </div>
-          </div>
-          <div
-            className="text-center p-4 rounded-xl"
-            style={{ background: palette.white2 }}
-          >
-            <div
-              className="text-2xl font-bold mb-1"
-              style={{ color: palette.primary }}
-            >
-              {avgAttendanceRate}%
-            </div>
-            <div className="text-sm" style={{ color: palette.black2 }}>
-              Rata-rata Kehadiran
-            </div>
-          </div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
 
 /* ==============================
    Main Page Component
 ============================== */
-export default function TeacherClassesList() {
+const TeacherClassesList: React.FC<TeacherClassesProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const navigate = useNavigate();
 
   const { data: classes = [], isFetching: isFetchingClasses } =
     useTeacherClasses();
@@ -1109,23 +997,38 @@ export default function TeacherClassesList() {
             className="flex-1 min-w-0 space-y-6"
             style={{ color: palette.black2 }}
           >
-            {!isFetchingClasses && classes.length > 0 && (
+            {/* {!isFetchingClasses && classes.length > 0 && (
               <SummaryStats classes={classes} palette={palette} />
-            )}
+            )} */}
 
             <SectionCard palette={palette}>
               <div className="p-5 md:p-6 space-y-6">
                 <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div>
-                    <h2
-                      className="font-bold text-xl md:text-2xl mb-1"
-                      style={{ color: palette.black1 }}
-                    >
-                      Kelas yang Saya Ajar
-                    </h2>
-                    <p className="text-sm" style={{ color: palette.black2 }}>
-                      Kelola dan pantau semua kelas yang Anda ampu
-                    </p>
+                  <div className="flex items-center gap-5">
+                    <div className="mx-auto max-w-6xl flex gap-4 items-center">
+                      {showBack && (
+                        <Btn
+                          palette={palette}
+                          variant="ghost"
+                          onClick={() => navigate(-1)}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <ArrowLeft size={20} />
+                        </Btn>
+                      )}
+                      {/* <h1 className="font-semibold text-lg">Keuangan</h1> */}
+                    </div>
+                    <div>
+                      <h2
+                        className="font-bold text-xl md:text-2xl mb-1"
+                        style={{ color: palette.black1 }}
+                      >
+                        Kelas yang Saya Ajar
+                      </h2>
+                      <p className="text-sm" style={{ color: palette.black2 }}>
+                        Kelola dan pantau semua kelas yang Anda ampu
+                      </p>
+                    </div>
                   </div>
                   <ViewModeToggle
                     palette={palette}
@@ -1248,4 +1151,6 @@ export default function TeacherClassesList() {
       </main>
     </div>
   );
-}
+};
+
+export default TeacherClassesList

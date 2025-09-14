@@ -479,42 +479,35 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-2">
+      <main className="mx-auto max-w-6xl px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header */}
-            <section className="flex items-center gap-6">
-              <span
-                className="h-10 w-10 grid place-items-center rounded-xl"
-                
-              >
+            <section className="flex items-center gap-5 ">
+              <div className="flex items-center -mt-3 gap-3">
                 {showBack && (
-                  <div className="mx-auto max-w-6xl flex items-center">
-                    <Btn
-                      palette={palette}
-                      variant="ghost"
-                      onClick={() => navigate(-1)}
-                      className="inline-flex items-center gap-2"
-                      aria-label={backLabel}
-                      title={backLabel}
-                    >
-                      <ArrowLeft size={18} />
-                    </Btn>
-                  </div>
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2"
+                    aria-label={backLabel}
+                    title={backLabel}
+                  >
+                    <ArrowLeft size={18} />
+                  </Btn>
                 )}
-              </span>
-            
+
                 <div className="text-lg font-semibold">Kelas & Tingkat</div>
-                
-          
+              </div>
             </section>
 
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-                <div className="font-medium flex items-center gap-2">
+              <div className="flex md:p-5 pb-2 items-center justify-between">
+                <div className="font-medium flex items-center gap-2 -mt-7">
                   <Layers size={18} /> Tingkat
                 </div>
                 <Btn
@@ -568,7 +561,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
             </SectionCard>
 
             {/* KPI mini */}
-            <section
+            {/* <section
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
               style={{ color: palette.black2 }}
             >
@@ -597,7 +590,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 label="Wali Kelas"
                 value={stats.homerooms}
               />
-            </section>
+            </section> */}
 
             {/* Filter bar */}
             <SectionCard palette={palette}>
@@ -610,7 +603,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 <div className="md:col-span-2">
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Pencarian
                   </div>
@@ -634,7 +627,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Shift (dari jam mulai)
                   </div>
@@ -653,7 +646,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Status
                   </div>

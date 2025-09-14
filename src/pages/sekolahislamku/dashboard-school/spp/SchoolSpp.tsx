@@ -183,7 +183,7 @@ const SchoolSpp: React.FC = () => {
               <h1 className="font-semibold text-lg">SPP</h1>
             </div>
             {/* KPI */}
-            <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+            {/* <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
               <KpiTile
                 palette={palette}
                 label="Tagihan Terbit"
@@ -208,7 +208,7 @@ const SchoolSpp: React.FC = () => {
                 value={idr(summaryQ.data?.outstanding)}
                 icon={<BarChart2 size={18} />}
               />
-            </section>
+            </section> */}
 
             {/* Filter */}
             <SectionCard palette={palette}>
@@ -219,7 +219,7 @@ const SchoolSpp: React.FC = () => {
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Bulan
                   </div>
@@ -237,7 +237,7 @@ const SchoolSpp: React.FC = () => {
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Kelas
                   </div>
@@ -261,7 +261,7 @@ const SchoolSpp: React.FC = () => {
                 <div>
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Status
                   </div>
@@ -284,7 +284,7 @@ const SchoolSpp: React.FC = () => {
                 <div className="md:col-span-2">
                   <div
                     className="text-xs mb-1"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     Cari siswa/ID
                   </div>

@@ -994,96 +994,37 @@ const AllAnnouncement: React.FC = () => {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 ">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri */}
           <ParentSidebar palette={palette} />
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
-            {/* Back */}
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 hover:bg-black"
-              style={{ color: palette.black1 }}
-            >
-              <ArrowLeft size={24} className="font-bold" />
-              <span className=" font-semibold text-md">Kembali</span>
-            </button>
-
+          <div className="flex-1 space-y-5 px-4">
             {/* Header + Add Button */}
-            <SectionCard palette={palette} className="p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div className="text-left">
-                  <h1 className="text-2xl font-bold mb-2">Semua Pengumuman</h1>
-                  <p className="opacity-70">
-                    Informasi terbaru seputar kegiatan Tahfidz, Tahsin, dan
-                    Kajian
-                  </p>
-                </div>
-                <Btn palette={palette} onClick={() => setOpenAdd(true)}>
-                  Tambah Pengumuman
-                </Btn>
-              </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mt-6">
-                <div
-                  className="text-left p-3 rounded-lg"
-                  style={{ background: palette.white1 }}
-                >
-                  <p className="text-2xl font-bold text-blue-600">
-                    {stats.total}
-                  </p>
-                  <p className="text-xs opacity-70">Total</p>
+            <div className="flex items-start justify-between gap-6">
+              <div className="text-left flex items-center gap-3">
+                <div className="flex items-center">
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 mb-2"
+                  >
+                    <ArrowLeft size={20} />
+                  </Btn>
                 </div>
-                <div
-                  className="text-left p-3 rounded-lg"
-                  style={{ background: palette.white1 }}
-                >
-                  <p className="text-2xl font-bold text-green-600">
-                    {stats.aktif}
-                  </p>
-                  <p className="text-xs opacity-70">Aktif</p>
-                </div>
-                <div
-                  className="text-left p-3 rounded-lg"
-                  style={{ background: palette.white1 }}
-                >
-                  <p className="text-2xl font-bold text-emerald-600">
-                    {stats.tahfidz}
-                  </p>
-                  <p className="text-xs opacity-70">Tahfidz</p>
-                </div>
-                <div
-                  className="text-left p-3 rounded-lg"
-                  style={{ background: palette.white1 }}
-                >
-                  <p className="text-2xl font-bold text-cyan-600">
-                    {stats.tahsin}
-                  </p>
-                  <p className="text-xs opacity-70">Tahsin</p>
-                </div>
-                <div
-                  className="text-left p-3 rounded-lg"
-                  style={{ background: palette.white1 }}
-                >
-                  <p className="text-2xl font-bold text-purple-600">
-                    {stats.kajian}
-                  </p>
-                  <p className="text-xs opacity-70">Kajian</p>
-                </div>
-                <div
-                  className="text-left p-3 rounded-lg"
-                  style={{ background: palette.white1 }}
-                >
-                  <p className="text-2xl font-bold text-red-600">
-                    {stats.urgent}
-                  </p>
-                  <p className="text-xs opacity-70">Urgent</p>
+                <div>
+                  <h1 className="text-lg font-semibold mb-2">
+                    Semua Pengumuman
+                  </h1>
                 </div>
               </div>
-            </SectionCard>
+              <Btn palette={palette} onClick={() => setOpenAdd(true)}>
+                Tambah Pengumuman
+              </Btn>
+            </div>
 
             {/* Search & Filter */}
             <SearchFilter
@@ -1094,7 +1035,10 @@ const AllAnnouncement: React.FC = () => {
 
             {/* Result info */}
             <div className="flex items-center justify-between">
-              <p className="text-sm opacity-70">
+              <p
+                className="text-sm opacity-90"
+                style={{ color: palette.black2 }}
+              >
                 Menampilkan {filteredPengumuman.length} dari {items.length}{" "}
                 pengumuman
               </p>
@@ -1147,10 +1091,13 @@ const AllAnnouncement: React.FC = () => {
                         d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    <h3 className="text-lg font-semibold mb-2">
+                    <h3
+                      className="text-lg font-semibold mb-2"
+                      style={{ color: palette.black2 }}
+                    >
                       Tidak Ada Pengumuman
                     </h3>
-                    <p className="text-sm">
+                    <p className="text-sm" style={{ color: palette.black2 }}>
                       Tidak ada pengumuman yang sesuai dengan filter yang
                       dipilih.
                     </p>
@@ -1166,6 +1113,7 @@ const AllAnnouncement: React.FC = () => {
                 <button
                   className="p-3 rounded-lg text-left transition-colors duration-200 hover:opacity-80"
                   style={{
+                    color: palette.black2,
                     background: palette.white1,
                     border: `1px solid ${palette.silver1}`,
                   }}
@@ -1180,9 +1128,17 @@ const AllAnnouncement: React.FC = () => {
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">Arsip Pengumuman</p>
-                      <p className="text-xs opacity-60">
+                    <div style={{ color: palette.black2 }}>
+                      <p
+                        className="font-medium text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        Arsip Pengumuman
+                      </p>
+                      <p
+                        className="text-xs opacity-90"
+                        style={{ color: palette.black2 }}
+                      >
                         Lihat pengumuman lama
                       </p>
                     </div>
@@ -1190,13 +1146,16 @@ const AllAnnouncement: React.FC = () => {
                 </button>
 
                 <button
-                  className="p-3 rounded-lg text-left transition-colors duration-200 hover:opacity-80"
+                  className="p-3 rounded-lg text-left transition-colors duration-200 hover:opacity-90"
                   style={{
                     background: palette.white1,
                     border: `1px solid ${palette.silver1}`,
                   }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div
+                    className="flex items-center gap-3"
+                    style={{ color: palette.black2 }}
+                  >
                     <div className="text-blue-600">
                       <svg
                         className="w-6 h-6"
@@ -1207,8 +1166,18 @@ const AllAnnouncement: React.FC = () => {
                       </svg>
                     </div>
                     <div>
-                      <p className="font-medium text-sm">Kategori Favorit</p>
-                      <p className="text-xs opacity-60">Atur preferensi</p>
+                      <p
+                        className="font-medium text-sm"
+                        style={{ color: palette.black2 }}
+                      >
+                        Kategori Favorit
+                      </p>
+                      <p
+                        className="text-xs opacity-90"
+                        style={{ color: palette.black2 }}
+                      >
+                        Atur preferensi
+                      </p>
                     </div>
                   </div>
                 </button>
@@ -1236,7 +1205,12 @@ const AllAnnouncement: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium text-sm">Hubungi Admin</p>
-                      <p className="text-xs opacity-60">Ada pertanyaan?</p>
+                      <p
+                        className="text-xs opacity-90"
+                        style={{ color: palette.black2 }}
+                      >
+                        Ada pertanyaan?
+                      </p>
                     </div>
                   </div>
                 </button>

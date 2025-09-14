@@ -293,7 +293,7 @@ const FiltersSection = ({
         <Search
           size={16}
           className="flex-shrink-0"
-          style={{ color: palette.silver2 }}
+          style={{ color: palette.black2 }}
         />
         <input
           value={q}
@@ -314,7 +314,7 @@ const FiltersSection = ({
               color: palette.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+            <div className="text-xs mb-1" style={{ color: palette.black2 }}>
               Mapel
             </div>
             <select
@@ -339,7 +339,7 @@ const FiltersSection = ({
               color: palette.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+            <div className="text-xs mb-1" style={{ color: palette.black2 }}>
               Status
             </div>
             <select
@@ -699,7 +699,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
             backLabel={backLabel}
           />
 
-          <StatsGrid stats={stats} palette={palette} />
+          {/* <StatsGrid stats={stats} palette={palette} /> */}
 
           <FiltersSection
             palette={palette}

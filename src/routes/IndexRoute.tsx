@@ -226,6 +226,8 @@ import CalenderAcademic from "@/pages/sekolahislamku/dashboard-school/calender/C
 import SchoolStatistik from "@/pages/sekolahislamku/dashboard-school/statistik/SchoolStatistik";
 import SchoolSettings from "@/pages/sekolahislamku/dashboard-school/settings/SchoolSettings";
 import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/active-class/SchoolActiveClass";
+import AllClasses from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/AllClasses";
+import ClassDetail from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/DetailClasses";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -720,9 +722,13 @@ export default function AppRoutes() {
         {/* Router Menu Utama Guru*/}
         <Route path="menu-utama">
           <Route index element={<TeacherMenuGrids />} />
+          <Route path="all-classes"  >
+            <Route index element={<AllClasses />} />
+             <Route path=":id" element={<ClassDetail />} />
+            </Route>
           <Route path="jadwal" element={<TeacherSchedule />} />
           <Route path="kelas">
-            <Route index element={<TeacherClass />} />
+            <Route index element={<TeacherClass showBack />} />
             <Route path=":id" element={<DetailClass />} />
             <Route path=":id/absensi" element={<ClassAttandence />} />
             <Route path=":id/material/:materialId" element={<DetailMateri />} />
@@ -799,7 +805,7 @@ export default function AppRoutes() {
           <Route path="keuangan" element={<SchoolFinance showBack />} />
           <Route path="guru" element={<SchoolTeacher showBack />} />
           <Route path="all-announcement" element={<AllAnnouncement />} />
-          <Route path="sekolah" element={<SchoolDashboard />} />
+          <Route path="sekolah" element={<SchoolDashboard showBack />} />
           <Route path="room-school" element={<RoomSchool />} />
           <Route path="spp" element={<SchoolSpp />} />
           <Route path="pelajaran" element={<SchoolSubject />} />

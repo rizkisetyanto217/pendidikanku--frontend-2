@@ -120,7 +120,7 @@ const AttendanceDetailPage: React.FC = () => {
               onClick={() => navigate(-1)}
               className="gap-1"
             >
-              <ArrowLeft size={16} /> Kembali
+              <ArrowLeft size={20} /> 
             </Btn>
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 space-y-4">

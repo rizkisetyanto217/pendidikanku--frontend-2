@@ -459,35 +459,36 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6 min-w-0">
+          <div className="flex-1 space-y-5 min-w-0">
             {/* Header */}
-            <section className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="flex items-start gap-2">
+            {/* Header */}
+            <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
                 {showBack && (
-                  <div className="mx-auto max-w-6xl ">
-                    <Btn
-                      palette={palette}
-                      variant="ghost"
-                      onClick={() => navigate(-1)}
-                      className="inline-flex items-center gap-2"
-                      aria-label={backLabel}
-                      title={backLabel}
-                    >
-                      <ArrowLeft size={20} />
-                    </Btn>
-                  </div>
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                    className="inline-flex items-center gap-2"
+                    aria-label={backLabel}
+                    title={backLabel}
+                  >
+                    <ArrowLeft size={20} />
+                  </Btn>
                 )}
-                <div>
-                  <div className="text-lg font-semibold">Buku Pelajaran</div>
-                  <div className="text-sm" style={{ color: palette.black2 }}>
-                    Sumber buku dan pemakaiannya di kelas/section.
-                  </div>
-                </div>
+                <h1
+                  className="text-xl sm:text-lg font-semibold"
+                  style={{ color: palette.black1 }}
+                >
+                  Buku Pelajaran
+                </h1>
               </div>
-              <div className="flex items-center gap-2 sm:self-start">
+
+              <div className="flex items-center gap-2">
                 <Btn
                   palette={palette}
                   onClick={() => setBookModal({ mode: "create" })}
+                  className="px-4"
                 >
                   + Buku
                 </Btn>
@@ -551,7 +552,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             </div>
 
             {/* Desktop */}
-            <div className="hidden md:block">
+            <div className="hidden md:block " style={{color: palette.black2}}>
               <SimpleTable
                 columns={[
                   "No",
@@ -578,13 +579,13 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
             {/* Pagination */}
             <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="text-xs" style={{ color: palette.silver2 }}>
+              <div className="text-xs" style={{ color: palette.black2 }}>
                 Menampilkan {showing} dari {total}
               </div>
               <div className="flex items-center gap-2">
                 <Btn
                   palette={palette}
-                  variant="ghost"
+                  variant="default"
                   onClick={() => onPage(-1)}
                   disabled={offset <= 0 || booksQ.isFetching}
                 >
@@ -592,7 +593,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                 </Btn>
                 <Btn
                   palette={palette}
-                  variant="ghost"
+                  variant="default"
                   onClick={() => onPage(1)}
                   disabled={offset + limit >= total || booksQ.isFetching}
                 >

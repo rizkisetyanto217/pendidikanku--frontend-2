@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
@@ -18,7 +18,14 @@ import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodaySched
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
 
-import { Users, UserCog, BookOpen, CheckSquare, BarChart2 } from "lucide-react";
+import {
+  Users,
+  UserCog,
+  BookOpen,
+  CheckSquare,
+  BarChart2,
+  ArrowLeft,
+} from "lucide-react";
 // ✅ import type + helper + mock jadwal
 import {
   TodayScheduleItem,
@@ -134,6 +141,12 @@ type SessionsItem = {
 type SessionsResponse = {
   message: string;
   data: { limit: number; offset: number; count: number; items: SessionsItem[] };
+};
+
+type SchoolDashboardProps = {
+  showBack?: boolean; // default: false
+  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
+  backLabel?: string; // teks tombol
 };
 
 /* ============ Query Keys ============ */
@@ -688,11 +701,15 @@ function AnnouncementModal({
 }
 
 /* ================= Page ================= */
-export default function SchoolDashboard() {
+const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
+  showBack = false,
+  backTo,
+  backLabel = "Kembali",
+}) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const qc = useQueryClient();
-
+  const navigate = useNavigate();
   const [flash, setFlash] = useState<{
     type: "success" | "error";
     msg: string;
@@ -893,7 +910,7 @@ export default function SchoolDashboard() {
       <Flash palette={palette} flash={flash} />
 
       {/* ====== CONTAINER ====== */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 ">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -902,36 +919,23 @@ export default function SchoolDashboard() {
 
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
+            {/* Back button biasa */}
+            <div className="mx-auto max-w-6xl flex gap-4 items-center">
+              {showBack && (
+                <div className="flex py-5 -mb-3">
+                  <Btn
+                    palette={palette}
+                    variant="ghost"
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 "
+                  >
+                    <ArrowLeft size={20} />
+                  </Btn>
+                </div>
+              )}
+              {/* <h1 className="font-semibold text-lg">Dashboard Sekolah</h1> */}
+            </div>
             <Outlet />
-
-            {/* ===== KPI ===== */}
-            <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-              <KpiTile
-                palette={palette}
-                label="Total Siswa"
-                value={kpis.students}
-                icon={<Users size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Total Guru"
-                value={kpis.teachers}
-                icon={<UserCog size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Kelas Aktif"
-                value={kpis.program}
-                icon={<BookOpen size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Kehadiran Hari Ini"
-                value={kpis.class}
-                icon={<CheckSquare size={18} />}
-                tone="success"
-              />
-            </section>
 
             {/* ===== Jadwal • Keuangan • Pengumuman ===== */}
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-stretch">
@@ -1074,57 +1078,8 @@ export default function SchoolDashboard() {
       </main>
     </div>
   );
-}
-
-/* ================= Small UI helpers ================= */
-function KpiTile({
-  palette,
-  label,
-  value,
-  icon,
-  tone,
-}: {
-  palette: Palette;
-  label: string;
-  value: number | string;
-  icon?: React.ReactNode;
-  tone?: "success" | "warning" | "danger";
-}) {
-  const toneBg =
-    tone === "success"
-      ? palette.success2
-      : tone === "warning"
-        ? palette.warning1
-        : tone === "danger"
-          ? palette.error2
-          : palette.primary2;
-  const toneTxt =
-    tone === "success"
-      ? palette.success1
-      : tone === "warning"
-        ? palette.warning1
-        : tone === "danger"
-          ? palette.error1
-          : palette.primary;
-  return (
-    <SectionCard palette={palette}>
-      <div className="p-4 md:p-5 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{ background: toneBg, color: toneTxt }}
-        >
-          {icon ?? <BarChart2 size={18} />}
-        </span>
-        <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
-            {label}
-          </div>
-          <div className="text-xl font-semibold">{value}</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
+};
+export default SchoolDashboard;
 
 function MiniStat({
   palette,

@@ -417,17 +417,17 @@ const SchoolCertificate: React.FC = () => {
             )}
 
             {/* Header */}
-            <section className="flex items-start gap-6">
-              <span className="h-10 w-10 grid place-items-center rounded-xl">
+            <section className="flex items-start gap-5">
+         
                 <Btn
                   palette={palette}
                   variant="ghost"
                   onClick={() => navigate(-1)}
                   className="inline-flex items-center gap-2"
                 >
-                  <ArrowLeft size={16} />
+                  <ArrowLeft size={20} />
                 </Btn>
-              </span>
+             
 
               <div className="min-w-0">
                 <div className="text-lg font-semibold">

@@ -64,13 +64,13 @@ const UploadFileTeacher: React.FC<Props> = ({ open, onClose, palette }) => {
           <div className="flex items-center gap-2">
             <div
               className="h-8 w-8 rounded-xl flex items-center justify-center"
-              style={{ background: palette.white3, color: palette.quaternary }}
+              style={{ background: palette.white3, color: palette.black2 }}
             >
               <Upload size={16} />
             </div>
             <div
               className="font-semibold"
-              style={{ color: palette.quaternary }}
+              style={{ color: palette.black2 }}
             >
               Import Guru
             </div>
@@ -83,7 +83,7 @@ const UploadFileTeacher: React.FC<Props> = ({ open, onClose, palette }) => {
             }}
             className="p-2 rounded-lg"
             aria-label="Tutup"
-            style={{ color: palette.secondary }}
+            style={{ color: palette.black2 }}
           >
             <X size={18} />
           </button>
@@ -91,7 +91,7 @@ const UploadFileTeacher: React.FC<Props> = ({ open, onClose, palette }) => {
 
         {/* Body */}
         <div className="px-4 py-5 space-y-4">
-          <div className="text-sm" style={{ color: palette.secondary }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             Format yang didukung: <b>CSV</b> / <b>Excel</b> (xls, xlsx)
           </div>
 
@@ -113,7 +113,7 @@ const UploadFileTeacher: React.FC<Props> = ({ open, onClose, palette }) => {
             />
             <div className="flex flex-col items-center gap-2">
               <FileSpreadsheet />
-              <div className="text-sm" style={{ color: palette.quaternary }}>
+              <div className="text-sm" style={{ color: palette.black2 }}>
                 {file ? file.name : "Klik untuk pilih file CSV/XLS/XLSX"}
               </div>
             </div>
