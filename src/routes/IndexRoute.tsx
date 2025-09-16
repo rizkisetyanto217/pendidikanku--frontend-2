@@ -228,6 +228,11 @@ import SchoolSettings from "@/pages/sekolahislamku/dashboard-school/settings/Sch
 import SchoolActiveClass from "@/pages/sekolahislamku/dashboard-school/active-class/SchoolActiveClass";
 import AllClasses from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/AllClasses";
 import ClassDetail from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/DetailClasses";
+import TeacherProfil from "@/pages/sekolahislamku/dashboard-teacher/profil/TeacherProfil";
+import TeacherSettings from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/settings/TeacherSettings";
+import TeacherAssignment from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/assignments/TeacherAssignment";
+import Certificate from "@/pages/dashboard/dkm/certificate/DKMCertificate";
+import TeacherCertificate from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/certificate/Certificate";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -643,7 +648,7 @@ export default function AppRoutes() {
         <Route index element={<TeacherDashboard />} />
         <Route path="kehadiran" element={<TeacherAttendance />} />
         <Route path="kehadiran/:id" element={<AttendanceDetail />} />
-
+        <Route path="profil-guru" element={<TeacherProfil />} />
         <Route path="penilaian" element={<TeacherGrading />} />
         <Route path="penilaian/:id" element={<DetailGrading />} />
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
@@ -722,11 +727,20 @@ export default function AppRoutes() {
         {/* Router Menu Utama Guru*/}
         <Route path="menu-utama">
           <Route index element={<TeacherMenuGrids />} />
-          <Route path="all-classes"  >
+          <Route path="all-classes">
             <Route index element={<AllClasses />} />
-             <Route path=":id" element={<ClassDetail />} />
-            </Route>
-          <Route path="jadwal" element={<TeacherSchedule />} />
+            <Route path=":id" element={<ClassDetail />} />
+          </Route>
+          <Route path="jadwal" element={<TeacherSchedule showBack />} />
+          <Route path="profil-guru" element={<TeacherProfil showBack />} />
+          <Route path="pengaturan" element={<TeacherSettings />} />
+          <Route path="tugas" element={<TeacherAssignment />} />
+          <Route path="sertifikat" element={<TeacherCertificate />} />
+
+          <Route
+            path="all-announcement-teacher"
+            element={<AllAnnouncementTeacher />}
+          />
           <Route path="kelas">
             <Route index element={<TeacherClass showBack />} />
             <Route path=":id" element={<DetailClass />} />

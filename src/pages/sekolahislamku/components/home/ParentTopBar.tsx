@@ -529,7 +529,7 @@ const SCHOOL_NAVS: NavItem[] = [
   { path: "keuangan", label: "Keuangan", icon: Wallet },
   { path: "profil-sekolah", label: "Profil", icon: School },
   { path: "academic", label: "Akademik", icon: FileSpreadsheet },
-  { path: "room", label: "Ruangan", icon: ChartBar },
+  // { path: "room", label: "Ruangan", icon: ChartBar },
 ];
 
 const TEACHER_NAVS: NavItem[] = [
@@ -760,7 +760,7 @@ export default function ParentTopBar({
                 <div className="sm:hidden mt-0.5">
                   <span
                     className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px]"
-                    style={{ background: palette.secondary, color: isDark ? palette.silver1 : palette.black1 }}
+                    style={{ background: palette.secondary, color: isDark ? palette.black2 : palette.silver1 }}
                     aria-label="Tanggal Hijriah"
                     title={hijriLabel}
                   >

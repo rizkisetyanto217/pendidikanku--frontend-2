@@ -61,13 +61,13 @@ export default function TeacherMenuGrids() {
       {
         key: "profil",
         label: "Profil Guru",
-        to: "/guru/profil",
+        to: "profil-guru",
         icon: <IdCard />,
       },
       {
         key: "pengumuman",
         label: "Pengumuman",
-        to: "/guru/pengumuman",
+        to: "all-announcement-teacher",
         icon: <Megaphone />,
       },
       {
@@ -79,19 +79,19 @@ export default function TeacherMenuGrids() {
       {
         key: "pengaturan",
         label: "Pengaturan",
-        to: "/guru/pengaturan",
+        to: "pengaturan",
         icon: <Settings />,
       },
       {
         key: "tugas",
         label: "Tugas",
-        to: "/guru/tugas",
+        to: "tugas",
         icon: <NotebookPen />,
       },
       {
         key: "sertifikat",
         label: "Sertifikat",
-        to: "/guru/sertifikat",
+        to: "sertifikat",
         icon: <Award />,
       },
     ],

@@ -1036,19 +1036,24 @@ export default function AllAnnouncementTeacher({
 
           <div className="flex-1 space-y-4">
             {/* Header & tombol tambah */}
-            <button
+            <Btn
+              palette={palette}
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 hover:bg-black"
-              style={{ color: palette.black1 }}
+              variant="ghost"
+              className="cursor-pointer mr-3"
             >
-              <ArrowLeft size={24} className="font-bold" />
-              <span className=" font-semibold text-md">Kembali</span>
-            </button>
+              <ArrowLeft
+                // aria-label={backLabel}
+                // title={backLabel}
+
+                size={20}
+              />
+            </Btn>
 
             {/* Stats */}
             <SectionCard palette={palette} className="p-6">
               <div className="text-left">
-                <h1 className="text-2xl font-bold mb-2">
+                <h1 className="text-lg font-semibold ">
                   {title}
                   {classId ? (
                     <span className="text-base font-normal opacity-80">
@@ -1057,7 +1062,7 @@ export default function AllAnnouncementTeacher({
                     </span>
                   ) : null}
                 </h1>
-                <p className="opacity-80 mb-6">
+                <p className="opacity-80 mb-6 text-sm">
                   Informasi terbaru seputar kegiatan Tahfidz, Tahsin, dan Kajian
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
