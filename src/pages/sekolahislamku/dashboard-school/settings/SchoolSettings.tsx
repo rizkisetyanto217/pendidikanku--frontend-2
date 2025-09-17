@@ -105,7 +105,7 @@ const AttendanceDetailPage: React.FC = () => {
         dateFmt={(iso) => new Date(iso || "").toLocaleDateString("id-ID")}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">

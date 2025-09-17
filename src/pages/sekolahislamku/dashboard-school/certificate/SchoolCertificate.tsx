@@ -397,7 +397,7 @@ const SchoolCertificate: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -429,20 +429,7 @@ const SchoolCertificate: React.FC = () => {
                 </Btn>
              
 
-              <div className="min-w-0">
-                <div className="text-lg font-semibold">
-                  {selectedClass
-                    ? `Sertifikat • ${selectedClass.name}`
-                    : "Sertifikat"}
-                </div>
-                <div className="text-sm" style={{ color: palette.black2 }}>
-                  {selectedClass
-                    ? `Jenis: ${certType} • Tahun Ajaran ${selectedClass.academic_year} • Terbit ${dateOnly(
-                        selectedClass.issue_date
-                      )}`
-                    : "Sertifikat dikelompokkan per kelas. Pilih kelas untuk melihat daftar siswa beserta nilai akhirnya."}
-                </div>
-              </div>
+             
 
               {selectedClass && (
                 <div className="ml-auto">
@@ -500,7 +487,7 @@ const SchoolCertificate: React.FC = () => {
             {/* View 1: grid kelas */}
             {!selectedClass && (
               <>
-                <section
+                {/* <section
                   className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3"
                   style={{ color: palette.black2 }}
                 >
@@ -516,7 +503,7 @@ const SchoolCertificate: React.FC = () => {
                     value={totalRecipients}
                     icon={<Users size={18} />}
                   />
-                </section>
+                </section> */}
 
                 <SectionCard palette={palette}>
                   <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">

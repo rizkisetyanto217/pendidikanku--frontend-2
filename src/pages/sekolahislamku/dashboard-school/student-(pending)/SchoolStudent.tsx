@@ -135,9 +135,9 @@ export default function StudentsPage() {
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
         {/* Konten kanan */}
-        <main className="flex-1 mx-auto max-w-6xl px-4 space-y-5">
+        <main className="flex-1 mx-auto max-w-6xl px-4 space-y-6 py-5 md:py-0">
           {/* Header + actions */}
-          <div className="flex items-start justify-between flex-wrap gap-3">
+          <div className="flex flex-col  items-start  flex-wrap gap-5">
             <div className="flex items-center gap-3">
               {/* Back button biasa */}
               <div className="mx-auto max-w-6xl ">
@@ -149,17 +149,6 @@ export default function StudentsPage() {
                 >
                   <ArrowLeft size={20} />
                 </Btn>
-              </div>
-              <div>
-                <h1
-                  className="text-xl font-semibold"
-                  style={{ color: palette.black2 }}
-                >
-                  Siswa
-                </h1>
-                <p className="text-sm" style={{ color: palette.black2 }}>
-                  Kelola data siswa, filter, dan tindakan cepat.
-                </p>
               </div>
             </div>
 

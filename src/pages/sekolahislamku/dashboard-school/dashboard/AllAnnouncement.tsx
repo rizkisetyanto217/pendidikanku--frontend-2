@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/pengumuman/AllAnnouncement.tsx
 import React, { useState, useMemo, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -266,7 +266,7 @@ const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">{title}</h3>
             <Btn variant="white1" palette={palette} onClick={onClose}>
-              Tutup
+              <X />
             </Btn>
           </div>
         </div>
@@ -1015,14 +1015,10 @@ const AllAnnouncement: React.FC = () => {
                     <ArrowLeft size={20} />
                   </Btn>
                 </div>
-                <div>
-                  <h1 className="text-lg font-semibold mb-2">
-                    Semua Pengumuman
-                  </h1>
-                </div>
+
               </div>
               <Btn palette={palette} onClick={() => setOpenAdd(true)}>
-                Tambah Pengumuman
+                <Plus size={20} />
               </Btn>
             </div>
 

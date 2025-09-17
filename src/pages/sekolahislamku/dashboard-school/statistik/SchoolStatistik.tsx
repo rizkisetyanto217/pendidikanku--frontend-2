@@ -184,7 +184,7 @@ const SchoolStatistik: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -204,12 +204,7 @@ const SchoolStatistik: React.FC = () => {
                   <ArrowLeft onClick={() => navigate(-1)} size={20} />
                 </Btn>
               </span>
-              <div>
-                <div className="text-lg font-semibold">Statistik Sekolah</div>
-                <div className="text-sm" style={{ color: palette.black2 }}>
-                  Gambaran ringkas populasi dan aktivitas akademik.
-                </div>
-              </div>
+              
             </section>
 
             {/* KPI */}

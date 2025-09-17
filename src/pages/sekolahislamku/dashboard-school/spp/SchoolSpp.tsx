@@ -161,7 +161,7 @@ const SchoolSpp: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -178,37 +178,11 @@ const SchoolSpp: React.FC = () => {
                 onClick={() => navigate(-1)}
                 className="inline-flex items-center gap-2"
               >
-                <ArrowLeft size={16} /> 
+                <ArrowLeft size={20} /> 
               </Btn>
-              <h1 className="font-semibold text-lg">SPP</h1>
+              
             </div>
-            {/* KPI */}
-            {/* <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-              <KpiTile
-                palette={palette}
-                label="Tagihan Terbit"
-                value={summaryQ.data?.scheduled ?? 0}
-                icon={<Banknote size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Tunggakan (siswa)"
-                value={summaryQ.data?.students_affected ?? 0}
-                icon={<Users size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Terkumpul"
-                value={idr(summaryQ.data?.collected)}
-                icon={<CreditCard size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Outstanding"
-                value={idr(summaryQ.data?.outstanding)}
-                icon={<BarChart2 size={18} />}
-              />
-            </section> */}
+          
 
             {/* Filter */}
             <SectionCard palette={palette}>

@@ -169,7 +169,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6  py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -178,7 +178,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
 
           {/* Main */}
           <section className="lg:col-span-9 space-y-5 min-w-0">
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between ">
               <div className="font-semibold text-lg flex items-center ">
                 <div className="  flex items-center gap-x-3 ">
                   {showBack && (

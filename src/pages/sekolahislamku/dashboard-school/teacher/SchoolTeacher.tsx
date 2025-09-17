@@ -1,6 +1,6 @@
+/* ================= Imports ================= */
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
@@ -15,9 +15,9 @@ import {
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "../../components/home/ParentSideBar";
 
 import {
-  UserCog,
   UserPlus,
   Search,
   Filter,
@@ -26,12 +26,11 @@ import {
   AlertTriangle,
   Mail,
   Phone,
-  Briefcase,
   ArrowLeft,
 } from "lucide-react";
+
 import TambahGuru from "./components/AddTeacher";
 import UploadFileGuru from "./components/UploadFileTeacher";
-import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================= */
 export type TeacherStatus = "aktif" | "nonaktif" | "alumni";
@@ -63,7 +62,6 @@ type TeachersByMasjidResponse = {
     total: number;
     teachers: Array<{
       masjid_teachers_id: string;
-      masjid_teachers_masjid_id: string;
       masjid_teachers_user_id: string;
       user_name: string;
       masjid_teachers_created_at: string;
@@ -73,9 +71,9 @@ type TeachersByMasjidResponse = {
 };
 
 type SchoolTeacherProps = {
-  showBack?: boolean; // default: false
-  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
-  backLabel?: string; // teks tombol
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
 };
 
 /* ================= Helpers ================= */
@@ -91,13 +89,6 @@ const DEFAULT_SUBJECTS = [
   "Agama",
 ];
 
-// --- timezone-safe helpers (pakai “siang lokal”)
-const atLocalNoon = (d: Date) => {
-  const x = new Date(d);
-  x.setHours(12, 0, 0, 0);
-  return x;
-};
-// const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 const hijriWithWeekday = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -108,13 +99,13 @@ const hijriWithWeekday = (iso?: string) =>
       })
     : "-";
 
-/* ================= Components kecil ================= */
+/* ================= Components ================= */
 const PageHeader = ({
   palette,
   onImportClick,
   onAddClick,
-  onBackClick, // NEW
-  backLabel = "Kembali", // NEW
+  onBackClick,
+  backLabel = "Kembali",
 }: {
   palette: Palette;
   onImportClick: () => void;
@@ -122,34 +113,22 @@ const PageHeader = ({
   onBackClick?: () => void;
   backLabel?: string;
 }) => (
-  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
     {/* Kiri: Back + Title */}
     <div className="flex items-center gap-3">
       {onBackClick && (
-        <Btn
-          palette={palette}
-          variant="ghost"
-          onClick={onBackClick}
-          className="flex items-center gap-1.5"
-        >
-          <ArrowLeft size={20} />
-          <span className="hidden sm:inline"></span>
-        </Btn>
+        <div className="flex items-center mt-5">
+          <Btn
+            palette={palette}
+            variant="ghost"
+            onClick={onBackClick}
+            className="flex items-center gap-1.5"
+          >
+            <ArrowLeft size={20} />
+            <span className="hidden sm:inline">{backLabel}</span>
+          </Btn>
+        </div>
       )}
-      <div className="min-w-0 flex-1">
-        <h1
-          className="text-lg sm:text-xl font-semibold truncate"
-          style={{ color: palette.black1 }}
-        >
-          Guru
-        </h1>
-        <p
-          className="text-xs sm:text-sm line-clamp-1"
-          style={{ color: palette.black2 }}
-        >
-          Kelola data pengajar, filter, dan tindakan cepat.
-        </p>
-      </div>
     </div>
 
     {/* Kanan: Action buttons */}
@@ -181,98 +160,6 @@ const PageHeader = ({
   </div>
 );
 
-
-const StatCard = ({
-  title,
-  value,
-  icon,
-  palette,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  palette: Palette;
-}) => (
-  <SectionCard palette={palette} className="p-3 sm:p-4">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-xs sm:text-sm" style={{ color: palette.silver2 }}>
-          {title}
-        </p>
-        <p
-          className="text-lg sm:text-2xl font-semibold"
-          style={{ color: palette.black1 }}
-        >
-          {value}
-        </p>
-      </div>
-      <div className="flex-shrink-0">{icon}</div>
-    </div>
-  </SectionCard>
-);
-
-const StatsGrid = ({
-  stats,
-  palette,
-}: {
-  stats: TeacherStats;
-  palette: Palette;
-}) => (
-  <div
-    className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3"
-    style={{ color: palette.black1 }}
-  >
-    <StatCard
-      title="Total Guru"
-      value={stats.total}
-      icon={<Briefcase size={18} />}
-      palette={palette}
-    />
-    <StatCard
-      title="Aktif"
-      value={stats.aktif}
-      icon={
-        <Badge variant="success" palette={palette} className="text-xs px-2">
-          OK
-        </Badge>
-      }
-      palette={palette}
-    />
-    <StatCard
-      title="Laki-laki"
-      value={stats.L}
-      icon={
-        <Badge palette={palette} className="text-xs px-2">
-          L
-        </Badge>
-      }
-      palette={palette}
-    />
-    <StatCard
-      title="Perempuan"
-      value={stats.P}
-      icon={
-        <Badge palette={palette} className="text-xs px-2">
-          P
-        </Badge>
-      }
-      palette={palette}
-    />
-  </div>
-);
-
-interface FiltersProps {
-  palette: Palette;
-  q: string;
-  setQ: (value: string) => void;
-  mapel: string | undefined;
-  setMapel: (value: string | undefined) => void;
-  status: TeacherStatus | "semua";
-  setStatus: (value: TeacherStatus | "semua") => void;
-  subjects: string[];
-  onApply: () => void;
-}
-
 const FiltersSection = ({
   palette,
   q,
@@ -283,11 +170,22 @@ const FiltersSection = ({
   setStatus,
   subjects,
   onApply,
-}: FiltersProps) => (
-  <SectionCard palette={palette} className="p-3 sm:p-4">
-    <div className="space-y-3">
+}: {
+  palette: Palette;
+  q: string;
+  setQ: (value: string) => void;
+  mapel: string | undefined;
+  setMapel: (value: string | undefined) => void;
+  status: TeacherStatus | "semua";
+  setStatus: (value: TeacherStatus | "semua") => void;
+  subjects: string[];
+  onApply: () => void;
+}) => (
+  <SectionCard palette={palette} className="p-4 sm:p-5 mb-6">
+    <div className="space-y-4">
+      {/* Search bar */}
       <div
-        className="flex items-center gap-2 rounded-xl px-3 py-2.5 sm:py-2 border"
+        className="flex items-center gap-2 rounded-xl px-3 py-2.5 border"
         style={{ borderColor: palette.silver1, background: palette.white1 }}
       >
         <Search
@@ -304,19 +202,24 @@ const FiltersSection = ({
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-        <div className="flex gap-2 flex-1">
+      {/* Dropdowns */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+        <div className="flex flex-1 gap-3">
+          {/* Mapel */}
           <div
-            className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
+            className="flex-1 rounded-xl border px-3 py-2"
             style={{
               borderColor: palette.silver1,
               background: palette.white1,
               color: palette.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: palette.black2 }}>
+            <label
+              className="text-xs block mb-1"
+              style={{ color: palette.black2 }}
+            >
               Mapel
-            </div>
+            </label>
             <select
               value={mapel ?? ""}
               onChange={(e) => setMapel(e.target.value || undefined)}
@@ -331,17 +234,21 @@ const FiltersSection = ({
             </select>
           </div>
 
+          {/* Status */}
           <div
-            className="flex-1 sm:flex-none rounded-xl border px-3 py-2"
+            className="flex-1 rounded-xl border px-3 py-2"
             style={{
               borderColor: palette.silver1,
               background: palette.white1,
               color: palette.black1,
             }}
           >
-            <div className="text-xs mb-1" style={{ color: palette.black2 }}>
+            <label
+              className="text-xs block mb-1"
+              style={{ color: palette.black2 }}
+            >
               Status
-            </div>
+            </label>
             <select
               value={status}
               onChange={(e) =>
@@ -357,9 +264,10 @@ const FiltersSection = ({
           </div>
         </div>
 
+        {/* Apply */}
         <Btn
           size="sm"
-          className="flex items-center justify-center gap-2 text-sm py-2.5 sm:py-2"
+          className="flex items-center justify-center gap-2 text-sm py-2.5"
           onClick={onApply}
           palette={palette}
         >
@@ -381,11 +289,7 @@ const TeacherTableRow = ({
     className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
     style={{ borderColor: palette.silver1 }}
   >
-    <td className="py-3 align-top">
-      <div className="font-medium" style={{ color: palette.black1 }}>
-        {teacher.nip ?? "-"}
-      </div>
-    </td>
+    <td className="py-3 align-top">{teacher.nip ?? "-"}</td>
     <td className="py-3 align-top">
       <div className="font-medium" style={{ color: palette.black1 }}>
         {teacher.name}
@@ -396,22 +300,14 @@ const TeacherTableRow = ({
         </div>
       )}
     </td>
-    <td className="py-3 align-top" style={{ color: palette.black1 }}>
-      {teacher.subject ?? "-"}
-    </td>
-    <td className="py-3 align-top" style={{ color: palette.black1 }}>
-      {genderLabel(teacher.gender)}
-    </td>
+    <td className="py-3 align-top">{teacher.subject ?? "-"}</td>
+    <td className="py-3 align-top">{genderLabel(teacher.gender)}</td>
     <td className="py-3 align-top">
-      <div
-        className="flex items-center gap-3 text-sm"
-        style={{ color: palette.black1 }}
-      >
+      <div className="flex items-center gap-3 text-sm">
         {teacher.phone && (
           <a
             href={`tel:${teacher.phone}`}
             className="flex items-center gap-1 hover:underline"
-            title={`Telepon ${teacher.phone}`}
             style={{ color: palette.primary }}
           >
             <Phone size={14} /> {teacher.phone}
@@ -421,7 +317,6 @@ const TeacherTableRow = ({
           <a
             href={`mailto:${teacher.email}`}
             className="flex items-center gap-1 hover:underline"
-            title={`Email ${teacher.email}`}
             style={{ color: palette.primary }}
           >
             <Mail size={14} /> Email
@@ -468,15 +363,6 @@ const TeacherTableRow = ({
   </tr>
 );
 
-interface TeachersTableProps {
-  palette: Palette;
-  teachers: TeacherItem[];
-  isLoading: boolean;
-  isError: boolean;
-  isFetching: boolean;
-  onRefetch: () => void;
-}
-
 const TeachersTable = ({
   palette,
   teachers,
@@ -484,9 +370,15 @@ const TeachersTable = ({
   isError,
   isFetching,
   onRefetch,
-}: TeachersTableProps) => (
-  <SectionCard palette={palette} className="p-0 sm:p-2 lg:p-4">
-    {/* Desktop Table View */}
+}: {
+  palette: Palette;
+  teachers: TeacherItem[];
+  isLoading: boolean;
+  isError: boolean;
+  isFetching: boolean;
+  onRefetch: () => void;
+}) => (
+  <SectionCard palette={palette} className="p-0">
     <div className="overflow-auto">
       <table className="min-w-[800px] w-full">
         <thead>
@@ -552,17 +444,15 @@ const TeachersTable = ({
     </div>
 
     <div
-      className="p-3 sm:mt-3 text-xs flex items-center justify-between border-t"
+      className="p-3 text-xs flex items-center justify-between border-t"
       style={{ color: palette.silver2, borderColor: palette.silver1 }}
     >
       <div>
         {isFetching ? "Memuat ulang…" : `Menampilkan ${teachers.length} data`}
       </div>
-      <div className="flex items-center gap-2">
-        <button className="underline" onClick={onRefetch}>
-          Refresh
-        </button>
-      </div>
+      <button className="underline" onClick={onRefetch}>
+        Refresh
+      </button>
     </div>
   </SectionCard>
 );
@@ -576,16 +466,14 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-  // Modal
+
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
 
-  // Filter states
   const [q, setQ] = useState("");
   const [mapel, setMapel] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<TeacherStatus | "semua">("semua");
 
-  // Current user → ambil masjidId
   const { user } = useCurrentUser();
   const masjidId = useMemo(() => {
     const u: any = user || {};
@@ -600,7 +488,6 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
     );
   }, [user]);
 
-  // Fetch: /api/a/masjid-teachers/by-masjid
   const {
     data: resp,
     isLoading,
@@ -619,14 +506,13 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
     },
   });
 
-  // Mapping & filter lokal
   const teachersRaw = resp?.data?.teachers ?? [];
   const teachersAll: TeacherItem[] = useMemo(
     () =>
       teachersRaw.map((t) => ({
         id: t.masjid_teachers_id,
         name: t.user_name,
-        status: "aktif", // default
+        status: "aktif",
       })),
     [teachersRaw]
   );
@@ -645,23 +531,14 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
     if (status !== "semua") {
       list = list.filter((t) => t.status === status);
     }
-    // mapel filter di-skip sementara
     return list;
   }, [teachersAll, q, status]);
 
   const subjects = DEFAULT_SUBJECTS;
 
-  // Stats
-  const stats: TeacherStats = useMemo(() => {
-    const total = resp?.data?.total ?? teachersAll.length;
-    const aktif = teachers.filter((t) => t.status === "aktif").length;
-    const L = teachers.filter((t) => t.gender === "L").length;
-    const P = teachers.filter((t) => t.gender === "P").length;
-    return { total, L, P, aktif };
-  }, [resp, teachers, teachersAll]);
-
   return (
     <>
+      {/* Modals */}
       <TambahGuru
         open={openAdd}
         onClose={() => setOpenAdd(false)}
@@ -681,12 +558,11 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
         title="Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
+
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
-        <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4  sm:space-y-5">
-
-           
+        <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4 space-y-6">
           <PageHeader
             palette={palette}
             onImportClick={() => setOpenImport(true)}
@@ -698,8 +574,6 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
             }
             backLabel={backLabel}
           />
-
-          {/* <StatsGrid stats={stats} palette={palette} /> */}
 
           <FiltersSection
             palette={palette}
@@ -726,4 +600,5 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
     </>
   );
 };
+
 export default TeachersPage;

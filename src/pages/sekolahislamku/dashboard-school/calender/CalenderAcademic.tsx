@@ -221,7 +221,7 @@ const CalenderAcademic: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <aside className="lg:col-span-3">
             <ParentSidebar palette={palette} />
@@ -229,27 +229,29 @@ const CalenderAcademic: React.FC = () => {
 
           <section className="lg:col-span-9 space-y-6 min-w-0">
             {/* Header */}
-            <section className="flex items-start gap-3">
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft size={20} />
-              </Btn>
-              <span
-                className="h-10 w-10 grid place-items-center rounded-xl"
-                style={{ background: palette.primary2, color: palette.primary }}
-              >
-                <CalendarDays size={18} />
-              </span>
-              <div>
-                <div className="text-lg font-semibold">Kalender Akademik</div>
-                <div className="text-sm" style={{ color: palette.black2 }}>
-                  Klik tanggal untuk melihat/menambah acara.
-                </div>
+            <section className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex items-center gap-3">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft size={20} />
+                </Btn>
+                <span
+                  className="h-10 w-10 grid place-items-center rounded-xl"
+                  style={{
+                    background: palette.primary2,
+                    color: palette.primary,
+                  }}
+                >
+                  <CalendarDays size={18} />
+                </span>
+                
               </div>
-              <div className="ml-auto flex items-center gap-2">
+
+              {/* Navigasi bulan */}
+              <div className="flex items-center gap-2 md:ml-auto">
                 <Btn palette={palette} variant="outline" onClick={gotoPrev}>
                   <ChevronLeft size={16} />
                 </Btn>
@@ -262,23 +264,23 @@ const CalenderAcademic: React.FC = () => {
               </div>
             </section>
 
-            {/* Kalender */}
+            {/* Kalender & Agenda responsive */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5">
+              <div className="p-3 md:p-5">
                 <div
-                  className="grid grid-cols-7 gap-2 text-xs mb-2"
+                  className="grid grid-cols-7 gap-1 sm:gap-2 text-[11px] sm:text-xs mb-2"
                   style={{ color: palette.black2 }}
                 >
                   {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map(
                     (d) => (
-                      <div key={d} className="text-center">
+                      <div key={d} className="text-center font-medium">
                         {d}
                       </div>
                     )
                   )}
                 </div>
 
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1 sm:gap-2">
                   {days.map((c, i) => {
                     const has = c.dateKey ? byDate.get(c.dateKey) : undefined;
                     const selected = selectedDay === c.dateKey;
@@ -287,7 +289,7 @@ const CalenderAcademic: React.FC = () => {
                         key={i}
                         disabled={!c.dateKey}
                         onClick={() => setSelectedDay(c.dateKey!)}
-                        className="h-24 rounded-lg border p-2 text-left relative transition disabled:opacity-50"
+                        className="aspect-square sm:h-24 rounded-lg border p-1 sm:p-2 text-left relative transition disabled:opacity-50"
                         style={{
                           borderColor: palette.silver1,
                           background: selected
@@ -295,21 +297,21 @@ const CalenderAcademic: React.FC = () => {
                             : palette.white1,
                         }}
                       >
-                        <div className="text-xs font-medium">
+                        <div className="text-[11px] sm:text-xs font-medium">
                           {c.label ?? ""}
                         </div>
                         {!!has && has.length > 0 && (
-                          <div className="absolute right-2 top-2 flex gap-1">
+                          <div className="absolute right-1 sm:right-2 top-1 sm:top-2 flex gap-0.5 sm:gap-1">
                             {has.slice(0, 3).map((_, idx) => (
                               <span
                                 key={idx}
-                                className="h-1.5 w-1.5 rounded-full"
+                                className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full"
                                 style={{ background: palette.primary }}
                               />
                             ))}
                             {has.length > 3 && (
                               <span
-                                className="text-[10px]"
+                                className="text-[9px] sm:text-[10px]"
                                 style={{ color: palette.black2 }}
                               >
                                 +{has.length - 3}
@@ -319,7 +321,7 @@ const CalenderAcademic: React.FC = () => {
                         )}
                         {has && has[0] && (
                           <div
-                            className="mt-2 text-xs line-clamp-3"
+                            className="mt-1 sm:mt-2 text-[10px] sm:text-xs line-clamp-2 sm:line-clamp-3"
                             style={{ color: palette.black2 }}
                           >
                             {has[0].title}
@@ -332,11 +334,11 @@ const CalenderAcademic: React.FC = () => {
               </div>
             </SectionCard>
 
-            {/* Panel hari terpilih */}
+            {/* Panel agenda: full di mobile, kolom kanan di desktop */}
             {selectedDay && (
               <SectionCard palette={palette}>
-                <div className="p-4 md:p-5">
-                  <div className="flex items-center justify-between">
+                <div className="p-3 md:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="font-medium">
                       Agenda {new Date(selectedDay).toLocaleDateString("id-ID")}
                     </div>
@@ -372,7 +374,7 @@ const CalenderAcademic: React.FC = () => {
                     {(byDate.get(selectedDay) ?? []).map((ev) => (
                       <div
                         key={ev.id}
-                        className="flex items-center justify-between rounded-lg border px-3 py-2"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border px-3 py-2 gap-2"
                         style={{ borderColor: palette.silver1 }}
                       >
                         <div className="min-w-0">
@@ -387,8 +389,8 @@ const CalenderAcademic: React.FC = () => {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
-                            {ev.category ? ` • ${ev.category}` : ""}{" "}
-                            {ev.level ? `• Kelas ${ev.level}` : ""}
+                            {ev.category ? ` • ${ev.category}` : ""}
+                            {ev.level ? ` • Kelas ${ev.level}` : ""}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

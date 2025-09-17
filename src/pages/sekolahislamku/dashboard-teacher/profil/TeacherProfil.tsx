@@ -218,7 +218,7 @@ const TeacherProfil: React.FC<TeacherProfilProps> = ({
                   </Btn>
                 )}
               </div>
-              <h1 className="flex items-center text-lg font-semibold">Pfofil Guru</h1>
+              {/* <h1 className="flex items-center text-lg font-semibold">Pfofil Guru</h1>\\\\ */}
             </div>
             {/* Header */}
             <SectionCard palette={palette}>

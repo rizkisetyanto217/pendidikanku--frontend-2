@@ -166,7 +166,7 @@ const SchoolSubject: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -178,7 +178,7 @@ const SchoolSubject: React.FC = () => {
             {/* Header */}
             <section className="flex items-start gap-3">
               <span
-                className="hidden sm:inline-flex items-center gap-1.5"
+                className="  items-center gap-1.5"
                 
               >
                 <Btn
@@ -190,12 +190,7 @@ const SchoolSubject: React.FC = () => {
                   <ArrowLeft size={20} />
                 </Btn>
               </span>
-              <div>
-                <div className="text-lg font-semibold">Mata Pelajaran</div>
-                <div className="text-sm" style={{ color: palette.black2 }}>
-                  Kelola daftar mapel, level, dan pengampu.
-                </div>
-              </div>
+              
               
             </section>
 

@@ -822,7 +822,7 @@ export default function AppRoutes() {
           <Route path="sekolah" element={<SchoolDashboard showBack />} />
           <Route path="room-school" element={<RoomSchool />} />
           <Route path="spp" element={<SchoolSpp />} />
-          <Route path="pelajaran" element={<SchoolSubject />} />
+          <Route path="pelajaran" element={<SchoolSubject />}  />
           <Route path="sertifikat" element={<SchoolCertificate />} />
           <Route path="kalender" element={<CalenderAcademic />} />
           <Route path="statistik" element={<SchoolStatistik />} />

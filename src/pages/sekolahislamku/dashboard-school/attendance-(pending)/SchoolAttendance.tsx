@@ -15,17 +15,7 @@ import {
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 
-import {
-  CalendarDays,
-  Users,
-  UserCog,
-  Search,
-  Filter,
-  Check,
-  X,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { CalendarDays, Users, UserCog, Search } from "lucide-react";
 import ParentSidebar from "../../components/home/ParentSideBar";
 
 /* ================= Types ================ */
@@ -74,7 +64,7 @@ export default function SchoolAttendance() {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   // ====== Fetch list
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["attendance", { tanggal, tipe, kelas, q, status }],
     queryFn: async () => {
       const params: Record<string, string> = { date: tanggal, type: tipe };
@@ -95,7 +85,6 @@ export default function SchoolAttendance() {
   });
 
   const rows = data?.list ?? [];
-  const classes = data?.classes ?? ["1A", "1B", "2A", "2B", "3A"];
 
   const stats = useMemo(() => {
     const total = data?.total ?? rows.length;
@@ -150,7 +139,7 @@ export default function SchoolAttendance() {
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
-        <main className="flex-1 mx-auto max-w-3xl py-6 space-y-5">
+        <main className="flex-1 mx-auto max-w-5xl py-6 space-y-5 px-4 lg:px-0">
           {/* Header */}
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
@@ -243,137 +232,137 @@ export default function SchoolAttendance() {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder={`Cari nama, ${tipe === "siswa" ? "NIS" : "NIP"}, email…`}
-                  className="w-full bg-transparent outline-none"
+                  className="w-full bg-transparent outline-none text-sm"
                   style={{ color: c.heading }}
                 />
               </div>
-
-              {/* Dropdowns */}
-              {/* ...semua select box sama, pakai border: c.border, bg: c.surface, color heading */}
-              {/* Status */}
-              {/* Btn Terapkan */}
+              {/* TODO: tambahin dropdown filter jika diperlukan */}
             </div>
           </SectionCard>
 
-          {/* Bulk actions */}
-          {/* ...tetap, tidak banyak perubahan warna */}
-
           {/* Table */}
           <SectionCard palette={palette} className="p-2 md:p-4">
-            <table className="min-w-[900px] w-full">
-              <thead style={{ background: palette.white2 }}>
-                <tr className="text-left text-sm" style={{ color: c.muted }}>
-                  <th className="py-3 w-10">
-                    <input
-                      type="checkbox"
-                      onChange={(e) => toggleAll(e.target.checked)}
-                    />
-                  </th>
-                  <th>Nama</th>
-                  <th>{tipe === "siswa" ? "Kelas" : "Mapel"}</th>
-                  <th>Tipe</th>
-                  <th>Status</th>
-                  <th>Waktu</th>
-                  <th className="text-right pr-2">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading && (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="py-8 text-center"
-                      style={{ color: c.muted }}
-                    >
-                      Memuat data…
-                    </td>
-                  </tr>
-                )}
-                {/* ...error & empty states sama */}
-                {rows.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="border-t"
-                    style={{ borderColor: c.border }}
-                  >
-                    <td>
+            <div className="overflow-x-auto">
+              <table className="min-w-[800px] w-full text-xs sm:text-sm">
+                <thead style={{ background: palette.white2 }}>
+                  <tr className="text-left" style={{ color: c.muted }}>
+                    <th className="py-3 w-10">
                       <input
                         type="checkbox"
-                        checked={!!selected[r.id]}
-                        onChange={(e) => toggleOne(r.id, e.target.checked)}
+                        onChange={(e) => toggleAll(e.target.checked)}
                       />
-                    </td>
-                    <td style={{ color: c.heading }}>{r.name}</td>
-                    <td style={{ color: c.accent }}>
-                      {r.class_or_subject ?? "-"}
-                    </td>
-                    <td style={{ color: c.text }}>
-                      {r.role === "siswa" ? (
-                        <>
-                          <Users size={14} /> Siswa
-                        </>
-                      ) : (
-                        <>
-                          <UserCog size={14} /> Guru
-                        </>
-                      )}
-                    </td>
-                    <td>
-                      {r.status === "hadir" && (
-                        <Badge variant="success" palette={palette}>
-                          Hadir
-                        </Badge>
-                      )}
-                      {r.status === "terlambat" && (
-                        <Badge variant="warning" palette={palette}>
-                          Terlambat
-                        </Badge>
-                      )}
-                      {r.status === "izin" && (
-                        <Badge variant="info" palette={palette}>
-                          Izin
-                        </Badge>
-                      )}
-                      {r.status === "sakit" && (
-                        <Badge variant="secondary" palette={palette}>
-                          Sakit
-                        </Badge>
-                      )}
-                      {r.status === "alfa" && (
-                        <Badge variant="destructive" palette={palette}>
-                          Alfa
-                        </Badge>
-                      )}
-                    </td>
-                    <td style={{ color: c.text }}>{r.time ?? "-"}</td>
-                    <td>
-                      <div className="flex gap-2 justify-end">
-                        <NavLink
-                          to={`/sekolah/${r.role === "siswa" ? "murid" : "guru"}/${r.id}`}
-                          className="underline text-sm"
-                          style={{ color: c.accent }}
-                        >
-                          Lihat Profil
-                        </NavLink>
-                        <Btn
-                          size="sm"
-                          palette={palette}
-                          variant="outline"
-                          onClick={() =>
-                            markMutation.mutate({
-                              ids: [r.id],
-                              status: "hadir",
-                            })
-                          }
-                        >
-                          Tandai Hadir
-                        </Btn>
-                      </div>
-                    </td>
+                    </th>
+                    <th>Nama</th>
+                    <th>{tipe === "siswa" ? "Kelas" : "Mapel"}</th>
+                    <th>Tipe</th>
+                    <th>Status</th>
+                    <th>Waktu</th>
+                    <th className="text-right pr-2">Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {isLoading && (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="py-8 text-center"
+                        style={{ color: c.muted }}
+                      >
+                        Memuat data…
+                      </td>
+                    </tr>
+                  )}
+                  {rows.map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-t"
+                      style={{ borderColor: c.border }}
+                    >
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={!!selected[r.id]}
+                          onChange={(e) => toggleOne(r.id, e.target.checked)}
+                        />
+                      </td>
+                      <td className="whitespace-nowrap">{r.name}</td>
+                      <td
+                        className="whitespace-nowrap"
+                        style={{ color: c.accent }}
+                      >
+                        {r.class_or_subject ?? "-"}
+                      </td>
+                      <td
+                        className="whitespace-nowrap"
+                        style={{ color: c.text }}
+                      >
+                        {r.role === "siswa" ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Users size={14} /> Siswa
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1">
+                            <UserCog size={14} /> Guru
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {r.status === "hadir" && (
+                          <Badge variant="success" palette={palette}>
+                            Hadir
+                          </Badge>
+                        )}
+                        {r.status === "terlambat" && (
+                          <Badge variant="warning" palette={palette}>
+                            Terlambat
+                          </Badge>
+                        )}
+                        {r.status === "izin" && (
+                          <Badge variant="info" palette={palette}>
+                            Izin
+                          </Badge>
+                        )}
+                        {r.status === "sakit" && (
+                          <Badge variant="secondary" palette={palette}>
+                            Sakit
+                          </Badge>
+                        )}
+                        {r.status === "alfa" && (
+                          <Badge variant="destructive" palette={palette}>
+                            Alfa
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap">{r.time ?? "-"}</td>
+                      <td>
+                        <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                          <NavLink
+                            to={`/sekolah/${r.role === "siswa" ? "murid" : "guru"}/${r.id}`}
+                            className="underline text-xs sm:text-sm"
+                            style={{ color: c.accent }}
+                          >
+                            Lihat Profil
+                          </NavLink>
+                          <Btn
+                            size="sm"
+                            palette={palette}
+                            variant="outline"
+                            onClick={() =>
+                              markMutation.mutate({
+                                ids: [r.id],
+                                status: "hadir",
+                              })
+                            }
+                          >
+                            Tandai Hadir
+                          </Btn>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </SectionCard>
         </main>
       </div>
