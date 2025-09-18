@@ -10,7 +10,6 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 import {
   SectionCard,
-  Badge,
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -19,8 +18,6 @@ import ParentSidebar from "../../components/home/ParentSideBar";
 
 import {
   UserPlus,
-  Search,
-  Filter,
   ChevronRight,
   Upload,
   AlertTriangle,
@@ -33,42 +30,15 @@ import TambahGuru from "./components/AddTeacher";
 import UploadFileGuru from "./components/UploadFileTeacher";
 
 /* ================= Types ================= */
-export type TeacherStatus = "aktif" | "nonaktif" | "alumni";
-
 export interface TeacherItem {
-  id: string; // masjid_teachers_id
+  id: string;
   nip?: string;
-  name: string; // user_name
+  name: string;
   subject?: string;
   gender?: "L" | "P";
   phone?: string;
   email?: string;
-  status: TeacherStatus; // default "aktif"
 }
-
-interface TeacherStats {
-  total: number;
-  L: number;
-  P: number;
-  aktif: number;
-}
-
-/** Response: GET /api/a/masjid-teachers/by-masjid */
-type TeachersByMasjidResponse = {
-  code: number;
-  status: string;
-  message: string;
-  data: {
-    total: number;
-    teachers: Array<{
-      masjid_teachers_id: string;
-      masjid_teachers_user_id: string;
-      user_name: string;
-      masjid_teachers_created_at: string;
-      masjid_teachers_updated_at: string;
-    }>;
-  };
-};
 
 type SchoolTeacherProps = {
   showBack?: boolean;
@@ -99,6 +69,46 @@ const hijriWithWeekday = (iso?: string) =>
       })
     : "-";
 
+/* ================= Dummy Data ================= */
+const DUMMY_TEACHERS: TeacherItem[] = [
+  {
+    id: "1",
+    nip: "19800101",
+    name: "Ahmad Fauzi",
+    subject: "Matematika",
+    gender: "L",
+    phone: "081234567890",
+    email: "ahmad.fauzi@example.com",
+  },
+  {
+    id: "2",
+    nip: "19800202",
+    name: "Siti Nurhaliza",
+    subject: "Bahasa Indonesia",
+    gender: "P",
+    phone: "081298765432",
+    email: "siti.nurhaliza@example.com",
+  },
+  {
+    id: "3",
+    nip: "19800303",
+    name: "Budi Santoso",
+    subject: "IPA",
+    gender: "L",
+    phone: "081377788899",
+    email: "budi.santoso@example.com",
+  },
+  {
+    id: "4",
+    nip: "19800404",
+    name: "Dewi Anggraini",
+    subject: "Bahasa Inggris",
+    gender: "P",
+    phone: "081366655544",
+    email: "dewi.anggraini@example.com",
+  },
+];
+
 /* ================= Components ================= */
 const PageHeader = ({
   palette,
@@ -114,24 +124,20 @@ const PageHeader = ({
   backLabel?: string;
 }) => (
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-    {/* Kiri: Back + Title */}
     <div className="flex items-center gap-3">
       {onBackClick && (
-        <div className="flex items-center mt-5">
-          <Btn
-            palette={palette}
-            variant="ghost"
-            onClick={onBackClick}
-            className="flex items-center gap-1.5"
-          >
-            <ArrowLeft size={20} />
-            <span className="hidden sm:inline">{backLabel}</span>
-          </Btn>
-        </div>
+        <Btn
+          palette={palette}
+          variant="ghost"
+          onClick={onBackClick}
+          className="flex items-center gap-1.5 mt-1"
+        >
+          <ArrowLeft size={20} />
+          <span className="hidden sm:inline">{backLabel}</span>
+        </Btn>
       )}
     </div>
 
-    {/* Kanan: Action buttons */}
     <div className="flex items-center gap-2 flex-wrap">
       <Btn
         onClick={onImportClick}
@@ -160,123 +166,78 @@ const PageHeader = ({
   </div>
 );
 
-const FiltersSection = ({
+function TeacherCardMobile({
+  teacher,
   palette,
-  q,
-  setQ,
-  mapel,
-  setMapel,
-  status,
-  setStatus,
-  subjects,
-  onApply,
 }: {
+  teacher: TeacherItem;
   palette: Palette;
-  q: string;
-  setQ: (value: string) => void;
-  mapel: string | undefined;
-  setMapel: (value: string | undefined) => void;
-  status: TeacherStatus | "semua";
-  setStatus: (value: TeacherStatus | "semua") => void;
-  subjects: string[];
-  onApply: () => void;
-}) => (
-  <SectionCard palette={palette} className="p-4 sm:p-5 mb-6">
-    <div className="space-y-4">
-      {/* Search bar */}
-      <div
-        className="flex items-center gap-2 rounded-xl px-3 py-2.5 border"
-        style={{ borderColor: palette.silver1, background: palette.white1 }}
-      >
-        <Search
-          size={16}
-          className="flex-shrink-0"
-          style={{ color: palette.black2 }}
-        />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Cari nama, NIP, email…"
-          className="w-full bg-transparent outline-none text-sm"
-          style={{ color: palette.black1 }}
-        />
-      </div>
+}) {
+  return (
+    <div
+      key={teacher.id}
+      className="border rounded-lg p-4 space-y-3"
+      style={{ borderColor: palette.silver1 }}
+    >
+      <div className="font-medium">{teacher.name}</div>
+      <div className="text-xs opacity-70">{teacher.subject ?? "-"}</div>
 
-      {/* Dropdowns */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-        <div className="flex flex-1 gap-3">
-          {/* Mapel */}
-          <div
-            className="flex-1 rounded-xl border px-3 py-2"
-            style={{
-              borderColor: palette.silver1,
-              background: palette.white1,
-              color: palette.black1,
-            }}
-          >
-            <label
-              className="text-xs block mb-1"
-              style={{ color: palette.black2 }}
-            >
-              Mapel
-            </label>
-            <select
-              value={mapel ?? ""}
-              onChange={(e) => setMapel(e.target.value || undefined)}
-              className="w-full bg-transparent outline-none text-sm"
-            >
-              <option value="">Semua</option>
-              {subjects.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status */}
-          <div
-            className="flex-1 rounded-xl border px-3 py-2"
-            style={{
-              borderColor: palette.silver1,
-              background: palette.white1,
-              color: palette.black1,
-            }}
-          >
-            <label
-              className="text-xs block mb-1"
-              style={{ color: palette.black2 }}
-            >
-              Status
-            </label>
-            <select
-              value={status}
-              onChange={(e) =>
-                setStatus(e.target.value as TeacherStatus | "semua")
-              }
-              className="w-full bg-transparent outline-none text-sm"
-            >
-              <option value="semua">Semua</option>
-              <option value="aktif">Aktif</option>
-              <option value="nonaktif">Nonaktif</option>
-              <option value="alumni">Alumni</option>
-            </select>
+      <div className="text-sm space-y-1">
+        <div>
+          <span className="text-gray-600">NIP: </span>
+          {teacher.nip ?? "-"}
+        </div>
+        <div>
+          <span className="text-gray-600">Gender: </span>
+          {genderLabel(teacher.gender)}
+        </div>
+        <div>
+          <span className="text-gray-600">Kontak: </span>
+          <div className="flex gap-3 mt-1">
+            {teacher.phone && (
+              <a
+                href={`tel:${teacher.phone}`}
+                className="flex items-center gap-1 text-sm hover:underline"
+                style={{ color: palette.primary }}
+              >
+                <Phone size={14} /> {teacher.phone}
+              </a>
+            )}
+            {teacher.email && (
+              <a
+                href={`mailto:${teacher.email}`}
+                className="flex items-center gap-1 text-sm hover:underline"
+                style={{ color: palette.primary }}
+              >
+                <Mail size={14} /> Email
+              </a>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Apply */}
-        <Btn
-          size="sm"
-          className="flex items-center justify-center gap-2 text-sm py-2.5"
-          onClick={onApply}
-          palette={palette}
+      <div
+        className="flex gap-2 pt-2 border-t"
+        style={{ borderColor: palette.silver1 }}
+      >
+        <NavLink
+          to={`/sekolah/guru/${teacher.id}`}
+          className="underline text-sm"
+          style={{ color: palette.primary }}
         >
-          <Filter size={16} /> Terapkan
-        </Btn>
+          Detail
+        </NavLink>
+        <NavLink
+          to={`/sekolah/absensi?guru=${teacher.id}`}
+          className="underline text-sm"
+          style={{ color: palette.primary }}
+        >
+          Absensi
+        </NavLink>
       </div>
     </div>
-  </SectionCard>
-);
+  );
+}
 
 const TeacherTableRow = ({
   teacher,
@@ -289,20 +250,16 @@ const TeacherTableRow = ({
     className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
     style={{ borderColor: palette.silver1 }}
   >
-    <td className="py-3 align-top">{teacher.nip ?? "-"}</td>
-    <td className="py-3 align-top">
-      <div className="font-medium" style={{ color: palette.black1 }}>
-        {teacher.name}
-      </div>
+    <td className="py-3 px-5">{teacher.nip ?? "-"}</td>
+    <td className="py-3">
+      <div className="font-medium">{teacher.name}</div>
       {teacher.email && (
-        <div className="text-xs" style={{ color: palette.silver2 }}>
-          {teacher.email}
-        </div>
+        <div className="text-xs opacity-70">{teacher.email}</div>
       )}
     </td>
-    <td className="py-3 align-top">{teacher.subject ?? "-"}</td>
-    <td className="py-3 align-top">{genderLabel(teacher.gender)}</td>
-    <td className="py-3 align-top">
+    <td className="py-3">{teacher.subject ?? "-"}</td>
+    <td className="py-3">{genderLabel(teacher.gender)}</td>
+    <td className="py-3">
       <div className="flex items-center gap-3 text-sm">
         {teacher.phone && (
           <a
@@ -319,30 +276,13 @@ const TeacherTableRow = ({
             className="flex items-center gap-1 hover:underline"
             style={{ color: palette.primary }}
           >
-            <Mail size={14} /> Email
+           
           </a>
         )}
       </div>
     </td>
-    <td className="py-3 align-top">
-      {teacher.status === "aktif" && (
-        <Badge variant="success" palette={palette}>
-          Aktif
-        </Badge>
-      )}
-      {teacher.status === "nonaktif" && (
-        <Badge variant="warning" palette={palette}>
-          Nonaktif
-        </Badge>
-      )}
-      {teacher.status === "alumni" && (
-        <Badge variant="info" palette={palette}>
-          Alumni
-        </Badge>
-      )}
-    </td>
-    <td className="py-3 align-top">
-      <div className="flex items-center gap-2 justify-end">
+    <td className="py-3 text-right">
+      <div className="flex items-center gap-2 justify-end mr-3">
         <NavLink to={`/sekolah/guru/${teacher.id}`}>
           <Btn
             size="sm"
@@ -353,11 +293,11 @@ const TeacherTableRow = ({
             Detail <ChevronRight size={14} />
           </Btn>
         </NavLink>
-        <NavLink to={`/sekolah/absensi?guru=${teacher.id}`}>
+        {/* <NavLink to={`/sekolah/absensi?guru=${teacher.id}`}>
           <Btn size="sm" palette={palette} variant="outline">
             Absensi
           </Btn>
-        </NavLink>
+        </NavLink> */}
       </div>
     </td>
   </tr>
@@ -379,57 +319,71 @@ const TeachersTable = ({
   onRefetch: () => void;
 }) => (
   <SectionCard palette={palette} className="p-0">
-    <div className="overflow-auto">
-      <table className="min-w-[800px] w-full">
+    {/* Mobile: card view */}
+    <div className="block md:hidden p-4 space-y-3">
+      {isLoading && <div className="text-center text-sm">Memuat data…</div>}
+      {isError && (
+        <div
+          className="text-center text-sm"
+          style={{ color: palette.warning1 }}
+        >
+          <AlertTriangle size={16} className="inline mr-1" /> Terjadi kesalahan.{" "}
+          <button className="underline" onClick={onRefetch}>
+            Coba lagi
+          </button>
+        </div>
+      )}
+      {!isLoading && !isError && teachers.length === 0 && (
+        <div className="text-center text-sm opacity-70">
+          Belum ada data guru.
+        </div>
+      )}
+      {!isLoading &&
+        !isError &&
+        teachers.map((t) => (
+          <TeacherCardMobile key={t.id} teacher={t} palette={palette} />
+        ))}
+    </div>
+
+    {/* Desktop: table view */}
+    <div className="hidden md:block overflow-x-auto">
+      <table className="min-w-[800px] w-full text-sm">
         <thead>
           <tr
-            className="text-left text-sm border-b"
+            className="text-left border-b"
             style={{ color: palette.silver2, borderColor: palette.silver1 }}
           >
-            <th className="py-3">NIP</th>
+            <th className="py-3 px-5">NIP</th>
             <th>Nama</th>
             <th>Mapel</th>
-            <th>JK</th>
+            <th>Gender</th>
             <th>Kontak</th>
-            <th>Status</th>
-            <th className="text-right pr-2">Aksi</th>
+            {/* <th className="text-right">Aksi</th> */}
           </tr>
         </thead>
         <tbody>
           {isLoading && (
             <tr>
-              <td
-                colSpan={7}
-                className="py-8 text-center"
-                style={{ color: palette.silver2 }}
-              >
+              <td colSpan={6} className="py-8 text-center opacity-70">
                 Memuat data…
               </td>
             </tr>
           )}
           {isError && (
             <tr>
-              <td colSpan={7} className="py-8">
-                <div
-                  className="flex items-center gap-2 justify-center text-sm"
-                  style={{ color: palette.warning1 }}
-                >
-                  <AlertTriangle size={16} />
-                  Terjadi kesalahan.
-                  <button className="underline" onClick={onRefetch}>
-                    Coba lagi
-                  </button>
-                </div>
+              <td
+                colSpan={6}
+                className="py-8 text-center"
+                style={{ color: palette.warning1 }}
+              >
+                <AlertTriangle size={16} className="inline mr-1" /> Terjadi
+                kesalahan.
               </td>
             </tr>
           )}
           {!isLoading && !isError && teachers.length === 0 && (
             <tr>
-              <td
-                colSpan={7}
-                className="py-10 text-center"
-                style={{ color: palette.silver2 }}
-              >
+              <td colSpan={6} className="py-10 text-center opacity-70">
                 Belum ada data guru.
               </td>
             </tr>
@@ -461,7 +415,7 @@ const TeachersTable = ({
 const TeachersPage: React.FC<SchoolTeacherProps> = ({
   showBack = false,
   backTo,
-  backLabel = "Kembali",
+  backLabel,
 }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
@@ -469,24 +423,16 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
-
   const [q, setQ] = useState("");
-  const [mapel, setMapel] = useState<string | undefined>(undefined);
-  const [status, setStatus] = useState<TeacherStatus | "semua">("semua");
 
   const { user } = useCurrentUser();
-  const masjidId = useMemo(() => {
-    const u: any = user || {};
-    return (
-      u.masjid_id ||
-      u.lembaga_id ||
-      u.mosque_id ||
-      u?.masjid?.id ||
-      u?.lembaga?.id ||
-      (Array.isArray(u?.masjid_teacher_ids) && u.masjid_teacher_ids[0]) ||
-      ""
-    );
-  }, [user]);
+const masjidId = useMemo(() => {
+  const u: any = user || {};
+  return u.masjid_id || u.lembaga_id || u?.masjid?.id || u?.lembaga?.id || "";
+}, [user]);
+
+
+
 
   const {
     data: resp,
@@ -498,7 +444,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
     queryKey: ["masjid-teachers", masjidId],
     enabled: !!masjidId,
     staleTime: 2 * 60 * 1000,
-    queryFn: async (): Promise<TeachersByMasjidResponse> => {
+    queryFn: async () => {
       const res = await axios.get("/api/a/masjid-teachers/by-masjid", {
         params: masjidId ? { masjid_id: masjidId } : undefined,
       });
@@ -506,21 +452,21 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
     },
   });
 
-  const teachersRaw = resp?.data?.teachers ?? [];
-  const teachersAll: TeacherItem[] = useMemo(
-    () =>
-      teachersRaw.map((t) => ({
-        id: t.masjid_teachers_id,
-        name: t.user_name,
-        status: "aktif",
-      })),
-    [teachersRaw]
-  );
+  const teachersFromApi: TeacherItem[] =
+    resp?.data?.teachers?.map((t: any) => ({
+      id: t.masjid_teachers_id,
+      nip: "N/A",
+      name: t.user_name,
+      subject: "Umum",
+    })) ?? [];
+
+  const teachersAll =
+    teachersFromApi.length > 0 ? teachersFromApi : DUMMY_TEACHERS;
 
   const teachers = useMemo(() => {
     let list = teachersAll;
     if (q.trim()) {
-      const needle = q.trim().toLowerCase();
+      const needle = q.toLowerCase();
       list = list.filter(
         (t) =>
           t.name.toLowerCase().includes(needle) ||
@@ -528,22 +474,16 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
           (t.email ?? "").toLowerCase().includes(needle)
       );
     }
-    if (status !== "semua") {
-      list = list.filter((t) => t.status === status);
-    }
     return list;
-  }, [teachersAll, q, status]);
-
-  const subjects = DEFAULT_SUBJECTS;
+  }, [teachersAll, q]);
 
   return (
     <>
-      {/* Modals */}
       <TambahGuru
         open={openAdd}
         onClose={() => setOpenAdd(false)}
         palette={palette}
-        subjects={subjects}
+        subjects={DEFAULT_SUBJECTS}
         masjidId={masjidId}
         onCreated={() => refetch()}
       />
@@ -561,7 +501,6 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
 
       <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
         <ParentSidebar palette={palette} className="hidden lg:block" />
-
         <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4 space-y-6">
           <PageHeader
             palette={palette}
@@ -572,21 +511,8 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
                 ? () => (backTo ? navigate(backTo) : navigate(-1))
                 : undefined
             }
-            backLabel={backLabel}
+            backLabel={backLabel || "Kembali"}
           />
-
-          <FiltersSection
-            palette={palette}
-            q={q}
-            setQ={setQ}
-            mapel={mapel}
-            setMapel={setMapel}
-            status={status}
-            setStatus={setStatus}
-            subjects={subjects}
-            onApply={refetch}
-          />
-
           <TeachersTable
             palette={palette}
             teachers={teachers}

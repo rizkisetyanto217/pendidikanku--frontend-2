@@ -107,9 +107,10 @@ export default function DetailAcademic() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate(-1)}
+                className="flex items-center gap-1.5 p-5"
               >
-                <ArrowLeft size={16} className="mr-1" />
-                Kembali
+                <ArrowLeft size={20} className="mr-1" />
+                
               </Btn>
             </div>
 

@@ -1,12 +1,13 @@
 // src/pages/sekolahislamku/pages/classes/SchoolClasses.tsx
 import { useMemo, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams, Link, useParams, useNavigate } from "react-router-dom";
 import {
-  BookOpen,
-  Users,
-  UserCog,
-  Clock4,
+  useSearchParams,
+  Link,
+  useParams,
+  useNavigate,
+} from "react-router-dom";
+import {
   Filter as FilterIcon,
   Plus,
   Layers,
@@ -24,14 +25,16 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "../../components/home/ParentSideBar";
-import TambahKelas, { type ClassRow as NewClassRow } from "./components/AddClass";
+import TambahKelas, {
+  type ClassRow as NewClassRow,
+} from "./components/AddClass";
 import TambahLevel from "./components/AddLevel";
 import axios from "@/lib/axios";
 
 /* ================= Types ================= */
 export type ClassStatus = "active" | "inactive";
 
-export type ClassRow = {
+export interface ClassRow {
   id: string;
   code: string;
   name: string;
@@ -41,14 +44,14 @@ export type ClassRow = {
   schedule: string;
   status: ClassStatus;
   classId?: string; // parent LEVEL id
-};
+}
 
-export type ClassStats = {
+export interface ClassStats {
   total: number;
   active: number;
   students: number;
   homerooms: number;
-};
+}
 
 type ApiSchedule = {
   start?: string;
@@ -64,7 +67,7 @@ type ApiTeacherLite = {
 };
 type ApiClassSection = {
   class_sections_id: string;
-  class_sections_class_id: string; // LEVEL ID
+  class_sections_class_id: string;
   class_sections_masjid_id: string;
   class_sections_teacher_id?: string | null;
   class_sections_slug: string;
@@ -92,14 +95,14 @@ type ApiLevel = {
 };
 type ApiListLevels = { data: ApiLevel[]; message: string };
 
-type Level = {
+export interface Level {
   id: string;
   name: string;
   slug: string;
   level?: string | null;
   fee?: number | null;
   is_active: boolean;
-};
+}
 
 type SchoolClassProps = {
   showBack?: boolean;
@@ -145,14 +148,73 @@ const scheduleToText = (sch?: ApiSchedule | null): string => {
   return left ? `${left}${loc}` : "-";
 };
 
-const getShiftFromSchedule = (sch?: ApiSchedule | null): "Pagi" | "Sore" | "-" => {
+const getShiftFromSchedule = (
+  sch?: ApiSchedule | null
+): "Pagi" | "Sore" | "-" => {
   if (!sch?.start) return "-";
   const [hh] = sch.start.split(":").map((x) => parseInt(x, 10));
   if (Number.isNaN(hh)) return "-";
   return hh < 12 ? "Pagi" : "Sore";
 };
 
-const uid = (p = "tmp") => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const uid = (p = "tmp") =>
+  `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+/* ================= Dummy Data ================= */
+const DUMMY_LEVELS: Level[] = [
+  {
+    id: "lv-1",
+    name: "SD Kelas 1",
+    slug: "sd-1",
+    level: "1",
+    fee: 150000,
+    is_active: true,
+  },
+  {
+    id: "lv-2",
+    name: "SD Kelas 2",
+    slug: "sd-2",
+    level: "2",
+    fee: 150000,
+    is_active: true,
+  },
+];
+
+const DUMMY_CLASSES: ClassRow[] = [
+  {
+    id: "cls-1",
+    code: "1A",
+    name: "Kelas 1A",
+    grade: "1",
+    homeroom: "Ahmad Fauzi",
+    studentCount: 28,
+    schedule: "Senin, Rabu, Jumat 07:30–09:30 @Ruang A1",
+    status: "active",
+    classId: "lv-1",
+  },
+  {
+    id: "cls-2",
+    code: "1B",
+    name: "Kelas 1B",
+    grade: "1",
+    homeroom: "Siti Nurhaliza",
+    studentCount: 26,
+    schedule: "Selasa & Kamis 08:00–10:00 @Ruang A2",
+    status: "inactive",
+    classId: "lv-1",
+  },
+  {
+    id: "cls-3",
+    code: "2A",
+    name: "Kelas 2A",
+    grade: "2",
+    homeroom: "Budi Santoso",
+    studentCount: 30,
+    schedule: "Senin–Kamis 09:00–11:00 @Ruang B1",
+    status: "active",
+    classId: "lv-2",
+  },
+];
 
 /* ================= Fetchers ================= */
 async function fetchClassSections({
@@ -169,7 +231,9 @@ async function fetchClassSections({
   if (status && status !== "all") params.active_only = status === "active";
   if (classId) params.class_id = classId;
 
-  const res = await axios.get<ApiListSections>("/api/a/class-sections", { params });
+  const res = await axios.get<ApiListSections>("/api/a/class-sections", {
+    params,
+  });
   return res.data?.data ?? [];
 }
 
@@ -189,34 +253,14 @@ async function fetchLevels(): Promise<Level[]> {
   return (res.data?.data ?? []).map(mapLevelRow);
 }
 
-/* ================= UI Components ================= */
-function MiniKPI({ palette, icon, label, value, tone }: {
-  palette: Palette;
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  tone?: "success" | "normal";
-}) {
-  const bg = tone === "success" ? "#0EA5A222" : palette.primary2;
-  return (
-    <SectionCard palette={palette}>
-      <div className="p-4 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{ background: bg, color: tone === "success" ? palette.success1 : palette.primary }}
-        >
-          {icon}
-        </span>
-        <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>{label}</div>
-          <div className="text-xl font-semibold">{value}</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
-
-function SelectBox({ value, onChange, children, palette, className = "" }: {
+/* ================= UI ================= */
+function SelectBox({
+  value,
+  onChange,
+  children,
+  palette,
+  className = "",
+}: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   children: React.ReactNode;
@@ -228,7 +272,7 @@ function SelectBox({ value, onChange, children, palette, className = "" }: {
       <select
         value={value}
         onChange={onChange}
-        className="w-full h-11 rounded-lg border pl-3 pr-10 bg-transparent text-sm leading-none appearance-none"
+        className="w-full h-11 rounded-lg border pl-3 pr-10 bg-transparent text-sm appearance-none"
         style={{ borderColor: palette.silver1, color: palette.black1 }}
       >
         {children}
@@ -236,7 +280,6 @@ function SelectBox({ value, onChange, children, palette, className = "" }: {
       <ChevronDown
         size={16}
         className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-        style={{ color: "#111" }}
       />
     </div>
   );
@@ -303,28 +346,15 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     [apiItems]
   );
 
-  const filteredRows = useMemo(
-    () =>
-      mappedRows.filter((r) => {
-        const apiItem = (apiItems ?? []).find(
-          (x) => x.class_sections_id === r.id
-        );
-        const rowShift = getShiftFromSchedule(apiItem?.class_sections_schedule);
-        return shift === "all" || rowShift === shift;
-      }),
-    [mappedRows, shift, apiItems]
-  );
-
-  const stats: ClassStats = useMemo(
-    () => ({
-      total: filteredRows.length,
-      active: filteredRows.filter((x) => x.status === "active").length,
-      students: filteredRows.reduce((a, b) => a + (b.studentCount || 0), 0),
-      homerooms: new Set(filteredRows.map((x) => x.homeroom).filter(Boolean))
-        .size,
-    }),
-    [filteredRows]
-  );
+  const filteredRows = useMemo(() => {
+    return mappedRows.filter((r) => {
+      const apiItem = (apiItems ?? []).find(
+        (x) => x.class_sections_id === r.id
+      );
+      const rowShift = getShiftFromSchedule(apiItem?.class_sections_schedule);
+      return shift === "all" || rowShift === shift;
+    });
+  }, [mappedRows, shift, apiItems]);
 
   const sectionCountByLevel = useMemo(() => {
     const m = new Map<string, number>();
@@ -340,8 +370,10 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     setSp(next, { replace: true });
   };
 
-  const items = filteredRows;
-  const levels = levelsQ.data ?? [];
+  // Fallback ke dummy data
+  const items = filteredRows.length > 0 ? filteredRows : DUMMY_CLASSES;
+  const levels =
+    levelsQ.data && levelsQ.data.length > 0 ? levelsQ.data : DUMMY_LEVELS;
 
   /* ===== Optimistic Handlers ===== */
   const toSlug = (s: string) =>
@@ -349,47 +381,53 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
 
   const handleLevelCreated = (payload?: any) => {
     const lvl: Level = {
-      id: payload?.id ?? payload?.class_id ?? payload?.level_id ?? uid("lv"),
-      name: payload?.name ?? payload?.class_name ?? "Level Baru",
-      slug:
-        payload?.slug ??
-        payload?.class_slug ??
-        toSlug(payload?.name ?? payload?.class_name ?? ""),
-      level: payload?.level ?? payload?.class_level ?? null,
-      fee: payload?.fee ?? payload?.class_fee_monthly_idr ?? null,
-      is_active: payload?.is_active ?? payload?.class_is_active ?? true,
+      id: payload?.id ?? uid("lv"),
+      name: payload?.name ?? "Level Baru",
+      slug: payload?.slug ?? toSlug(payload?.name ?? ""),
+      level: payload?.level ?? null,
+      fee: payload?.fee ?? null,
+      is_active: payload?.is_active ?? true,
     };
     qc.setQueryData<Level[]>(["levels"], (old = []) => [lvl, ...(old ?? [])]);
     setOpenTambahLevel(false);
   };
 
-  const handleClassCreated = (row: NewClassRow) => {
-    const dummy: ApiClassSection = {
-      class_sections_id: (row as any).id ?? uid("sec"),
-      class_sections_class_id: (row as any).classId ?? levels[0]?.id ?? "",
-      class_sections_masjid_id: (row as any).masjidId ?? "",
-      class_sections_teacher_id: (row as any).teacherId ?? null,
-      class_sections_slug:
-        (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
-      class_sections_name: row.name ?? "Kelas Baru",
-      class_sections_code: (row as any).code ?? "-",
-      class_sections_capacity: (row as any).capacity ?? null,
-      class_sections_schedule: (row as any).schedule ?? {
-        days: [],
-        start: undefined,
-        end: undefined,
-      },
-      class_sections_is_active: (row as any).is_active ?? true,
-      class_sections_created_at: new Date().toISOString(),
-      class_sections_updated_at: new Date().toISOString(),
-      teacher: (row as any).teacher ?? null,
-    };
-    qc.setQueryData<ApiClassSection[]>(
-      ["class-sections", q, status, levelId],
-      (old = []) => [dummy, ...(old ?? [])]
-    );
-    setOpenTambah(false);
-  };
+ const handleClassCreated = (row: NewClassRow) => {
+   const dummy: ApiClassSection = {
+     class_sections_id: (row as any).id ?? uid("sec"),
+     class_sections_class_id: (row as any).classId ?? levels[0]?.id ?? "",
+     class_sections_masjid_id: (row as any).masjidId ?? "",
+     class_sections_teacher_id: (row as any).teacherId ?? null,
+     class_sections_slug: (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
+     class_sections_name: row.name ?? "Kelas Baru",
+     class_sections_code: (row as any).code ?? "-",
+     class_sections_capacity: (row as any).capacity ?? null,
+     class_sections_schedule: (row as any).schedule ?? {
+       days: [],
+       start: undefined,
+       end: undefined,
+     },
+     class_sections_is_active: (row as any).is_active ?? true,
+     class_sections_created_at: new Date().toISOString(),
+     class_sections_updated_at: new Date().toISOString(),
+     teacher: (row as any).teacher
+       ? {
+           id: (row as any).teacher.id ?? uid("tch"),
+           user_name: (row as any).teacher.user_name ?? "Guru Baru",
+           email: (row as any).teacher.email ?? "",
+           is_active: (row as any).teacher.is_active ?? true,
+         }
+       : null,
+   };
+
+   qc.setQueryData<ApiClassSection[]>(
+     ["class-sections", q, status, levelId],
+     (old = []) => [dummy, ...(old ?? [])]
+   );
+
+   setOpenTambah(false);
+ };
+
 
   /* ================= Render ================= */
   return (
@@ -405,23 +443,21 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 md:py-0">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header */}
             {showBack && (
-              <div className="flex items-center gap-3">
-                <Btn
-                  palette={palette}
-                  variant="ghost"
-                  onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                  className="inline-flex items-center gap-2"
-                >
-                  <ArrowLeft size={18} /> 
-                </Btn>
-              </div>
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                className="inline-flex items-center gap-2"
+              >
+                <ArrowLeft size={20} /> 
+              </Btn>
             )}
 
             {/* Panel Tingkat */}
@@ -469,28 +505,17 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                     </button>
                   );
                 })}
-                {levelsQ.isLoading && (
-                  <span className="text-sm" style={{ color: palette.silver2 }}>
-                    Memuat tingkat…
-                  </span>
-                )}
               </div>
             </SectionCard>
 
-            {/* Filter bar */}
+            {/* Filter */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
                 <FilterIcon size={18} /> Filter
               </div>
               <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-                {/* Search */}
                 <div className="md:col-span-2">
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.black2 }}
-                  >
-                    Pencarian
-                  </div>
+                  <div className="text-xs mb-1">Pencarian</div>
                   <input
                     placeholder="Cari slug/nama/kode…"
                     defaultValue={sp.get("q") ?? ""}
@@ -499,20 +524,11 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                         setParam("q", (e.target as HTMLInputElement).value);
                     }}
                     className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
+                    style={{ borderColor: palette.silver1 }}
                   />
                 </div>
-                {/* Shift */}
                 <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.black2 }}
-                  >
-                    Shift (dari jam mulai)
-                  </div>
+                  <div className="text-xs mb-1">Shift</div>
                   <SelectBox
                     value={shift}
                     onChange={(e) => setParam("shift", e.target.value)}
@@ -523,15 +539,8 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                     <option value="Sore">Sore</option>
                   </SelectBox>
                 </div>
-
-                {/* Status */}
                 <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.black2 }}
-                  >
-                    Status
-                  </div>
+                  <div className="text-xs mb-1">Status</div>
                   <SelectBox
                     value={status}
                     onChange={(e) => setParam("status", e.target.value)}
@@ -545,7 +554,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
               </div>
             </SectionCard>
 
-            {/* Tabel Kelas */}
+            {/* Tabel */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
                 <div className="font-medium">Daftar Kelas</div>
@@ -555,7 +564,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
               </div>
 
               <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="min-w-[800px] w-full text-sm">
                   <thead
                     className="text-left border-b"
                     style={{
@@ -580,21 +589,13 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   >
                     {isLoading || isFetching ? (
                       <tr>
-                        <td
-                          colSpan={8}
-                          className="py-6 text-center"
-                          style={{ color: palette.silver2 }}
-                        >
+                        <td colSpan={8} className="py-6 text-center">
                           Memuat data…
                         </td>
                       </tr>
                     ) : items.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan={8}
-                          className="py-6 text-center"
-                          style={{ color: palette.silver2 }}
-                        >
+                        <td colSpan={8} className="py-6 text-center">
                           Tidak ada data yang cocok.
                         </td>
                       </tr>
@@ -638,15 +639,12 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   </tbody>
                 </table>
 
-                <div className="pt-3 flex items-center justify-between text-xs">
-                  <div style={{ color: palette.silver2 }}>
-                    Menampilkan {items.length} kelas
-                  </div>
-                  <button
-                    onClick={() => refetch()}
-                    className="underline"
-                    style={{ color: palette.silver2 }}
-                  >
+                <div
+                  className="pt-3 flex items-center justify-between text-xs"
+                  style={{ color: palette.silver2 }}
+                >
+                  <div>Menampilkan {items.length} kelas</div>
+                  <button onClick={() => refetch()} className="underline">
                     Refresh
                   </button>
                 </div>
@@ -674,4 +672,3 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
 };
 
 export default SchoolClass;
-

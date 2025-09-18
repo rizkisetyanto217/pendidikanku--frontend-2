@@ -296,7 +296,7 @@ export default function AppRoutes() {
           />
           <Route path="donasi/pesan" element={<MasjidDonationMotivation />} />
           {/* Laporan Keuangan */}
-          <Route path="keuangan" element={<MasjidReportFinansial />} />
+          {/* <Route path="keuangan" element={<MasjidReportFinansial />} /> */}
           {/* Jadwal Kajian dan Detail */}
           <Route path="jadwal-kajian" element={<MasjidScheduleLecture />} />
           <Route path="jadwal-kajian/:id" element={<MasjidDetailLecture />} />
@@ -412,8 +412,6 @@ export default function AppRoutes() {
           </Route>
         </Route>
       </Route>
-      {/*  */}
-      {/*  */}
       {/* ==== Protected Routes - DKM ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
         <Route path="/dkm" element={<DkmLayout />}>
@@ -780,7 +778,7 @@ export default function AppRoutes() {
         <Route path="murid" element={<SchoolStudent />} />
         <Route path="all-schedule" element={<AllSchedule />} />
         <Route path="profil-sekolah" element={<SchoolProfile />} />
-
+        <Route path="keuangan" element={<SchoolFinance />} />
         <Route path="academic">
           <Route index element={<AcademicSchool />} />
           <Route path="detail" element={<DetailAcademic />} />
@@ -805,8 +803,8 @@ export default function AppRoutes() {
           <Route path="detail/:id" element={<SchoolManageClass />} />
         </Route>
         <Route path="kehadiran" element={<SchoolAttendance />} />
-        <Route path="keuangan" element={<SchoolFinance />} />
-        {/* <Route path="pengumuman" element={<SchoolAnnouncement />} /> */}
+
+        <Route path="pengumuman" element={<SchoolAnnouncement />} />
         <Route path="buku">
           <Route index element={<SchoolBooks />} />
           <Route path="detail/:id" element={<SchoolDetailBook />} />
@@ -814,7 +812,7 @@ export default function AppRoutes() {
         {/* Route Menu Utama */}
         <Route path="menu-utama">
           <Route index element={<SchoolMenuGrids />} />
-          <Route path="academic" element={<AcademicSchool showBack />} />
+          {/* <Route path="academic" element={<AcademicSchool showBack />} /> */}
           <Route path="profil-sekolah" element={<SchoolProfile showBack />} />
           <Route path="keuangan" element={<SchoolFinance showBack />} />
           <Route path="guru" element={<SchoolTeacher showBack />} />
@@ -822,7 +820,7 @@ export default function AppRoutes() {
           <Route path="sekolah" element={<SchoolDashboard showBack />} />
           <Route path="room-school" element={<RoomSchool />} />
           <Route path="spp" element={<SchoolSpp />} />
-          <Route path="pelajaran" element={<SchoolSubject />}  />
+          <Route path="pelajaran" element={<SchoolSubject />} />
           <Route path="sertifikat" element={<SchoolCertificate />} />
           <Route path="kalender" element={<CalenderAcademic />} />
           <Route path="statistik" element={<SchoolStatistik />} />
@@ -842,6 +840,11 @@ export default function AppRoutes() {
           <Route path="kelas">
             <Route index element={<SchoolClasses showBack />} />
             <Route path="detail/:id" element={<SchoolManageClass />} />
+          </Route>
+          <Route path="academic">
+            <Route index element={<AcademicSchool  showBack />} />
+            <Route path="detail" element={<DetailAcademic />} />
+            <Route path="manage" element={<ManagementAcademic />} />
           </Route>
         </Route>
       </Route>
