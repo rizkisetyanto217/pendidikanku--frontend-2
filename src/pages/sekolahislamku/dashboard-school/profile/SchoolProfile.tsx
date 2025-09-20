@@ -199,7 +199,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
           {/* Main Content */}
           <section className="lg:col-span-9 space-y-4 md:space-y-6 min-w-0">
             {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 md:py-0">
               {showBack && (
                 <Btn
                   palette={palette}

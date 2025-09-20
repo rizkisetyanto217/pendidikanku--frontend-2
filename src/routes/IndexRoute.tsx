@@ -233,6 +233,7 @@ import TeacherSettings from "@/pages/sekolahislamku/dashboard-teacher/menu-utama
 import TeacherAssignment from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/assignments/TeacherAssignment";
 import Certificate from "@/pages/dashboard/dkm/certificate/DKMCertificate";
 import TeacherCertificate from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/certificate/Certificate";
+import DetailTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/components/DetailTeacher";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -779,6 +780,10 @@ export default function AppRoutes() {
         <Route path="all-schedule" element={<AllSchedule />} />
         <Route path="profil-sekolah" element={<SchoolProfile />} />
         <Route path="keuangan" element={<SchoolFinance />} />
+        <Route path="guru">
+          <Route index element={<SchoolTeacher />} />
+          <Route path=":id" element={<DetailTeacher />} />
+        </Route>
         <Route path="academic">
           <Route index element={<AcademicSchool />} />
           <Route path="detail" element={<DetailAcademic />} />
@@ -797,7 +802,7 @@ export default function AppRoutes() {
 
         <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
         <Route path="all-announcement" element={<AllAnnouncement />} />
-        <Route path="guru" element={<SchoolTeacher />} />
+
         <Route path="kelas">
           <Route index element={<SchoolClasses />} />
           <Route path="detail/:id" element={<SchoolManageClass />} />
@@ -842,7 +847,7 @@ export default function AppRoutes() {
             <Route path="detail/:id" element={<SchoolManageClass />} />
           </Route>
           <Route path="academic">
-            <Route index element={<AcademicSchool  showBack />} />
+            <Route index element={<AcademicSchool showBack />} />
             <Route path="detail" element={<DetailAcademic />} />
             <Route path="manage" element={<ManagementAcademic />} />
           </Route>

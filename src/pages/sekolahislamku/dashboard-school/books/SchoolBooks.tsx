@@ -121,6 +121,60 @@ function useBooksList(params: { limit: number; offset: number }) {
   });
 }
 
+/* ============== Dummy Data ============== */
+const DUMMY_BOOKS: BookAPI[] = [
+  {
+    books_id: "dummy-1",
+    books_masjid_id: "masjid-1",
+    books_title: "Matematika Dasar",
+    books_author: "Ahmad Fauzi",
+    books_desc: "Buku dasar untuk memahami konsep matematika SD.",
+    books_url: "https://contoh.com/matematika-dasar",
+    books_image_url: null,
+    books_slug: "matematika-dasar",
+    usages: [
+      {
+        class_subject_books_id: "csb-1",
+        class_subjects_id: "sub-1",
+        subjects_id: "mat-1",
+        classes_id: "cls-1",
+        sections: [
+          {
+            class_sections_id: "sec-1",
+            class_sections_name: "Kelas 1A",
+            class_sections_slug: "kelas-1a",
+            class_sections_code: "1A",
+            class_sections_capacity: 30,
+            class_sections_is_active: true,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    books_id: "dummy-2",
+    books_masjid_id: "masjid-1",
+    books_title: "Bahasa Indonesia",
+    books_author: "Siti Nurhaliza",
+    books_desc: "Panduan belajar Bahasa Indonesia dengan mudah.",
+    books_url: "https://contoh.com/bahasa-indonesia",
+    books_image_url: null,
+    books_slug: "bahasa-indonesia",
+    usages: [],
+  },
+  {
+    books_id: "dummy-3",
+    books_masjid_id: "masjid-1",
+    books_title: "IPA Terapan",
+    books_author: "Budi Santoso",
+    books_desc: "Eksperimen IPA untuk siswa SMP.",
+    books_url: null,
+    books_image_url: null,
+    books_slug: "ipa-terapan",
+    usages: [],
+  },
+];
+
 /* ============== Skeletons ============== */
 function CardSkeleton({ palette }: { palette: Palette }) {
   return (
@@ -203,9 +257,13 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
     },
   });
 
-  // filter client-side
+  // filter client-side dengan fallback dummy
   const items = useMemo(() => {
-    const src = booksQ.data?.data ?? [];
+    const src =
+      booksQ.data?.data && booksQ.data.data.length > 0
+        ? booksQ.data.data
+        : DUMMY_BOOKS;
+
     const text = q.trim().toLowerCase();
     if (!text) return src;
     return src.filter((b) =>
@@ -461,25 +519,25 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           {/* Konten utama */}
           <div className="flex-1 space-y-5 min-w-0">
             {/* Header */}
-            {/* Header */}
-            <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-           
+        
+            <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2  ">
+              <div className="flex items-center gap-4 md:-mt-2">
                 {showBack && (
                   <Btn
                     palette={palette}
                     variant="ghost"
                     onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                    className="inline-flex items-center gap-2"
+                    className="w-auto  gap-2"
                     aria-label={backLabel}
                     title={backLabel}
                   >
                     <ArrowLeft size={20} />
                   </Btn>
                 )}
-              
-            
+                <h1 className="text-lg font-semibold  ">Buku Pelajaran</h1>
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-2 ">
                 <Btn
                   palette={palette}
                   onClick={() => setBookModal({ mode: "create" })}
@@ -492,7 +550,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
 
             {/* Toolbar */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-3 font-medium">Filter</div>
+              <div className="p-4 md:p-3 pb-3 font-medium">Filter</div>
               <div className="px-4 md:px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <div className="lg:col-span-2">
                   <div
@@ -547,7 +605,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             </div>
 
             {/* Desktop */}
-            <div className="hidden md:block " style={{color: palette.black2}}>
+            <div className="hidden md:block " style={{ color: palette.black2 }}>
               <SimpleTable
                 columns={[
                   "No",

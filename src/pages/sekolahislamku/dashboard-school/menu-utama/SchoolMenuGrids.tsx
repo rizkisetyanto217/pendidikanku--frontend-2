@@ -170,16 +170,14 @@ export default function SchoolMenuGrids() {
 
           {/* Main */}
           <section className="lg:col-span-9 space-y-6 min-w-0">
-            <SectionCard palette={palette} className="p-4 md:p-5">
-              <div className="mb-4 font-semibold text-base">Akses Cepat</div>
+            <div className="mb-4 font-semibold text-base">Akses Cepat</div>
 
-              {/* Grid menu */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-                {items.map((it) => (
-                  <MenuTile key={it.key} item={it} palette={palette} />
-                ))}
-              </div>
-            </SectionCard>
+            {/* Grid menu */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+              {items.map((it) => (
+                <MenuTile key={it.key} item={it} palette={palette} />
+              ))}
+            </div>
           </section>
         </div>
       </main>
@@ -196,13 +194,12 @@ function MenuTile({ item, palette }: { item: MenuItem; palette: Palette }) {
       className="h-full w-full rounded-2xl border p-3 md:p-4 flex flex-col items-center justify-center text-center gap-2 transition-transform"
       style={{
         borderColor: palette.silver1,
-        background: palette.white1,
+        // background: palette.white1,
       }}
     >
       <span
-        className="h-12 w-12 md:h-14 md:w-14 grid place-items-center rounded-xl"
         style={{
-          background: palette.primary2,
+          // background: palette.primary2,
           color: palette.primary,
         }}
         aria-hidden

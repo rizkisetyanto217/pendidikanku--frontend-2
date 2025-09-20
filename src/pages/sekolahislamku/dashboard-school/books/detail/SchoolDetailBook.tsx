@@ -15,7 +15,7 @@ import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import { BookOpen, ArrowLeft, ExternalLink, ImageOff } from "lucide-react";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
-/* ==================== Types (ikuti payload API detail) ==================== */
+/* ==================== Types ==================== */
 export type SectionLite = {
   class_sections_id: string;
   class_sections_name: string;
@@ -24,6 +24,7 @@ export type SectionLite = {
   class_sections_capacity?: number | null;
   class_sections_is_active: boolean;
 };
+
 export type UsageItem = {
   class_subject_books_id: string;
   class_subjects_id: string;
@@ -31,7 +32,8 @@ export type UsageItem = {
   classes_id: string;
   sections: SectionLite[];
 };
-export type BookDetail = {
+
+export type BookAPI = {
   books_id: string;
   books_masjid_id: string;
   books_title: string;
@@ -40,9 +42,65 @@ export type BookDetail = {
   books_url?: string | null;
   books_image_url?: string | null;
   books_slug?: string | null;
-  usages?: UsageItem[]; // <- bisa undefined/[]
+  usages: UsageItem[];
 };
+
+export type BookDetail = BookAPI;
 type BookDetailResp = { data: BookDetail; message?: string };
+
+/* ==================== Dummy Data ==================== */
+const DUMMY_BOOKS: BookAPI[] = [
+  {
+    books_id: "dummy-1",
+    books_masjid_id: "masjid-1",
+    books_title: "Matematika Dasar",
+    books_author: "Ahmad Fauzi",
+    books_desc: "Buku dasar untuk memahami konsep matematika SD.",
+    books_url: "https://contoh.com/matematika-dasar",
+    books_image_url: null,
+    books_slug: "matematika-dasar",
+    usages: [
+      {
+        class_subject_books_id: "csb-1",
+        class_subjects_id: "sub-1",
+        subjects_id: "mat-1",
+        classes_id: "cls-1",
+        sections: [
+          {
+            class_sections_id: "sec-1",
+            class_sections_name: "Kelas 1A",
+            class_sections_slug: "kelas-1a",
+            class_sections_code: "1A",
+            class_sections_capacity: 30,
+            class_sections_is_active: true,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    books_id: "dummy-2",
+    books_masjid_id: "masjid-1",
+    books_title: "Bahasa Indonesia",
+    books_author: "Siti Nurhaliza",
+    books_desc: "Panduan belajar Bahasa Indonesia dengan mudah.",
+    books_url: "https://contoh.com/bahasa-indonesia",
+    books_image_url: null,
+    books_slug: "bahasa-indonesia",
+    usages: [],
+  },
+  {
+    books_id: "dummy-3",
+    books_masjid_id: "masjid-1",
+    books_title: "IPA Terapan",
+    books_author: "Budi Santoso",
+    books_desc: "Eksperimen IPA untuk siswa SMP.",
+    books_url: null,
+    books_image_url: null,
+    books_slug: "ipa-terapan",
+    usages: [],
+  },
+];
 
 /* ==================== Helpers ==================== */
 const dateLong = (iso?: string) =>
@@ -57,13 +115,15 @@ const dateLong = (iso?: string) =>
 
 /* ==================== Fetcher ==================== */
 async function fetchBookDetail(id: string): Promise<BookDetail | null> {
-  const r = await axios.get<BookDetailResp>(`/api/a/books/${id}`, {
-    withCredentials: true,
-  });
-  console.log("📥 Mengambil detail buku:", r.data);
-  // fallback kalau backend suatu saat mengembalikan langsung objek
-  const d: any = r.data;
-  return d?.data ?? d ?? null;
+  try {
+    const r = await axios.get<BookDetailResp>(`/api/a/books/${id}`, {
+      withCredentials: true,
+    });
+    const d: any = r.data;
+    return d?.data ?? d ?? null;
+  } catch (e) {
+    return null;
+  }
 }
 
 /* ==================== Page ==================== */
@@ -82,7 +142,10 @@ export default function SchoolBookDetail() {
     staleTime: 60_000,
   });
 
-  const book = q.data ?? undefined;
+  // ✅ Fallback dummy kalau API kosong
+  const book: BookDetail | undefined =
+    q.data ?? DUMMY_BOOKS.find((b) => b.books_id === id || b.books_slug === id);
+
   const sectionsFlat = useMemo<SectionLite[]>(() => {
     const usages = book?.usages ?? [];
     return usages.flatMap((u) => u.sections || []);
@@ -95,7 +158,7 @@ export default function SchoolBookDetail() {
     >
       <ParentTopBar
         palette={palette}
-        title="Buku Pelajaran"
+        // title="Buku Pelajaran"
         gregorianDate={new Date().toISOString()}
         dateFmt={dateLong}
       />
@@ -108,13 +171,8 @@ export default function SchoolBookDetail() {
             {/* Header + Back */}
             <section className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Btn
-                  palette={palette}
-                  variant="outline"
-                  onClick={() => nav(-1)}
-                >
+                <Btn palette={palette} variant="ghost" onClick={() => nav(-1)}>
                   <ArrowLeft className="mr-2" size={16} />
-                  Kembali
                 </Btn>
                 <div className="ml-2">
                   <div className="text-lg font-semibold">

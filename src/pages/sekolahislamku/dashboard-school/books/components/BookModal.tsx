@@ -1,25 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "@/lib/axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import {
   SectionCard,
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import { colors } from "@/constants/thema";
 
-/* ===== helper debounce ===== */
-function useDebounce<T>(value: T, delay = 350) {
-  const [v, setV] = React.useState(value);
-  React.useEffect(() => {
-    const t = setTimeout(() => setV(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return v;
-}
-
-/* ===== types ===== */
 type BookEdit = {
   books_id: string;
   books_title: string;
@@ -29,30 +16,13 @@ type BookEdit = {
   books_image_url?: string | null;
 };
 
-type ClassesSearchItem = {
-  class_id: string;
-  class_name: string;
-  class_slug: string;
-  class_is_active: boolean;
-  subjects: {
-    subjects_id: string;
-    subjects_name: string;
-    class_subjects_id: string;
-  }[];
-};
-type ClassesSearchResponse = {
-  data: ClassesSearchItem[];
-  pagination: { limit: number; offset: number; total: number };
-};
-
 type Props = {
   open: boolean;
   mode: "create" | "edit";
   palette: Palette;
-  book?: BookEdit | null; // wajib saat edit
+  book?: BookEdit | null;
   onClose: () => void;
-  onSuccess: (id?: string) => void; // dipanggil saat sukses
-  showBindingOnEdit?: boolean; // default false
+  onSuccess: (id?: string) => void;
 };
 
 export default function BookModal({
@@ -62,12 +32,11 @@ export default function BookModal({
   book,
   onClose,
   onSuccess,
-  showBindingOnEdit = false,
 }: Props) {
   const qc = useQueryClient();
   const isEdit = mode === "edit";
 
-  // form buku
+  // form
   const [title, setTitle] = useState(book?.books_title ?? "");
   const [author, setAuthor] = useState(book?.books_author ?? "");
   const [desc, setDesc] = useState(book?.books_desc ?? "");
@@ -94,128 +63,52 @@ export default function BookModal({
     return () => URL.revokeObjectURL(u);
   }, [file]);
 
-  // binding opsional (aktif hanya saat create / jika diizinkan saat edit)
-  const bindingEnabledByMode = !isEdit || showBindingOnEdit;
-  const [bindEnabled, setBindEnabled] = useState(false);
-  const [classQuery, setClassQuery] = useState("");
-  const debouncedQ = useDebounce(classQuery, 400);
-  const [selectedClassSubjectId, setSelectedClassSubjectId] = useState("");
-  const [bindDesc, setBindDesc] = useState("");
-  const [bindActive, setBindActive] = useState(true);
+  // ===== Fake API (pakai localStorage) =====
+  function fakeSaveBook(newBook: BookEdit) {
+    const raw = localStorage.getItem("dummy_books") || "[]";
+    const arr: BookEdit[] = JSON.parse(raw);
 
-  useEffect(() => {
-    if (!open) {
-      setBindEnabled(false);
-      setClassQuery("");
-      setSelectedClassSubjectId("");
-      setBindDesc("");
-      setBindActive(true);
+    if (isEdit) {
+      const idx = arr.findIndex((b) => b.books_id === newBook.books_id);
+      if (idx >= 0) arr[idx] = newBook;
+    } else {
+      arr.push(newBook);
     }
-  }, [open]);
 
-  const classesQ = useQuery<ClassesSearchResponse>({
-    queryKey: ["classes-search", debouncedQ],
-    queryFn: async () => {
-      const r = await axios.get<ClassesSearchResponse>(
-        "/api/a/classes/search",
-        {
-          withCredentials: true,
-          params: { q: debouncedQ, limit: 20 },
-        }
-      );
-      return r.data;
-    },
-    enabled:
-      open &&
-      bindingEnabledByMode &&
-      bindEnabled &&
-      debouncedQ.trim().length >= 2,
-    staleTime: 30_000,
-  });
-
-  const options = useMemo(() => {
-    const rows = classesQ.data?.data ?? [];
-    return rows.flatMap((c) =>
-      (c.subjects || []).map((s) => ({
-        id: s.class_subjects_id,
-        label: `${c.class_name} — ${s.subjects_name}`,
-      }))
-    );
-  }, [classesQ.data?.data]);
+    localStorage.setItem("dummy_books", JSON.stringify(arr));
+    return newBook;
+  }
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (isEdit) {
-        if (!book) return;
-        const fd = new FormData();
-        fd.set("books_title", title);
-        fd.set("books_author", author || "");
-        fd.set("books_desc", desc || "");
-        fd.set("books_url", url || "");
-        if (file) fd.set("books_image_url", file);
-        await axios.put(`/api/a/books/${book.books_id}`, fd, {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        return { id: book.books_id };
-      } else {
-        const fd = new FormData();
-        fd.set("books_title", title);
-        if (author) fd.set("books_author", author);
-        if (desc) fd.set("books_desc", desc);
-        if (url) fd.set("books_url", url);
-        if (file) fd.set("books_image_url", file);
-        const createRes = await axios.post("/api/a/books", fd, {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        const newBookId: string =
-          createRes?.data?.data?.books_id ?? createRes?.data?.books_id;
+      const newBook: BookEdit = {
+        books_id: isEdit ? book!.books_id : `dummy-${Date.now()}`,
+        books_title: title,
+        books_author: author,
+        books_desc: desc,
+        books_url: url,
+        books_image_url: preview, // simpan preview base64/URL
+      };
 
-        if (bindEnabled && selectedClassSubjectId) {
-          try {
-            await axios.post(
-              "/api/a/class-subject-books",
-              {
-                class_subject_books_class_subject_id: selectedClassSubjectId,
-                class_subject_books_book_id: newBookId,
-                class_subject_books_description: bindDesc || undefined,
-                class_subject_books_is_active: bindActive,
-                is_active: bindActive,
-              },
-              { withCredentials: true }
-            );
-          } catch (e: any) {
-            throw new Error(
-              e?.response?.data?.message ||
-                "Buku dibuat, tapi gagal mengaitkan ke kelas/mapel."
-            );
-          }
-        }
-
-        return { id: newBookId };
-      }
+      // simpan ke fake storage
+      return fakeSaveBook(newBook);
     },
     onSuccess: async (res) => {
       await qc.invalidateQueries({ queryKey: ["books-list"] });
-      onSuccess(res?.id);
+      onSuccess(res?.books_id);
     },
     onError: (err: any) => {
-      alert(
-        err?.message || err?.response?.data?.message || "Gagal menyimpan buku."
-      );
+      alert(err?.message || "Gagal menyimpan buku (fake).");
     },
   });
 
   if (!open) return null;
 
-  const canClose = !mutation.isPending;
-
   return (
     <div
       className="fixed inset-0 z-[70] grid place-items-center p-3"
       style={{ background: "rgba(0,0,0,.45)" }}
-      onClick={() => canClose && onClose()}
+      onClick={() => !mutation.isPending && onClose()}
     >
       <SectionCard
         palette={palette}
@@ -225,24 +118,20 @@ export default function BookModal({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="text-base md:text-lg font-semibold">
-              {isEdit ? "Edit Buku" : "Tambah Buku"}
+              {isEdit ? "Edit Buku (Fake)" : "Tambah Buku (Fake)"}
             </div>
             <button
               className="opacity-70 hover:opacity-100"
-              onClick={() => canClose && onClose()}
-              aria-label="Tutup"
+              onClick={() => !mutation.isPending && onClose()}
             >
               <X size={18} />
             </button>
           </div>
 
-          {/* Grid Form */}
+          {/* Form */}
           <div className="grid md:grid-cols-12 gap-4">
             <div className="md:col-span-4">
-              <div
-                className="w-full aspect-[3/4] rounded-xl overflow-hidden grid place-items-center"
-                style={{ background: "#f3f4f6" }}
-              >
+              <div className="w-full aspect-[3/4] rounded-xl overflow-hidden grid place-items-center bg-gray-100">
                 {preview ? (
                   <img
                     src={preview}
@@ -263,9 +152,7 @@ export default function BookModal({
 
             <div className="md:col-span-8 grid gap-3">
               <label className="grid gap-1 text-sm">
-                <span>
-                  Judul <span className="text-red-500">*</span>
-                </span>
+                <span>Judul *</span>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -274,23 +161,21 @@ export default function BookModal({
                 />
               </label>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid md:grid-cols-2 gap-3">
                 <label className="grid gap-1 text-sm">
                   <span>Penulis</span>
                   <input
-                    value={author ?? ""}
+                    value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                     className="px-3 py-2 rounded-lg border bg-transparent"
-                    placeholder="cth. Budi Santoso"
                   />
                 </label>
                 <label className="grid gap-1 text-sm">
-                  <span>URL (opsional)</span>
+                  <span>URL</span>
                   <input
-                    value={url ?? ""}
+                    value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     className="px-3 py-2 rounded-lg border bg-transparent"
-                    placeholder="https://penerbit-cerdas.id/..."
                   />
                 </label>
               </div>
@@ -298,94 +183,16 @@ export default function BookModal({
               <label className="grid gap-1 text-sm">
                 <span>Deskripsi</span>
                 <textarea
-                  value={desc ?? ""}
+                  value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   className="px-3 py-2 rounded-lg border bg-transparent min-h-[84px]"
-                  placeholder="Edisi / catatan lain…"
                 />
               </label>
-
-              {bindingEnabledByMode && (
-                <div
-                  className="mt-2 pt-3 border-t"
-                  style={{ borderColor: palette.silver1 }}
-                >
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={bindEnabled}
-                      onChange={(e) => setBindEnabled(e.target.checked)}
-                    />
-                    Hubungkan ke Kelas / Mapel (opsional)
-                  </label>
-
-                  {bindEnabled && (
-                    <div className="mt-3 grid gap-3">
-                      <div className="grid md:grid-cols-2 gap-3">
-                        <label className="grid gap-1 text-sm">
-                          <span>Cari kelas (min. 2 huruf)</span>
-                          <input
-                            value={classQuery}
-                            onChange={(e) => setClassQuery(e.target.value)}
-                            className="px-3 py-2 rounded-lg border bg-transparent"
-                            placeholder='cth. "Level 1"'
-                          />
-                        </label>
-
-                        <label className="grid gap-1 text-sm">
-                          <span>Pilih Kelas — Mapel</span>
-                          <select
-                            value={selectedClassSubjectId}
-                            onChange={(e) =>
-                              setSelectedClassSubjectId(e.target.value)
-                            }
-                            className="px-3 py-2 rounded-lg border bg-transparent"
-                            disabled={!options.length && !!debouncedQ}
-                          >
-                            <option value="">— Pilih —</option>
-                            {options.map((o) => (
-                              <option key={o.id} value={o.id}>
-                                {o.label}
-                              </option>
-                            ))}
-                          </select>
-                          {debouncedQ && (
-                            <div className="text-[11px] opacity-60 mt-1">
-                              {classesQ.isFetching
-                                ? "Mencari…"
-                                : `${options.length} opsi ditemukan`}
-                            </div>
-                          )}
-                        </label>
-                      </div>
-
-                      <label className="grid gap-1 text-sm">
-                        <span>Deskripsi keterkaitan (opsional)</span>
-                        <textarea
-                          value={bindDesc}
-                          onChange={(e) => setBindDesc(e.target.value)}
-                          className="px-3 py-2 rounded-lg border bg-transparent min-h-[72px]"
-                          placeholder="Buku wajib untuk semester ganjil…"
-                        />
-                      </label>
-
-                      <label className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={bindActive}
-                          onChange={(e) => setBindActive(e.target.checked)}
-                        />
-                        Tandai keterkaitan sebagai aktif
-                      </label>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
 
           {/* Actions */}
-          <div className="mt-5 flex items-center justify-end gap-2">
+          <div className="mt-5 flex justify-end gap-2">
             <Btn
               palette={palette}
               variant="ghost"
@@ -399,12 +206,6 @@ export default function BookModal({
               loading={mutation.isPending}
               onClick={() => {
                 if (!title.trim()) return alert("Judul wajib diisi.");
-                if (!isEdit && bindEnabled && !selectedClassSubjectId) {
-                  const ok = confirm(
-                    "Belum memilih Kelas — Mapel. Lanjutkan tanpa mengaitkan?"
-                  );
-                  if (!ok) return;
-                }
                 mutation.mutate();
               }}
             >

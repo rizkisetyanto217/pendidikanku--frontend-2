@@ -393,7 +393,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-3 sm:px-4 py-3 sm:py-4 md:py-0">
+      <main className="mx-auto  px-3 sm:px-4 py-5  md:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3 order-2 lg:order-1">
@@ -412,13 +412,14 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
                   className="inline-flex items-center gap-2"
                 >
                   <ArrowLeft size={20} />
-                  {backLabel}
+             
                 </Btn>
               )}
+              <h1 className="text-lg font-semibold">Keuangan</h1>
             </div>
 
             {/* Snapshot */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 py-3 md:py-0">
               <KpiTile
                 palette={palette}
                 label="Tertagih Bulan Ini"
@@ -585,7 +586,7 @@ function InvoiceTable({
 }) {
   return (
     <SectionCard palette={palette}>
-      <div className="p-4 font-medium">Daftar Tagihan</div>
+      <div className="p-4 font-medium text-lg">Daftar Tagihan</div>
 
       {/* Mobile View */}
       <div className="block md:hidden">

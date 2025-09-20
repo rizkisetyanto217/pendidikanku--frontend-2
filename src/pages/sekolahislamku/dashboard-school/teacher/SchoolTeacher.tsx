@@ -1,6 +1,6 @@
 /* ================= Imports ================= */
 import { useState, useMemo } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 
@@ -109,6 +109,13 @@ const DUMMY_TEACHERS: TeacherItem[] = [
   },
 ];
 
+/* ================= Slug Hook ================= */
+function useSchoolSlug() {
+  const { slug } = useParams<{ slug: string }>();
+  const makePath = (path: string) => `/${slug}/sekolah/${path}`;
+  return { slug, makePath };
+}
+
 /* ================= Components ================= */
 const PageHeader = ({
   palette,
@@ -123,19 +130,19 @@ const PageHeader = ({
   onBackClick?: () => void;
   backLabel?: string;
 }) => (
-  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-    <div className="flex items-center gap-3">
+  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
+    <div className="flex items-center gap-5">
       {onBackClick && (
         <Btn
           palette={palette}
           variant="ghost"
           onClick={onBackClick}
-          className="flex items-center gap-1.5 mt-1"
+          className="flex items-center gap-1.5 mt-7 md:mt-0"
         >
           <ArrowLeft size={20} />
-          <span className="hidden sm:inline">{backLabel}</span>
         </Btn>
       )}
+      <h1 className="text-lg font-semibold">Guru</h1>
     </div>
 
     <div className="flex items-center gap-2 flex-wrap">
@@ -173,6 +180,8 @@ function TeacherCardMobile({
   teacher: TeacherItem;
   palette: Palette;
 }) {
+  const { makePath } = useSchoolSlug();
+
   return (
     <div
       key={teacher.id}
@@ -221,18 +230,11 @@ function TeacherCardMobile({
         style={{ borderColor: palette.silver1 }}
       >
         <NavLink
-          to={`/sekolah/guru/${teacher.id}`}
+          to={makePath(`guru/${teacher.id}`)}
           className="underline text-sm"
           style={{ color: palette.primary }}
         >
           Detail
-        </NavLink>
-        <NavLink
-          to={`/sekolah/absensi?guru=${teacher.id}`}
-          className="underline text-sm"
-          style={{ color: palette.primary }}
-        >
-          Absensi
         </NavLink>
       </div>
     </div>
@@ -245,63 +247,60 @@ const TeacherTableRow = ({
 }: {
   teacher: TeacherItem;
   palette: Palette;
-}) => (
-  <tr
-    className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-    style={{ borderColor: palette.silver1 }}
-  >
-    <td className="py-3 px-5">{teacher.nip ?? "-"}</td>
-    <td className="py-3">
-      <div className="font-medium">{teacher.name}</div>
-      {teacher.email && (
-        <div className="text-xs opacity-70">{teacher.email}</div>
-      )}
-    </td>
-    <td className="py-3">{teacher.subject ?? "-"}</td>
-    <td className="py-3">{genderLabel(teacher.gender)}</td>
-    <td className="py-3">
-      <div className="flex items-center gap-3 text-sm">
-        {teacher.phone && (
-          <a
-            href={`tel:${teacher.phone}`}
-            className="flex items-center gap-1 hover:underline"
-            style={{ color: palette.primary }}
-          >
-            <Phone size={14} /> {teacher.phone}
-          </a>
-        )}
+}) => {
+  const { makePath } = useSchoolSlug();
+
+  return (
+    <tr
+      className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+      style={{ borderColor: palette.silver1 }}
+    >
+      <td className="py-3 px-5">{teacher.nip ?? "-"}</td>
+      <td className="py-3">
+        <div className="font-medium">{teacher.name}</div>
         {teacher.email && (
-          <a
-            href={`mailto:${teacher.email}`}
-            className="flex items-center gap-1 hover:underline"
-            style={{ color: palette.primary }}
-          >
-           
-          </a>
+          <div className="text-xs opacity-70">{teacher.email}</div>
         )}
-      </div>
-    </td>
-    <td className="py-3 text-right">
-      <div className="flex items-center gap-2 justify-end mr-3">
-        <NavLink to={`/sekolah/guru/${teacher.id}`}>
-          <Btn
-            size="sm"
-            palette={palette}
-            variant="quaternary"
-            className="flex items-center gap-1"
-          >
-            Detail <ChevronRight size={14} />
-          </Btn>
-        </NavLink>
-        {/* <NavLink to={`/sekolah/absensi?guru=${teacher.id}`}>
-          <Btn size="sm" palette={palette} variant="outline">
-            Absensi
-          </Btn>
-        </NavLink> */}
-      </div>
-    </td>
-  </tr>
-);
+      </td>
+      <td className="py-3">{teacher.subject ?? "-"}</td>
+      <td className="py-3">{genderLabel(teacher.gender)}</td>
+      <td className="py-3">
+        <div className="flex items-center gap-3 text-sm">
+          {teacher.phone && (
+            <a
+              href={`tel:${teacher.phone}`}
+              className="flex items-center gap-1 hover:underline"
+              style={{ color: palette.primary }}
+            >
+              <Phone size={14} /> {teacher.phone}
+            </a>
+          )}
+          {teacher.email && (
+            <a
+              href={`mailto:${teacher.email}`}
+              className="flex items-center gap-1 hover:underline"
+              style={{ color: palette.primary }}
+            />
+          )}
+        </div>
+      </td>
+      <td className="py-3 text-right">
+        <div className="flex items-center gap-2 justify-end mr-3">
+          <NavLink to={makePath(`guru/${teacher.id}`)}>
+            <Btn
+              size="sm"
+              palette={palette}
+              variant="quaternary"
+              className="flex items-center gap-1"
+            >
+              Detail <ChevronRight size={14} />
+            </Btn>
+          </NavLink>
+        </div>
+      </td>
+    </tr>
+  );
+};
 
 const TeachersTable = ({
   palette,
@@ -319,7 +318,7 @@ const TeachersTable = ({
   onRefetch: () => void;
 }) => (
   <SectionCard palette={palette} className="p-0">
-    {/* Mobile: card view */}
+    {/* Mobile */}
     <div className="block md:hidden p-4 space-y-3">
       {isLoading && <div className="text-center text-sm">Memuat data…</div>}
       {isError && (
@@ -345,7 +344,7 @@ const TeachersTable = ({
         ))}
     </div>
 
-    {/* Desktop: table view */}
+    {/* Desktop */}
     <div className="hidden md:block overflow-x-auto">
       <table className="min-w-[800px] w-full text-sm">
         <thead>
@@ -358,7 +357,6 @@ const TeachersTable = ({
             <th>Mapel</th>
             <th>Gender</th>
             <th>Kontak</th>
-            {/* <th className="text-right">Aksi</th> */}
           </tr>
         </thead>
         <tbody>
@@ -412,11 +410,7 @@ const TeachersTable = ({
 );
 
 /* ================= Main Component ================= */
-const TeachersPage: React.FC<SchoolTeacherProps> = ({
-  showBack = false,
-  backTo,
-  backLabel,
-}) => {
+const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
@@ -426,13 +420,10 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({
   const [q, setQ] = useState("");
 
   const { user } = useCurrentUser();
-const masjidId = useMemo(() => {
-  const u: any = user || {};
-  return u.masjid_id || u.lembaga_id || u?.masjid?.id || u?.lembaga?.id || "";
-}, [user]);
-
-
-
+  const masjidId = useMemo(() => {
+    const u: any = user || {};
+    return u.masjid_id || u.lembaga_id || u?.masjid?.id || u?.lembaga?.id || "";
+  }, [user]);
 
   const {
     data: resp,
@@ -506,12 +497,7 @@ const masjidId = useMemo(() => {
             palette={palette}
             onImportClick={() => setOpenImport(true)}
             onAddClick={() => setOpenAdd(true)}
-            onBackClick={
-              showBack
-                ? () => (backTo ? navigate(backTo) : navigate(-1))
-                : undefined
-            }
-            backLabel={backLabel || "Kembali"}
+            onBackClick={showBack ? () => navigate(-1) : undefined}
           />
           <TeachersTable
             palette={palette}

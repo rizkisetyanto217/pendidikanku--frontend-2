@@ -443,23 +443,25 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:py-0">
+      <main className="mx-auto max-w-6xl px-4 py-6 ">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
           <div className="flex-1 space-y-6 min-w-0 lg:p-4">
             {/* Header */}
-            {showBack && (
-              <Btn
-                palette={palette}
-                variant="ghost"
-                onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
-                className="inline-flex items-center gap-2"
-              >
-                <ArrowLeft size={20} /> 
-              </Btn>
-            )}
-
+            <div className="flex gap-3 items-center md:-mt-4 ">
+              {showBack && (
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} />
+                </Btn>
+              )}
+              <h1 className="text-lg font-semibold">Seluruh Kelas</h1>
+            </div>
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>
               <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
