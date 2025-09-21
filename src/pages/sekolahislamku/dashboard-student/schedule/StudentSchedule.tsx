@@ -209,8 +209,8 @@ function ClassLevelBadge({
         level === "Dasar"
           ? "success"
           : level === "Menengah"
-          ? "warning"
-          : "info"
+            ? "warning"
+            : "info"
       }
       palette={palette}
       className="h-6"
@@ -399,9 +399,9 @@ export default function StudentSchedule() {
         palette={palette}
         title="Jadwal"
         gregorianDate={qISO}
-        hijriDate={hijriWithWeekday(qISO)} 
+        hijriDate={hijriWithWeekday(qISO)}
       />
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
           <div className="flex-1 space-y-6">

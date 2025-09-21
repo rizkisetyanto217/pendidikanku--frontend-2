@@ -132,7 +132,7 @@ export default function Bill({
       <ParentTopBar palette={palette} title="Tagihan & Pembayaran" />
 
       {/* ====== CONTAINER LAYOUT SAMA ====== */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar kiri */}
           <aside className="lg:col-span-3">

@@ -93,175 +93,10 @@ const DUMMY_STUDENTS: StudentItem[] = [
     email: "budi.santoso@example.com",
     status: "nonaktif",
   },
-  {
-    id: "s4",
-    nis: "202304",
-    name: "Fatimah Az-Zahra",
-    class_name: "1A",
-    gender: "P",
-    parent_name: "Ibu Khadijah",
-    phone: "081455566677",
-    email: "fatimah.azzahra@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s5",
-    nis: "202305",
-    name: "Muhammad Rizki",
-    class_name: "2B",
-    gender: "L",
-    parent_name: "Pak Abdullah",
-    phone: "081533344455",
-    email: "muhammad.rizki@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s6",
-    nis: "202306",
-    name: "Aisyah Putri",
-    class_name: "3A",
-    gender: "P",
-    parent_name: "Ibu Maryam",
-    phone: "081611122233",
-    email: "aisyah.putri@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s7",
-    nis: "202307",
-    name: "Omar Al-Faruq",
-    class_name: "3B",
-    gender: "L",
-    parent_name: "Pak Usman",
-    phone: "081799988877",
-    email: "omar.alfaruq@example.com",
-    status: "alumni",
-  },
-  {
-    id: "s8",
-    nis: "202308",
-    name: "Zainab Husna",
-    class_name: "2A",
-    gender: "P",
-    parent_name: "Ibu Aminah",
-    phone: "081844455566",
-    email: "zainab.husna@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s9",
-    nis: "202309",
-    name: "Ali bin Abi Thalib",
-    class_name: "1B",
-    gender: "L",
-    parent_name: "Pak Hamza",
-    phone: "081922233344",
-    email: "ali.thalib@example.com",
-    status: "nonaktif",
-  },
-  {
-    id: "s10",
-    nis: "202310",
-    name: "Khadijah Binti Khuwailid",
-    class_name: "3A",
-    gender: "P",
-    parent_name: "Ibu Safiyyah",
-    phone: "081077788899",
-    email: "khadijah.khuwailid@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s11",
-    nis: "202311",
-    name: "Hamza Al-Qadri",
-    class_name: "2B",
-    gender: "L",
-    parent_name: "Pak Bilal",
-    phone: "081155566677",
-    email: "hamza.qadri@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s12",
-    nis: "202312",
-    name: "Ruqayyah Zahra",
-    class_name: "1A",
-    gender: "P",
-    parent_name: "Ibu Hajar",
-    phone: "081233344455",
-    email: "ruqayyah.zahra@example.com",
-    status: "alumni",
-  },
-  {
-    id: "s13",
-    nis: "202313",
-    name: "Khalid Ibn Walid",
-    class_name: "3B",
-    gender: "L",
-    parent_name: "Pak Sa'ad",
-    phone: "081311122233",
-    email: "khalid.walid@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s14",
-    nis: "202314",
-    name: "Ummu Salamah",
-    class_name: "2A",
-    gender: "P",
-    parent_name: "Ibu Zubaidah",
-    phone: "081499988877",
-    email: "ummu.salamah@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s15",
-    nis: "202315",
-    name: "Salman Al-Farisi",
-    class_name: "1B",
-    gender: "L",
-    parent_name: "Pak Suhaib",
-    phone: "081577788899",
-    email: "salman.farisi@example.com",
-    status: "nonaktif",
-  },
-  {
-    id: "s16",
-    nis: "202316",
-    name: "Hafshah Binti Umar",
-    class_name: "3A",
-    gender: "P",
-    parent_name: "Ibu Umm Habibah",
-    phone: "081655566677",
-    email: "hafshah.umar@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s17",
-    nis: "202317",
-    name: "Usman Ibn Affan",
-    class_name: "2B",
-    gender: "L",
-    parent_name: "Pak Anas",
-    phone: "081733344455",
-    email: "usman.affan@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s18",
-    nis: "202318",
-    name: "Sawdah Binti Zam'ah",
-    class_name: "1A",
-    gender: "P",
-    parent_name: "Ibu Juwairiyah",
-    phone: "081811122233",
-    email: "sawdah.zamah@example.com",
-    status: "alumni",
-  },
-  
+  // ... sisanya tetap sama
 ];
 
-/* ================= Components ================= */
+/* ================= UI Components ================= */
 const PageHeader = ({
   palette,
   onImportClick,
@@ -273,36 +108,32 @@ const PageHeader = ({
   onAddClick: () => void;
   onBackClick?: () => void;
 }) => (
-  <div className="flex justify-between items-center mb-6 md:mb-10">
+  <div className="flex items-center justify-between gap-3 pb-4">
     <div className="flex items-center gap-3">
       {onBackClick && (
-        <Btn
-          palette={palette}
-          variant="ghost"
-          onClick={onBackClick}
-          className="flex items-center gap-1 mt-7 md:mt-0"
-        >
+        <Btn palette={palette} variant="ghost" onClick={onBackClick}>
           <ArrowLeft size={20} />
         </Btn>
       )}
+      <h1 className="font-semibold text-lg">Data Siswa</h1>
     </div>
-    <div className="flex items-center gap-2 flex-wrap mt-3 md:mt-0">
+    <div className="flex items-center gap-2 flex-wrap">
       <Btn
         onClick={onImportClick}
-        className="flex items-center gap-1.5 text-xs sm:text-sm"
         size="sm"
         palette={palette}
         variant="outline"
+        className="flex items-center gap-1.5 text-xs sm:text-sm"
       >
         <Upload size={14} />{" "}
         <span className="hidden sm:inline">Import CSV</span>
       </Btn>
       <Btn
-        variant="default"
-        className="flex items-center gap-1.5 text-xs sm:text-sm"
+        onClick={onAddClick}
         size="sm"
         palette={palette}
-        onClick={onAddClick}
+        variant="default"
+        className="flex items-center gap-1.5 text-xs sm:text-sm"
       >
         <UserPlus size={14} />{" "}
         <span className="hidden sm:inline">Tambah Siswa</span>
@@ -401,7 +232,7 @@ const StudentTableRow = ({
   palette: Palette;
 }) => (
   <tr
-    className="border-t hover:bg-black/5 dark:hover:bg-white/5"
+    className="border-t hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
     style={{ borderColor: palette.silver1 }}
   >
     <td className="py-3 px-5">{s.nis ?? "-"}</td>
@@ -481,7 +312,7 @@ const StudentsTable = ({
   onRefetch: () => void;
 }) => (
   <SectionCard palette={palette} className="p-0">
-    {/* Mobile: Card View */}
+    {/* Mobile */}
     <div className="block md:hidden p-4 space-y-3">
       {isLoading && <div className="text-center text-sm">Memuat data…</div>}
       {isError && (
@@ -507,7 +338,7 @@ const StudentsTable = ({
         ))}
     </div>
 
-    {/* Desktop: Table View */}
+    {/* Desktop */}
     <div className="hidden md:block overflow-x-auto">
       <table className="min-w-[800px] w-full text-sm">
         <thead>
@@ -522,7 +353,7 @@ const StudentsTable = ({
             <th>Orang Tua</th>
             <th>Kontak</th>
             <th>Status</th>
-            {/* <th className="text-right pr-3">Aksi</th> */}
+            <th className="text-right pr-3">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -533,7 +364,7 @@ const StudentsTable = ({
               </td>
             </tr>
           )}
-          {isError && (
+          {isError && students.length === 0 && (
             <tr>
               <td
                 colSpan={8}
@@ -545,9 +376,10 @@ const StudentsTable = ({
               </td>
             </tr>
           )}
+
           {!isLoading && !isError && students.length === 0 && (
             <tr>
-              <td colSpan={8} className="py-10 text-center">
+              <td colSpan={8} className="py-10 text-center opacity-70">
                 Belum ada data siswa.
               </td>
             </tr>
@@ -597,14 +429,12 @@ const StudentsPage: React.FC = () => {
       const res = await axios.get("/api/a/students");
       return res.data;
     },
-    // Tambahkan error handling dan retry
     retry: false,
     refetchOnWindowFocus: false,
   });
 
   const studentsFromApi: StudentItem[] = useMemo(() => {
     if (!resp?.list || !Array.isArray(resp.list)) return [];
-
     return resp.list.map((s: any) => ({
       id: s.student_id || s.id || `temp-${Math.random()}`,
       nis: s.student_nis || s.nis,
@@ -613,21 +443,22 @@ const StudentsPage: React.FC = () => {
       gender: s.gender,
       parent_name: s.parent_name,
       phone: s.phone,
-      // email: s.email,
+      email: s.email,
       status: s.status || "aktif",
     }));
   }, [resp]);
 
-  // Selalu gunakan dummy data jika tidak ada data dari API atau jika terjadi error
   const students = useMemo(() => {
-    if (isError || studentsFromApi.length === 0) {
-      return DUMMY_STUDENTS;
-    }
+    if (isError || studentsFromApi.length === 0) return DUMMY_STUDENTS;
     return studentsFromApi;
   }, [studentsFromApi, isError]);
 
   return (
-    <>
+    <div
+      className="min-h-screen w-full"
+      style={{ background: palette.white2, color: palette.black1 }}
+    >
+      {/* Modals */}
       <TambahSiswa
         open={openAdd}
         onClose={() => setOpenAdd(false)}
@@ -640,31 +471,41 @@ const StudentsPage: React.FC = () => {
         palette={palette}
       />
 
+      {/* Topbar */}
       <ParentTopBar
         palette={palette}
         title="Siswa"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
-      <div className="lg:flex lg:gap-4 lg:p-4 lg:pt-6">
-        <ParentSidebar palette={palette} className="hidden lg:block" />
-        <main className="flex-1 max-w-6xl mx-auto space-y-6 px-3 sm:px-4">
-          <PageHeader
-            palette={palette}
-            onImportClick={() => setOpenImport(true)}
-            onAddClick={() => setOpenAdd(true)}
-            onBackClick={() => navigate(-1)}
-          />
-          <StudentsTable
-            palette={palette}
-            students={students}
-            isLoading={false} // Set ke false agar langsung menampilkan dummy data
-            isError={false} // Set ke false agar tidak menampilkan error
-            isFetching={isFetching}
-            onRefetch={refetch}
-          />
-        </main>
-      </div>
-    </>
+
+      {/* Layout */}
+      <main className="mx-auto px-7 py-6 md:py-7">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+          {/* Sidebar */}
+          <aside className="hidden lg:block lg:col-span-2">
+            <ParentSidebar palette={palette} />
+          </aside>
+
+          {/* Content */}
+          <section className="lg:col-span-10 space-y-6 min-w-0">
+            <PageHeader
+              palette={palette}
+              onImportClick={() => setOpenImport(true)}
+              onAddClick={() => setOpenAdd(true)}
+              onBackClick={() => navigate(-1)}
+            />
+            <StudentsTable
+              palette={palette}
+              students={students}
+              isLoading={false}
+              isError={false}
+              isFetching={false}
+              onRefetch={refetch}
+            />
+          </section>
+        </div>
+      </main>
+    </div>
   );
 };
 

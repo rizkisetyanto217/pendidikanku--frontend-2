@@ -11,14 +11,16 @@ type ExportModalProps = {
   open: boolean;
   onClose: () => void;
   palette: Palette;
-  onSubmit?: (data: {
+  onSubmit: (data: {
     month: string;
     format: string;
     file?: File | null;
-  }) => void; // opsional
-  accept?: string; // default ".xlsx,.csv,.pdf"
-  maxSizeMB?: number; // default 10
+  }) => void; // ✅ wajib
+  accept?: string;
+  maxSizeMB?: number;
 };
+
+
 
 const Export: React.FC<ExportModalProps> = ({
   open,

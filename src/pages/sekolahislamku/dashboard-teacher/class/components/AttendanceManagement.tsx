@@ -48,7 +48,7 @@ export default function AttendanceManagement() {
         gregorianDate={new Date().toISOString()}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:gap-6">
           <aside className="lg:w-64 mb-6 lg:mb-0">
             <ParentSidebar palette={palette} />

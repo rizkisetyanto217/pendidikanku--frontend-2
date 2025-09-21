@@ -105,23 +105,26 @@ const AttendanceDetailPage: React.FC = () => {
         dateFmt={(iso) => new Date(iso || "").toLocaleDateString("id-ID")}
       />
 
-      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
+      <main className="mx-auto px-7 md:py-8 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Content */}
-          <section className="lg:col-span-9 space-y-6">
-            <Btn
-              palette={palette}
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="gap-1"
-            >
-              <ArrowLeft size={20} /> 
-            </Btn>
+          <section className="lg:col-span-10 space-y-6">
+            <div className="flex gap-3 items-center">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-1"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+              <h1 className="textlg font-semibold">Pengaturan</h1>
+            </div>
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 space-y-4">
                 <div className="flex justify-between items-center">

@@ -338,7 +338,7 @@ export default function TeacherAnnouncements() {
         dateFmt={(iso) => dateLong(iso)}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar */}
           <ParentSidebar palette={palette} />

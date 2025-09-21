@@ -994,7 +994,7 @@ const AllAnnouncement: React.FC = () => {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto max-w-6xl px-4 py-6 ">
+      <main className="mx-auto Replace px-4 py-6 ">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri */}
           <ParentSidebar palette={palette} />
@@ -1005,17 +1005,17 @@ const AllAnnouncement: React.FC = () => {
 
             <div className="flex items-start justify-between gap-6">
               <div className="text-left flex items-center gap-3">
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
                   <Btn
                     palette={palette}
                     variant="ghost"
                     onClick={() => navigate(-1)}
-                    className="inline-flex items-center gap-2 mb-2"
+                    className="inline-flex items-center mb-2"
                   >
                     <ArrowLeft size={20} />
                   </Btn>
+                   <h1 className="text-lg font-semibold">Pengumuman</h1>
                 </div>
-
               </div>
               <Btn palette={palette} onClick={() => setOpenAdd(true)}>
                 <Plus size={20} />

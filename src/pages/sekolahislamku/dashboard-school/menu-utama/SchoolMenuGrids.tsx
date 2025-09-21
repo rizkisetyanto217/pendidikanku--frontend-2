@@ -50,7 +50,6 @@ const dateLong = (iso?: string) =>
       })
     : "-";
 
-
 type MenuItem = {
   key: string;
   label: string;
@@ -119,7 +118,12 @@ export default function SchoolMenuGrids() {
         to: "pelajaran",
         icon: LibraryBig,
       },
-      { key: "pengumuman", label: "Pengumuman", to: "all-announcement", icon: Bell },
+      {
+        key: "pengumuman",
+        label: "Pengumuman",
+        to: "all-announcement",
+        icon: Bell,
+      },
       {
         key: "sertifikat",
         label: "Sertifikat",
@@ -161,15 +165,15 @@ export default function SchoolMenuGrids() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto w-full px-7 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
             <div className="mb-4 font-semibold text-base">Akses Cepat</div>
 
             {/* Grid menu */}

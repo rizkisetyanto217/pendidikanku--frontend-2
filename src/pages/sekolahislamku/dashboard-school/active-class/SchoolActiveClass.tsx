@@ -108,7 +108,7 @@ const SchoolActiveClass: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-3 md:py-6">
+      <main className="mx-auto Replace px-4 py-3 md:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">

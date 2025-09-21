@@ -195,7 +195,7 @@ function MobileDrawer({
       {/* panel */}
       <aside
         id="mobile-drawer"
-        className="fixed inset-y-0 left-0 z-50 w-72 max-w-[70vw]"
+        className="fixed inset-y-0 left-0 z-50 w-72 max-w-[70vw] flex flex-col"
         style={{
           background: palette.white1,
           borderRight: `1px solid ${palette.silver1}`,
@@ -203,13 +203,12 @@ function MobileDrawer({
         role="dialog"
         aria-label="Menu navigasi"
       >
-        {/* Header dengan Logo dan Nama Sekolah */}
+        {/* Header fixed */}
         <div
-          className="flex flex-col items-center px-4 py-6 border-b"
+          className="flex flex-col items-center px-4 py-6 border-b relative flex-shrink-0"
           style={{ borderColor: palette.silver1 }}
         >
-          {/* Logo Sekolah */}
-          <div className="mb-3 ">
+          <div className="mb-3">
             <img
               src="/image/Gambar-Masjid.jpeg"
               alt="Logo Sekolah"
@@ -217,21 +216,17 @@ function MobileDrawer({
               style={{ borderColor: palette.primary }}
             />
           </div>
-
-          {/* Nama Sekolah */}
           <div className="text-center">
             <h2
               className="font-bold text-lg leading-tight"
               style={{ color: palette.primary }}
             >
-              SDIT{" "}
+              SDIT
             </h2>
             <p className="text-sm mt-1" style={{ color: palette.silver2 }}>
               Al-Hikmah
             </p>
           </div>
-
-          {/* Tombol close di pojok kanan atas */}
           <button
             aria-label="Tutup menu"
             onClick={onClose}
@@ -242,31 +237,34 @@ function MobileDrawer({
           </button>
         </div>
 
-        {/* Tanggal */}
-        <div
-          className="px-3 pt-3 pb-2 text-xs flex flex-col gap-1 items-start"
-          style={{ color: palette.silver2 }}
-        >
-          {formattedGregorian}
-        </div>
+        {/* Konten scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Tanggal */}
+          <div
+            className="px-3 pt-3 pb-2 text-xs flex flex-col gap-1 items-start"
+            style={{ color: palette.silver2 }}
+          >
+            {formattedGregorian}
+          </div>
 
-        {/* Navigation */}
-        <nav className="px-2 pb-4" aria-label="Navigasi">
-          <ul className="space-y-2">
-            {navs.map(({ path, label, icon, end }) => (
-              <li key={path}>
-                <NavLinkItem
-                  to={path}
-                  icon={icon}
-                  label={label}
-                  end={end}
-                  palette={palette}
-                  onClick={onClose}
-                />
-              </li>
-            ))}
-          </ul>
-        </nav>
+          {/* Navigation */}
+          <nav className="px-2 pb-4" aria-label="Navigasi">
+            <ul className="space-y-2">
+              {navs.map(({ path, label, icon, end }) => (
+                <li key={path}>
+                  <NavLinkItem
+                    to={path}
+                    icon={icon}
+                    label={label}
+                    end={end}
+                    palette={palette}
+                    onClick={onClose}
+                  />
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </aside>
     </div>
   );
@@ -374,7 +372,7 @@ export default function ParentTopBar({
           borderColor: palette.silver1,
         }}
       >
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3">
+        <div className="mx-auto Replace px-4 py-3 flex items-center justify-between gap-3">
           {/* Left */}
           <div className="flex items-center gap-2">
             <button

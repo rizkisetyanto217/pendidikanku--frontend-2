@@ -392,42 +392,42 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     setOpenTambahLevel(false);
   };
 
- const handleClassCreated = (row: NewClassRow) => {
-   const dummy: ApiClassSection = {
-     class_sections_id: (row as any).id ?? uid("sec"),
-     class_sections_class_id: (row as any).classId ?? levels[0]?.id ?? "",
-     class_sections_masjid_id: (row as any).masjidId ?? "",
-     class_sections_teacher_id: (row as any).teacherId ?? null,
-     class_sections_slug: (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
-     class_sections_name: row.name ?? "Kelas Baru",
-     class_sections_code: (row as any).code ?? "-",
-     class_sections_capacity: (row as any).capacity ?? null,
-     class_sections_schedule: (row as any).schedule ?? {
-       days: [],
-       start: undefined,
-       end: undefined,
-     },
-     class_sections_is_active: (row as any).is_active ?? true,
-     class_sections_created_at: new Date().toISOString(),
-     class_sections_updated_at: new Date().toISOString(),
-     teacher: (row as any).teacher
-       ? {
-           id: (row as any).teacher.id ?? uid("tch"),
-           user_name: (row as any).teacher.user_name ?? "Guru Baru",
-           email: (row as any).teacher.email ?? "",
-           is_active: (row as any).teacher.is_active ?? true,
-         }
-       : null,
-   };
+  const handleClassCreated = (row: NewClassRow) => {
+    const dummy: ApiClassSection = {
+      class_sections_id: (row as any).id ?? uid("sec"),
+      class_sections_class_id: (row as any).classId ?? levels[0]?.id ?? "",
+      class_sections_masjid_id: (row as any).masjidId ?? "",
+      class_sections_teacher_id: (row as any).teacherId ?? null,
+      class_sections_slug:
+        (row as any).slug ?? toSlug(row.name ?? "kelas-baru"),
+      class_sections_name: row.name ?? "Kelas Baru",
+      class_sections_code: (row as any).code ?? "-",
+      class_sections_capacity: (row as any).capacity ?? null,
+      class_sections_schedule: (row as any).schedule ?? {
+        days: [],
+        start: undefined,
+        end: undefined,
+      },
+      class_sections_is_active: (row as any).is_active ?? true,
+      class_sections_created_at: new Date().toISOString(),
+      class_sections_updated_at: new Date().toISOString(),
+      teacher: (row as any).teacher
+        ? {
+            id: (row as any).teacher.id ?? uid("tch"),
+            user_name: (row as any).teacher.user_name ?? "Guru Baru",
+            email: (row as any).teacher.email ?? "",
+            is_active: (row as any).teacher.is_active ?? true,
+          }
+        : null,
+    };
 
-   qc.setQueryData<ApiClassSection[]>(
-     ["class-sections", q, status, levelId],
-     (old = []) => [dummy, ...(old ?? [])]
-   );
+    qc.setQueryData<ApiClassSection[]>(
+      ["class-sections", q, status, levelId],
+      (old = []) => [dummy, ...(old ?? [])]
+    );
 
-   setOpenTambah(false);
- };
-
+    setOpenTambah(false);
+  };
 
   /* ================= Render ================= */
   return (
@@ -443,7 +443,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6 ">
+      <main className="mx-auto Replace px-7 py-6 ">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
@@ -464,8 +464,8 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
             </div>
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>
-              <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
-                <div className="font-medium flex items-center gap-2">
+              <div className="flex p-4 md:p-5 pb-2 items-center justify-between ">
+                <div className="font-medium flex items-center gap-2 -mt-5">
                   <Layers size={18} /> Tingkat
                 </div>
                 <Btn

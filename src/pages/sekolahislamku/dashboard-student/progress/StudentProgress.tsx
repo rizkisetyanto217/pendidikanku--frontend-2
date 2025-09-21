@@ -226,7 +226,7 @@ export default function StudentProgress() {
       />
 
       {/* Content */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri (sticky saat lg+) */}
           <ParentSidebar palette={palette} />
@@ -556,7 +556,10 @@ export default function StudentProgress() {
                 <NotebookPen size={18} color={palette.quaternary} /> Riwayat
                 Catatan & Hafalan
               </div>
-              <div className="grid grid-cols-1 gap-3" style={{ color: palette.black2 }}>
+              <div
+                className="grid grid-cols-1 gap-3"
+                style={{ color: palette.black2 }}
+              >
                 {(data?.notesHistory ?? []).map((n, i) => (
                   <div
                     key={i}
@@ -564,7 +567,7 @@ export default function StudentProgress() {
                     style={{
                       borderColor: palette.silver1,
                       background: palette.white2,
-                      color: palette.black2
+                      color: palette.black2,
                     }}
                   >
                     <div

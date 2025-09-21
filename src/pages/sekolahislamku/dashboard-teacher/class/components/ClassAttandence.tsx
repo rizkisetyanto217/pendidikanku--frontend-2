@@ -195,41 +195,40 @@ export default function ClassAttandence() {
       : students;
   }, [students, q]);
 
- const counts = useMemo(() => {
-   const c = { hadir: 0, online: 0, sakit: 0, izin: 0, alpa: 0 } as Record<
-     AttendanceStatus,
-     number
-   >;
-   for (const s of students) {
-     const v: AttendanceStatus = statuses[s.id] ?? "hadir";
-     c[v] = (c[v] ?? 0) + 1;
-   }
-   return c;
- }, [statuses, students]);
-
+  const counts = useMemo(() => {
+    const c = { hadir: 0, online: 0, sakit: 0, izin: 0, alpa: 0 } as Record<
+      AttendanceStatus,
+      number
+    >;
+    for (const s of students) {
+      const v: AttendanceStatus = statuses[s.id] ?? "hadir";
+      c[v] = (c[v] ?? 0) + 1;
+    }
+    return c;
+  }, [statuses, students]);
 
   const handleChange = (sid: string, st: AttendanceStatus) =>
     setStatuses((prev) => ({ ...prev, [sid]: st }));
 
-const handleSave = () => {
-  const store = readStore();
-  const payload: Record<string, AttendanceStatus> = {};
-  for (const s of students) {
-    payload[s.id] = statuses[s.id] ?? "hadir";
-  }
-  store[storageKey] = payload;
-  writeStore(store);
+  const handleSave = () => {
+    const store = readStore();
+    const payload: Record<string, AttendanceStatus> = {};
+    for (const s of students) {
+      payload[s.id] = statuses[s.id] ?? "hadir";
+    }
+    store[storageKey] = payload;
+    writeStore(store);
 
-  // Buat CSV sederhana
-  let csv = "Nama,Status\n";
-  for (const s of students) {
-    const st = payload[s.id];
-    csv += `${s.name},${st}\n`;
-  }
-  downloadFile(`absensi_${classId ?? "unknown"}.csv`, csv);
+    // Buat CSV sederhana
+    let csv = "Nama,Status\n";
+    for (const s of students) {
+      const st = payload[s.id];
+      csv += `${s.name},${st}\n`;
+    }
+    downloadFile(`absensi_${classId ?? "unknown"}.csv`, csv);
 
-  alert("Absensi disimpan & diunduh ✅");
-};
+    alert("Absensi disimpan & diunduh ✅");
+  };
 
   // setelah states: const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>(initialStatuses);
 
@@ -270,7 +269,6 @@ const handleSave = () => {
     URL.revokeObjectURL(url);
   }
 
-
   return (
     <div
       className="min-h-screen w-full"
@@ -284,7 +282,7 @@ const handleSave = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 

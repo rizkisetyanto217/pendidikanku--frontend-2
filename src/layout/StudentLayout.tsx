@@ -13,7 +13,7 @@ export default function StudentLayout() {
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* Container + 2 kolom saat lg+ */}
-      <div className="mx-auto max-w-6xl pb-6 lg:flex lg:items-start lg:gap-4">
+      <div className="mx-auto Replace pb-6 lg:flex lg:items-start lg:gap-4">
         {/* Konten halaman */}
         <div className="flex-1">
           <Outlet />

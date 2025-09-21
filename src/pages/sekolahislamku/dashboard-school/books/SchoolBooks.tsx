@@ -509,7 +509,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 md:py-6 py-0">
+      <main className="mx-auto Replace px-4 sm:px-6 lg:px-8 md:py-6 py-0">
         <div className="lg:flex lg:items-start lg:gap-6">
           {/* Sidebar kiri (sticky di desktop) */}
           <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
@@ -519,7 +519,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           {/* Konten utama */}
           <div className="flex-1 space-y-5 min-w-0">
             {/* Header */}
-        
+
             <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2  ">
               <div className="flex items-center gap-4 md:-mt-2">
                 {showBack && (

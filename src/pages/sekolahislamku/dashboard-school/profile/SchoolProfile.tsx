@@ -189,15 +189,15 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
         dateFmt={topbarDateFmt}
       />
 
-      <main className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-6 py-3 md:py-6">
+      <main className="mx-auto  px-7 py-6 md:py-7">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
           {/* Sidebar - hidden on mobile, show on tablet+ */}
-          <aside className="hidden lg:block lg:col-span-3">
+          <aside className="hidden lg:block lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main Content */}
-          <section className="lg:col-span-9 space-y-4 md:space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-4 md:space-y-6 min-w-0">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 md:py-0">
               {showBack && (
@@ -216,7 +216,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
             </div>
 
             {/* Header Card - Responsive Layout */}
-            <SectionCard palette={palette} className="overflow-hidden">
+            <SectionCard palette={palette} className="overflow-hidden ">
               <div className="p-4 md:p-6">
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                   {/* Logo */}

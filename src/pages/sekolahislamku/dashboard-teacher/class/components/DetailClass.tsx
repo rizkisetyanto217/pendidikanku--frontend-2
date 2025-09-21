@@ -230,7 +230,7 @@ export default function DetailClass() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
@@ -362,10 +362,7 @@ export default function DetailClass() {
             {/* Kehadiran breakdown */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5">
-                <div
-                  className="text-sm mb-2"
-                  style={{ color: palette.black2 }}
-                >
+                <div className="text-sm mb-2" style={{ color: palette.black2 }}>
                   Ringkasan Kehadiran Hari Ini
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">

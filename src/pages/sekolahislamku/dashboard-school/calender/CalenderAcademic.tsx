@@ -221,13 +221,13 @@ const CalenderAcademic: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
+      <main className="mx-auto px-7 md:py-8 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
             {/* Header */}
             <section className="flex flex-col md:flex-row md:items-center gap-3">
               <div className="flex items-center gap-3">
@@ -247,7 +247,6 @@ const CalenderAcademic: React.FC = () => {
                 >
                   <CalendarDays size={18} />
                 </span>
-                
               </div>
 
               {/* Navigasi bulan */}
@@ -267,6 +266,7 @@ const CalenderAcademic: React.FC = () => {
             {/* Kalender & Agenda responsive */}
             <SectionCard palette={palette}>
               <div className="p-3 md:p-5">
+                {/* Header hari */}
                 <div
                   className="grid grid-cols-7 gap-1 sm:gap-2 text-[11px] sm:text-xs mb-2"
                   style={{ color: palette.black2 }}
@@ -280,6 +280,7 @@ const CalenderAcademic: React.FC = () => {
                   )}
                 </div>
 
+                {/* Grid tanggal */}
                 <div className="grid grid-cols-7 gap-1 sm:gap-2">
                   {days.map((c, i) => {
                     const has = c.dateKey ? byDate.get(c.dateKey) : undefined;
@@ -289,7 +290,8 @@ const CalenderAcademic: React.FC = () => {
                         key={i}
                         disabled={!c.dateKey}
                         onClick={() => setSelectedDay(c.dateKey!)}
-                        className="aspect-square sm:h-24 rounded-lg border p-1 sm:p-2 text-left relative transition disabled:opacity-50"
+                        className="rounded-lg border p-1 sm:p-2 text-left relative transition disabled:opacity-50
+                   aspect-square min-h-[80px] sm:min-h-[100px]"
                         style={{
                           borderColor: palette.silver1,
                           background: selected
@@ -309,14 +311,6 @@ const CalenderAcademic: React.FC = () => {
                                 style={{ background: palette.primary }}
                               />
                             ))}
-                            {has.length > 3 && (
-                              <span
-                                className="text-[9px] sm:text-[10px]"
-                                style={{ color: palette.black2 }}
-                              >
-                                +{has.length - 3}
-                              </span>
-                            )}
                           </div>
                         )}
                         {has && has[0] && (
@@ -331,6 +325,8 @@ const CalenderAcademic: React.FC = () => {
                     );
                   })}
                 </div>
+
+                
               </div>
             </SectionCard>
 

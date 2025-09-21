@@ -156,7 +156,7 @@ export default function ParentSidebar({
     <nav
       className={[
         desktopOnly ? "hidden lg:block" : "",
-        "w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto",
+        "w-64 shrink-0 lg:sticky lg:top-20 lg:z-30 lg:max-h-[calc(100vh-5rem)] lg:overflow-auto overflow-y-auto",
         className,
       ].join(" ")}
       aria-label={

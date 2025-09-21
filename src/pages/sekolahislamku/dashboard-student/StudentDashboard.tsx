@@ -94,7 +94,8 @@ const hijriLong = (iso?: string) =>
 async function fetchParentHome() {
   const now = new Date();
   const todayISO = toLocalNoonISO(now); // ✅ “siang lokal”
-  const inDays = (n: number) => toLocalNoonISO(new Date(now.getTime() + n * 864e5));
+  const inDays = (n: number) =>
+    toLocalNoonISO(new Date(now.getTime() + n * 864e5));
 
   return Promise.resolve({
     parentName: "Bapak/Ibu",
@@ -177,17 +178,17 @@ export default function StudentDashboard() {
   const gregorianISO =
     normalizeISOToLocalNoon(data?.gregorianDate) ?? toLocalNoonISO(new Date());
 
-  const todayScheduleItems: TodayScheduleItem[] =
-    data?.sessionsToday?.length
-      ? mapSessionsToTodaySchedule(
-          // kalau mapper butuh ISO, pastikan “siang lokal”
-          data.sessionsToday.map((s) => ({
-            ...s,
-            class_attendance_sessions_date:
-              normalizeISOToLocalNoon(s.class_attendance_sessions_date)!,
-          }))
-        )
-      : mockTodaySchedule;
+  const todayScheduleItems: TodayScheduleItem[] = data?.sessionsToday?.length
+    ? mapSessionsToTodaySchedule(
+        // kalau mapper butuh ISO, pastikan “siang lokal”
+        data.sessionsToday.map((s) => ({
+          ...s,
+          class_attendance_sessions_date: normalizeISOToLocalNoon(
+            s.class_attendance_sessions_date
+          )!,
+        }))
+      )
+    : mockTodaySchedule;
 
   return (
     <div
@@ -197,12 +198,12 @@ export default function StudentDashboard() {
       <ParentTopBar
         palette={palette}
         title={data?.parentName}
-        gregorianDate={gregorianISO}              
-        hijriDate={hijriLong(gregorianISO)}        
+        gregorianDate={gregorianISO}
+        hijriDate={hijriLong(gregorianISO)}
         dateFmt={dateFmt}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 

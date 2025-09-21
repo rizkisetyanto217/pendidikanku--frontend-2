@@ -188,7 +188,7 @@ export default function StudentNotesSummary() {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri (PC) */}
           <ParentSidebar palette={palette} />
@@ -258,7 +258,10 @@ export default function StudentNotesSummary() {
                       Ada Nilai
                     </div>
                     <Badge className="mt-1" variant="outline" palette={palette}>
-                      <p style={{ color: palette.black2 }}> {s.stats.withScore}</p>
+                      <p style={{ color: palette.black2 }}>
+                        {" "}
+                        {s.stats.withScore}
+                      </p>
                     </Badge>
                   </SectionCard>
                   <SectionCard
@@ -432,7 +435,6 @@ export default function StudentNotesSummary() {
                   </div>
                 ))}
               </div>
-              
             </SectionCard>
           </div>
         </div>

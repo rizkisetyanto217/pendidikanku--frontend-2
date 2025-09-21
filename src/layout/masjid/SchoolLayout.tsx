@@ -24,7 +24,7 @@ export default function SchoolLayout() {
       /> */}
 
       {/* Container + 2 kolom saat lg+ */}
-      <div className="mx-auto max-w-6xl pb-6 lg:flex lg:items-start lg:gap-4">
+      <div className="mx-auto Replace pb-6 lg:flex lg:items-start lg:gap-4">
         {/* Sidebar Navigation (desktop only) */}
         <ParentSidebar palette={palette} />
 

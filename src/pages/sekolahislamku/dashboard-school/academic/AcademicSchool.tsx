@@ -169,15 +169,15 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 md:py-6  py-3">
+      <main className="mx-auto  px-7 md:py-8  py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-5 min-w-0">
+          <section className="lg:col-span-10 space-y-5 min-w-0">
             <div className="flex items-center justify-between ">
               <div className="font-semibold text-lg flex items-center ">
                 <div className="  flex items-center gap-x-3 ">
@@ -199,7 +199,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                 </div>
                 <h1 className="flex items-center ">Periode Akademik Aktif</h1>
               </div>
-              
             </div>
             {/* ===== Periode Akademik (active term) ===== */}
             <SectionCard palette={palette} className="overflow-hidden">

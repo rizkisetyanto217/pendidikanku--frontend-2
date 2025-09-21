@@ -910,19 +910,19 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       <Flash palette={palette} flash={flash} />
 
       {/* ====== CONTAINER ====== */}
-      <main className="mx-auto max-w-6xl px-4 ">
+      <main className="mx-auto w-full px-7 md:py-5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2 mt-5">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
             {/* Back button biasa */}
             <div className="mx-auto max-w-6xl flex gap-4 items-center">
               {showBack && (
-                <div className="flex py-5 -mb-3">
+                <div className="flex md:py-5 -mb-3">
                   <Btn
                     palette={palette}
                     variant="ghost"

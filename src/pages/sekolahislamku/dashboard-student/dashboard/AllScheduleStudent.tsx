@@ -54,7 +54,7 @@ export default function AllScheduleStudent() {
         dateFmt={topbarDateFmt}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
@@ -117,7 +117,9 @@ export default function AllScheduleStudent() {
                             <span className="inline-flex items-center gap-1">
                               <MapPin size={14} />
                               <Badge palette={palette} variant="outline">
-                                <p style={{ color: palette.black2 }}>{it.room}</p>
+                                <p style={{ color: palette.black2 }}>
+                                  {it.room}
+                                </p>
                               </Badge>
                             </span>
                           )}

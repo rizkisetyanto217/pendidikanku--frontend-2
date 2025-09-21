@@ -306,7 +306,7 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <aside className="lg:col-span-3">
             <ParentSidebar palette={palette} />
@@ -762,4 +762,3 @@ function EditScheduleModal({
     </div>
   );
 }
-

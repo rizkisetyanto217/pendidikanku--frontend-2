@@ -148,7 +148,7 @@ const topbarDateFmt = (iso: string) =>
     day: "numeric",
   });
 
-  // --- timezone-safe helpers (pakai “siang lokal”)
+// --- timezone-safe helpers (pakai “siang lokal”)
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -198,7 +198,7 @@ export default function StudentRaport() {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri (PC) */}
           <ParentSidebar palette={palette} />

@@ -216,7 +216,7 @@ function Flash({ palette, flash }: FlashProps) {
   if (!flash) return null;
   const isOk = flash.type === "success";
   return (
-    <div className="mx-auto max-w-6xl px-4">
+    <div className="mx-auto Replace px-4">
       <div
         className="mb-3 rounded-lg px-3 py-2 text-sm"
         style={{
@@ -706,17 +706,21 @@ export default function RoomSchool() {
 
       <Flash palette={palette} flash={flash} />
 
-      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
+      <main className="mx-auto px-7 md:py-8 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Content */}
-          <section className="lg:col-span-9 space-y-5 min-w-0">
-            <div className="mx-auto max-w-5xl flex items-center gap-3">
-              <Btn palette={palette} variant="ghost" onClick={() => navigate(-1)}>
+          <section className="lg:col-span-10 space-y-5 min-w-0">
+            <div className="mx-auto  flex items-center gap-3">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+              >
                 <ArrowLeft className="cursor-pointer" size={20} />
               </Btn>
 

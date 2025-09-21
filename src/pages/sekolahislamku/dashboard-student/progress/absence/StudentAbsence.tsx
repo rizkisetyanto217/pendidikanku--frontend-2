@@ -196,7 +196,7 @@ export default function StudentAbsence() {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri (PC) */}
           <ParentSidebar palette={palette} />
@@ -332,7 +332,10 @@ export default function StudentAbsence() {
                     value={mode}
                     onChange={(e) => handleChange("mode", e.target.value)}
                     className="rounded-lg border px-3 py-2 bg-transparent"
-                    style={{ borderColor: palette.silver1, color: palette.black2 }}
+                    style={{
+                      borderColor: palette.silver1,
+                      color: palette.black2,
+                    }}
                   >
                     <option value="all">Semua</option>
                     <option value="onsite">Tatap muka</option>

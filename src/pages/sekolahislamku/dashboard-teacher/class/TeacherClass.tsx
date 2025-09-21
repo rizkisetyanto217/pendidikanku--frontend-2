@@ -1,6 +1,6 @@
 // src/pages/sekolahislamku/teacher/TeacherClassesList.tsx
 import { useMemo, useState, useDeferredValue } from "react";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -432,8 +432,6 @@ function ViewModeToggle({
     </div>
   );
 }
-
-
 
 function AttendanceBar({
   pct,
@@ -934,8 +932,6 @@ function LoadingCard({
   );
 }
 
-
-
 /* ==============================
    Main Page Component
 ============================== */
@@ -1005,7 +1001,7 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
               <div className="p-5 md:p-6 space-y-6">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-5">
-                    <div className="mx-auto max-w-6xl flex gap-4 items-center">
+                    <div className="mx-auto Replace flex gap-4 items-center">
                       {showBack && (
                         <Btn
                           palette={palette}
@@ -1153,4 +1149,4 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
   );
 };
 
-export default TeacherClassesList
+export default TeacherClassesList;

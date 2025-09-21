@@ -374,7 +374,7 @@ export default function SchoolAnnouncement() {
         <ParentSidebar palette={palette} className="hidden lg:block" />
 
         {/* Main Content */}
-        <main className="flex-1 mx-auto max-w-6xl px-4 py-6 space-y-6">
+        <main className="flex-1 mx-auto Replace px-4 py-6 space-y-6">
           {/* Header */}
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">

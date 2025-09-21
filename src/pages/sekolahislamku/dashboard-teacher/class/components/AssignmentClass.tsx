@@ -33,7 +33,9 @@ import {
 import ModalEditAssignmentClass from "./ModalEditAssignmentClass";
 import { EditAssignmentPayload } from "./ModalEditAssignment";
 import Swal from "sweetalert2";
-import ModalAddAssignmentClass, { AddAssignmentClassPayload } from "./ModalAddAssignmentClass";
+import ModalAddAssignmentClass, {
+  AddAssignmentClassPayload,
+} from "./ModalAddAssignmentClass";
 
 // ===== Dummy classes (biar tampilan header tetap work)
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
@@ -402,7 +404,7 @@ export default function AssignmentClass() {
         onSubmit={handleEditSubmit}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
@@ -430,7 +432,9 @@ export default function AssignmentClass() {
                     style={{ color: palette.black2 }}
                   >
                     <Badge variant="outline" palette={palette}>
-                      <h1 style={{color: palette.black2}}>{cls?.room ?? "-"}</h1>
+                      <h1 style={{ color: palette.black2 }}>
+                        {cls?.room ?? "-"}
+                      </h1>
                     </Badge>
                     <span>Wali Kelas: {cls?.homeroom ?? "-"}</span>
                     <span>• {cls?.academicTerm ?? "-"}</span>
@@ -549,7 +553,10 @@ export default function AssignmentClass() {
                             </Badge>
                             {a.dueDate && (
                               <Badge palette={palette} variant="outline">
-                                <h1 style={{color: palette.black2}}> Jatuh tempo: {dueBadge}</h1>
+                                <h1 style={{ color: palette.black2 }}>
+                                  {" "}
+                                  Jatuh tempo: {dueBadge}
+                                </h1>
                               </Badge>
                             )}
                           </div>
@@ -568,7 +575,7 @@ export default function AssignmentClass() {
                             style={{ color: palette.black2 }}
                           >
                             <CalendarDays size={14} />
-                            <span >Dibuat: {dateLong(a.createdAt)}</span>
+                            <span>Dibuat: {dateLong(a.createdAt)}</span>
                             {a.author && <span>• Oleh {a.author}</span>}
                             {(a.totalSubmissions ?? 0) > 0 && (
                               <>

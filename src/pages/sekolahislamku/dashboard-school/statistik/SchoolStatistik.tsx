@@ -184,18 +184,19 @@ const SchoolStatistik: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 md:py-6 py-3">
+      <main className="mx-auto px-7 md:py-8 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
             {/* Header */}
             <section className="flex items-start gap-7">
-              <span className="h-10 w-10 grid place-items-center rounded-xl">
+             
+                <div className="flex gap-3 items-center ">
                 <Btn
                   palette={palette}
                   variant="ghost"
@@ -203,8 +204,9 @@ const SchoolStatistik: React.FC = () => {
                 >
                   <ArrowLeft onClick={() => navigate(-1)} size={20} />
                 </Btn>
-              </span>
-              
+                <h1 className="textlg font-semibold">Statistik Sekolah</h1>
+                </div>
+           
             </section>
 
             {/* KPI */}

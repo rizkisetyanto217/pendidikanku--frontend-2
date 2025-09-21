@@ -131,18 +131,18 @@ const PageHeader = ({
   backLabel?: string;
 }) => (
   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-3 mt-2 md:mt-0">
       {onBackClick && (
         <Btn
           palette={palette}
           variant="ghost"
           onClick={onBackClick}
-          className="flex items-center gap-1.5 mt-7 md:mt-0"
+          className="flex items-center gap-1.5 md:mt-0"
         >
           <ArrowLeft size={20} />
         </Btn>
       )}
-      <h1 className="text-lg font-semibold">Guru</h1>
+      <h1 className="text-lg  items-center font-semibold">Guru</h1>
     </div>
 
     <div className="flex items-center gap-2 flex-wrap">
@@ -346,7 +346,7 @@ const TeachersTable = ({
 
     {/* Desktop */}
     <div className="hidden md:block overflow-x-auto">
-      <table className="min-w-[800px] w-full text-sm">
+      <table className=" w-full text-sm">
         <thead>
           <tr
             className="text-left border-b"
@@ -469,7 +469,11 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   }, [teachersAll, q]);
 
   return (
-    <>
+    <div
+      className="min-h-screen w-full"
+      style={{ background: palette.white2, color: palette.black1 }}
+    >
+      {/* Modals */}
       <TambahGuru
         open={openAdd}
         onClose={() => setOpenAdd(false)}
@@ -484,33 +488,43 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         palette={palette}
       />
 
+      {/* TopBar */}
       <ParentTopBar
         palette={palette}
         title="Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <div className="lg:flex lg:items-start lg:gap-4 lg:p-4 lg:pt-6">
-        <ParentSidebar palette={palette} className="hidden lg:block" />
-        <main className="flex-1 mx-auto max-w-6xl px-3 sm:px-4 space-y-6">
-          <PageHeader
-            palette={palette}
-            onImportClick={() => setOpenImport(true)}
-            onAddClick={() => setOpenAdd(true)}
-            onBackClick={showBack ? () => navigate(-1) : undefined}
-          />
-          <TeachersTable
-            palette={palette}
-            teachers={teachers}
-            isLoading={isLoading && !!masjidId}
-            isError={isError}
-            isFetching={isFetching}
-            onRefetch={refetch}
-          />
-        </main>
-      </div>
-    </>
+      <main className="mx-auto px-7 py-5 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4">
+          {/* Sidebar */}
+          <aside className="lg:col-span-2 order-2 lg:order-1">
+            <ParentSidebar palette={palette} />
+          </aside>
+
+          {/* Main Content */}
+          <section className="lg:col-span-10 space-y-6 order-1 lg:order-2">
+            <PageHeader
+              palette={palette}
+              onImportClick={() => setOpenImport(true)}
+              onAddClick={() => setOpenAdd(true)}
+              onBackClick={showBack ? () => navigate(-1) : undefined}
+            />
+
+            <TeachersTable
+              palette={palette}
+              teachers={teachers}
+              isLoading={isLoading && !!masjidId}
+              isError={isError}
+              isFetching={isFetching}
+              onRefetch={refetch}
+            />
+          </section>
+        </div>
+      </main>
+    </div>
   );
 };
 
 export default TeachersPage;
+

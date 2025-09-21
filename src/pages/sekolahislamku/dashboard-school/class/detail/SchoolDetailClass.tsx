@@ -498,7 +498,7 @@ export default function SchoolDetailClass() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* === Sidebar kiri === */}
           <ParentSidebar palette={palette} />

@@ -30,7 +30,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import ModalAddClassMateri from "./ModalAddClassMateri";
-import ModalEditClassMateri, { EditClassMaterialInput } from "./ModalEditClassMateri";
+import ModalEditClassMateri, {
+  EditClassMaterialInput,
+} from "./ModalEditClassMateri";
 
 /* ====== Helpers tanggal ====== */
 const atLocalNoon = (d: Date) => {
@@ -391,51 +393,50 @@ export default function ClassMateri() {
   // state editclass materi
   const [openEdit, setOpenEdit] = useState(false);
   const [editingItem, setEditingItem] = useState<ClassMaterial | null>(null);
-const handleEditMateri = async (payload: EditClassMaterialInput) => {
-  try {
-    const nowISO = new Date().toISOString();
+  const handleEditMateri = async (payload: EditClassMaterialInput) => {
+    try {
+      const nowISO = new Date().toISOString();
 
-    // 1) Optimistic replace item berdasarkan id
-    qc.setQueryData<ClassMaterial[]>(QK.MATERIALS(id), (old = []) =>
-      old.map((m) =>
-        m.id === payload.id
-          ? {
-              ...m,
-              title: payload.title,
-              description: payload.description,
-              type: payload.type as any,
-              attachments: payload.attachments ?? [],
-              author: payload.author ?? m.author,
-              updatedAt: nowISO,
-            }
-          : m
-      )
-    );
+      // 1) Optimistic replace item berdasarkan id
+      qc.setQueryData<ClassMaterial[]>(QK.MATERIALS(id), (old = []) =>
+        old.map((m) =>
+          m.id === payload.id
+            ? {
+                ...m,
+                title: payload.title,
+                description: payload.description,
+                type: payload.type as any,
+                attachments: payload.attachments ?? [],
+                author: payload.author ?? m.author,
+                updatedAt: nowISO,
+              }
+            : m
+        )
+      );
 
-    setOpenEdit(false);
-    setEditingItem(null);
+      setOpenEdit(false);
+      setEditingItem(null);
 
-    await Swal.fire({
-      title: "Perubahan disimpan",
-      text: "Materi berhasil diperbarui.",
-      icon: "success",
-      timer: 1400,
-      showConfirmButton: false,
-      background: palette.white1,
-      color: palette.black1,
-    });
-  } catch (e) {
-    await Swal.fire({
-      title: "Gagal menyimpan",
-      text: "Terjadi kesalahan saat menyimpan perubahan.",
-      icon: "error",
-      background: palette.white1,
-      color: palette.black1,
-      confirmButtonColor: (palette as any).destructive ?? "#ef4444",
-    });
-  }
-};
-
+      await Swal.fire({
+        title: "Perubahan disimpan",
+        text: "Materi berhasil diperbarui.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+        background: palette.white1,
+        color: palette.black1,
+      });
+    } catch (e) {
+      await Swal.fire({
+        title: "Gagal menyimpan",
+        text: "Terjadi kesalahan saat menyimpan perubahan.",
+        icon: "error",
+        background: palette.white1,
+        color: palette.black1,
+        confirmButtonColor: (palette as any).destructive ?? "#ef4444",
+      });
+    }
+  };
 
   return (
     <div
@@ -478,7 +479,7 @@ const handleEditMateri = async (payload: EditClassMaterialInput) => {
         }
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 

@@ -92,7 +92,7 @@ export default function DetailAcademic() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto Replace px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
@@ -110,7 +110,6 @@ export default function DetailAcademic() {
                 className="flex items-center gap-1.5 p-5"
               >
                 <ArrowLeft size={20} className="mr-1" />
-                
               </Btn>
             </div>
 
