@@ -910,7 +910,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       <Flash palette={palette} flash={flash} />
 
       {/* ====== CONTAINER ====== */}
-      <main className="mx-auto w-full px-7 md:py-5">
+      <main className="mx-auto w-full px-7 md:py-3  py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-2 mt-5">

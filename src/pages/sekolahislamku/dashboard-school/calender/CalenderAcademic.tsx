@@ -229,46 +229,53 @@ const CalenderAcademic: React.FC = () => {
 
           <section className="lg:col-span-10 space-y-6 min-w-0">
             {/* Header */}
-            <section className="flex flex-col md:flex-row md:items-center gap-3">
-              <div className="flex items-center gap-3">
+            {/* Header Responsive */}
+            <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
                 <Btn
                   palette={palette}
                   variant="ghost"
+                  size="sm"
                   onClick={() => navigate(-1)}
+                  className="px-2"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={18} />
                 </Btn>
-                <span
-                  className="h-10 w-10 grid place-items-center rounded-xl"
-                  style={{
-                    background: palette.primary2,
-                    color: palette.primary,
-                  }}
-                >
-                  <CalendarDays size={18} />
-                </span>
+                <h1 className="text-base font-semibold sm:text-lg">
+                  Kalender Akademik
+                </h1>
               </div>
 
-              {/* Navigasi bulan */}
-              <div className="flex items-center gap-2 md:ml-auto">
-                <Btn palette={palette} variant="outline" onClick={gotoPrev}>
+              {/* Navigasi Bulan */}
+              <div className="flex items-center justify-between sm:justify-end gap-2">
+                <Btn
+                  palette={palette}
+                  variant="outline"
+                  size="sm"
+                  onClick={gotoPrev}
+                >
                   <ChevronLeft size={16} />
                 </Btn>
                 <div className="px-2 text-sm font-medium">
                   {monthLabel(month)}
                 </div>
-                <Btn palette={palette} variant="outline" onClick={gotoNext}>
+                <Btn
+                  palette={palette}
+                  variant="outline"
+                  size="sm"
+                  onClick={gotoNext}
+                >
                   <ChevronRight size={16} />
                 </Btn>
               </div>
             </section>
 
-            {/* Kalender & Agenda responsive */}
+            {/* Kalender */}
             <SectionCard palette={palette}>
-              <div className="p-3 md:p-5">
+              <div className="p-3 sm:p-5">
                 {/* Header hari */}
                 <div
-                  className="grid grid-cols-7 gap-1 sm:gap-2 text-[11px] sm:text-xs mb-2"
+                  className="grid grid-cols-7 text-[10px] sm:text-xs mb-2"
                   style={{ color: palette.black2 }}
                 >
                   {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map(
@@ -290,8 +297,8 @@ const CalenderAcademic: React.FC = () => {
                         key={i}
                         disabled={!c.dateKey}
                         onClick={() => setSelectedDay(c.dateKey!)}
-                        className="rounded-lg border p-1 sm:p-2 text-left relative transition disabled:opacity-50
-                   aspect-square min-h-[80px] sm:min-h-[100px]"
+                        className="aspect-square rounded-lg border text-left relative p-1 sm:p-2 
+                       transition disabled:opacity-50"
                         style={{
                           borderColor: palette.silver1,
                           background: selected
@@ -299,37 +306,29 @@ const CalenderAcademic: React.FC = () => {
                             : palette.white1,
                         }}
                       >
-                        <div className="text-[11px] sm:text-xs font-medium">
+                        <div className="text-[10px] sm:text-xs font-medium">
                           {c.label ?? ""}
                         </div>
+                        {/* Dot events */}
                         {!!has && has.length > 0 && (
-                          <div className="absolute right-1 sm:right-2 top-1 sm:top-2 flex gap-0.5 sm:gap-1">
+                          <div className="absolute right-1 top-1 flex gap-0.5">
                             {has.slice(0, 3).map((_, idx) => (
                               <span
                                 key={idx}
-                                className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full"
+                                className="h-1.5 w-1.5 rounded-full"
                                 style={{ background: palette.primary }}
                               />
                             ))}
-                          </div>
-                        )}
-                        {has && has[0] && (
-                          <div
-                            className="mt-1 sm:mt-2 text-[10px] sm:text-xs line-clamp-2 sm:line-clamp-3"
-                            style={{ color: palette.black2 }}
-                          >
-                            {has[0].title}
                           </div>
                         )}
                       </button>
                     );
                   })}
                 </div>
-
-                
               </div>
             </SectionCard>
 
+           
             {/* Panel agenda: full di mobile, kolom kanan di desktop */}
             {selectedDay && (
               <SectionCard palette={palette}>

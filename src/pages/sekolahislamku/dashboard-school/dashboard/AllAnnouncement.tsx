@@ -1005,12 +1005,12 @@ const AllAnnouncement: React.FC = () => {
 
             <div className="flex items-start justify-between gap-6">
               <div className="text-left flex items-center gap-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-2">
                   <Btn
                     palette={palette}
                     variant="ghost"
                     onClick={() => navigate(-1)}
-                    className="inline-flex items-center mb-2"
+                    className="inline-flex items-center "
                   >
                     <ArrowLeft size={20} />
                   </Btn>

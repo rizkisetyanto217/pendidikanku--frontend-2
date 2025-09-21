@@ -179,8 +179,8 @@ const SchoolSpp: React.FC = () => {
                 className="inline-flex items-center gap-2"
               >
                 <ArrowLeft size={20} />
-                <h1 className="text-base font-semibold">SPP Murid</h1>
               </Btn>
+              <h1 className="text-base font-semibold">SPP Murid</h1>
             </div>
 
             {/* Filter */}

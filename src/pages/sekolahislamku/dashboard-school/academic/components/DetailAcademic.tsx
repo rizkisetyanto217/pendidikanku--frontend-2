@@ -92,25 +92,27 @@ export default function DetailAcademic() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
+      <main className="mx-auto  px-7 md:py-8  py-">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
-            <div className="flex items-center justify-between">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
+            <div className="flex items-center gap-3">
               <Btn
                 palette={palette}
                 variant="ghost"
-                size="sm"
+                size="md"
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-1.5 p-5"
+                className="inline-flex items-center gap-2 px-3 py-2 p-5"
               >
-                <ArrowLeft size={20} className="mr-1" />
+                <ArrowLeft size={20} />
+                
               </Btn>
+              <h1 className="text-lg font-semibold">Halaman Detail Akademik</h1>
             </div>
 
             {/* Header */}

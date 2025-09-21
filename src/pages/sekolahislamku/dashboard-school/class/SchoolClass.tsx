@@ -443,13 +443,13 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto Replace px-7 py-6 ">
+      <main className="mx-auto Replace px-7 md:py-8 py-5">
         <div className="lg:flex lg:items-start lg:gap-4">
           <ParentSidebar palette={palette} />
 
-          <div className="flex-1 space-y-6 min-w-0 lg:p-4">
+          <div className="flex-1 space-y-6 min-w-0 md:space-x-8">
             {/* Header */}
-            <div className="flex gap-3 items-center md:-mt-4 ">
+            <div className="flex gap-3 items-center md:mx-9">
               {showBack && (
                 <Btn
                   palette={palette}
@@ -460,7 +460,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   <ArrowLeft size={20} />
                 </Btn>
               )}
-              <h1 className="text-lg font-semibold">Seluruh Kelas</h1>
+              <h1 className="text-lg font-semibold ">Seluruh Kelas</h1>
             </div>
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>

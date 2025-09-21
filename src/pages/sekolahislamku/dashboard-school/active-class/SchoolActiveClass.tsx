@@ -108,16 +108,16 @@ const SchoolActiveClass: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto Replace px-4 py-3 md:py-6">
+      <main className="mx-auto  px-7 md:py-8  py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
 
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
             {/* Header */}
 
             <section className="flex items-center gap-7 ">

@@ -1037,7 +1037,7 @@ const handleCreateInvoiceSubmit = (data: any) => {
                   className="inline-flex items-center gap-2"
                 >
                   <ArrowLeft size={20} />
-                  <span className="hidden sm:inline">{backLabel}</span>
+
                 </Btn>
               )}
               <h1 className="text-lg font-semibold">Keuangan Sekolah</h1>

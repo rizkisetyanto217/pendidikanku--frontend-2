@@ -180,7 +180,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
           <section className="lg:col-span-10 space-y-5 min-w-0">
             <div className="flex items-center justify-between ">
               <div className="font-semibold text-lg flex items-center ">
-                <div className="  flex items-center gap-x-3 ">
+                <div className="  flex items-center ">
                   {showBack && (
                     <Btn
                       palette={palette}
@@ -201,7 +201,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
               </div>
             </div>
             {/* ===== Periode Akademik (active term) ===== */}
-            <SectionCard palette={palette} className="overflow-hidden">
+            <SectionCard palette={palette} className="overflow-hidden ">
               <div className="p-5 grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="text-sm" style={{ color: palette.black2 }}>

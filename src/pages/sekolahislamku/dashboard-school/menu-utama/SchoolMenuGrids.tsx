@@ -165,7 +165,7 @@ export default function SchoolMenuGrids() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto w-full px-7 py-6">
+      <main className="mx-auto w-full px-7 md:py-8  py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
           <aside className="lg:col-span-2">

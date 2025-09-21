@@ -113,17 +113,18 @@ export default function ManagementAcademic() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
+      <main className="mx-auto  px-7 md:py-8  py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="lg:col-span-2">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-6 min-w-0">
             <div className="flex items-center justify-between">
-              <Btn
+              <div className="flex items-center gap-3">
+                 <Btn
                 palette={palette}
                 variant="ghost"
                 size="sm"
@@ -132,9 +133,11 @@ export default function ManagementAcademic() {
               >
                 <ArrowLeft size={20} className="mr-1" />
               </Btn>
-              <Btn palette={palette} size="sm" variant="outline">
+              <h1 className="flex text-lg font-semibold ">Kelola Akademik</h1>
+              </div>
+              <Btn palette={palette} size="sm" variant="ghost">
                 <Plus size={16} className="mr-1" />
-                Tambah Ruang
+                
               </Btn>
             </div>
 

@@ -189,7 +189,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
         dateFmt={topbarDateFmt}
       />
 
-      <main className="mx-auto  px-7 py-6 md:py-7">
+      <main className="mx-auto  px-7 py-6 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
           {/* Sidebar - hidden on mobile, show on tablet+ */}
           <aside className="hidden lg:block lg:col-span-2">
@@ -197,9 +197,9 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
           </aside>
 
           {/* Main Content */}
-          <section className="lg:col-span-10 space-y-4 md:space-y-6 min-w-0">
+          <section className="lg:col-span-10 space-y-5 md:space-y-6 min-w-0">
             {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 md:py-0">
+            <div className="flex gap-3 items-center">
               {showBack && (
                 <Btn
                   palette={palette}
@@ -210,9 +210,9 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
                   <ArrowLeft size={20} />
                 </Btn>
               )}
-              <div className="font-semibold text-lg md:text-xl">
+              <h1 className="font-semibold text-lg md:text-xl">
                 Identitas Sekolah
-              </div>
+              </h1>
             </div>
 
             {/* Header Card - Responsive Layout */}
