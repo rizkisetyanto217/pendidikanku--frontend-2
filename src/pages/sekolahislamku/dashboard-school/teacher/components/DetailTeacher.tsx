@@ -57,6 +57,7 @@ const DUMMY_TEACHERS: TeacherItem[] = [
 /* ================= Helpers ================= */
 const genderLabel = (g?: "L" | "P") =>
   g === "L" ? "Laki-laki" : g === "P" ? "Perempuan" : "-";
+
 const hijriWithWeekday = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -108,89 +109,106 @@ const DetailTeacher: React.FC = () => {
   const teacher = teachers.find((t) => t.id === id);
 
   return (
-    <>
+    <div
+      className="min-h-screen w-full"
+      style={{ background: palette.white2, color: palette.black1 }}
+    >
       <ParentTopBar
         palette={palette}
         title="Detail Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
-      <div className="lg:flex lg:gap-4 lg:p-4 lg:pt-6">
-        <ParentSidebar palette={palette} className="hidden lg:block" />
-        <main className="flex-1 mx-auto max-w-4xl px-3 sm:px-4 space-y-6">
-          <Btn
-            palette={palette}
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 mt-6 md:mt-0"
-          >
-            <ArrowLeft size={20} />
-          </Btn>
 
-          <SectionCard palette={palette} className="p-6 space-y-5">
-            {teacher ? (
-              <>
-                <div className="text-xl font-semibold">{teacher.name}</div>
-                <div className="text-sm text-gray-500">
-                  {teacher.subject ?? "-"}
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4 text-sm">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0 hidden lg:block">
+            <ParentSidebar palette={palette} />
+          </aside>
+
+          {/* Content */}
+          <section className="flex-1 min-w-0 space-y-6">
+            <div className="mx-auto  flex items-center gap-3">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="cursor-pointer" size={20} />
+              </Btn>
+
+              <h1 className="font-semibold text-lg">Detail Guru</h1>
+            </div>
+
+            <SectionCard palette={palette} className="p-6 space-y-5">
+              {teacher ? (
+                <>
                   <div>
-                    <div className="font-medium">NIP</div>
-                    <div>{teacher.nip ?? "-"}</div>
+                    <h1 className="text-xl font-semibold">{teacher.name}</h1>
+                    <p className="text-sm text-gray-500">
+                      {teacher.subject ?? "-"}
+                    </p>
                   </div>
-                  <div>
-                    <div className="font-medium">Gender</div>
-                    <div>{genderLabel(teacher.gender)}</div>
-                  </div>
-                  <div>
-                    <div className="font-medium">Kontak</div>
-                    <div className="flex gap-3 mt-1">
-                      {teacher.phone && (
-                        <a
-                          href={`tel:${teacher.phone}`}
-                          className="flex items-center gap-1 hover:underline"
-                          style={{ color: palette.primary }}
-                        >
-                          <Phone size={14} /> {teacher.phone}
-                        </a>
-                      )}
-                      {teacher.email && (
-                        <a
-                          href={`mailto:${teacher.email}`}
-                          className="flex items-center gap-1 hover:underline"
-                          style={{ color: palette.primary }}
-                        >
-                          <Mail size={14} /> Email
-                        </a>
-                      )}
+
+                  <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="font-medium">NIP</div>
+                      <div>{teacher.nip ?? "-"}</div>
+                    </div>
+                    <div>
+                      <div className="font-medium">Gender</div>
+                      <div>{genderLabel(teacher.gender)}</div>
+                    </div>
+                    <div>
+                      <div className="font-medium">Kontak</div>
+                      <div className="flex gap-3 mt-1">
+                        {teacher.phone && (
+                          <a
+                            href={`tel:${teacher.phone}`}
+                            className="flex items-center gap-1 hover:underline"
+                            style={{ color: palette.primary }}
+                          >
+                            <Phone size={14} /> {teacher.phone}
+                          </a>
+                        )}
+                        {teacher.email && (
+                          <a
+                            href={`mailto:${teacher.email}`}
+                            className="flex items-center gap-1 hover:underline"
+                            style={{ color: palette.primary }}
+                          >
+                            <Mail size={14} /> Email
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-medium">Status</div>
+                      <Badge
+                        palette={palette}
+                        variant={
+                          teacher.status === "aktif"
+                            ? "success"
+                            : teacher.status === "nonaktif"
+                              ? "warning"
+                              : "info"
+                        }
+                      >
+                        {teacher.status ?? "-"}
+                      </Badge>
                     </div>
                   </div>
-                  <div>
-                    <div className="font-medium">Status</div>
-                    <Badge
-                      palette={palette}
-                      variant={
-                        teacher.status === "aktif"
-                          ? "success"
-                          : teacher.status === "nonaktif"
-                            ? "warning"
-                            : "info"
-                      }
-                    >
-                      {teacher.status ?? "-"}
-                    </Badge>
-                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-gray-500">
+                  Data guru tidak ditemukan.
                 </div>
-              </>
-            ) : (
-              <div className="text-sm text-gray-500">
-                Data guru tidak ditemukan.
-              </div>
-            )}
-          </SectionCard>
-        </main>
-      </div>
-    </>
+              )}
+            </SectionCard>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 };
 

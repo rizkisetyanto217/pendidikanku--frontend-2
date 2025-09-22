@@ -25,7 +25,6 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 
 /* =========================================
    DUMMY SWITCH
-   - Set true untuk tampilkan dummy bila API belum siap
 ========================================= */
 const USE_DUMMY = true;
 
@@ -68,8 +67,8 @@ type ApiParticipant = {
   status?: string;
 };
 type ApiParticipantsResp =
-  | { data: ApiParticipant[]; message?: string }
-  | { data: { items: ApiParticipant[] }; message?: string };
+  | { data: ApiParticipant[] }
+  | { data: { items: ApiParticipant[] } };
 
 type ApiLesson = {
   id?: string;
@@ -83,9 +82,7 @@ type ApiLesson = {
   teacher_name?: string;
   note?: string;
 };
-type ApiLessonsResp =
-  | { data: ApiLesson[]; message?: string }
-  | { data: { items: ApiLesson[] }; message?: string };
+type ApiLessonsResp = { data: ApiLesson[] } | { data: { items: ApiLesson[] } };
 
 /* ========= Helpers ========= */
 const dateLong = (iso?: string) =>
@@ -110,10 +107,10 @@ const scheduleToText = (sch?: ApiSchedule | null): string => {
   return left ? `${left}${loc}` : "-";
 };
 
-/* ========= DUMMY DATA ========= */
+/* ========= Dummy Data ========= */
 const DUMMY_SECTION = (id: string): ApiSection => ({
   class_sections_id: id,
-  class_sections_class_id: "1b6cbfc9-fe18-4c39-9af9-35a030c04e96",
+  class_sections_class_id: "1",
   class_sections_slug: "kelas-a",
   class_sections_name: "Kelas A",
   class_sections_code: "A1",
@@ -125,9 +122,9 @@ const DUMMY_SECTION = (id: string): ApiSection => ({
   },
   class_sections_is_active: true,
   teacher: {
-    id: "5e6ae4d3-a977-46ae-b918-11fa42748f4e",
+    id: "t1",
     user_name: "Ridla Agustiawan",
-    email: "ridla.agustiawan@gmail.com",
+    email: "ridla@example.com",
     is_active: true,
   },
 });
@@ -151,164 +148,76 @@ const DUMMY_PARTICIPANTS: ApiParticipant[] = [
     email: "siti@example.com",
     status: "aktif",
   },
-  {
-    id: "s3",
-    student_name: "Fauzan Akbar",
-    nis: "2025-003",
-    gender: "L",
-    phone: "0812-5555-6666",
-    email: "fauzan@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s4",
-    student_name: "Nabila Aulia",
-    nis: "2025-004",
-    gender: "P",
-    phone: "0812-7777-8888",
-    email: "nabila@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s5",
-    student_name: "Raihan Pratama",
-    nis: "2025-005",
-    gender: "L",
-    phone: "0812-9999-0000",
-    email: "raihan@example.com",
-    status: "izin",
-  },
-  {
-    id: "s6",
-    student_name: "Hana Zahra",
-    nis: "2025-006",
-    gender: "P",
-    phone: "0813-1234-5678",
-    email: "hana@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s7",
-    student_name: "M. Yusuf",
-    nis: "2025-007",
-    gender: "L",
-    phone: "0813-8765-4321",
-    email: "yusuf@example.com",
-    status: "aktif",
-  },
-  {
-    id: "s8",
-    student_name: "Aisyah Nur",
-    nis: "2025-008",
-    gender: "P",
-    phone: "0813-9090-1010",
-    email: "aisyah@example.com",
-    status: "aktif",
-  },
 ];
 
 const DUMMY_LESSONS: ApiLesson[] = [
   {
     id: "l1",
-    title: "Tahsin: Makharijul Huruf",
+    title: "Tahsin",
     date: new Date().toISOString().slice(0, 10),
     start: "07:30",
     end: "09:00",
-    teacher_name: "Ridla Agustiawan",
-    note: "Fokus pada huruf-huruf qalqalah.",
-  },
-  {
-    id: "l2",
-    title: "Tahfizh: Juz 30 (An-Naba')",
-    date: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
-    start: "07:30",
-    end: "09:00",
-    teacher_name: "Ridla Agustiawan",
-    note: "Target ayat 1–16.",
-  },
-  {
-    id: "l3",
-    title: "Adab Murojaah",
-    date: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
-    start: "07:30",
-    end: "09:00",
-    teacher_name: "Ridla Agustiawan",
-    note: "Ringan + praktik.",
+    teacher_name: "Ridla",
+    note: "Makharijul huruf",
   },
 ];
 
-/* ========= Fetchers (fallback ke dummy) ========= */
-async function fetchSection(sectionId: string): Promise<ApiSection | null> {
-  if (USE_DUMMY) return DUMMY_SECTION(sectionId);
+/* ========= Dummy Mapel & Tugas ========= */
+interface Subject {
+  id: string;
+  name: string;
+  teacher: string;
+}
+interface Task {
+  id: string;
+  subjectId: string;
+  title: string;
+  dueDate: string;
+  status: "pending" | "submitted" | "graded";
+}
+
+const DUMMY_SUBJECTS: Subject[] = [
+  { id: "sbj-1", name: "Matematika", teacher: "Budi Santoso" },
+  { id: "sbj-2", name: "Bahasa Indonesia", teacher: "Siti Nurhaliza" },
+];
+const DUMMY_TASKS: Task[] = [
+  {
+    id: "tsk-1",
+    subjectId: "sbj-1",
+    title: "PR Aljabar",
+    dueDate: "2025-09-30",
+    status: "pending",
+  },
+  {
+    id: "tsk-2",
+    subjectId: "sbj-2",
+    title: "Ringkasan Cerpen",
+    dueDate: "2025-09-25",
+    status: "submitted",
+  },
+];
+
+/* ========= Fetchers ========= */
+async function fetchSection(id: string): Promise<ApiSection | null> {
+  if (USE_DUMMY) return DUMMY_SECTION(id);
   try {
-    const r = await axios.get<ApiOneSection>(
-      `/api/a/class-sections/${sectionId}`
-    );
-    if (r.data?.data) return r.data.data;
-  } catch {}
-  try {
-    const r = await axios.get<ApiListSections>("/api/a/class-sections", {
-      params: { limit: 500 },
-    });
-    const rows = r.data?.data ?? [];
-    return rows.find((x) => x.class_sections_id === sectionId) ?? null;
+    const r = await axios.get<ApiOneSection>(`/api/a/class-sections/${id}`);
+    return r.data.data;
   } catch {
     return null;
   }
 }
-
-async function fetchParticipants(sectionId: string): Promise<ApiParticipant[]> {
+async function fetchParticipants(id: string): Promise<ApiParticipant[]> {
   if (USE_DUMMY) return DUMMY_PARTICIPANTS;
-  const tries: Array<{ url: string; params?: any }> = [
-    { url: "/api/a/class-section-students", params: { section_id: sectionId } },
-    { url: "/api/a/class-students", params: { section_id: sectionId } },
-    { url: "/api/a/students", params: { section_id: sectionId } },
-  ];
-  for (const t of tries) {
-    try {
-      const r = await axios.get<ApiParticipantsResp>(t.url, {
-        params: t.params,
-      });
-      const d: any = r.data?.data;
-      if (Array.isArray(d)) return d;
-      if (d?.items && Array.isArray(d.items)) return d.items;
-    } catch {}
-  }
   return [];
 }
-
-async function fetchLessons(
-  sectionId: string,
-  classId?: string
-): Promise<ApiLesson[]> {
+async function fetchLessons(id: string): Promise<ApiLesson[]> {
   if (USE_DUMMY) return DUMMY_LESSONS;
-  const tries: Array<{ url: string; params?: any }> = [
-    { url: "/api/a/class-lessons", params: { section_id: sectionId } },
-    { url: "/api/a/class-lessons", params: { class_id: classId } },
-    { url: "/api/a/lessons", params: { class_id: classId } },
-  ];
-  for (const t of tries) {
-    try {
-      const r = await axios.get<ApiLessonsResp>(t.url, { params: t.params });
-      const d: any = r.data?.data;
-      if (Array.isArray(d)) return d;
-      if (d?.items && Array.isArray(d.items)) return d.items;
-    } catch {}
-  }
   return [];
 }
 
 /* ========= UI mappers ========= */
-type ParticipantRow = {
-  id: string;
-  name: string;
-  nis?: string;
-  gender?: "L" | "P";
-  phone?: string;
-  email?: string;
-  status?: string;
-};
-function mapParticipant(x: ApiParticipant): ParticipantRow {
+function mapParticipant(x: ApiParticipant) {
   return {
     id: x.class_student_id || x.student_id || x.id || crypto.randomUUID(),
     name: x.student_name || x.name || "-",
@@ -319,77 +228,48 @@ function mapParticipant(x: ApiParticipant): ParticipantRow {
     status: x.status,
   };
 }
-
-type LessonRow = {
-  id: string;
-  title: string;
-  date?: string;
-  time?: string;
-  teacher?: string;
-  note?: string;
-};
-function mapLesson(x: ApiLesson): LessonRow {
-  const id = x.class_lesson_id || x.id || crypto.randomUUID();
-  const title = x.title || x.topic || x.subject_name || "Materi";
-  const time = x.start && x.end ? `${x.start}–${x.end}` : x.start || x.end;
+function mapLesson(x: ApiLesson) {
   return {
-    id,
-    title,
+    id: x.class_lesson_id || x.id || crypto.randomUUID(),
+    title: x.title || x.topic || x.subject_name || "Materi",
     date: x.date,
-    time,
+    time: x.start && x.end ? `${x.start}–${x.end}` : x.start || x.end,
     teacher: x.teacher_name,
     note: x.note,
   };
 }
 
 /* ========= Semester helpers ========= */
-type SemesterKey = "2025-Ganjil" | "2025-Genap" | "2026-Ganjil" | "2026-Genap";
-
+type SemesterKey = "2025-Ganjil" | "2025-Genap";
 const SEMESTER_RANGES: Record<SemesterKey, { start: string; end: string }> = {
   "2025-Ganjil": { start: "2025-07-01", end: "2025-12-31" },
   "2025-Genap": { start: "2026-01-01", end: "2026-06-30" },
-  "2026-Ganjil": { start: "2026-07-01", end: "2026-12-31" },
-  "2026-Genap": { start: "2027-01-01", end: "2027-06-30" },
 };
-
-const inRange = (iso: string, start: string, end: string) =>
-  iso >= start && iso <= end;
+const inRange = (iso: string, s: string, e: string) => iso >= s && iso <= e;
 
 /* ========= Page ========= */
 export default function SchoolDetailClass() {
-  const { id: sectionId = "" } = useParams<{ id: string }>();
+  const { id = "" } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
-  const nav = useNavigate();
 
-  // semester selection
   const [semester, setSemester] = useState<SemesterKey>("2025-Ganjil");
 
   const sectionQ = useQuery({
-    queryKey: ["section", sectionId, USE_DUMMY],
-    enabled: !!sectionId,
-    queryFn: () => fetchSection(sectionId),
-    staleTime: 60_000,
+    queryKey: ["section", id],
+    enabled: !!id,
+    queryFn: () => fetchSection(id),
   });
-
   const participantsQ = useQuery({
-    queryKey: ["section-participants", sectionId, USE_DUMMY],
-    enabled: !!sectionId,
-    queryFn: () => fetchParticipants(sectionId),
-    staleTime: 30_000,
+    queryKey: ["participants", id],
+    enabled: !!id,
+    queryFn: () => fetchParticipants(id),
   });
-
   const lessonsQ = useQuery({
-    queryKey: [
-      "section-lessons",
-      sectionId,
-      sectionQ.data?.class_sections_class_id,
-      USE_DUMMY,
-    ],
-    enabled: !!sectionId,
-    queryFn: () =>
-      fetchLessons(sectionId, sectionQ.data?.class_sections_class_id),
-    staleTime: 30_000,
+    queryKey: ["lessons", id],
+    enabled: !!id,
+    queryFn: () => fetchLessons(id),
   });
 
   const section = sectionQ.data ?? undefined;
@@ -402,158 +282,58 @@ export default function SchoolDetailClass() {
     [lessonsQ.data]
   );
 
-  // ===== Filter lessons by semester
   const semesterRange = SEMESTER_RANGES[semester];
-  const lessonsInSemester = useMemo(() => {
-    const rows = (lessons ?? []).filter(
-      (l) => l.date && inRange(l.date, semesterRange.start, semesterRange.end)
-    );
-    return rows.sort((a, b) => (a.date! < b.date! ? -1 : 1));
-  }, [lessons, semesterRange.start, semesterRange.end]);
-
-  // ===== Meeting dates for attendance columns
-  const meetingDates = useMemo(() => {
-    const s = new Set<string>();
-    lessonsInSemester.forEach((l) => l.date && s.add(l.date));
-    return Array.from(s).sort();
-  }, [lessonsInSemester]);
-
-  // ===== Attendance state (matrix)
-  type AttStatus = "-" | "H" | "I" | "A";
-  type AttendanceMap = Record<
-    string /*studentId*/,
-    Record<string /*date*/, AttStatus>
-  >;
-  const [attendance, setAttendance] = useState<AttendanceMap>({});
-
-  // initialize / extend attendance grid when participants or meetingDates change
-  useEffect(() => {
-    if (participants.length === 0 || meetingDates.length === 0) return;
-    setAttendance((prev) => {
-      const next: AttendanceMap = { ...prev };
-      participants.forEach((p) => {
-        if (!next[p.id]) next[p.id] = {};
-        meetingDates.forEach((d) => {
-          if (!next[p.id][d]) next[p.id][d] = "-";
-        });
-      });
-      return next;
-    });
-  }, [participants, meetingDates]);
-
-  const cycle: AttStatus[] = ["-", "H", "I", "A"];
-  const nextStatus = (s: AttStatus): AttStatus =>
-    cycle[(cycle.indexOf(s) + 1) % cycle.length];
-
-  const toggleCell = (studentId: string, date: string) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        [date]: nextStatus(prev[studentId]?.[date] ?? "-"),
-      },
-    }));
-  };
-
-  const resetAttendance = () => {
-    const blank: AttendanceMap = {};
-    participants.forEach((p) => {
-      blank[p.id] = {};
-      meetingDates.forEach((d) => (blank[p.id][d] = "-"));
-    });
-    setAttendance(blank);
-  };
-
-  const saveAttendance = () => {
-    // TODO: Integrasi ke backend (POST/PUT)
-    // Contoh payload:
-    // {
-    //   section_id: sectionId,
-    //   semester,
-    //   attendances: [{ student_id, date, status }, ...]
-    // }
-    const payload: Array<{
-      student_id: string;
-      date: string;
-      status: AttStatus;
-    }> = [];
-    Object.entries(attendance).forEach(([sid, byDate]) => {
-      Object.entries(byDate).forEach(([date, status]) => {
-        if (status !== "-") payload.push({ student_id: sid, date, status });
-      });
-    });
-    console.log("SAVE attendance", { sectionId, semester, payload });
-  };
+  const lessonsInSemester = lessons.filter(
+    (l) => l.date && inRange(l.date, semesterRange.start, semesterRange.end)
+  );
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="h-full w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* === Topbar === */}
       <ParentTopBar
         palette={palette}
         title="Kelas"
         gregorianDate={new Date().toISOString()}
         dateFmt={dateLong}
       />
+      <main className="px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          {/* === Sidebar kiri === */}
-          <ParentSidebar palette={palette} />
-
-          {/* === Konten kanan === */}
-          <div className="flex-1 space-y-6 min-w-0 lg:p-4">
-            {/* Back + Header + Semester Selector */}
-            <section className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          {/* Content */}
+          <div className="flex-1 min-w-0 space-y-6">
+            <section className="flex items-center justify-between ">
+              <div className=" flex items-center gap-3">
                 <Btn
                   palette={palette}
-                  variant="outline"
-                  onClick={() => nav(-1)}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
                 >
-                  <ArrowLeft className="mr-2" size={16} />
-                  Kembali
+                  <ArrowLeft className="cursor-pointer" size={20} />
                 </Btn>
-                <div className="ml-2">
-                  <div className="text-lg font-semibold">
-                    {section?.class_sections_name ?? "Kelas"}
-                  </div>
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
-                    Kode: {section?.class_sections_code ?? "-"} •{" "}
-                    {section?.class_sections_is_active ? "Aktif" : "Nonaktif"}
-                  </div>
-                </div>
-              </div>
 
-              {/* Selector Semester */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: palette.silver2 }}>
-                  Semester
-                </span>
-                <select
-                  className="text-sm rounded-md border px-2 py-1"
-                  style={{
-                    borderColor: palette.silver1,
-                    background: palette.white1,
-                    color: palette.black1,
-                  }}
-                  value={semester}
-                  onChange={(e) => setSemester(e.target.value as SemesterKey)}
-                >
-                  <option value="2025-Ganjil">2025 • Ganjil</option>
-                  <option value="2025-Genap">2025 • Genap</option>
-                  <option value="2026-Ganjil">2026 • Ganjil</option>
-                  <option value="2026-Genap">2026 • Genap</option>
-                </select>
+                <h1 className="font-semibold text-lg">Detail Kelas</h1>
               </div>
+              <select
+                value={semester}
+                onChange={(e) => setSemester(e.target.value as SemesterKey)}
+                className="border rounded px-2 py-1"
+              >
+                <option value="2025-Ganjil">2025 Ganjil</option>
+                <option value="2025-Genap">2025 Genap</option>
+              </select>
             </section>
 
-            {/* Ringkasan singkat */}
+            {/* Ringkasan */}
             <SectionCard palette={palette}>
-              <div className="p-4 grid gap-3 md:grid-cols-3">
-                <div className="flex items-center gap-3">
+              <div className="p-4 grid gap-4 md:grid-cols-3">
+                {/* Wali Kelas */}
+                <div className="flex items-start gap-3">
                   <span
                     className="h-10 w-10 grid place-items-center rounded-xl"
                     style={{
@@ -581,7 +361,8 @@ export default function SchoolDetailClass() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* Hari & Lokasi */}
+                <div className="flex items-start gap-3">
                   <span
                     className="h-10 w-10 grid place-items-center rounded-xl"
                     style={{
@@ -606,7 +387,8 @@ export default function SchoolDetailClass() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* Waktu */}
+                <div className="flex items-start gap-3">
                   <span
                     className="h-10 w-10 grid place-items-center rounded-xl"
                     style={{
@@ -630,302 +412,151 @@ export default function SchoolDetailClass() {
 
             {/* Peserta */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-                <div className="font-medium flex items-center gap-2">
-                  <Users size={18} /> Peserta
-                </div>
-                <Btn
-                  palette={palette}
-                  onClick={() => console.log("Tambah peserta")}
-                >
-                  + Tambah Peserta
-                </Btn>
+              <div className="p-4 font-medium flex items-center gap-2">
+                <Users size={18} /> Peserta
               </div>
-
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="p-4 overflow-x-auto">
+                <table className="min-w-full table-auto text-sm border-collapse">
                   <thead
-                    className="text-left border-b"
+                    className="border-b"
                     style={{
-                      color: palette.silver2,
                       borderColor: palette.silver1,
+                      color: palette.silver2,
                     }}
                   >
                     <tr>
-                      <th className="py-2 pr-4">NIS</th>
-                      <th className="py-2 pr-4">Nama</th>
-                      <th className="py-2 pr-4">JK</th>
-                      <th className="py-2 pr-4">Kontak</th>
-                      <th className="py-2 pr-4">Status</th>
+                      <th className="px-4 py-2 text-left">NIS</th>
+                      <th className="px-4 py-2 text-left">Nama</th>
+                      <th className="px-4 py-2 text-center">JK</th>
+                      <th className="px-4 py-2 text-left">Kontak</th>
+                      <th className="px-4 py-2 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody
-                    className="divide-y"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    {(participants ?? []).length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="py-6 text-center"
-                          style={{ color: palette.silver2 }}
-                        >
-                          Belum ada peserta.
+                  <tbody>
+                    {participants.map((p) => (
+                      <tr
+                        key={p.id}
+                        className="border-b"
+                        style={{ borderColor: palette.silver1 }}
+                      >
+                        <td className="px-4 py-2">{p.nis ?? "-"}</td>
+                        <td className="px-4 py-2 font-medium">{p.name}</td>
+                        <td className="px-4 py-2 text-center">
+                          {p.gender ?? "-"}
+                        </td>
+                        <td className="px-4 py-2">
+                          <div className="flex flex-col">
+                            {p.phone && <span>{p.phone}</span>}
+                            {p.email && (
+                              <a
+                                href={`mailto:${p.email}`}
+                                className="text-xs underline"
+                                style={{ color: palette.primary }}
+                              >
+                                {p.email}
+                              </a>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <Badge
+                            palette={palette}
+                            variant={
+                              p.status === "aktif" ? "success" : "outline"
+                            }
+                          >
+                            {p.status ?? "Aktif"}
+                          </Badge>
                         </td>
                       </tr>
-                    ) : (
-                      participants.map((p) => (
-                        <tr key={p.id} className="align-middle">
-                          <td className="py-3 pr-4">{p.nis ?? "-"}</td>
-                          <td className="py-3 pr-4 font-medium">{p.name}</td>
-                          <td className="py-3 pr-4">{p.gender ?? "-"}</td>
-                          <td className="py-3 pr-4">
-                            <div className="flex gap-3">
-                              {p.phone && (
-                                <a
-                                  href={`tel:${p.phone}`}
-                                  className="underline"
-                                  style={{ color: palette.primary }}
-                                >
-                                  {p.phone}
-                                </a>
-                              )}
-                              {p.email && (
-                                <a
-                                  href={`mailto:${p.email}`}
-                                  className="underline"
-                                  style={{ color: palette.primary }}
-                                >
-                                  Email
-                                </a>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              palette={palette}
-                              variant={
-                                p.status === "aktif" ? "success" : "outline"
-                              }
-                            >
-                              {p.status ?? "Aktif"}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
-
-                <div
-                  className="pt-3 text-xs"
-                  style={{ color: palette.silver2 }}
-                >
-                  Menampilkan {participants.length} peserta
-                </div>
               </div>
             </SectionCard>
 
-            {/* Pelajaran (per semester) */}
+           
+
+            {/* Mata Pelajaran & Tugas */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
                 <div className="font-medium flex items-center gap-2">
-                  <BookOpen size={18} /> Pelajaran ({semester})
+                  <BookOpen size={18} /> Mata Pelajaran
                 </div>
-                <Btn
-                  palette={palette}
-                  onClick={() => console.log("Tambah pelajaran")}
-                >
-                  + Tambah Pelajaran
-                </Btn>
+                <Btn palette={palette}>+ Tambah Mapel</Btn>
               </div>
 
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead
-                    className="text-left border-b"
-                    style={{
-                      color: palette.silver2,
-                      borderColor: palette.silver1,
-                    }}
-                  >
-                    <tr>
-                      <th className="py-2 pr-4">Tanggal</th>
-                      <th className="py-2 pr-4">Waktu</th>
-                      <th className="py-2 pr-4">Materi/Topik</th>
-                      <th className="py-2 pr-4">Pengajar</th>
-                      <th className="py-2 pr-4">Catatan</th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    className="divide-y"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    {lessonsInSemester.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="py-6 text-center"
-                          style={{ color: palette.silver2 }}
-                        >
-                          Belum ada pelajaran terjadwal di semester ini.
-                        </td>
-                      </tr>
-                    ) : (
-                      lessonsInSemester.map((l) => (
-                        <tr key={l.id} className="align-middle">
-                          <td className="py-3 pr-4">
-                            {l.date ? dateLong(l.date) : "-"}
-                          </td>
-                          <td className="py-3 pr-4">{l.time ?? "-"}</td>
-                          <td className="py-3 pr-4 font-medium">{l.title}</td>
-                          <td className="py-3 pr-4">{l.teacher ?? "-"}</td>
-                          <td className="py-3 pr-4">{l.note ?? "-"}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-
-                <div
-                  className="pt-3 text-xs"
-                  style={{ color: palette.silver2 }}
-                >
-                  Menampilkan {lessonsInSemester.length} pelajaran
-                </div>
-              </div>
-            </SectionCard>
-
-            {/* Absensi (matrix) */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-                <div className="font-medium flex items-center gap-2">
-                  <Users size={18} /> Absensi ({semester})
-                </div>
-                <div className="flex items-center gap-2">
-                  <Btn
-                    palette={palette}
-                    variant="outline"
-                    onClick={resetAttendance}
-                  >
-                    Reset
-                  </Btn>
-                  <Btn palette={palette} onClick={saveAttendance}>
-                    Simpan Absensi
-                  </Btn>
-                </div>
-              </div>
-
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                {participants.length === 0 || meetingDates.length === 0 ? (
+              <div className="px-4 md:px-5 pb-4 space-y-4">
+                {DUMMY_SUBJECTS.map((subj) => (
                   <div
-                    className="py-6 text-center text-sm"
-                    style={{ color: palette.silver2 }}
+                    key={subj.id}
+                    className="border rounded-lg p-4"
+                    style={{ borderColor: palette.silver1 }}
                   >
-                    {participants.length === 0
-                      ? "Belum ada peserta."
-                      : "Belum ada jadwal di semester ini, sehingga absensi belum dapat diisi."}
-                  </div>
-                ) : (
-                  <table className="text-sm min-w-max">
-                    <thead
-                      className="text-left border-b sticky top-0"
-                      style={{
-                        color: palette.silver2,
-                        borderColor: palette.silver1,
-                        background: palette.white2,
-                      }}
-                    >
-                      <tr>
-                        <th className="py-2 pr-4 sticky left-0 bg-inherit">
-                          Nama
-                        </th>
-                        {meetingDates.map((d) => (
-                          <th key={d} className="py-2 px-3 whitespace-nowrap">
-                            {dateLong(d)}
-                          </th>
-                        ))}
-                        <th className="py-2 px-3">Hadir</th>
-                        <th className="py-2 px-3">Izin</th>
-                        <th className="py-2 px-3">Alpa</th>
-                      </tr>
-                    </thead>
-                    <tbody
-                      className="divide-y"
-                      style={{ borderColor: palette.silver1 }}
-                    >
-                      {participants.map((p) => {
-                        const row = attendance[p.id] ?? {};
-                        const counts = meetingDates.reduce(
-                          (acc, d) => {
-                            const s = row[d] ?? "-";
-                            if (s === "H") acc.H++;
-                            else if (s === "I") acc.I++;
-                            else if (s === "A") acc.A++;
-                            return acc;
-                          },
-                          { H: 0, I: 0, A: 0 }
-                        );
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold">{subj.name}</div>
+                        <div
+                          className="text-xs"
+                          style={{ color: palette.silver2 }}
+                        >
+                          Guru: {subj.teacher}
+                        </div>
+                      </div>
+                      <Btn palette={palette} size="sm">
+                        Tambah Tugas
+                      </Btn>
+                    </div>
 
-                        return (
-                          <tr key={p.id} className="align-middle">
-                            <td className="py-3 pr-4 font-medium sticky left-0 bg-inherit">
-                              {p.name}
-                            </td>
-                            {meetingDates.map((d) => {
-                              const cur = row[d] ?? "-";
-                              const color =
-                                cur === "H"
-                                  ? palette.success1
-                                  : cur === "I"
-                                    ? palette.warning1
-                                    : cur === "A"
-                                      ? palette.error1
-                                      : palette.silver2;
-                              const bg =
-                                cur === "H"
-                                  ? palette.success2
-                                  : cur === "I"
-                                    ? palette.warning1
-                                    : cur === "A"
-                                      ? palette.error2
-                                      : palette.white1;
-                              return (
-                                <td key={d} className="py-2 px-3">
-                                  <button
-                                    onClick={() => toggleCell(p.id, d)}
-                                    className="w-8 h-8 rounded-md grid place-items-center border"
-                                    style={{
-                                      color,
-                                      background: bg,
-                                      borderColor: palette.silver1,
-                                    }}
-                                    title="Klik untuk ubah status"
-                                  >
-                                    {cur}
-                                  </button>
-                                </td>
-                              );
-                            })}
-                            <td className="py-3 px-3">{counts.H}</td>
-                            <td className="py-3 px-3">{counts.I}</td>
-                            <td className="py-3 px-3">{counts.A}</td>
+                    {/* Tabel tugas */}
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="min-w-[500px] w-full text-sm">
+                        <thead
+                          className="text-left border-b"
+                          style={{
+                            color: palette.silver2,
+                            borderColor: palette.silver1,
+                          }}
+                        >
+                          <tr>
+                            <th className="py-2 pr-4">Judul</th>
+                            <th className="py-2 pr-4">Deadline</th>
+                            <th className="py-2 pr-4">Status</th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-
-                {participants.length > 0 && meetingDates.length > 0 && (
-                  <div
-                    className="pt-3 text-xs"
-                    style={{ color: palette.silver2 }}
-                  >
-                    {participants.length} peserta • {meetingDates.length}{" "}
-                    pertemuan
+                        </thead>
+                        <tbody
+                          className="divide-y"
+                          style={{ borderColor: palette.silver1 }}
+                        >
+                          {DUMMY_TASKS.filter(
+                            (t) => t.subjectId === subj.id
+                          ).map((t) => (
+                            <tr key={t.id}>
+                              <td className="py-3 pr-4">{t.title}</td>
+                              <td className="py-3 pr-4">
+                                {dateLong(t.dueDate)}
+                              </td>
+                              <td className="py-3 pr-4">
+                                <Badge
+                                  palette={palette}
+                                  variant={
+                                    t.status === "graded"
+                                      ? "success"
+                                      : t.status === "submitted"
+                                        ? "secondary"
+                                        : "outline"
+                                  }
+                                >
+                                  {t.status}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
             </SectionCard>
           </div>

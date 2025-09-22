@@ -210,7 +210,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   );
 };
 
-/* ===== Table Header & Row (dengan Aksi) ===== */
+/* ===== Table Header & Row ===== */
 const TableHeader = ({ palette }: { palette: Palette }) => (
   <thead>
     <tr
@@ -219,42 +219,23 @@ const TableHeader = ({ palette }: { palette: Palette }) => (
         borderBottom: `2px solid ${palette.silver1}`,
       }}
     >
-      <th
-        className="p-3 text-center border font-semibold"
-        style={{ borderColor: palette.silver1 }}
-      >
-        No
-      </th>
-      <th
-        className="p-3 text-left border font-semibold"
-        style={{ borderColor: palette.silver1 }}
-      >
-        Nama Tagihan
-      </th>
-      <th
-        className="p-3 text-right border font-semibold"
-        style={{ borderColor: palette.silver1 }}
-      >
-        Jumlah
-      </th>
-      <th
-        className="p-3 text-center border font-semibold"
-        style={{ borderColor: palette.silver1 }}
-      >
-        Status
-      </th>
-      <th
-        className="p-3 text-center border font-semibold"
-        style={{ borderColor: palette.silver1 }}
-      >
-        Jatuh Tempo
-      </th>
-      <th
-        className="p-3 text-center border font-semibold"
-        style={{ borderColor: palette.silver1, width: 160 }}
-      >
-        Aksi
-      </th>
+      {["No", "Nama Tagihan", "Jumlah", "Status", "Jatuh Tempo", "Aksi"].map(
+        (h, i) => (
+          <th
+            key={h}
+            className={`p-3 border font-semibold ${
+              i === 0 || i >= 3
+                ? "text-center"
+                : i === 2
+                  ? "text-right"
+                  : "text-left"
+            }`}
+            style={{ borderColor: palette.silver1 }}
+          >
+            {h}
+          </th>
+        )
+      )}
     </tr>
   </thead>
 );
@@ -347,22 +328,19 @@ const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
     <SectionCard palette={palette} className="p-4">
       <h3 className="text-lg font-semibold mb-3">Ringkasan Tagihan</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div
-          className="text-start p-3 rounded-lg"
-          style={{ background: palette.white1 }}
-        >
+        <div className="p-3 rounded-lg" style={{ background: palette.white1 }}>
           <p className="text-sm opacity-70">Total Tagihan</p>
           <p className="text-xl font-bold">
             Rp {totalSemua.toLocaleString("id-ID")}
           </p>
         </div>
-        <div className="text-center p-3 rounded-lg bg-red-50">
+        <div className="p-3 rounded-lg bg-red-50 text-center">
           <p className="text-sm text-red-600">Belum Lunas</p>
           <p className="text-xl font-bold text-red-700">
             Rp {totalBelum.toLocaleString("id-ID")}
           </p>
         </div>
-        <div className="text-center p-3 rounded-lg">
+        <div className="p-3 rounded-lg text-center">
           <p className="text-sm opacity-70">Jumlah Tagihan</p>
           <p className="text-xl font-bold">{data.length} item</p>
         </div>
@@ -378,28 +356,19 @@ export default function AllInvoices() {
   const { state } = useLocation() as { state: LocationState };
   const navigate = useNavigate();
 
-  // Ambil dari state (yang dikirim BillsSectionCard). Kalau kosong, bisa fetch API.
   const initialBills: BillItem[] = state?.bills ?? [];
-
-  // State lokal agar bisa Add/Edit/Delete
   const [items, setItems] = useState<BillItem[]>(initialBills);
 
-  // (Opsional) jika ingin sync ulang saat state berubah:
   useEffect(() => setItems(initialBills), [initialBills]);
 
   const tagihanList: Tagihan[] = useMemo(() => items.map(toTagihan), [items]);
   const currentDate = new Date().toISOString();
 
-  /* ========= Handlers ========= */
-
-  // Tambah
   const [openAdd, setOpenAdd] = useState(false);
-  const handleAdd = async (payload: Omit<BillItem, "id"> & { id?: string }) => {
-    // ====== API nyata (sesuaikan endpoint):
-    // const res = await axios.post<{ data: BillItem }>("/api/a/finance/bills", payload, { withCredentials: true });
-    // const created = res.data.data;
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selected, setSelected] = useState<BillItem | null>(null);
 
-    // ====== Fallback lokal (tanpa API):
+  const handleAdd = async (payload: Omit<BillItem, "id"> & { id?: string }) => {
     const created: BillItem = {
       id: payload.id ?? String(Date.now()),
       title: payload.title,
@@ -407,7 +376,6 @@ export default function AllInvoices() {
       dueDate: payload.dueDate,
       status: payload.status,
     };
-
     setItems((prev) => [...prev, created]);
     Swal.fire({
       icon: "success",
@@ -417,10 +385,6 @@ export default function AllInvoices() {
       showConfirmButton: false,
     });
   };
-
-  // Edit
-  const [openEdit, setOpenEdit] = useState(false);
-  const [selected, setSelected] = useState<BillItem | null>(null);
 
   const openEditById = (id: string) => {
     const found = items.find((x) => x.id === id) ?? null;
@@ -433,12 +397,6 @@ export default function AllInvoices() {
   ) => {
     if (!selected) return;
     const id = selected.id;
-
-    // ====== API nyata (sesuaikan endpoint):
-    // const res = await axios.put<{ data: BillItem }>(`/api/a/finance/bills/${id}`, payload, { withCredentials: true });
-    // const updated = res.data.data;
-
-    // ====== Fallback lokal:
     const updated: BillItem = {
       id,
       title: payload.title,
@@ -446,7 +404,6 @@ export default function AllInvoices() {
       dueDate: payload.dueDate,
       status: payload.status,
     };
-
     setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
     Swal.fire({
       icon: "success",
@@ -457,11 +414,9 @@ export default function AllInvoices() {
     });
   };
 
-  // Hapus
   const handleDelete = async (id: string) => {
     const target = items.find((x) => x.id === id);
     if (!target) return;
-
     const res = await Swal.fire({
       title: "Hapus tagihan?",
       text: `Tagihan "${target.title}" akan dihapus.`,
@@ -471,30 +426,15 @@ export default function AllInvoices() {
       cancelButtonText: "Batal",
       confirmButtonColor: "#d33",
     });
-
     if (!res.isConfirmed) return;
-
-    try {
-      // ====== API nyata:
-      // await axios.delete(`/api/a/finance/bills/${id}`, { withCredentials: true });
-
-      // ====== Update lokal:
-      setItems((prev) => prev.filter((x) => x.id !== id));
-
-      Swal.fire({
-        icon: "success",
-        title: "Terhapus",
-        text: `Tagihan "${target.title}" telah dihapus.`,
-        timer: 1200,
-        showConfirmButton: false,
-      });
-    } catch (e: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Gagal menghapus",
-        text: e?.message ?? "Terjadi kesalahan.",
-      });
-    }
+    setItems((prev) => prev.filter((x) => x.id !== id));
+    Swal.fire({
+      icon: "success",
+      title: "Terhapus",
+      text: `Tagihan "${target.title}" telah dihapus.`,
+      timer: 1200,
+      showConfirmButton: false,
+    });
   };
 
   return (
@@ -508,7 +448,7 @@ export default function AllInvoices() {
         title={state?.heading ?? "Semua Tagihan"}
       />
 
-      {/* Modal Add */}
+      {/* Modals */}
       <InvoiceModal
         open={openAdd}
         onClose={() => setOpenAdd(false)}
@@ -516,8 +456,6 @@ export default function AllInvoices() {
         title="Tambah Tagihan"
         onSubmit={handleAdd}
       />
-
-      {/* Modal Edit */}
       <InvoiceModal
         open={openEdit}
         onClose={() => {
@@ -530,23 +468,32 @@ export default function AllInvoices() {
         onSubmit={handleEdit}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-6">
-          <div className="lg:w-64 mb-6 lg:mb-0">
+      {/* Layout */}
+      <main className="w-full px-4 md:px-6 py-6">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
-          </div>
+          </aside>
 
-          <div className="flex-1 space-y-6">
-            <ArrowLeft
-              onClick={() => navigate(-1)}
-              className="font-boldd cursor-pointer"
-            />
-
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Tagihan</h2>
-              <Btn palette={palette} onClick={() => setOpenAdd(true)}>
-                Tambah Tagihan
-              </Btn>
+              <div className="  flex items-center gap-3">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft className="cursor-pointer" size={20} />
+                </Btn>
+
+                <h1 className="font-semibold text-lg">Tagihan</h1>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Btn palette={palette} onClick={() => setOpenAdd(true)}>
+                  Tambah Tagihan
+                </Btn>
+              </div>
             </div>
 
             <Total data={tagihanList} palette={palette} />
@@ -592,7 +539,7 @@ export default function AllInvoices() {
                 </table>
               </div>
             </SectionCard>
-          </div>
+          </section>
         </div>
       </main>
     </div>

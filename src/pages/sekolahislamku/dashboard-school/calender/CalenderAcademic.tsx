@@ -221,25 +221,24 @@ const CalenderAcademic: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto px-7 md:py-8 py-3">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <aside className="lg:col-span-2">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          <section className="lg:col-span-10 space-y-6 min-w-0">
-            {/* Header */}
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
+
             {/* Header Responsive */}
             <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Btn
                   palette={palette}
                   variant="ghost"
-                  size="sm"
                   onClick={() => navigate(-1)}
                   className="px-2"
                 >
-                  <ArrowLeft size={18} />
+                  <ArrowLeft size={20} />
                 </Btn>
                 <h1 className="text-base font-semibold sm:text-lg">
                   Kalender Akademik
@@ -328,7 +327,6 @@ const CalenderAcademic: React.FC = () => {
               </div>
             </SectionCard>
 
-           
             {/* Panel agenda: full di mobile, kolom kanan di desktop */}
             {selectedDay && (
               <SectionCard palette={palette}>

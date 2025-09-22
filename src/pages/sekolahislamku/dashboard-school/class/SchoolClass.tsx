@@ -43,7 +43,7 @@ export interface ClassRow {
   studentCount: number;
   schedule: string;
   status: ClassStatus;
-  classId?: string; // parent LEVEL id
+  classId?: string;
 }
 
 export interface ClassStats {
@@ -301,13 +301,11 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
   const { slug = "" } = useParams<{ slug: string }>();
 
-  // Query params
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
   const levelId = sp.get("level_id") ?? "";
 
-  // Data queries
   const levelsQ = useQuery({
     queryKey: ["levels"],
     queryFn: fetchLevels,
@@ -329,7 +327,6 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     if (!openTambah) refetch();
   }, [openTambah, refetch]);
 
-  // Map API → UI
   const mappedRows: ClassRow[] = useMemo(
     () =>
       (apiItems ?? []).map((it) => ({
@@ -370,12 +367,10 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     setSp(next, { replace: true });
   };
 
-  // Fallback ke dummy data
   const items = filteredRows.length > 0 ? filteredRows : DUMMY_CLASSES;
   const levels =
     levelsQ.data && levelsQ.data.length > 0 ? levelsQ.data : DUMMY_LEVELS;
 
-  /* ===== Optimistic Handlers ===== */
   const toSlug = (s: string) =>
     (s || "level-baru").toLowerCase().trim().replace(/\s+/g, "-");
 
@@ -429,10 +424,9 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
     setOpenTambah(false);
   };
 
-  /* ================= Render ================= */
   return (
     <div
-      className="min-h-screen w-full"
+      className="h-full w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ParentTopBar
@@ -443,13 +437,17 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto Replace px-7 md:py-8 py-5">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 space-y-6 min-w-0 md:space-x-8">
+          {/* Main Content */}
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
-            <div className="flex gap-3 items-center md:mx-9">
+            <div className="flex gap-3 items-center">
               {showBack && (
                 <Btn
                   palette={palette}
@@ -458,14 +456,16 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   className="inline-flex items-center gap-2"
                 >
                   <ArrowLeft size={20} />
+          
                 </Btn>
               )}
-              <h1 className="text-lg font-semibold ">Seluruh Kelas</h1>
+              <h1 className="text-lg font-semibold">Seluruh Kelas</h1>
             </div>
+
             {/* Panel Tingkat */}
             <SectionCard palette={palette}>
-              <div className="flex p-4 md:p-5 pb-2 items-center justify-between ">
-                <div className="font-medium flex items-center gap-2 -mt-5">
+              <div className="flex p-4 md:p-5 pb-2 items-center justify-between">
+                <div className="font-medium flex items-center gap-2">
                   <Layers size={18} /> Tingkat
                 </div>
                 <Btn
@@ -652,7 +652,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 </div>
               </div>
             </SectionCard>
-          </div>
+          </section>
         </div>
       </main>
 

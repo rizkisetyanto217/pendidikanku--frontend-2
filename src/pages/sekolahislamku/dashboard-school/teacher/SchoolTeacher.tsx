@@ -140,9 +140,10 @@ const PageHeader = ({
           className="flex items-center gap-1.5 md:mt-0"
         >
           <ArrowLeft size={20} />
+          
         </Btn>
       )}
-      <h1 className="text-lg  items-center font-semibold">Guru</h1>
+      <h1 className="text-lg font-semibold">Guru</h1>
     </div>
 
     <div className="flex items-center gap-2 flex-wrap">
@@ -280,7 +281,9 @@ const TeacherTableRow = ({
               href={`mailto:${teacher.email}`}
               className="flex items-center gap-1 hover:underline"
               style={{ color: palette.primary }}
-            />
+            >
+              <Mail size={14} /> Email
+            </a>
           )}
         </div>
       </td>
@@ -346,7 +349,7 @@ const TeachersTable = ({
 
     {/* Desktop */}
     <div className="hidden md:block overflow-x-auto">
-      <table className=" w-full text-sm">
+      <table className="w-full text-sm">
         <thead>
           <tr
             className="text-left border-b"
@@ -495,15 +498,16 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         hijriDate={hijriWithWeekday(new Date().toISOString())}
       />
 
-      <main className="mx-auto px-7 py-5 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4">
+      {/* Container */}
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2 order-2 lg:order-1">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main Content */}
-          <section className="lg:col-span-10 space-y-6 order-1 lg:order-2">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <PageHeader
               palette={palette}
               onImportClick={() => setOpenImport(true)}
@@ -527,4 +531,3 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
 };
 
 export default TeachersPage;
-

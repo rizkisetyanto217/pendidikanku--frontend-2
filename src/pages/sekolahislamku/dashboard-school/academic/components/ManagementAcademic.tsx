@@ -113,31 +113,30 @@ export default function ManagementAcademic() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto  px-7 md:py-8  py-3">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-10 space-y-6 min-w-0">
-            <div className="flex items-center justify-between">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="flex items-center justify-between ">
               <div className="flex items-center gap-3">
-                 <Btn
-                palette={palette}
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-1.5 p-5"
-              >
-                <ArrowLeft size={20} className="mr-1" />
-              </Btn>
-              <h1 className="flex text-lg font-semibold ">Kelola Akademik</h1>
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-1.5 p-5"
+                >
+                  <ArrowLeft size={20} className="mr-1" />
+                </Btn>
+                <h1 className="flex text-lg font-semibold ">Kelola Akademik</h1>
               </div>
               <Btn palette={palette} size="sm" variant="ghost">
                 <Plus size={16} className="mr-1" />
-                
               </Btn>
             </div>
 

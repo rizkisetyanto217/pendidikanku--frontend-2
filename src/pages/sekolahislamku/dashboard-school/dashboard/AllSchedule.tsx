@@ -215,24 +215,23 @@ export default function AllSchedule() {
         onSubmit={handleSubmitAdd}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          <div className="flex-1 min-w-0 space-y-4">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header actions — selaras ScheduleThreeDays */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-2 font-semibold text-lg">
-                <button
+              <div className="flex items-center gap-3 font-semibold text-lg">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
                   onClick={() => navigate(-1)}
-                  className="inline-flex items-center justify-center rounded-full p-1 hover:opacity-80"
-                  aria-label="Kembali"
-                  title="Kembali"
                 >
-                  <ArrowLeft size={20} />
-                </button>
+                  <ArrowLeft className="cursor-pointer" size={20} />
+                </Btn>
                 <span>{heading || "Jadwal Hari Ini"}</span>
               </div>
               <div className="flex gap-2">

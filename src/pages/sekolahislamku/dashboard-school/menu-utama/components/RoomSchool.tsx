@@ -706,15 +706,15 @@ export default function RoomSchool() {
 
       <Flash palette={palette} flash={flash} />
 
-      <main className="mx-auto px-7 md:py-8 py-3">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Content */}
-          <section className="lg:col-span-10 space-y-5 min-w-0">
+          <section className="flex-1 min-w-0 space-y-6">
             <div className="mx-auto  flex items-center gap-3">
               <Btn
                 palette={palette}
@@ -726,35 +726,6 @@ export default function RoomSchool() {
 
               <h1 className="font-semibold text-lg">Ruangan</h1>
             </div>
-            {/* KPIs */}
-            {/* <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              <KpiTile
-                palette={palette}
-                label="Total Ruangan"
-                value={stats.total}
-                icon={<Building2 size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Aktif"
-                value={stats.active}
-                icon={<UsersIcon size={18} />}
-              />
-              <KpiTile
-                palette={palette}
-                label="Dipakai Sekarang"
-                value={stats.inUseNow}
-                icon={<CalendarDays size={18} />}
-                tone="warning"
-              />
-              <KpiTile
-                palette={palette}
-                label="Tersedia Hari Ini"
-                value={stats.availableToday}
-                icon={<MapPin size={18} />}
-                tone="success"
-              />
-            </section> */}
 
             {/* Toolbar */}
             <SectionCard palette={palette}>

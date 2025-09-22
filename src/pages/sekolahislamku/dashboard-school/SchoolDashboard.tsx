@@ -910,37 +910,36 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
       <Flash palette={palette} flash={flash} />
 
       {/* ====== CONTAINER ====== */}
-      <main className="mx-auto w-full px-7 md:py-3  py-3">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2 mt-5">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-10 space-y-6 min-w-0">
-            {/* Back button biasa */}
-            <div className="mx-auto max-w-6xl flex gap-4 items-center">
-              {showBack && (
-                <div className="flex md:py-5 -mb-3">
-                  <Btn
-                    palette={palette}
-                    variant="ghost"
-                    onClick={() => navigate(-1)}
-                    className="inline-flex items-center gap-2 "
-                  >
-                    <ArrowLeft size={20} />
-                  </Btn>
-                </div>
-              )}
-              {/* <h1 className="font-semibold text-lg">Dashboard Sekolah</h1> */}
-            </div>
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            {/* Back button */}
+            {showBack && (
+              <div className="flex py-2">
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} />
+                  {backLabel}
+                </Btn>
+              </div>
+            )}
+
             <Outlet />
 
             {/* ===== Jadwal • Keuangan • Pengumuman ===== */}
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-stretch">
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-stretch">
               {/* Jadwal */}
-              <div className="md:col-span-1 lg:col-span-6">
+              <div className="col-span-1 md:col-span-6">
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
@@ -952,7 +951,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                     heading: "Semua Jadwal Hari Ini",
                   }}
                 />
-
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
                     Memuat jadwal hari ini…
@@ -961,7 +959,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
               </div>
 
               {/* Keuangan */}
-              <div className="md:col-span-1 lg:col-span-6 space-y-4 min-w-0">
+              <div className="md:col-span-1 lg:col-span-6 space-y-6 min-w-0">
                 <SectionCard palette={palette}>
                   <div className="p-4 pb-1 font-medium">Snapshot Keuangan</div>
                   <div className="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -993,7 +991,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 />
               </div>
 
-              {/* Pengumuman (full width) */}
+              {/* Pengumuman */}
               <div className="lg:col-span-12">
                 <AnnouncementsList
                   palette={palette}
@@ -1030,50 +1028,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 )}
               </div>
             </section>
-
-            {/* ===== Modals & states ===== */}
-            <AnnouncementModal
-              open={modalOpen}
-              onClose={() => {
-                setModalOpen(false);
-                setModalInitial(null);
-              }}
-              palette={palette}
-              initial={modalInitial}
-              onSubmit={(form) => upsertMutation.mutate(form)}
-              saving={upsertMutation.isPending}
-              error={
-                (upsertMutation.error as any)?.response?.data?.message ??
-                (upsertMutation.error as any)?.message ??
-                null
-              }
-              themes={themesQ.data ?? []}
-              onAddTheme={() => setCreateThemeOpen(true)}
-            />
-
-            {(homeQ.isLoading || statsQ.isLoading) && (
-              <div className="text-sm opacity-70">Memuat data dashboard…</div>
-            )}
-            {statsQ.isError && (
-              <div className="text-xs opacity-70">
-                Gagal memuat statistik lembaga. Menampilkan data sementara.
-              </div>
-            )}
           </section>
-
-          {/* Add Theme Modal */}
-          <AddThemeModal
-            open={createThemeOpen}
-            onClose={() => setCreateThemeOpen(false)}
-            palette={palette}
-            onSubmit={(v) => createThemeMutation.mutate(v)}
-            saving={createThemeMutation.isPending}
-            error={
-              (createThemeMutation.error as any)?.response?.data?.message ??
-              (createThemeMutation.error as any)?.message ??
-              null
-            }
-          />
         </div>
       </main>
     </div>

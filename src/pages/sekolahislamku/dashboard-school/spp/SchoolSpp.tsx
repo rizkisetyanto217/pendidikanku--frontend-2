@@ -161,17 +161,17 @@ const SchoolSpp: React.FC = () => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto px-7 md:py-8 py-3">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-10 space-y-6 min-w-0">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Back button biasa */}
-            <div className="mx-auto Replace flex gap-4 items-center">
+            <div className="flex gap-3 items-center">
               <Btn
                 palette={palette}
                 variant="ghost"

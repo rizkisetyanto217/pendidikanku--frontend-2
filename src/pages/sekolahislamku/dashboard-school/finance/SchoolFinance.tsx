@@ -1018,15 +1018,15 @@ const handleCreateInvoiceSubmit = (data: any) => {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto px-7 py-5 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2 order-2 lg:order-1">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main Content */}
-          <section className="lg:col-span-10 space-y-5 sm:space-y-6 min-w-0 order-1 lg:order-2 pr-5">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
             <div className="flex gap-3 items-center">
               {showBack && (
@@ -1037,7 +1037,6 @@ const handleCreateInvoiceSubmit = (data: any) => {
                   className="inline-flex items-center gap-2"
                 >
                   <ArrowLeft size={20} />
-
                 </Btn>
               )}
               <h1 className="text-lg font-semibold">Keuangan Sekolah</h1>

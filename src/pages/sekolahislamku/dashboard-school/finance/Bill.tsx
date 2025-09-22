@@ -1,20 +1,26 @@
 import * as React from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
+// Constants & utils
+import { colors } from "@/constants/colorsThema";
+
+// UI primitives
 import {
   SectionCard,
   Btn,
   Badge,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import { colors } from "@/constants/colorsThema";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+
+// Icons
 import {
-  Wallet,
   ArrowLeft,
   Calendar as CalendarIcon,
   Receipt,
   ShieldCheck,
 } from "lucide-react";
 
+// Layout components
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 
@@ -128,208 +134,166 @@ export default function Bill({
       className="min-h-screen w-full"
       style={{ background: palette.white2, color: palette.black1 }}
     >
-      {/* TopBar sama seperti dashboard */}
+      {/* TopBar */}
       <ParentTopBar palette={palette} title="Tagihan & Pembayaran" />
 
-      {/* ====== CONTAINER LAYOUT SAMA ====== */}
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar kiri */}
-          <aside className="lg:col-span-3">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Konten kanan */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
-            {/* Breadcrumb kecil */}
-            <div className="flex items-center gap-2">
-              <Btn
-                variant="ghost"
-                size="sm"
-                palette={palette}
-                onClick={() => navigate(-1)}
-                className="inline-flex items-center gap-2"
-              >
-                <ArrowLeft size={16} />
-                Kembali
-              </Btn>
-              {/* <Link
-                to={backHref}
-                className="text-sm underline"
-                style={{ color: palette.secondary }}
-              >
-                Lihat semua tagihan
-              </Link> */}
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-3">
+                <Btn
+                  variant="ghost"
+            
+                  palette={palette}
+                  onClick={() => navigate(-1)}
+                  className="inline-flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} />
+                </Btn>
+                <h2 className="text-lg md:text-xl font-semibold">
+                  Detail Tagihan
+                </h2>
+              </div>
+              {bill && (
+                <Badge
+                  variant={badgeVariants[bill.status]}
+                  palette={palette}
+                  className="shrink-0"
+                >
+                  {statusText[bill.status]}
+                </Badge>
+              )}
             </div>
 
-            {/* Kartu Detail Tagihan */}
-            <SectionCard palette={palette} className="w-full">
-              {/* Header card */}
-              <div
-                className="p-4 md:p-5 flex items-center justify-between"
-                style={{ borderBottom: `1px solid ${palette.silver1}` }}
-              >
-                <div className="flex items-center gap-2">
-                  <Wallet size={22} color={palette.quaternary} />
-                  <h2 className="text-lg md:text-xl font-semibold">
-                    Detail Tagihan
-                  </h2>
-                </div>
-                {bill && (
-                  <Badge
-                    variant={badgeVariants[bill.status]}
-                    palette={palette}
-                    className="shrink-0"
-                  >
-                    {statusText[bill.status]}
-                  </Badge>
-                )}
-              </div>
-
-              {/* Body */}
-              <div className="px-4 md:px-5 py-5">
-                {loading && (
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
-                    Memuat data tagihan…
-                  </div>
-                )}
-                {!loading && error && (
-                  <div className="text-sm" style={{ color: palette.error1 }}>
-                    {error}
-                  </div>
-                )}
-                {!loading && !error && !bill && (
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
-                    Data tagihan tidak tersedia.
-                  </div>
-                )}
-
-                {bill && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    {/* Info */}
-                    <div className="lg:col-span-2 space-y-4">
-                      <div
-                        className="rounded-2xl border p-4"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white2,
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="text-base md:text-lg font-semibold truncate">
-                              {bill.title}
-                            </div>
-                            {bill.invoiceNo && (
-                              <div
-                                className="text-xs"
-                                style={{ color: palette.black2 }}
-                              >
-                                No. Invoice: {bill.invoiceNo}
-                              </div>
-                            )}
+            {/* Body */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {/* Info utama */}
+              <div className="lg:col-span-2 space-y-4">
+                <SectionCard palette={palette} className="p-5">
+                  {loading && (
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
+                      Memuat data tagihan…
+                    </div>
+                  )}
+                  {!loading && error && (
+                    <div className="text-sm" style={{ color: palette.error1 }}>
+                      {error}
+                    </div>
+                  )}
+                  {!loading && !error && !bill && (
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
+                      Data tagihan tidak tersedia.
+                    </div>
+                  )}
+                  {bill && (
+                    <>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-base md:text-lg font-semibold truncate">
+                            {bill.title}
                           </div>
-
-                          <div className="text-right">
+                          {bill.invoiceNo && (
                             <div
                               className="text-xs"
                               style={{ color: palette.black2 }}
                             >
-                              Total
+                              No. Invoice: {bill.invoiceNo}
                             </div>
-                            <div className="text-xl md:text-2xl font-bold">
-                              {formatIDR(bill.amount)}
-                            </div>
-                          </div>
+                          )}
                         </div>
-
-                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <CalendarIcon size={16} />
-                            <span>Jatuh tempo: {dateFmt(bill.dueDate)}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Receipt size={16} />
-                            <span>Status: {statusText[bill.status]}</span>
-                          </div>
-                        </div>
-
-                        {bill.description && (
-                          <p
-                            className="mt-3 text-sm leading-relaxed"
+                        <div className="text-right">
+                          <div
+                            className="text-xs"
                             style={{ color: palette.black2 }}
                           >
-                            {bill.description}
-                          </p>
-                        )}
+                            Total
+                          </div>
+                          <div className="text-xl md:text-2xl font-bold">
+                            {formatIDR(bill.amount)}
+                          </div>
+                        </div>
                       </div>
 
-                      <div
-                        className="rounded-2xl border p-4 flex items-start gap-3"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white2,
-                        }}
-                      >
-                        <ShieldCheck
-                          size={18}
-                          className="mt-0.5"
-                          color={palette.quaternary}
-                        />
+                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CalendarIcon size={16} />
+                          <span>Jatuh tempo: {dateFmt(bill.dueDate)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Receipt size={16} />
+                          <span>Status: {statusText[bill.status]}</span>
+                        </div>
+                      </div>
+
+                      {bill.description && (
                         <p
-                          className="text-sm"
+                          className="mt-3 text-sm leading-relaxed"
                           style={{ color: palette.black2 }}
                         >
-                          Pembayaran diproses secara aman. Simpan bukti
-                          transaksi setelah berhasil.
+                          {bill.description}
                         </p>
-                      </div>
-                    </div>
+                      )}
+                    </>
+                  )}
+                </SectionCard>
 
-                    {/* Actions */}
-                    <div className="space-y-3">
-                      <div
-                        className="rounded-2xl border p-4 sticky top-20"
-                        style={{
-                          borderColor: palette.silver1,
-                          background: palette.white2,
-                        }}
-                      >
-                        <div
-                          className="mb-2 text-sm"
-                          style={{ color: palette.black2 }}
-                        >
-                          Total Pembayaran
-                        </div>
-                        <div className="mb-4 text-2xl font-bold">
-                          {bill ? formatIDR(bill.amount) : "-"}
-                        </div>
-
-                        <Btn
-                          size="lg"
-                          palette={palette}
-                          className="w-full"
-                          disabled={isPaid}
-                          onClick={handleBayar}
-                        >
-                          {isPaid ? "Sudah Dibayar" : "Bayar Sekarang"}
-                        </Btn>
-
-                        {!isPaid && payUrl && (
-                          <a
-                            href={payUrl}
-                            className="block text-center text-sm underline mt-2"
-                            style={{ color: palette.secondary }}
-                          >
-                            Buka tautan pembayaran
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <SectionCard
+                  palette={palette}
+                  className="p-4 flex items-start gap-3"
+                >
+                  <ShieldCheck
+                    size={18}
+                    className="mt-0.5"
+                    color={palette.quaternary}
+                  />
+                  <p className="text-sm" style={{ color: palette.black2 }}>
+                    Pembayaran diproses secara aman. Simpan bukti transaksi
+                    setelah berhasil.
+                  </p>
+                </SectionCard>
               </div>
-            </SectionCard>
+
+              {/* Actions */}
+              <div className="space-y-3">
+                <SectionCard
+                  palette={palette}
+                  className="p-4 sticky top-20 space-y-4"
+                >
+                  <div className="text-sm" style={{ color: palette.black2 }}>
+                    Total Pembayaran
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {bill ? formatIDR(bill.amount) : "-"}
+                  </div>
+                  <Btn
+                    size="lg"
+                    palette={palette}
+                    className="w-full"
+                    disabled={isPaid}
+                    onClick={handleBayar}
+                  >
+                    {isPaid ? "Sudah Dibayar" : "Bayar Sekarang"}
+                  </Btn>
+                  {!isPaid && payUrl && (
+                    <a
+                      href={payUrl}
+                      className="block text-center text-sm underline"
+                      style={{ color: palette.secondary }}
+                    >
+                      Buka tautan pembayaran
+                    </a>
+                  )}
+                </SectionCard>
+              </div>
+            </div>
           </section>
         </div>
       </main>

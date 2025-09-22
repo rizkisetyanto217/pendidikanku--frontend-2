@@ -189,15 +189,15 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
         dateFmt={topbarDateFmt}
       />
 
-      <main className="mx-auto  px-7 py-6 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-6">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar - hidden on mobile, show on tablet+ */}
-          <aside className="hidden lg:block lg:col-span-2">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main Content */}
-          <section className="lg:col-span-10 space-y-5 md:space-y-6 min-w-0">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header Section */}
             <div className="flex gap-3 items-center">
               {showBack && (

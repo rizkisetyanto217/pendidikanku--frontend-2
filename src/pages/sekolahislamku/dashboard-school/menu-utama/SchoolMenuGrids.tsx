@@ -14,7 +14,6 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 
 import type { LucideIcon } from "lucide-react";
 import {
-  Home,
   CalendarDays,
   Building2,
   Layers,
@@ -53,10 +52,10 @@ const dateLong = (iso?: string) =>
 type MenuItem = {
   key: string;
   label: string;
-  to?: string; // rute internal (opsional)
-  onClick?: () => void; // aksi alternatif (opsional)
-  icon: LucideIcon; // ikon sebagai komponen, bukan node
-  note?: string; // teks kecil
+  to?: string;
+  onClick?: () => void;
+  icon: LucideIcon;
+  note?: string;
 };
 
 /* ============== Page ============== */
@@ -66,23 +65,15 @@ export default function SchoolMenuGrids() {
 
   const topbarISO = toLocalNoonISO(new Date());
 
-  // Susun item menu di sini. Ubah "to" sesuai rute di apps-mu.
   const items: MenuItem[] = useMemo(
     () => [
-      // { key: "beranda", label: "Beranda", to: "sekolah", icon: Home },
-
       {
         key: "periode",
         label: "Periode Akademik",
         to: "academic",
         icon: CalendarDays,
       },
-      {
-        key: "ruangan",
-        label: "Ruangan",
-        to: "room-school",
-        icon: Building2,
-      },
+      { key: "ruangan", label: "Ruangan", to: "room-school", icon: Building2 },
       { key: "kelas-all", label: "Seluruh Kelas", to: "kelas", icon: Layers },
       {
         key: "kelas-aktif",
@@ -90,10 +81,8 @@ export default function SchoolMenuGrids() {
         to: "kelas-aktif",
         icon: CheckCircle2,
       },
-
       { key: "keuangan", label: "Keuangan", to: "keuangan", icon: CreditCard },
       { key: "spp", label: "SPP", to: "spp", icon: Banknote },
-
       { key: "guru", label: "Guru", to: "guru", icon: UserCog },
       {
         key: "murid",
@@ -102,15 +91,8 @@ export default function SchoolMenuGrids() {
         icon: Users,
         note: "Cari Murid",
       },
-
-      {
-        key: "profil",
-        label: "Profil",
-        to: "profil-sekolah",
-        icon: IdCard,
-      },
+      { key: "profil", label: "Profil", to: "profil-sekolah", icon: IdCard },
       { key: "website", label: "Website", to: "/website", icon: Globe },
-
       { key: "buku", label: "Buku", to: "buku", icon: BookOpen },
       {
         key: "pelajaran",
@@ -124,13 +106,7 @@ export default function SchoolMenuGrids() {
         to: "all-announcement",
         icon: Bell,
       },
-      {
-        key: "sertifikat",
-        label: "Sertifikat",
-        to: "sertifikat",
-        icon: Award,
-      },
-
+      { key: "sertifikat", label: "Sertifikat", to: "sertifikat", icon: Award },
       {
         key: "kalender",
         label: "Kalender Akademik",
@@ -165,16 +141,16 @@ export default function SchoolMenuGrids() {
         dateFmt={dateLong}
       />
 
-      <main className="mx-auto w-full px-7 md:py-8  py-3">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-2">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-10 space-y-6 min-w-0">
-            <div className="mb-4 font-semibold text-base">Akses Cepat</div>
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="mb-2 font-semibold text-base">Akses Cepat</div>
 
             {/* Grid menu */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
@@ -196,18 +172,9 @@ function MenuTile({ item, palette }: { item: MenuItem; palette: Palette }) {
   const content = (
     <div
       className="h-full w-full rounded-2xl border p-3 md:p-4 flex flex-col items-center justify-center text-center gap-2 transition-transform"
-      style={{
-        borderColor: palette.silver1,
-        // background: palette.white1,
-      }}
+      style={{ borderColor: palette.silver1 }}
     >
-      <span
-        style={{
-          // background: palette.primary2,
-          color: palette.primary,
-        }}
-        aria-hidden
-      >
+      <span style={{ color: palette.primary }} aria-hidden>
         <Icon size={22} />
       </span>
       <div className="text-xs md:text-sm font-medium leading-tight line-clamp-2">
@@ -224,12 +191,10 @@ function MenuTile({ item, palette }: { item: MenuItem; palette: Palette }) {
     </div>
   );
 
-  // Prioritaskan Link jika ada rute; kalau tidak, pakai button (aksi custom)
   return item.to ? (
     <Link
       to={item.to}
-      className="block hover:scale-[1.02] active:scale-[0.99] focus:outline-none"
-      style={{ transition: "transform 160ms ease" }}
+      className="block hover:scale-[1.02] active:scale-[0.99] focus:outline-none transition-transform"
     >
       {content}
     </Link>
@@ -237,8 +202,7 @@ function MenuTile({ item, palette }: { item: MenuItem; palette: Palette }) {
     <button
       type="button"
       onClick={item.onClick}
-      className="block w-full hover:scale-[1.02] active:scale-[0.99] focus:outline-none"
-      style={{ transition: "transform 160ms ease" }}
+      className="block w-full hover:scale-[1.02] active:scale-[0.99] focus:outline-none transition-transform"
     >
       {content}
     </button>
