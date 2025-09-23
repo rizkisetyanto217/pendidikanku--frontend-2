@@ -836,7 +836,7 @@ export default function AppRoutes() {
             path="sertifikat/detail/:classId/:studentId"
             element={<DetailCertificate />}
           />
-          <Route path="murid" element={<SchoolStudent />} />
+          <Route path="murid" element={<SchoolStudent showBack />} />
 
           <Route path="buku">
             <Route index element={<SchoolBooks showBack />} />

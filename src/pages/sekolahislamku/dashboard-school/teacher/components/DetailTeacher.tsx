@@ -117,6 +117,7 @@ const DetailTeacher: React.FC = () => {
         palette={palette}
         title="Detail Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
+        showBack
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
@@ -128,7 +129,7 @@ const DetailTeacher: React.FC = () => {
 
           {/* Content */}
           <section className="flex-1 min-w-0 space-y-6">
-            <div className="mx-auto  flex items-center gap-3">
+            <div className="mx-auto  md:flex hidden items-center gap-3">
               <Btn
                 palette={palette}
                 variant="ghost"

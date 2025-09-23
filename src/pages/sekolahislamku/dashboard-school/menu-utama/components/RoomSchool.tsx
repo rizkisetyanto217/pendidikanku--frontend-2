@@ -687,6 +687,7 @@ export default function RoomSchool() {
       <ParentTopBar
         palette={palette}
         title="Manajemen Ruangan"
+        showBack={true}
         gregorianDate={topbarGregorianISO}
         hijriDate={new Date(topbarGregorianISO).toLocaleDateString(
           "id-ID-u-ca-islamic-umalqura",
@@ -706,7 +707,7 @@ export default function RoomSchool() {
 
       <Flash palette={palette} flash={flash} />
 
-      <main className="px-4 md:px-6 py-4 md:py-8">
+      <main className="px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
@@ -715,7 +716,7 @@ export default function RoomSchool() {
 
           {/* Content */}
           <section className="flex-1 min-w-0 space-y-6">
-            <div className="mx-auto  flex items-center gap-3">
+            <div className="mx-auto  md:flex hidden items-center gap-3">
               <Btn
                 palette={palette}
                 variant="ghost"

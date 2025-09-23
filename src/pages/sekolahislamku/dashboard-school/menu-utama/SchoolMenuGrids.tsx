@@ -131,12 +131,13 @@ export default function SchoolMenuGrids() {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="min-h-screen w-full "
       style={{ background: palette.white2, color: palette.black1 }}
     >
       <ParentTopBar
         palette={palette}
         title="Menu Sekolah"
+  
         gregorianDate={topbarISO}
         dateFmt={dateLong}
       />

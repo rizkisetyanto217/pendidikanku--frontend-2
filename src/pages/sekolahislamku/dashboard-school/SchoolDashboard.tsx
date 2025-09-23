@@ -919,6 +919,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
+           
             {/* Back button */}
             {showBack && (
               <div className="flex py-2">

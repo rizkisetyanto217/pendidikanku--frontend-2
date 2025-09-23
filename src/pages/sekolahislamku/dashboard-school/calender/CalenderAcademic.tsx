@@ -219,6 +219,7 @@ const CalenderAcademic: React.FC = () => {
         gregorianDate={nowISO}
         hijriDate={hijriLong(nowISO)}
         dateFmt={dateLong}
+        showBack={true}
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
@@ -228,10 +229,9 @@ const CalenderAcademic: React.FC = () => {
           </aside>
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-
             {/* Header Responsive */}
             <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
+              <div className="md:flex hidden items-center gap-3">
                 <Btn
                   palette={palette}
                   variant="ghost"

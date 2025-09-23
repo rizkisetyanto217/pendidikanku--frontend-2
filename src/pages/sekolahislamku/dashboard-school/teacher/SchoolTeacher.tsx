@@ -130,23 +130,22 @@ const PageHeader = ({
   onBackClick?: () => void;
   backLabel?: string;
 }) => (
-  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
-    <div className="flex items-center gap-3 mt-2 md:mt-0">
+  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 ">
+    <div className="flex items-center gap-3  md:mt-0">
       {onBackClick && (
         <Btn
           palette={palette}
           variant="ghost"
           onClick={onBackClick}
-          className="flex items-center gap-1.5 md:mt-0"
+          className=" items-center gap-1.5 md:mt-0  hidden md:block"
         >
           <ArrowLeft size={20} />
-          
         </Btn>
       )}
-      <h1 className="text-lg font-semibold">Guru</h1>
+      <h1 className="text-lg font-semibold hidden md:block">Guru</h1>
     </div>
 
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap -mt-3 md:-mt-0">
       <Btn
         onClick={onImportClick}
         className="flex items-center gap-1.5 text-xs sm:text-sm"
@@ -496,10 +495,11 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         palette={palette}
         title="Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
+        showBack={true}
       />
 
       {/* Container */}
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full px-4 md:px-6   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">

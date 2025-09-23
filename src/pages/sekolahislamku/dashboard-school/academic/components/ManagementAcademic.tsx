@@ -111,6 +111,7 @@ export default function ManagementAcademic() {
         title="Manajemen Ruang Kelas"
         gregorianDate={topbarISO}
         dateFmt={dateLong}
+        showBack={true}
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
@@ -121,9 +122,9 @@ export default function ManagementAcademic() {
           </aside>
 
           {/* Main */}
-          <section className="flex-1 flex flex-col space-y-6 min-w-0">
+          <section className="flex-1 flex flex-col space-y-8 min-w-0">
             <div className="flex items-center justify-between ">
-              <div className="flex items-center gap-3">
+              <div className="md:flex hidden items-center gap-3">
                 <Btn
                   palette={palette}
                   variant="ghost"
@@ -133,10 +134,12 @@ export default function ManagementAcademic() {
                 >
                   <ArrowLeft size={20} className="mr-1" />
                 </Btn>
-                <h1 className="flex text-lg font-semibold ">Kelola Akademik</h1>
+                <h1 className="md:flex hidden items-center text-lg font-semibold ">
+                  Kelola Akademik
+                </h1>
               </div>
               <Btn palette={palette} size="sm" variant="ghost">
-                <Plus size={16} className="mr-1" />
+                <Plus size={16} className="mr-1 " />
               </Btn>
             </div>
 

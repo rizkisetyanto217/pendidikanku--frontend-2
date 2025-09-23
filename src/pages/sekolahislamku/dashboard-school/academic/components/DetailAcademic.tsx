@@ -90,6 +90,7 @@ export default function DetailAcademic() {
         title="Detail Akademik"
         gregorianDate={topbarISO}
         dateFmt={dateLong}
+        showBack={true}
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
@@ -101,7 +102,7 @@ export default function DetailAcademic() {
 
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="flex items-center gap-3">
+            <div className="md:flex items-center gap-3 hidden">
               <Btn
                 palette={palette}
                 variant="ghost"

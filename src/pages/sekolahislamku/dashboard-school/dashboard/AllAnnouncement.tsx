@@ -970,6 +970,7 @@ const AllAnnouncement: React.FC = () => {
         palette={palette}
         gregorianDate={currentDate}
         title="Semua Pengumuman"
+        showBack
       />
 
       {/* Modal Add */}
@@ -994,7 +995,7 @@ const AllAnnouncement: React.FC = () => {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto Replace px-4 py-6 ">
+      <main className="mx-auto Replace px-4 py-6 md:py-8">
         <div className="lg:flex lg:items-start lg:gap-4">
           {/* Sidebar kiri */}
           <ParentSidebar palette={palette} />
@@ -1003,9 +1004,9 @@ const AllAnnouncement: React.FC = () => {
           <div className="flex-1 space-y-5 px-4">
             {/* Header + Add Button */}
 
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex items-start md:justify-between justify-start gap-6">
               <div className="text-left flex items-center gap-3">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="md:flex hidden items-center gap-3 mb-2">
                   <Btn
                     palette={palette}
                     variant="ghost"
@@ -1014,10 +1015,10 @@ const AllAnnouncement: React.FC = () => {
                   >
                     <ArrowLeft size={20} />
                   </Btn>
-                   <h1 className="text-lg font-semibold">Pengumuman</h1>
+                  <h1 className="text-lg font-semibold">Pengumuman</h1>
                 </div>
               </div>
-              <Btn palette={palette} onClick={() => setOpenAdd(true)}>
+              <Btn className="-ml-5 md:-ml-0" palette={palette} onClick={() => setOpenAdd(true)}>
                 <Plus size={20} />
               </Btn>
             </div>

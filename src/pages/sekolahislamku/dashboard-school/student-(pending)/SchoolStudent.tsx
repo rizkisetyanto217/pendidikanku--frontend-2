@@ -43,6 +43,11 @@ export interface StudentItem {
   email?: string;
   status: "aktif" | "nonaktif" | "alumni";
 }
+type SchoolStudentProps = {
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
+};
 
 /* ================= Helpers ================= */
 const genderLabel = (g?: "L" | "P") =>
@@ -108,16 +113,21 @@ const PageHeader = ({
   onAddClick: () => void;
   onBackClick?: () => void;
 }) => (
-  <div className="flex items-center justify-between gap-3 pb-4">
+  <div className="flex items-center md:justify-between justify-start gap-3 pb-4">
     <div className="flex items-center gap-3">
       {onBackClick && (
-        <Btn palette={palette} variant="ghost" onClick={onBackClick}>
+        <Btn
+          palette={palette}
+          variant="ghost"
+          onClick={onBackClick}
+          className=" items-center gap-1.5 md:mt-0  hidden md:block"
+        >
           <ArrowLeft size={20} />
         </Btn>
       )}
-      <h1 className="font-semibold text-lg">Data Siswa</h1>
+      <h1 className="font-semibold text-lg hidden md:block">Data Siswa</h1>
     </div>
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap ">
       <Btn
         onClick={onImportClick}
         size="sm"
@@ -408,9 +418,9 @@ const StudentsTable = ({
 );
 
 /* ================= Main Component ================= */
-const StudentsPage: React.FC = () => {
+const StudentsPage: React.FC<SchoolStudentProps> = ({ showBack = false }) => {
   const { isDark, themeName } = useHtmlDarkMode();
-  const palette = pickTheme(themeName as ThemeName, isDark);
+  const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
   const { user } = useCurrentUser();
 
@@ -476,6 +486,7 @@ const StudentsPage: React.FC = () => {
         palette={palette}
         title="Siswa"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
+        showBack={true}
       />
 
       {/* Layout */}

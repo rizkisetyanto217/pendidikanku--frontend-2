@@ -167,6 +167,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         title="Akademik"
         gregorianDate={topbarISO}
         dateFmt={dateLong}
+        showBack={showBack}
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
@@ -180,7 +181,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="flex items-center justify-between ">
               <div className="font-semibold text-lg flex items-center ">
-                <div className="  flex items-center ">
+                <div className=" items-center hidden md:flex">
                   {showBack && (
                     <Btn
                       palette={palette}
@@ -197,7 +198,9 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                     </Btn>
                   )}
                 </div>
-                <h1 className="flex items-center ">Periode Akademik Aktif</h1>
+                <h1 className=" items-center hidden md:flex">
+                  Periode Akademik Aktif
+                </h1>
               </div>
             </div>
             {/* ===== Periode Akademik (active term) ===== */}
@@ -239,34 +242,6 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
                 </div>
               </div>
             </SectionCard>
-
-            {/* ===== KPI kecil untuk rooms ===== */}
-            {/* <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <MiniKPI
-                palette={palette}
-                icon={<Grid size={16} />}
-                label="Total Ruang"
-                value={kpIs.totalRooms}
-              />
-              <MiniKPI
-                palette={palette}
-                icon={<Building2 size={16} />}
-                label="Ruang Fisik"
-                value={kpIs.physical}
-              />
-              <MiniKPI
-                palette={palette}
-                icon={<MonitorPlay size={16} />}
-                label="Ruang Virtual"
-                value={kpIs.virtual}
-              />
-              <MiniKPI
-                palette={palette}
-                icon={<Users size={16} />}
-                label="Total Kapasitas"
-                value={kpIs.capacitySum}
-              />
-            </section> */}
 
             {/* ===== Daftar Rooms ===== */}
             <SectionCard palette={palette}>

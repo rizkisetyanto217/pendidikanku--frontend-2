@@ -97,7 +97,6 @@ export interface InvoiceItem {
   paid_amount?: number;
   status: InvoiceStatus;
   type?: string;
-  
 }
 
 export interface PaymentItem {
@@ -985,24 +984,23 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
     }
   };
 
-const handleExportSubmit = (data: {
-  month: string;
-  format: string;
-  file?: File | null;
-}) => {
-  console.log("Export UI only:", data);
-  setOpenExport(false);
-};
-
+  const handleExportSubmit = (data: {
+    month: string;
+    format: string;
+    file?: File | null;
+  }) => {
+    console.log("Export UI only:", data);
+    setOpenExport(false);
+  };
 
   const handlePaymentSubmit = (data: any) => {
     console.log("Pembayaran:", data);
     setOpenPay(false);
   };
-const handleCreateInvoiceSubmit = (data: any) => {
-  console.log("Invoice baru:", data);
-  setOpenCreate(false);
-};
+  const handleCreateInvoiceSubmit = (data: any) => {
+    console.log("Invoice baru:", data);
+    setOpenCreate(false);
+  };
 
   return (
     <div
@@ -1016,9 +1014,10 @@ const handleCreateInvoiceSubmit = (data: any) => {
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+      <main className="w-full px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
@@ -1028,7 +1027,7 @@ const handleCreateInvoiceSubmit = (data: any) => {
           {/* Main Content */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
-            <div className="flex gap-3 items-center">
+            <div className="md:flex hidden gap-3 items-center">
               {showBack && (
                 <Btn
                   palette={palette}
