@@ -336,19 +336,22 @@ export default function TeacherAnnouncements() {
         gregorianDate={data?.gregorianDate}
         hijriDate={data?.hijriDate}
         dateFmt={(iso) => dateLong(iso)}
+        showBack
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
-          <ParentSidebar palette={palette} />
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Main */}
           <div className="flex-1 space-y-6">
             {/* ===== Filter & Actions + Summary ===== */}
             {/* ===== Filter & Aksi (desktop-optimized) ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-              <SectionCard palette={palette} className="lg:col-span-12">
+              <SectionCard palette={palette} className="lg:col-span-6">
                 <div className="p-4 md:p-5">
                   {/* Top bar: title left, actions right (desktop) */}
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">

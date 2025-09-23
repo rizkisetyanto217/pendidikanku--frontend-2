@@ -130,110 +130,118 @@ const DetailAnnouncementTeacher: React.FC = () => {
         palette={palette}
         gregorianDate={currentDate}
         title="Detail Pengumuman"
+        showBack
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 flex gap-6">
-        {/* Sidebar */}
-        <div className="hidden lg:block w-64">
-          <ParentSidebar palette={palette} />
-        </div>
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-        {/* Konten utama */}
-        <div className="flex-1 space-y-4">
-          {/* Header & tombol tambah */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 hover:bg-opacity-10 hover:bg-black"
-            style={{ color: palette.black1 }}
-          >
-            <ArrowLeft size={24} className="font-bold" />
-            <span className=" font-semibold text-md">Kembali</span>
-          </button>
-
-          <SectionCard palette={palette} className="p-6 space-y-6">
-            {/* Header badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              <CategoryBadge kategori={pengumuman.kategori} />
-              <PriorityBadge prioritas={pengumuman.prioritas} />
-              <StatusBadge status={pengumuman.status} />
-              {pengumuman.isPinned && (
-                <span className="text-blue-600 text-xs font-semibold">
-                  📌 Disematkan
-                </span>
-              )}
+          {/* Konten utama */}
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            {/* Header & tombol tambah */}
+            <div className="md:flex hidden gap-3 items-center">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-1"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+              <h1 className="textlg font-semibold">Pengaturan</h1>
             </div>
 
-            {/* Judul */}
-            <h1 className="text-2xl font-bold">{pengumuman.judul}</h1>
+            <SectionCard palette={palette} className="p-6 space-y-6">
+              {/* Header badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                <CategoryBadge kategori={pengumuman.kategori} />
+                <PriorityBadge prioritas={pengumuman.prioritas} />
+                <StatusBadge status={pengumuman.status} />
+                {pengumuman.isPinned && (
+                  <span className="text-blue-600 text-xs font-semibold">
+                    📌 Disematkan
+                  </span>
+                )}
+              </div>
 
-            {/* Meta */}
-            <div className="flex flex-wrap gap-4 text-sm opacity-70">
-              <span>✍️ {pengumuman.penulis}</span>
-              <span>📅 {fmtDate(pengumuman.tanggalPublish)}</span>
-              {pengumuman.tanggalBerakhir && (
-                <span>⏳ Berakhir: {fmtDate(pengumuman.tanggalBerakhir)}</span>
-              )}
-              <span>👁️ {pengumuman.views} views</span>
-            </div>
+              {/* Judul */}
+              <h1 className="text-2xl font-bold">{pengumuman.judul}</h1>
 
-            {/* Konten full */}
-            <div className="prose max-w-none text-base leading-relaxed">
-              {pengumuman.konten}
-            </div>
+              {/* Meta */}
+              <div className="flex flex-wrap gap-4 text-sm opacity-70">
+                <span>✍️ {pengumuman.penulis}</span>
+                <span>📅 {fmtDate(pengumuman.tanggalPublish)}</span>
+                {pengumuman.tanggalBerakhir && (
+                  <span>
+                    ⏳ Berakhir: {fmtDate(pengumuman.tanggalBerakhir)}
+                  </span>
+                )}
+                <span>👁️ {pengumuman.views} views</span>
+              </div>
 
-            {/* Target */}
-            {pengumuman.target.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Target Peserta</h3>
-                <div className="flex flex-wrap gap-2">
-                  {pengumuman.target.map((t, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 rounded text-xs"
-                      style={{
-                        background: palette.white1,
-                        border: `1px solid ${palette.silver1}`,
-                        color: palette.black1,
-                      }}
-                    >
-                      {t}
-                    </span>
-                  ))}
+              {/* Konten full */}
+              <div className="prose max-w-none text-base leading-relaxed">
+                {pengumuman.konten}
+              </div>
+
+              {/* Target */}
+              {pengumuman.target.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">Target Peserta</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {pengumuman.target.map((t, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 rounded text-xs"
+                        style={{
+                          background: palette.white1,
+                          border: `1px solid ${palette.silver1}`,
+                          color: palette.black1,
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Tags */}
-            {pengumuman.tags.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {pengumuman.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+              {/* Tags */}
+              {pengumuman.tags.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {pengumuman.tags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Lampiran */}
-            {pengumuman.lampiran && pengumuman.lampiran.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-1">Lampiran</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {pengumuman.lampiran.map((f, i) => (
-                    <li key={i} className="underline text-blue-600">
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </SectionCard>
+              {/* Lampiran */}
+              {pengumuman.lampiran && pengumuman.lampiran.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">Lampiran</h3>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {pengumuman.lampiran.map((f, i) => (
+                      <li key={i} className="underline text-blue-600">
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </SectionCard>
+          </div>
         </div>
       </main>
     </div>

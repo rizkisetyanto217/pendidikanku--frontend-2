@@ -353,6 +353,7 @@ export default function ScheduleThreeDays() {
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title="Jadwal 3 Hari Kedepan"
+        showBack
         dateFmt={(iso) =>
           new Date(iso).toLocaleDateString("id-ID", {
             weekday: "long",
@@ -371,22 +372,23 @@ export default function ScheduleThreeDays() {
         onSubmit={handleSubmitSchedule}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
             {/* Header actions */}
-            <div className="flex items-center justify-between gap-2">
+            <div className="md:flex hidden items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <ArrowLeft
-                  size={24} // sedikit lebih besar
-                  strokeWidth={3}
+                <Btn
+                  palette={palette}
+                  variant="ghost"
                   onClick={() => navigate(-1)}
-                  className="mr-1 cursor-pointer"
-                />
+                >
+                  <ArrowLeft className="cursor-pointer" size={20} />
+                </Btn>
                 <div className="font-semibold text-lg">
                   Jadwal 3 Hari Kedepan
                 </div>

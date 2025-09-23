@@ -982,11 +982,15 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
         gregorianDate={TODAY_ISO}
         hijriDate={hijriLong(TODAY_ISO)}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
-        <div className="lg:flex lg:items-start lg:gap-6">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Main Content */}
           <div
@@ -1016,14 +1020,11 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
                     </div>
                     <div>
                       <h2
-                        className="font-bold text-xl md:text-2xl mb-1"
+                        className="font-semibold text-lg  mb-1"
                         style={{ color: palette.black1 }}
                       >
                         Kelas yang Saya Ajar
                       </h2>
-                      <p className="text-sm" style={{ color: palette.black2 }}>
-                        Kelola dan pantau semua kelas yang Anda ampu
-                      </p>
                     </div>
                   </div>
                   <ViewModeToggle

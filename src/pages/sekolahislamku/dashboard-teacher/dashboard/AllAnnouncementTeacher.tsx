@@ -1006,6 +1006,7 @@ export default function AllAnnouncementTeacher({
         palette={palette}
         gregorianDate={currentDate}
         title={title}
+        showBack
       />
 
       {/* Modals */}
@@ -1028,27 +1029,25 @@ export default function AllAnnouncementTeacher({
         onSubmit={handleEdit}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-6">
-          <div className="lg:w-64 mb-6 lg:mb-0">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
-          </div>
+          </aside>
 
           <div className="flex-1 space-y-4">
             {/* Header & tombol tambah */}
-            <Btn
-              palette={palette}
-              onClick={() => navigate(-1)}
-              variant="ghost"
-              className="cursor-pointer mr-3"
-            >
-              <ArrowLeft
-                // aria-label={backLabel}
-                // title={backLabel}
-
-                size={20}
-              />
-            </Btn>
+            <div className="md:flex hidden gap-3 items-center">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-1"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+              <h1 className="textlg font-semibold">Semua Pengumuman</h1>
+            </div>
 
             {/* Stats */}
             <SectionCard palette={palette} className="p-6">

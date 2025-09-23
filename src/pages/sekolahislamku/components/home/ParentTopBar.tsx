@@ -477,6 +477,7 @@ import {
   Calendar1,
   ArrowLeft,
   MoreVertical,
+  CalendarDays,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
 import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -555,10 +556,11 @@ const TEACHER_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
   { path: "kelas", label: "Kelas Saya", icon: Users },
-  { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
-  { path: "penilaian", label: "Penilaian", icon: ClipboardList },
-  { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
-  { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+  { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+  // { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
+  // { path: "penilaian", label: "Penilaian", icon: ClipboardList },
+  // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
+  // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   { path: "profil-guru", label: "Profil", icon: Users },
 ];
 
@@ -777,6 +779,8 @@ export default function ParentTopBar({
     }
   };
 
+  const [openMore, setOpenMore] = useState(false);
+
   // refresh tiap tengah malam
   useEffect(() => {
     const d = new Date();
@@ -824,13 +828,9 @@ export default function ParentTopBar({
               >
                 <Menu size={18} />
               </button>
-              <button
-                className="h-9 w-9 grid place-items-center rounded-xl border"
-                aria-label="Menu lainnya"
-                style={{ borderColor: palette.silver1 }}
-              >
-                <MoreVertical size={18} />
-              </button>
+              <div className="relative">
+                <PublicUserDropdown variant="icon" withBg={false} />
+              </div>
             </div>
           </div>
 

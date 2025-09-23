@@ -92,6 +92,7 @@ export default function DetailScheduleThreeDays() {
         palette={palette}
         title="Detail Jadwal (3 Hari)"
         gregorianDate={new Date().toISOString()}
+        showBack
       />
 
       <ModalEditSchedule
@@ -105,19 +106,24 @@ export default function DetailScheduleThreeDays() {
         onDelete={handleDelete}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-16 shrink-0">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           <div className="flex-1 min-w-0 space-y-4">
-            <ArrowLeft
-              size={20}
-              onClick={() => navigate(-1)}
-              strokeWidth={3}
-              className="mr-1 cursor-pointer"
-            />
+            <div className="mx-auto  md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="cursor-pointer" size={20} />
+              </Btn>
+
+              <h1 className="font-semibold text-lg">Ruangan</h1>
+            </div>
 
             <SectionCard palette={palette} className="p-4 md:p-5">
               {item ? (

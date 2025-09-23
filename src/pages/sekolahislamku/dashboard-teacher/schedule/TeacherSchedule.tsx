@@ -304,15 +304,17 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
         gregorianDate={nowISO}
         hijriDate={hijriLong(nowISO)}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <aside className="lg:col-span-3">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
             <section className="flex items-start gap-3">
               {showBack && (
@@ -337,7 +339,7 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
                 <CalendarDays size={18} />
               </span>
               <div>
-                <div className="text-lg font-semibold">Jadwal Mengajar</div>
+                <div className="text-base font-semibold">Jadwal Mengajar</div>
                 <div className="text-sm" style={{ color: palette.black2 }}>
                   Klik tanggal untuk melihat/menambah jadwal mengajar.
                 </div>
@@ -382,7 +384,7 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
                         key={i}
                         disabled={!c.dateKey}
                         onClick={() => setSelectedDay(c.dateKey!)}
-                        className="h-24 rounded-lg border p-2 text-left relative transition disabled:opacity-50"
+                        className="aspect-square rounded-lg border p-1 sm:p-2 text-left relative transition disabled:opacity-40"
                         style={{
                           borderColor: palette.silver1,
                           background: selected
@@ -390,11 +392,14 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
                             : palette.white1,
                         }}
                       >
-                        <div className="text-xs font-medium">
+                        {/* Tanggal */}
+                        <div className="text-[11px] sm:text-xs font-medium">
                           {c.label ?? ""}
                         </div>
+
+                        {/* Titik indikator */}
                         {!!schedules && schedules.length > 0 && (
-                          <div className="absolute right-2 top-2 flex gap-1">
+                          <div className="absolute right-1 top-1 flex gap-0.5">
                             {schedules.slice(0, 3).map((s, idx) => (
                               <span
                                 key={idx}
@@ -402,19 +407,13 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({
                                 style={{ background: getTypeColor(s.type) }}
                               />
                             ))}
-                            {schedules.length > 3 && (
-                              <span
-                                className="text-[10px]"
-                                style={{ color: palette.black2 }}
-                              >
-                                +{schedules.length - 3}
-                              </span>
-                            )}
                           </div>
                         )}
+
+                        {/* Event ringkas */}
                         {schedules && schedules[0] && (
                           <div
-                            className="mt-2 text-xs line-clamp-3"
+                            className="mt-1 text-[10px] sm:text-xs line-clamp-2 leading-snug"
                             style={{ color: palette.black2 }}
                           >
                             {schedules[0].time} {schedules[0].title}

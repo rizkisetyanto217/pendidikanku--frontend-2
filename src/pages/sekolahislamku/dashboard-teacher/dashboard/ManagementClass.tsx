@@ -117,6 +117,7 @@ const ManagementClass = () => {
         palette={palette}
         title="Manajemen Kelas"
         gregorianDate={currentDate}
+        showBack
       />
       {/* Modal Edit */}
       <ModalEditManagementClass
@@ -144,39 +145,26 @@ const ManagementClass = () => {
         }}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-8">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:w-64 mb-6 lg:mb-0 lg:sticky lg:top-20 shrink-0">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Konten utama */}
-          <section className="flex-1 space-y-8 min-w-0 pb-2">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header dengan tombol kembali dan judul */}
-            <div className="flex items-center gap-4">
-              <button
+            <div className="md:flex hidden gap-3 items-center">
+              <Btn
+                palette={palette}
+                variant="ghost"
                 onClick={() => navigate(-1)}
-                className="flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 hover:scale-105"
-                style={{
-                  background: palette.white1,
-                  border: `1px solid ${palette.black1}20`,
-                  color: palette.black1,
-                }}
+                className="gap-1"
               >
                 <ArrowLeft size={20} />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold">
-                  Kelas {info?.className ?? String(className)}
-                </h1>
-                <p
-                  className="text-sm opacity-90 mt-1"
-                  style={{ color: palette.black2 }}
-                >
-                  Kelola informasi dan data kelas
-                </p>
-              </div>
+              </Btn>
+              <h1 className="textlg font-semibold">Pengelolaan Kelas</h1>
             </div>
 
             {/* Info kelas dalam card yang lebih menarik */}
@@ -352,7 +340,10 @@ const ManagementClass = () => {
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ background: palette.primary2, color: palette.black2 }}
+                    style={{
+                      background: palette.primary2,
+                      color: palette.black2,
+                    }}
                   />
                   Aksi Cepat
                 </h3>

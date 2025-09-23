@@ -107,6 +107,7 @@ export default function TeacherMenuGrids() {
         palette={palette}
         title="Menu Guru"
         gregorianDate={topbarISO}
+        
         dateFmt={(iso) =>
           new Date(iso!).toLocaleDateString("id-ID", {
             weekday: "long",
@@ -117,15 +118,15 @@ export default function TeacherMenuGrids() {
         }
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-9 space-y-6 min-w-0">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="mb-4 font-semibold text-base">
                 Akses Cepat Guru

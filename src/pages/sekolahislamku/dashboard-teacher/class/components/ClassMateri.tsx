@@ -449,6 +449,7 @@ export default function ClassMateri() {
         gregorianDate={todayISO}
         hijriDate={hijriLong(todayISO)}
         dateFmt={dateLong}
+        showBack
       />
 
       <ModalAddClassMateri
@@ -479,21 +480,26 @@ export default function ClassMateri() {
         }
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 min-w-0 space-y-6">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* back */}
-            <Btn
-              palette={palette}
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={16} className="mr-1" />
-              Kembali
-            </Btn>
+            <div className="md:flex hidden gap-3 items-center">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-1"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+              <h1 className="textlg font-semibold">Materi</h1>
+            </div>
 
             {/* header ringkas */}
             <SectionCard palette={palette}>
@@ -521,12 +527,12 @@ export default function ClassMateri() {
                 <div className="flex items-center gap-2">
                   <Btn
                     palette={palette}
-                    variant="secondary"
+                    variant="ghost"
                     size="sm"
                     onClick={() => setOpenModal(true)}
                   >
                     <Plus size={16} className="mr-1" />
-                    Tambah Materi
+                   
                   </Btn>
                 </div>
               </div>

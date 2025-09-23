@@ -194,14 +194,19 @@ const TeacherProfil: React.FC<TeacherProfilProps> = ({
         gregorianDate={TODAY_ISO}
         hijriDate={hijriWithWeekday(TODAY_ISO)}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
-        <div className="lg:flex lg:items-start lg:gap-6">
-          <ParentSidebar palette={palette} />
-          <div className="flex-1 min-w-0 space-y-6">
+      <main className="w-full px-4  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
+
+          <div className="flex-1 flex flex-col space-y-8 min-w-0">
             <div className="font-semibold text-lg flex items-center ">
-              <div className="  flex items-center gap-x-3 ">
+              <div className="  md:flex hidden items-center gap-x-3 ">
                 {showBack && (
                   <Btn
                     palette={palette}

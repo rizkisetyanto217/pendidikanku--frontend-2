@@ -1,3 +1,4 @@
+// src/pages/sekolahislamku/teacher/AssignmentClass.tsx
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,6 @@ import {
   Download,
 } from "lucide-react";
 
-// ===== Reuse: data & tipe assignments
 import {
   QK,
   fetchAssignmentsByClass,
@@ -37,7 +37,7 @@ import ModalAddAssignmentClass, {
   AddAssignmentClassPayload,
 } from "./ModalAddAssignmentClass";
 
-// ===== Dummy classes (biar tampilan header tetap work)
+/* ========= Dummy teacher classes ========= */
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "online";
 type NextSession = {
   dateISO: string;
@@ -59,6 +59,7 @@ type TeacherClassSummary = {
   academicTerm: string;
   cohortYear: number;
 };
+
 async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
   const now = new Date();
   const mk = (d: Date, addDay = 0) => {
@@ -108,13 +109,12 @@ async function fetchTeacherClasses(): Promise<TeacherClassSummary[]> {
   ]);
 }
 
-/* ========= Helpers tanggal ========= */
-const atLocalNoon = (d: Date) => {
+/* ========= Helpers ========= */
+const toLocalNoonISO = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
-  return x;
+  return x.toISOString();
 };
-const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
 const dateLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -178,83 +178,49 @@ export default function AssignmentClass() {
 
   const todayISO = toLocalNoonISO(new Date());
 
-  /* ========= Actions ========= */
-  const handleDownload = (a: Assignment) => {
-    const att = a.attachments?.[0];
-    if (!att) return alert("Tugas ini belum memiliki lampiran untuk diunduh.");
-    if (att.url) return window.open(att.url, "_blank", "noopener,noreferrer");
-    const blob = new Blob(
-      [`Tugas: ${a.title}\n\nPlaceholder untuk "${att.name}".`],
-      { type: "text/plain;charset=utf-8" }
-    );
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = att.name || `${a.title}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    URL.revokeObjectURL(link.href);
-    link.remove();
-  };
-  // state modal edit
-  // di dalam component AssignmentClass()
+  /* ========= Modal state ========= */
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Assignment | null>(null);
+  const [openAdd, setOpenAdd] = useState(false);
 
-  // buka modal
   const onEdit = (a: Assignment) => {
     setEditing(a);
     setOpenEdit(true);
   };
-
-  // mapping default values untuk modal
   const editDefaults = useMemo(() => {
     if (!editing) return undefined;
     return {
       title: editing.title,
       dueDate: editing.dueDate,
-      // Modal pakai "total" & "submitted".
-      // Kita map ke schema kita (totalSubmissions & graded).
       total: editing.totalSubmissions ?? 0,
-      submitted: editing.totalSubmissions, // isian "Terkumpul"
+      submitted: editing.totalSubmissions,
     };
   }, [editing]);
 
-  // submit dari modal -> update cache assignments
   const handleEditSubmit = (payload: EditAssignmentPayload) => {
     qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) =>
-      old.map((a) => {
-        if (a.id !== editing?.id) return a;
-
-        // prioritas: jika user isi "submitted", pakai itu jadi totalSubmissions,
-        // kalau tidak, pakai "total" sebagai fallback.
-        const newTotalSub =
-          payload.submitted ?? payload.total ?? a.totalSubmissions;
-
-        return {
-          ...a,
-          title: payload.title.trim(),
-          dueDate: payload.dueDate || a.dueDate,
-          totalSubmissions:
-            typeof newTotalSub === "number"
-              ? Math.max(0, newTotalSub)
-              : a.totalSubmissions,
-          // nilai graded kita biarkan apa adanya (bisa tambahin field baru di modal kalau mau edit terpisah)
-        };
-      })
+      old.map((a) =>
+        a.id !== editing?.id
+          ? a
+          : {
+              ...a,
+              title: payload.title.trim(),
+              dueDate: payload.dueDate || a.dueDate,
+              totalSubmissions:
+                payload.submitted ?? payload.total ?? a.totalSubmissions,
+            }
+      )
     );
-
     setOpenEdit(false);
     setEditing(null);
   };
 
-  // function delete
   const handleDelete = async (a: Assignment) => {
     const res = await Swal.fire({
       title: "Hapus tugas?",
-      text: `"${a.title}" akan dihapus. Tindakan ini tidak bisa dibatalkan.`,
+      text: `"${a.title}" akan dihapus.`,
       icon: "warning",
       showCancelButton: true,
-      reverseButtons: true,
       confirmButtonText: "Ya, hapus",
       cancelButtonText: "Batal",
       background: palette.white1,
@@ -262,98 +228,40 @@ export default function AssignmentClass() {
       confirmButtonColor: (palette as any).destructive ?? "#ef4444",
       cancelButtonColor: palette.primary,
     });
-
     if (!res.isConfirmed) return;
-
-    try {
-      // TODO: panggil API delete di sini kalau sudah ada
-      // await api.delete(`/classes/${id}/assignments/${a.id}`);
-
-      // Optimistic update: hapus dari cache daftar tugas
-      qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) =>
-        old.filter((x) => x.id !== a.id)
-      );
-
-      // (Opsional) kurangi counter assignments di info kelas agar konsisten
-      qc.setQueryData<TeacherClassSummary[]>(QK.CLASSES, (old = []) =>
-        old.map((c) =>
-          c.id === id
-            ? {
-                ...c,
-                assignmentsCount: Math.max(0, (c.assignmentsCount ?? 0) - 1),
-              }
-            : c
-        )
-      );
-
-      await Swal.fire({
-        title: "Terhapus",
-        text: "Tugas berhasil dihapus.",
-        icon: "success",
-        timer: 1400,
-        showConfirmButton: false,
-        background: palette.white1,
-        color: palette.black1,
-      });
-    } catch (e) {
-      await Swal.fire({
-        title: "Gagal menghapus",
-        text: "Terjadi kesalahan saat menghapus tugas.",
-        icon: "error",
-        background: palette.white1,
-        color: palette.black1,
-        confirmButtonColor: (palette as any).destructive ?? "#ef4444",
-      });
-    }
-  };
-
-  // state add assignmentClass
-  // state modal add
-  const [openAdd, setOpenAdd] = useState(false);
-
-  // submit dari modal add -> tambah ke cache assignments + update counter kelas
-  const handleAddSubmit = (payload: AddAssignmentClassPayload) => {
-    const nowISO = new Date().toISOString();
-
-    const newItem: Assignment = {
-      id: `a-${Date.now()}`, // id dummy unik
-      title: payload.title,
-      description: "", // bisa diisi dari modal kalau ditambah field
-      createdAt: nowISO,
-      dueDate: payload.dueDate,
-      status: "draft", // default
-      totalSubmissions: payload.total ?? 0,
-      graded: 0,
-      attachments: [],
-      author: cls?.homeroom ?? "Guru",
-    };
-
-    // 1) sisipkan ke daftar tugas kelas aktif
-    qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) => [
-      newItem,
-      ...old,
-    ]);
-
-    // 2) update counter assignments di info kelas
-    qc.setQueryData<TeacherClassSummary[]>(QK.CLASSES, (old = []) =>
-      old.map((c) =>
-        c.id === id
-          ? { ...c, assignmentsCount: (c.assignmentsCount ?? 0) + 1 }
-          : c
-      )
+    qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) =>
+      old.filter((x) => x.id !== a.id)
     );
-
-    // 3) tutup modal + (opsional) toast
-    setOpenAdd(false);
-    Swal.fire({
-      title: "Tugas ditambahkan",
-      text: "Tugas baru berhasil ditambahkan.",
+    await Swal.fire({
+      title: "Terhapus",
+      text: "Tugas berhasil dihapus.",
       icon: "success",
       timer: 1400,
       showConfirmButton: false,
       background: palette.white1,
       color: palette.black1,
     });
+  };
+
+  const handleAddSubmit = (payload: AddAssignmentClassPayload) => {
+    const nowISO = new Date().toISOString();
+    const newItem: Assignment = {
+      id: `a-${Date.now()}`,
+      title: payload.title,
+      description: "",
+      createdAt: nowISO,
+      dueDate: payload.dueDate,
+      status: "draft",
+      totalSubmissions: payload.total ?? 0,
+      graded: 0,
+      attachments: [],
+      author: cls?.homeroom ?? "Guru",
+    };
+    qc.setQueryData<Assignment[]>(QK.ASSIGNMENTS(id), (old = []) => [
+      newItem,
+      ...old,
+    ]);
+    setOpenAdd(false);
   };
 
   return (
@@ -375,7 +283,9 @@ export default function AssignmentClass() {
           }
         )}
         dateFmt={dateLong}
+        showBack
       />
+
       <ModalEditAssignmentClass
         open={openEdit}
         onClose={() => {
@@ -393,80 +303,74 @@ export default function AssignmentClass() {
         onSubmit={handleAddSubmit}
       />
 
-      <ModalEditAssignmentClass
-        open={openEdit}
-        onClose={() => {
-          setOpenEdit(false);
-          setEditing(null);
-        }}
-        palette={palette}
-        defaultValues={editDefaults}
-        onSubmit={handleEditSubmit}
-      />
+      <main className="w-full px-4  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+          {/* Konten */}
+          <div className="flex-1 flex flex-col space-y-8 min-w-0">
+            {/* Header */}
+            <div className="md:flex hidden items-center gap-4">
+              <Btn
+                palette={palette}
+                variant="ghost"
+                onClick={() => navigate(-1)}
+                className="gap-2"
+              >
+                <ArrowLeft size={18} />
+              </Btn>
+              <h1 className="text-lg font-semibold">Tugas Kelas</h1>
+            </div>
 
-          <div className="flex-1 min-w-0 space-y-6">
-            {/* Back */}
-            <Btn
-              palette={palette}
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={16} className="mr-1" />
-              Kembali
-            </Btn>
-
-            {/* Header ringkas */}
+            {/* Info kelas */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="text-lg md:text-xl font-semibold">
+              <div className="p-6 md:p-8 flex items-start justify-between gap-6">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xl md:text-2xl font-semibold mb-3">
                     {cls?.name ?? "—"}
                   </div>
                   <div
-                    className="mt-1 flex flex-wrap items-center gap-2 text-sm"
+                    className="flex flex-wrap items-center gap-3 text-sm"
                     style={{ color: palette.black2 }}
                   >
-                    <Badge variant="outline" palette={palette}>
-                      <h1 style={{ color: palette.black2 }}>
-                        {cls?.room ?? "-"}
-                      </h1>
+                    <Badge
+                      variant="outline"
+                      palette={palette}
+                      className="px-3 py-1"
+                    >
+                      {cls?.room ?? "-"}
                     </Badge>
                     <span>Wali Kelas: {cls?.homeroom ?? "-"}</span>
                     <span>• {cls?.academicTerm ?? "-"}</span>
                     <span>• Angkatan {cls?.cohortYear ?? "-"}</span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Btn
-                    palette={palette}
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setOpenAdd(true)} // <-- buka modal add
-                  >
-                    <Plus size={16} className="mr-1" />
-                    Buat Tugas
-                  </Btn>
-                </div>
+                <Btn
+                  palette={palette}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOpenAdd(true)}
+                  className="gap-2"
+                >
+                  <Plus size={16} />
+                </Btn>
               </div>
             </SectionCard>
 
             {/* Controls */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div
-                  className="flex items-center gap-2 rounded-xl border px-3 h-10"
+              <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <label
+                  className="flex items-center gap-3 rounded-lg border px-4 h-12"
                   style={{
                     borderColor: palette.silver1,
                     background: palette.white1,
                   }}
                 >
-                  <Search size={16} />
+                  <Search size={18} style={{ color: palette.black2 }} />
                   <input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
@@ -474,16 +378,16 @@ export default function AssignmentClass() {
                     className="bg-transparent outline-none text-sm w-full"
                     style={{ color: palette.black1 }}
                   />
-                </div>
+                </label>
 
-                <div
-                  className="flex items-center gap-2 rounded-xl border px-3 h-10"
+                <label
+                  className="flex items-center gap-3 rounded-lg border px-4 h-12"
                   style={{
                     borderColor: palette.silver1,
                     background: palette.white1,
                   }}
                 >
-                  <Filter size={16} />
+                  <Filter size={18} style={{ color: palette.black2 }} />
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
@@ -495,16 +399,16 @@ export default function AssignmentClass() {
                     <option value="terbit">Terbit</option>
                     <option value="selesai">Selesai</option>
                   </select>
-                </div>
+                </label>
               </div>
             </SectionCard>
 
             {/* List tugas */}
-            <div className="grid gap-3">
+            <div className="grid gap-6">
               {isFetching && filtered.length === 0 && (
                 <SectionCard palette={palette}>
                   <div
-                    className="p-6 text-sm"
+                    className="p-8 text-sm text-center"
                     style={{ color: palette.silver2 }}
                   >
                     Memuat tugas…
@@ -513,27 +417,25 @@ export default function AssignmentClass() {
               )}
 
               {filtered.map((a) => {
-                const dueBadge =
-                  a.dueDate &&
-                  (new Date(a.dueDate).toDateString() ===
-                  new Date().toDateString()
+                const dueBadge = a.dueDate
+                  ? new Date(a.dueDate).toDateString() ===
+                    new Date().toDateString()
                     ? "Hari ini"
-                    : dateShort(a.dueDate));
+                    : dateShort(a.dueDate)
+                  : null;
 
                 return (
                   <SectionCard
                     key={a.id}
                     palette={palette}
-                    className="p-0 hover:shadow-sm transition-shadow"
-                    style={{ background: palette.white1 }}
+                    className="hover:shadow-md transition-shadow overflow-hidden"
                   >
-                    {/* Body */}
-                    <div className="p-4 md:p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                    <div className="p-6 md:p-8">
+                      <div className="flex items-start justify-between gap-6 mb-4">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-3 mb-3">
                             <div
-                              className="text-base font-semibold truncate"
+                              className="text-lg font-semibold truncate"
                               style={{ color: palette.black2 }}
                             >
                               {a.title}
@@ -547,23 +449,24 @@ export default function AssignmentClass() {
                                     ? "secondary"
                                     : "warning"
                               }
-                              className="h-6"
+                              className="h-6 px-3"
                             >
                               {a.status.toUpperCase()}
                             </Badge>
-                            {a.dueDate && (
-                              <Badge palette={palette} variant="outline">
-                                <h1 style={{ color: palette.black2 }}>
-                                  {" "}
-                                  Jatuh tempo: {dueBadge}
-                                </h1>
+                            {dueBadge && (
+                              <Badge
+                                palette={palette}
+                                variant="outline"
+                                className="h-6 px-3"
+                              >
+                                tempo: {dueBadge}
                               </Badge>
                             )}
                           </div>
 
                           {a.description && (
                             <p
-                              className="text-sm mt-1 line-clamp-2"
+                              className="text-sm mb-4 line-clamp-2"
                               style={{ color: palette.black2 }}
                             >
                               {a.description}
@@ -571,27 +474,19 @@ export default function AssignmentClass() {
                           )}
 
                           <div
-                            className="mt-2 flex flex-wrap items-center gap-2 text-xs"
+                            className="flex flex-wrap items-center gap-4 text-xs"
                             style={{ color: palette.black2 }}
                           >
-                            <CalendarDays size={14} />
-                            <span>Dibuat: {dateLong(a.createdAt)}</span>
+                            <div className="flex items-center gap-2">
+                              <CalendarDays size={14} />
+                              <span>Dibuat: {dateLong(a.createdAt)}</span>
+                            </div>
                             {a.author && <span>• Oleh {a.author}</span>}
                             {(a.totalSubmissions ?? 0) > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>
-                                  {a.totalSubmissions} pengumpulan
-                                  {typeof a.graded === "number" &&
-                                    ` • ${a.graded} dinilai`}
-                                </span>
-                              </>
+                              <span>• {a.totalSubmissions} pengumpulan</span>
                             )}
                             {a.attachments?.length ? (
-                              <>
-                                <span>•</span>
-                                <span>{a.attachments.length} lampiran</span>
-                              </>
+                              <span>• {a.attachments.length} lampiran</span>
                             ) : null}
                           </div>
                         </div>
@@ -600,7 +495,7 @@ export default function AssignmentClass() {
 
                     {/* Footer actions */}
                     <div
-                      className="px-4 md:px-5 pb-4 md:pb-5 pt-3 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                      className="px-6 md:px-8 pb-6 md:pb-8 pt-4 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                       style={{ borderColor: palette.silver1 }}
                     >
                       <div
@@ -609,24 +504,25 @@ export default function AssignmentClass() {
                       >
                         Aksi cepat untuk tugas ini
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-3">
                         <Btn
                           palette={palette}
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDownload(a)}
+                          onClick={() =>
+                            window.alert("Unduh belum diimplementasikan")
+                          }
+                          className="gap-2"
                         >
-                          <Download size={16} className="mr-1" />
+                          <Download size={16} />
                           Unduh
                         </Btn>
-
-                        {/* Route detail: ../assignment/:assignmentId */}
                         <Link to={`../assignment/${a.id}`} relative="path">
-                          <Btn palette={palette} size="sm">
-                            Buka <ChevronRight size={16} className="ml-1" />
+                          <Btn palette={palette} size="sm" className="gap-2">
+                            Buka
+                            <ChevronRight size={16} />
                           </Btn>
                         </Link>
-
                         <Btn
                           palette={palette}
                           size="sm"
@@ -634,7 +530,6 @@ export default function AssignmentClass() {
                         >
                           Edit
                         </Btn>
-
                         <Btn
                           palette={palette}
                           size="sm"
@@ -652,7 +547,7 @@ export default function AssignmentClass() {
               {filtered.length === 0 && !isFetching && (
                 <SectionCard palette={palette}>
                   <div
-                    className="p-6 text-sm text-center"
+                    className="p-12 text-sm text-center"
                     style={{ color: palette.silver2 }}
                   >
                     Belum ada tugas untuk kelas ini.

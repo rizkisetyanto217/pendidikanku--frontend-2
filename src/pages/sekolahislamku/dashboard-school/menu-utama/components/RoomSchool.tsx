@@ -707,7 +707,7 @@ export default function RoomSchool() {
 
       <Flash palette={palette} flash={flash} />
 
-      <main className="px-4 md:px-6  md:py-8">
+      <main className="w-full px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
