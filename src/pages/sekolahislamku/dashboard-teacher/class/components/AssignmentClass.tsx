@@ -303,8 +303,8 @@ export default function AssignmentClass() {
         onSubmit={handleAddSubmit}
       />
 
-      <main className="w-full px-4  md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-8">
+      <main className="w-full px-4 md:px-6 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />

@@ -44,6 +44,7 @@ export default function AnnouncementsStudent() {
 
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
   // ⬇️ sumber data HANYA dari state yang dikirim StudentDashboard
   const sourceItems = state?.items ?? [];
@@ -77,22 +78,29 @@ export default function AnnouncementsStudent() {
         title={state?.heading ?? "Semua Pengumuman"}
         gregorianDate={new Date().toISOString()}
         dateFmt={dateFmt}
+        showBack={isFromMenuUtama}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 space-y-6">
-            <Btn
-              palette={palette}
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={16} className="mr-1" />
-              Kembali
-            </Btn>
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                onClick={() => navigate(-1)}
+                variant="ghost"
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+
+              <h1 className="text-lg font-semibold">Semua Pengumuman</h1>
+            </div>
 
             <SectionCard palette={palette}>
               {/* Header */}

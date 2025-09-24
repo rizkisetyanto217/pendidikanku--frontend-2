@@ -120,20 +120,24 @@ export default function ListFinance() {
         hijriDate={state?.hijriDate}
         gregorianDate={state?.gregorianDate ?? new Date().toISOString()}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
               <Link to=".." relative="path">
-                <Btn palette={palette} variant="ghost" size="sm">
-                  <ArrowLeft size={16} className="mr-1" />
-                  Kembali
+                <Btn palette={palette} variant="ghost" size="md">
+                  <ArrowLeft size={20} className="mr-1" />
                 </Btn>
               </Link>
+              <h1 className="font-semibold text-lg">List Tagihan</h1>
             </div>
 
             <SectionCard palette={palette}>

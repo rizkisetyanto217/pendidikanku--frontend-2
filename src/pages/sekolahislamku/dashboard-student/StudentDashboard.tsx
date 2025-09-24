@@ -203,11 +203,14 @@ export default function StudentDashboard() {
         dateFmt={dateFmt}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
             <section>
               <ChildSummaryCard
                 child={data?.child}

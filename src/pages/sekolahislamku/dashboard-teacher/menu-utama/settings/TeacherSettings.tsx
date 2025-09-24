@@ -194,15 +194,19 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
         gregorianDate={TODAY_ISO}
         hijriDate={hijriWithWeekday(TODAY_ISO)}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
-        <div className="lg:flex lg:items-start lg:gap-6">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6 py-4  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 min-w-0 space-y-6">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
-            <div className="flex items-center gap-4">
+            <div className="md:flex  hidden items-center gap-4">
               <Btn
                 palette={palette}
                 onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
@@ -260,7 +264,6 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
                 <div
                   className="divide-y"
                   style={{
-                 
                     borderColor: palette.silver1,
                   }}
                 >
@@ -301,7 +304,6 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
                 <div
                   className="divide-y"
                   style={{
-                  
                     borderColor: palette.silver1,
                   }}
                 >
@@ -356,7 +358,6 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({
                 <div
                   className="divide-y"
                   style={{
-                  
                     borderColor: palette.silver1,
                   }}
                 >

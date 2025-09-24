@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Wallet, FileText, CheckCircle2 } from "lucide-react";
+import { Wallet, FileText, CheckCircle2, ArrowLeft } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
@@ -252,7 +252,7 @@ function ItemsTable({
           className="grid grid-cols-12 px-3 py-2 text-xs"
           style={{ color: palette.black2 }}
         >
-          <div className="col-span-7">Item==</div>
+          <div className="col-span-7">Item</div>
           <div className="col-span-2 text-right">Qty</div>
           <div className="col-span-3 text-right">Jumlah</div>
         </div>
@@ -397,9 +397,10 @@ function SummaryCard({
 export default function StudentFinance() {
   const { billId: billIdParam } = useParams();
   const billId = billIdParam || "default";
-
+  const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["bill-detail", billId],
@@ -420,13 +421,28 @@ export default function StudentFinance() {
         hijriDate={hijriLong(topbarGregorianISO)}
         title="Pembayaran"
         dateFmt={dateLong}
+        showBack={isFromMenuUtama}
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6 py-4  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                onClick={() => navigate(-1)}
+                variant="ghost"
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
 
-          <div className="flex-1 space-y-6">
+              <h1 className="text-lg font-semibold">Pembayaran</h1>
+            </div>
             {error ? (
               <SectionCard palette={palette} className="p-4">
                 <div style={{ color: palette.primary }}>

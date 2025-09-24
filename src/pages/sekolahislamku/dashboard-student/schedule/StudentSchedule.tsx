@@ -1,7 +1,8 @@
 // src/pages/sekolahislamku/schedule/ParentSchedulePage.tsx
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, GraduationCap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, CalendarDays, GraduationCap } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import {
@@ -356,7 +357,8 @@ export default function StudentSchedule() {
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const [dateStr, setDateStr] = useState<string>(() => toISODate(new Date()));
   const [active, setActive] = useState<ActiveEntry>(null);
-
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+  const navigate = useNavigate();
   const {
     data: classesData,
     isLoading: isLoadingClasses,
@@ -400,11 +402,28 @@ export default function StudentSchedule() {
         title="Jadwal"
         gregorianDate={qISO}
         hijriDate={hijriWithWeekday(qISO)}
+        showBack={isFromMenuUtama}
       />
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          <ParentSidebar palette={palette} />
-          <div className="flex-1 space-y-6">
+      <main className="w-full px-4 md:px-6  md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
+
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                onClick={() => navigate(-1)}
+                variant="ghost"
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+
+              <h1 className="text-lg font-semibold">List Jadwal</h1>
+            </div>
             {classesError && (
               <SectionCard palette={palette}>
                 <div className="p-4 text-center">

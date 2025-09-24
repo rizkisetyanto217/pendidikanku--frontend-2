@@ -199,6 +199,7 @@ async function fetchChildDetail(): Promise<FetchResult> {
 export default function StudentProgress() {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
   const { data } = useQuery({
     queryKey: ["parent-child-detail"],
@@ -223,16 +224,19 @@ export default function StudentProgress() {
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
         dateFmt={dateLong}
+        showBack={isFromMenuUtama}
       />
 
       {/* Content */}
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri (sticky saat lg+) */}
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 flex flex-col space-y-8 min-w-0 ">
             {/* Header + quick actions + stats */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">

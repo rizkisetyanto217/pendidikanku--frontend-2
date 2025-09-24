@@ -234,6 +234,8 @@ import TeacherAssignment from "@/pages/sekolahislamku/dashboard-teacher/menu-uta
 import Certificate from "@/pages/dashboard/dkm/certificate/DKMCertificate";
 import TeacherCertificate from "@/pages/sekolahislamku/dashboard-teacher/menu-utama/certificate/Certificate";
 import DetailTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/components/DetailTeacher";
+import StudentProfil from "@/pages/sekolahislamku/dashboard-student/profil/StudentProfil";
+import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -603,6 +605,7 @@ export default function AppRoutes() {
         <Route index element={<StudentDashboard />} />
         <Route path="progress" element={<StudentProgressDetail />} />
         <Route path="all-schedule" element={<AllScheduleStudent />} />
+        <Route path="profil-murid" element={<StudentProfil />} />
 
         <Route
           path="all-schedule/detail/:scheduleId"
@@ -640,6 +643,8 @@ export default function AppRoutes() {
           <Route path="finance" element={<StudentFInance />} />
           <Route path="finnance-list" element={<ListFinance />} />
           <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
+          <Route path="profil-murid" element={<StudentProfil />} />
+          <Route path="sertifikat-murid" element={<StudentCertificate  />} />
         </Route>
       </Route>
       {/* ==== Protected Routes - Guru (teacher only) ==== */}

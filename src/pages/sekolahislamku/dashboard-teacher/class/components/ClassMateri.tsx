@@ -489,12 +489,13 @@ export default function ClassMateri() {
 
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* back */}
-            <div className="md:flex hidden gap-3 items-center">
+            <div className="md:flex hidden gap-3 items-center ">
               <Btn
                 palette={palette}
                 variant="ghost"
+                
                 onClick={() => navigate(-1)}
-                className="gap-1"
+                className="gap-1 "
               >
                 <ArrowLeft size={20} />
               </Btn>

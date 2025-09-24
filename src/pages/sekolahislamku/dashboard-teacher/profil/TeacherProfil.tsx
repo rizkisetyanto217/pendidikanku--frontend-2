@@ -197,37 +197,32 @@ const TeacherProfil: React.FC<TeacherProfilProps> = ({
         showBack
       />
 
-      <main className="w-full px-4  md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-8">
+      <main className="w-full px-4 md:px-6   md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-7">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          <div className="flex-1 flex flex-col space-y-8 min-w-0">
-            <div className="font-semibold text-lg flex items-center ">
-              <div className="  md:flex hidden items-center gap-x-3 ">
-                {showBack && (
-                  <Btn
-                    palette={palette}
-                    onClick={() => navigate(-1)}
-                    variant="ghost"
-                    className="cursor-pointer mr-3"
-                  >
-                    <ArrowLeft
-                      aria-label={backLabel}
-                      // title={backLabel}
-
-                      size={20}
-                    />
-                  </Btn>
-                )}
-              </div>
-              {/* <h1 className="flex items-center text-lg font-semibold">Pfofil Guru</h1>\\\\ */}
+          <div className="flex-1 flex flex-col space-y-8 min-w-0  ">
+            <div className="md:flex hidden items-center gap-3">
+              {showBack && (
+                <Btn
+                  palette={palette}
+                  onClick={() => navigate(-1)}
+                  variant="ghost"
+                  className="cursor-pointer flex items-center gap-2"
+                >
+                  <ArrowLeft size={20} aria-label={backLabel} />
+              
+                </Btn>
+              )}
+              <h1 className="text-lg font-semibold">Profil Guru</h1>
             </div>
+
             {/* Header */}
             <SectionCard palette={palette}>
-              <div className="p-6 flex flex-col md:flex-row gap-6 items-center md:items-start">
+              <div className="p-6 md:p-8 flex items-start justify-between gap-6 ">
                 {/* Avatar */}
                 <div className="relative mx-auto md:mx-0">
                   <div

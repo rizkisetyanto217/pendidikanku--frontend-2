@@ -1,4 +1,6 @@
-// // src/pages/sekolahislamku/components/home/StudentTopBar.tsx
+
+
+// // src/pages/sekolahislamku/components/home/ParentTopBar.tsx
 // import {
 //   useEffect,
 //   useMemo,
@@ -7,11 +9,11 @@
 //   type ReactNode,
 // } from "react";
 // import {
-//   Link,
 //   NavLink,
 //   useLocation,
 //   useMatch,
 //   useParams,
+//   useNavigate,
 // } from "react-router-dom";
 // import {
 //   LayoutDashboard,
@@ -25,13 +27,14 @@
 //   ClipboardCheck,
 //   ClipboardList,
 //   NotebookPen,
-//   GraduationCap,
 //   Menu,
 //   X,
 //   School,
 //   ChartBar,
 //   Calendar1,
-//   PanelLeftOpen,
+//   ArrowLeft,
+//   MoreVertical,
+//   CalendarDays,
 // } from "lucide-react";
 // import PublicUserDropdown from "@/components/common/public/UserDropDown";
 // import type { Palette } from "@/pages/sekolahislamku/components/ui/Primitives";
@@ -41,9 +44,11 @@
 // interface ParentTopBarProps {
 //   palette: Palette;
 //   title?: ReactNode;
-//   hijriDate?: string; // opsional: sudah berformat
-//   gregorianDate?: string; // ISO
+//   hijriDate?: string;
+//   gregorianDate?: string;
 //   dateFmt?: (iso: string) => string;
+//   showBack?: boolean; // New prop to control back button visibility
+//   onBackClick?: () => void; // Custom back handler
 // }
 
 // type NavItem = {
@@ -102,17 +107,17 @@
 //   { path: "keuangan", label: "Keuangan", icon: Wallet },
 //   { path: "profil-sekolah", label: "Profil", icon: School },
 //   { path: "academic", label: "Akademik", icon: FileSpreadsheet },
-//   // { path: "room", label: "Ruangan", icon: ChartBar },
 // ];
 
 // const TEACHER_NAVS: NavItem[] = [
 //   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
 //   { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
 //   { path: "kelas", label: "Kelas Saya", icon: Users },
-//   { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
-//   { path: "penilaian", label: "Penilaian", icon: ClipboardList },
-//   { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
-//   { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
+//   { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+//   // { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
+//   // { path: "penilaian", label: "Penilaian", icon: ClipboardList },
+//   // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
+//   // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
 //   { path: "profil-guru", label: "Profil", icon: Users },
 // ];
 
@@ -169,64 +174,49 @@
 // function MobileDrawer({
 //   open,
 //   onClose,
-//   brand,
-//   formattedGregorian,
 //   navs,
 //   palette,
 //   isDark,
+//   formattedGregorian,
 // }: {
 //   open: boolean;
 //   onClose: () => void;
-//   brand: ReactNode;
-//   formattedGregorian: string;
 //   navs: NavItem[];
 //   palette: Palette;
 //   isDark: boolean;
+//   formattedGregorian: string;
 // }) {
 //   if (!open) return null;
 //   return (
 //     <div className="md:hidden" style={{ pointerEvents: "auto" }}>
-//       {/* overlay */}
 //       <div
 //         className="fixed inset-0 z-50"
 //         onClick={onClose}
 //         style={{ background: "#0006" }}
 //       />
-//       {/* panel */}
 //       <aside
-//         id="mobile-drawer"
 //         className="fixed inset-y-0 left-0 z-50 w-72 max-w-[70vw] flex flex-col"
 //         style={{
 //           background: palette.white1,
 //           borderRight: `1px solid ${palette.silver1}`,
 //         }}
-//         role="dialog"
-//         aria-label="Menu navigasi"
 //       >
-//         {/* Header fixed */}
 //         <div
-//           className="flex flex-col items-center px-4 py-6 border-b relative flex-shrink-0"
+//           className="flex flex-col items-center px-4 py-6 border-b relative"
 //           style={{ borderColor: palette.silver1 }}
 //         >
-//           <div className="mb-3">
-//             <img
-//               src="/image/Gambar-Masjid.jpeg"
-//               alt="Logo Sekolah"
-//               className="w-16 h-16 rounded-full object-cover border-2"
-//               style={{ borderColor: palette.primary }}
-//             />
-//           </div>
-//           <div className="text-center">
-//             <h2
-//               className="font-bold text-lg leading-tight"
-//               style={{ color: palette.primary }}
-//             >
-//               SDIT
-//             </h2>
-//             <p className="text-sm mt-1" style={{ color: palette.silver2 }}>
-//               Al-Hikmah
-//             </p>
-//           </div>
+//           <img
+//             src="/image/Gambar-Masjid.jpeg"
+//             alt="Logo Sekolah"
+//             className="w-16 h-16 rounded-full object-cover border-2"
+//             style={{ borderColor: palette.primary }}
+//           />
+//           <h2
+//             className="font-bold text-lg mt-2"
+//             style={{ color: palette.primary }}
+//           >
+//             SDIT Al-Hikmah
+//           </h2>
 //           <button
 //             aria-label="Tutup menu"
 //             onClick={onClose}
@@ -237,18 +227,14 @@
 //           </button>
 //         </div>
 
-//         {/* Konten scrollable */}
 //         <div className="flex-1 overflow-y-auto">
-//           {/* Tanggal */}
 //           <div
-//             className="px-3 pt-3 pb-2 text-xs flex flex-col gap-1 items-start"
+//             className="px-3 pt-3 pb-2 text-xs"
 //             style={{ color: palette.silver2 }}
 //           >
 //             {formattedGregorian}
 //           </div>
-
-//           {/* Navigation */}
-//           <nav className="px-2 pb-4" aria-label="Navigasi">
+//           <nav className="px-2 pb-4">
 //             <ul className="space-y-2">
 //               {navs.map(({ path, label, icon, end }) => (
 //                 <li key={path}>
@@ -283,18 +269,20 @@
 //   gregorianDate,
 //   dateFmt,
 //   title,
+//   showBack = false,
+//   onBackClick,
 // }: ParentTopBarProps) {
 //   const { isDark } = useHtmlDarkMode();
 //   const [open, setOpen] = useState(false);
 //   const [midnightTick, setMidnightTick] = useState(0);
 //   const { pathname } = useLocation();
+//   const navigate = useNavigate();
 
 //   // slug awareness
 //   const params = useParams<{ slug?: string }>();
 //   const match = useMatch("/:slug/*");
 //   const slug = params.slug ?? match?.params.slug ?? "";
 
-//   // page kind
 //   const pageKind: "sekolah" | "murid" | "guru" = pathname.includes("/sekolah")
 //     ? "sekolah"
 //     : pathname.includes("/guru")
@@ -303,7 +291,6 @@
 
 //   const base = buildBase(slug, pageKind);
 
-//   // navs
 //   const navs = useMemo<NavItem[]>(() => {
 //     const source =
 //       pageKind === "sekolah"
@@ -319,7 +306,16 @@
 //     }));
 //   }, [pageKind, base]);
 
-//   // dates
+//   // label aktif (mobile)
+//   const activeLabel = useMemo(() => {
+//     if (title && typeof title === "string") return title;
+//     const found = navs.find(
+//       (n) => pathname === n.path || pathname.startsWith(n.path + "/")
+//     );
+//     return found?.label ?? "";
+//   }, [pathname, navs, title]);
+
+//   // tanggal
 //   const now = useMemo(() => new Date(), [pathname, midnightTick]);
 //   const gIso = gregorianDate ?? now.toISOString();
 //   const formattedGregorian = useMemo(
@@ -331,17 +327,18 @@
 //     [hijriDate, now]
 //   );
 
-//   // lock scroll when drawer opens
-//   useEffect(() => {
-//     if (!open) return;
-//     const prev = document.body.style.overflow;
-//     document.body.style.overflow = "hidden";
-//     return () => {
-//       document.body.style.overflow = prev;
-//     };
-//   }, [open]);
+//   // Handle back button click
+//   const handleBackClick = () => {
+//     if (onBackClick) {
+//       onBackClick();
+//     } else {
+//       navigate(-1);
+//     }
+//   };
 
-//   // tick after midnight to refresh dates
+//   const [openMore, setOpenMore] = useState(false);
+
+//   // refresh tiap tengah malam
 //   useEffect(() => {
 //     const d = new Date();
 //     const msUntilMidnight =
@@ -354,67 +351,72 @@
 //     return () => clearTimeout(t);
 //   }, [midnightTick]);
 
-//   const brandNode =
-//     title ??
-//     (pageKind === "sekolah"
-//       ? "Dashboard Sekolah"
-//       : pageKind === "guru"
-//         ? "Dashboard Guru"
-//         : "Dashboard Murid");
-
 //   return (
 //     <>
-//       {/* Top Bar */}
 //       <div
-//         className="sticky top-0 z-40 backdrop-blur border-b "
-//         style={{
-//           // background: `${palette.white1}E6`,
-//           borderColor: palette.silver1,
-//         }}
+//         className="sticky top-0 z-40 backdrop-blur border-b"
+//         style={{ borderColor: palette.silver1 }}
 //       >
-//         <div className="mx-auto Replace px-4 py-3 flex items-center justify-between gap-3">
-//           {/* Left */}
-//           <div className="flex items-center gap-2">
-//             <button
-//               className="md:hidden -ml-1 mr-1 grid place-items-center h-9 w-9 rounded-xl"
-//               onClick={() => setOpen(true)}
-//               aria-label="Buka menu"
-//               aria-controls="mobile-drawer"
-//               style={{ border: `1px solid ${palette.silver1}` }}
-//             >
-//               <Menu size={18} />
-//             </button>
-
-//             {/* Logo + Nama Sekolah dalam kolom */}
-//             <div className="md:flex  hidden gap-3 items-center justify-between">
-//               <img
-//                 src="/image/Gambar-Masjid.jpeg"
-//                 alt="Logo Sekolah"
-//                 className="w-12 h-12 rounded-full object-cover items-center flex"
-//               />
-
-//               <span
-//                 className="mt-1 text-xs font-semibold"
-//                 style={{ color: palette.primary }}
+//         <div className="mx-auto px-4 py-3 flex items-center justify-between">
+//           {/* Mobile: back button + judul + menu */}
+//           <div className="flex items-center gap-3 md:hidden flex-1">
+//             {showBack && (
+//               <button
+//                 className="h-9 w-9 grid place-items-center rounded-xl border flex-shrink-0"
+//                 onClick={handleBackClick}
+//                 aria-label="Kembali"
+//                 style={{ borderColor: palette.silver1 }}
 //               >
-//                 <p className="text-base"> SDIT Al-Hikmah</p>
-//               </span>
+//                 <ArrowLeft size={18} />
+//               </button>
+//             )}
+//             <span
+//               className="font-semibold text-lg truncate flex-1 text-start"
+//               style={{ color: palette.black2 }}
+//             >
+//               {activeLabel}
+//             </span>
+//             <div className="flex items-center gap-2 flex-shrink-0">
+//               <button
+//                 className="h-9 w-9 grid place-items-center rounded-xl border"
+//                 onClick={() => setOpen(true)}
+//                 aria-label="Buka menu"
+//                 style={{ borderColor: palette.silver1 }}
+//               >
+//                 <Menu size={18} />
+//               </button>
+//               <div className="relative">
+//                 <PublicUserDropdown variant="icon" withBg={false} />
+//               </div>
 //             </div>
 //           </div>
 
-//           {/* Right (desktop) */}
+//           {/* Desktop: Logo sekolah */}
+//           <div className="hidden md:flex gap-3 items-center">
+//             <img
+//               src="/image/Gambar-Masjid.jpeg"
+//               alt="Logo Sekolah"
+//               className="w-12 h-12 rounded-full object-cover"
+//             />
+//             <span
+//               className="text-base font-semibold"
+//               style={{ color: palette.primary }}
+//             >
+//               SDIT Al-Hikmah
+//             </span>
+//           </div>
+
+//           {/* Right - Desktop */}
 //           <div
-//             className="hidden md:flex items-center gap-3"
-//             style={{ fontSize: 14, color: palette.silver1 }}
+//             className="hidden md:flex items-center gap-3 text-sm"
+//             style={{ color: palette.silver1 }}
 //           >
 //             <span
 //               className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
 //               style={{
 //                 background: palette.secondary,
-//                 // kontras diperbaiki
 //                 color: isDark ? palette.black1 : palette.silver1,
 //               }}
-//               aria-label="Tanggal Hijriah"
 //               title={hijriLabel}
 //             >
 //               {hijriLabel || "—"}
@@ -422,8 +424,8 @@
 //             <PublicUserDropdown variant="icon" withBg={false} />
 //           </div>
 
-//           {/* Right (mobile) */}
-//           <div className="md:hidden">
+//           {/* Right - Mobile (just user dropdown, hidden behind buttons) */}
+//           <div className="md:hidden absolute right-4 top-1/2 transform -translate-y-1/2 opacity-0 pointer-events-none">
 //             <PublicUserDropdown variant="icon" withBg={false} />
 //           </div>
 //         </div>
@@ -433,11 +435,10 @@
 //       <MobileDrawer
 //         open={open}
 //         onClose={() => setOpen(false)}
-//         brand={brandNode}
-//         formattedGregorian={formattedGregorian}
 //         navs={navs}
 //         palette={palette}
 //         isDark={isDark}
+//         formattedGregorian={formattedGregorian}
 //       />
 //     </>
 //   );
@@ -468,15 +469,12 @@ import {
   Megaphone,
   FileSpreadsheet,
   ClipboardCheck,
-  ClipboardList,
-  NotebookPen,
+  Calendar1,
   Menu,
   X,
   School,
   ChartBar,
-  Calendar1,
   ArrowLeft,
-  MoreVertical,
   CalendarDays,
 } from "lucide-react";
 import PublicUserDropdown from "@/components/common/public/UserDropDown";
@@ -490,16 +488,9 @@ interface ParentTopBarProps {
   hijriDate?: string;
   gregorianDate?: string;
   dateFmt?: (iso: string) => string;
-  showBack?: boolean; // New prop to control back button visibility
-  onBackClick?: () => void; // Custom back handler
+  showBack?: boolean; // boleh override manual
+  onBackClick?: () => void;
 }
-
-type NavItem = {
-  path: "." | string;
-  label: string;
-  icon: ComponentType<any>;
-  end?: boolean;
-};
 
 /* ===================== Date helpers ===================== */
 const toCivilUtcDate = (d: Date) =>
@@ -528,6 +519,13 @@ const formatHijriLocal = (d: Date) => {
 };
 
 /* ===================== Nav data ===================== */
+type NavItem = {
+  path: "." | string;
+  label: string;
+  icon: ComponentType<any>;
+  end?: boolean;
+};
+
 const STUDENT_NAVS: NavItem[] = [
   { path: ".", label: "Dashboard", icon: LayoutDashboard, end: true },
   { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
@@ -557,10 +555,6 @@ const TEACHER_NAVS: NavItem[] = [
   { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
   { path: "kelas", label: "Kelas Saya", icon: Users },
   { path: "jadwal", label: "Jadwal", icon: CalendarDays },
-  // { path: "kehadiran", label: "Kehadiran", icon: CheckSquare },
-  // { path: "penilaian", label: "Penilaian", icon: ClipboardList },
-  // { path: "materials", label: "Materi & Tugas", icon: NotebookPen },
-  // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
   { path: "profil-guru", label: "Profil", icon: Users },
 ];
 
@@ -712,7 +706,7 @@ export default function ParentTopBar({
   gregorianDate,
   dateFmt,
   title,
-  showBack = false,
+  showBack,
   onBackClick,
 }: ParentTopBarProps) {
   const { isDark } = useHtmlDarkMode();
@@ -722,7 +716,7 @@ export default function ParentTopBar({
   const navigate = useNavigate();
 
   // slug awareness
-  const params = useParams<{ slug?: string }>();
+  const params = useParams<{ slug?: string; id?: string }>();
   const match = useMatch("/:slug/*");
   const slug = params.slug ?? match?.params.slug ?? "";
 
@@ -749,7 +743,7 @@ export default function ParentTopBar({
     }));
   }, [pageKind, base]);
 
-  // label aktif (mobile)
+  // aktif label
   const activeLabel = useMemo(() => {
     if (title && typeof title === "string") return title;
     const found = navs.find(
@@ -757,6 +751,9 @@ export default function ParentTopBar({
     );
     return found?.label ?? "";
   }, [pathname, navs, title]);
+
+  // auto showBack kalau ada param id (nested)
+  const autoShowBack = showBack ?? !!params.id;
 
   // tanggal
   const now = useMemo(() => new Date(), [pathname, midnightTick]);
@@ -770,16 +767,10 @@ export default function ParentTopBar({
     [hijriDate, now]
   );
 
-  // Handle back button click
   const handleBackClick = () => {
-    if (onBackClick) {
-      onBackClick();
-    } else {
-      navigate(-1);
-    }
+    if (onBackClick) onBackClick();
+    else navigate(-1);
   };
-
-  const [openMore, setOpenMore] = useState(false);
 
   // refresh tiap tengah malam
   useEffect(() => {
@@ -801,9 +792,9 @@ export default function ParentTopBar({
         style={{ borderColor: palette.silver1 }}
       >
         <div className="mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Mobile: back button + judul + menu */}
+          {/* Mobile */}
           <div className="flex items-center gap-3 md:hidden flex-1">
-            {showBack && (
+            {autoShowBack && (
               <button
                 className="h-9 w-9 grid place-items-center rounded-xl border flex-shrink-0"
                 onClick={handleBackClick}
@@ -828,13 +819,11 @@ export default function ParentTopBar({
               >
                 <Menu size={18} />
               </button>
-              <div className="relative">
-                <PublicUserDropdown variant="icon" withBg={false} />
-              </div>
+              <PublicUserDropdown variant="icon" withBg={false} />
             </div>
           </div>
 
-          {/* Desktop: Logo sekolah */}
+          {/* Desktop */}
           <div className="hidden md:flex gap-3 items-center">
             <img
               src="/image/Gambar-Masjid.jpeg"
@@ -849,7 +838,6 @@ export default function ParentTopBar({
             </span>
           </div>
 
-          {/* Right - Desktop */}
           <div
             className="hidden md:flex items-center gap-3 text-sm"
             style={{ color: palette.silver1 }}
@@ -860,21 +848,14 @@ export default function ParentTopBar({
                 background: palette.secondary,
                 color: isDark ? palette.black1 : palette.silver1,
               }}
-              title={hijriLabel}
             >
               {hijriLabel || "—"}
             </span>
             <PublicUserDropdown variant="icon" withBg={false} />
           </div>
-
-          {/* Right - Mobile (just user dropdown, hidden behind buttons) */}
-          <div className="md:hidden absolute right-4 top-1/2 transform -translate-y-1/2 opacity-0 pointer-events-none">
-            <PublicUserDropdown variant="icon" withBg={false} />
-          </div>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
       <MobileDrawer
         open={open}
         onClose={() => setOpen(false)}
