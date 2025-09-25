@@ -1,6 +1,5 @@
 // src/pages/sekolahislamku/pages/academic/SchoolSubject.tsx
-
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -9,7 +8,7 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 
-// UI primitives & layout
+// UI
 import {
   SectionCard,
   Badge,
@@ -22,18 +21,33 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 // Icons
 import {
   LibraryBig,
-  BookOpen,
-  UserCog,
-  Layers,
   Filter as FilterIcon,
   RefreshCcw,
   ArrowLeft,
   Plus,
   Pencil,
   Trash2,
+  Eye,
+  X,
 } from "lucide-react";
 
-/* ================== Date & format helpers ================== */
+/* ================= Types ================= */
+export type SubjectStatus = "active" | "inactive";
+export type SubjectRow = {
+  id: string;
+  code: string;
+  name: string;
+  level?: string;
+  hours_per_week?: number;
+  teacher_name?: string;
+  status: SubjectStatus;
+};
+type ApiSubjectsResp = {
+  list: SubjectRow[];
+  levels?: string[];
+};
+
+/* ================== Utils ================== */
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -59,105 +73,266 @@ const hijriLong = (iso?: string) =>
       })
     : "-";
 
-/* ================= Types ================= */
-export type SubjectStatus = "active" | "inactive";
+/* ================= Modal Form ================= */
+function SubjectFormModal({
+  open,
+  palette,
+  onClose,
+  initial,
+  onSave,
+}: {
+  open: boolean;
+  palette: Palette;
+  onClose: () => void;
+  initial?: SubjectRow | null;
+  onSave: (v: SubjectRow) => void;
+}) {
+  const isEdit = Boolean(initial);
+  const [form, setForm] = useState<SubjectRow>({
+    id: "",
+    code: "",
+    name: "",
+    level: "",
+    hours_per_week: 0,
+    teacher_name: "",
+    status: "active",
+  });
 
-export type SubjectRow = {
-  id: string;
-  code: string;
-  name: string;
-  level?: string; // contoh: SD/MI Kelas 1,2,3…
-  hours_per_week?: number;
-  teacher_name?: string;
-  status: SubjectStatus;
-};
+  useEffect(() => {
+    if (initial) setForm(initial);
+    else
+      setForm({
+        id: "",
+        code: "",
+        name: "",
+        level: "",
+        hours_per_week: 0,
+        teacher_name: "",
+        status: "active",
+      });
+  }, [initial, open]);
 
-type ApiSubjectsResp = {
-  list: SubjectRow[];
-  levels?: string[]; // opsi filter level
-};
+  if (!open) return null;
 
-/* =============== Page =============== */
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,.35)" }}
+    >
+      <SectionCard
+        palette={palette}
+        className="w-full max-w-lg flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h3 className="font-semibold">
+            {isEdit ? "Edit Mapel" : "Tambah Mapel"}
+          </h3>
+          <button onClick={onClose} className="p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-h-[70vh]">
+          <Field
+            label="Kode"
+            value={form.code}
+            onChange={(v) => setForm({ ...form, code: v })}
+          />
+          <Field
+            label="Nama Mapel"
+            value={form.name}
+            onChange={(v) => setForm({ ...form, name: v })}
+          />
+          <Field
+            label="Level"
+            value={form.level || ""}
+            onChange={(v) => setForm({ ...form, level: v })}
+          />
+          <Field
+            label="Jam / Minggu"
+            type="number"
+            value={String(form.hours_per_week ?? 0)}
+            onChange={(v) => setForm({ ...form, hours_per_week: Number(v) })}
+          />
+          <Field
+            label="Pengampu"
+            value={form.teacher_name || ""}
+            onChange={(v) => setForm({ ...form, teacher_name: v })}
+          />
+
+          {/* Status */}
+          <div>
+            <label className="text-xs">Status</label>
+            <select
+              value={form.status}
+              onChange={(e) =>
+                setForm({ ...form, status: e.target.value as SubjectStatus })
+              }
+              className="w-full rounded-lg border px-2 py-2 text-sm"
+            >
+              <option value="active">Aktif</option>
+              <option value="inactive">Nonaktif</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 py-3 flex items-center justify-end gap-2 border-t">
+          <Btn palette={palette} variant="ghost" onClick={onClose}>
+            Batal
+          </Btn>
+          <Btn
+            palette={palette}
+            onClick={() =>
+              onSave({
+                ...form,
+                id: isEdit ? form.id : `sub-${Date.now()}`,
+              })
+            }
+          >
+            {isEdit ? "Simpan" : "Tambah"}
+          </Btn>
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+/* ================= Modal Detail ================= */
+function SubjectDetailModal({
+  open,
+  palette,
+  subject,
+  onClose,
+}: {
+  open: boolean;
+  palette: Palette;
+  subject: SubjectRow | null;
+  onClose: () => void;
+}) {
+  if (!open || !subject) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,.35)" }}
+    >
+      <SectionCard
+        palette={palette}
+        className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h3 className="font-semibold">Detail Mapel</h3>
+          <button onClick={onClose} className="p-1">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="px-4 py-4 space-y-2 text-sm">
+          <InfoRow label="Kode" value={subject.code} />
+          <InfoRow label="Nama" value={subject.name} />
+          <InfoRow label="Level" value={subject.level ?? "-"} />
+          <InfoRow label="Jam/Minggu" value={subject.hours_per_week ?? "-"} />
+          <InfoRow label="Pengampu" value={subject.teacher_name ?? "-"} />
+          <InfoRow
+            label="Status"
+            value={subject.status === "active" ? "Aktif" : "Nonaktif"}
+          />
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between border-b py-1 text-sm">
+      <span className="opacity-70">{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border px-3 py-2 text-sm"
+      />
+    </div>
+  );
+}
+
+/* ================== Page ================== */
 const SchoolSubject: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-
   const gregorianISO = toLocalNoonISO(new Date());
 
-  // ==== Filters ====
-  const [q, setQ] = useState<string>("");
-  const [level, setLevel] = useState<string>("");
-  const [status, setStatus] = useState<SubjectStatus | "semua">("semua");
+  // State modal
+  const [openForm, setOpenForm] = useState(false);
+  const [editData, setEditData] = useState<SubjectRow | null>(null);
+  const [detailData, setDetailData] = useState<SubjectRow | null>(null);
+  const [rows, setRows] = useState<SubjectRow[]>([]);
 
-  // ==== Data (dummy fallback jika API belum siap) ====
-  const subjectsQ = useQuery({
-    queryKey: ["subjects", { q, level, status }],
+  // Dummy load
+  const subjectsQ = useQuery<ApiSubjectsResp>({
+    queryKey: ["subjects"],
     queryFn: async () => {
-      // Jika endpoint sudah ada, tinggal ganti jadi axios.get("/api/a/subjects", { params: { q, level, status }})
       const dummy: ApiSubjectsResp = {
-        list: Array.from({ length: 12 }).map((_, i) => ({
-          id: `sub-${i + 1}`,
-          code: `SBJ${String(i + 1).padStart(2, "0")}`,
-          name: [
-            "Matematika",
-            "Bahasa Indonesia",
-            "Bahasa Inggris",
-            "IPA",
-            "IPS",
-            "Pendidikan Agama",
-            "Tahfizh",
-            "Fiqih",
-            "Sejarah",
-            "PJOK",
-            "Seni Budaya",
-            "Prakarya",
-          ][i % 12],
-          level: ["1", "2", "3", "4", "5", "6"][i % 6],
-          hours_per_week: [2, 3, 4][i % 3],
-          teacher_name: `Ustadz/Ustadzah ${i + 1}`,
-          status: i % 5 === 0 ? "inactive" : "active",
-        })),
-        levels: ["1", "2", "3", "4", "5", "6"],
+        list: [
+          { id: "1", code: "SBJ01", name: "Matematika", status: "active" },
+          {
+            id: "2",
+            code: "SBJ02",
+            name: "Bahasa Indonesia",
+            status: "inactive",
+          },
+        ],
       };
-
       return dummy;
     },
-    staleTime: 60_000,
   });
 
-  const rows = useMemo(() => {
-    let list = subjectsQ.data?.list ?? [];
-    if (level) list = list.filter((r) => (r.level || "") === level);
-    if (status !== "semua") list = list.filter((r) => r.status === status);
-    if (q.trim()) {
-      const qq = q.toLowerCase();
-      list = list.filter(
-        (r) =>
-          r.name.toLowerCase().includes(qq) ||
-          r.code.toLowerCase().includes(qq) ||
-          (r.teacher_name || "").toLowerCase().includes(qq)
-      );
+  useEffect(() => {
+    if (subjectsQ.data) {
+      setRows(subjectsQ.data.list);
     }
-    return list;
-  }, [subjectsQ.data?.list, q, level, status]);
+  }, [subjectsQ.data]);
 
-  const levelOptions = subjectsQ.data?.levels ?? ["1", "2", "3", "4", "5", "6"];
+  // Handlers
+  const handleSave = (subject: SubjectRow) => {
+    setRows((prev) => {
+      const exists = prev.find((x) => x.id === subject.id);
+      if (exists) return prev.map((x) => (x.id === subject.id ? subject : x));
+      return [...prev, subject];
+    });
+    setOpenForm(false);
+    setEditData(null);
+  };
 
-  // KPI kecil
-  const kpi = useMemo(() => {
-    const total = rows.length;
-    const active = rows.filter((r) => r.status === "active").length;
-    const inactive = total - active;
-    const uniqueTeachers = new Set(rows.map((r) => r.teacher_name || "")).size;
-    return { total, active, inactive, uniqueTeachers };
-  }, [rows]);
+  const handleDelete = (id: string) => {
+    if (!confirm("Yakin hapus mapel ini?")) return;
+    setRows((prev) => prev.filter((x) => x.id !== id));
+  };
 
   return (
-    <div
-      className="min-h-screen w-full"
-      style={{ background: palette.white2, color: palette.black1 }}
-    >
+    <div className="min-h-screen w-full" style={{ background: palette.white2 }}>
       <ParentTopBar
         palette={palette}
         title="Mata Pelajaran"
@@ -167,263 +342,147 @@ const SchoolSubject: React.FC = () => {
         showBack
       />
 
-      <main className="w-full px-4 md:px-6 md:py-8">
-        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          {/* Sidebar */}
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          {/* Main */}
-          <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {/* Header */}
-            <section className="flex items-start gap-3">
-              <div className="md:flex hidden gap-3 items-center">
+          <section className="flex-1 flex flex-col space-y-6">
+            {/* Toolbar */}
+
+            <div className=" flex items-center justify-between">
+              <div className="  md:flex hidden items-center gap-3">
                 <Btn
                   palette={palette}
                   variant="ghost"
                   onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft className="cursor-pointer" size={20} />
                 </Btn>
-                <h1 className="textlg font-semibold">Pelajaran</h1>
-              </div>
-            </section>
 
-            {/* Filter */}
+                <h1 className="font-semibold text-lg">Ruangan</h1>
+              </div>
+              <Btn
+                palette={palette}
+                size="sm"
+                className="gap-1"
+                onClick={() => setOpenForm(true)}
+              >
+                <Plus size={16} /> Tambah
+              </Btn>
+            </div>
+
+            {/* Table */}
             <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
-                <FilterIcon size={18} /> Filter
-              </div>
-              <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-                {/* Level */}
-                <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.black2 }}
-                  >
-                    Level/Kelas
-                  </div>
-                  <select
-                    value={level}
-                    onChange={(e) => setLevel(e.target.value)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
-                  >
-                    <option value="">Semua</option>
-                    {levelOptions.map((lv) => (
-                      <option key={lv} value={lv}>
-                        {lv}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status */}
-                <div>
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.black2 }}
-                  >
-                    Status
-                  </div>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                    style={{
-                      borderColor: palette.silver1,
-                      color: palette.black1,
-                    }}
-                  >
-                    <option value="semua">Semua</option>
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
-                  </select>
-                </div>
-
-                {/* Pencarian */}
-                <div className="md:col-span-3">
-                  <div
-                    className="text-xs mb-1"
-                    style={{ color: palette.black2 }}
-                  >
-                    Cari (nama/kode/pengampu)
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={q}
-                      onChange={(e) => setQ(e.target.value)}
-                      placeholder="Ketik kata kunci…"
-                      className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
-                      style={{
-                        borderColor: palette.silver1,
-                        color: palette.black1,
-                      }}
-                    />
-                    <Btn
-                      palette={palette}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => subjectsQ.refetch()}
-                    >
-                      <RefreshCcw size={16} />
-                    </Btn>
-                  </div>
-                </div>
-              </div>
-            </SectionCard>
-
-            {/* Tabel Mapel */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
-                <div className="font-medium">Daftar Mata Pelajaran</div>
-                <Btn palette={palette} size="sm" className="gap-1">
-                  <Plus size={16} /> Tambah
-                </Btn>
-              </div>
-
-              <div className="px-4 md:px-5 pb-4 overflow-x-auto">
-                <table className="w-full text-sm min-w-[940px]">
-                  <thead
-                    className="text-left"
-                    style={{ color: palette.silver2 }}
-                  >
+              <div className="overflow-x-auto px-4 pb-4">
+                <table className="w-full text-sm min-w-[820px]">
+                  <thead style={{ color: palette.silver2 }}>
                     <tr
                       className="border-b"
                       style={{ borderColor: palette.silver1 }}
                     >
-                      <th className="py-2 pr-4">Kode</th>
-                      <th className="py-2 pr-4">Nama Mapel</th>
-                      <th className="py-2 pr-4">Level</th>
-                      <th className="py-2 pr-4">Jam / Minggu</th>
-                      <th className="py-2 pr-4">Pengampu</th>
-                      <th className="py-2 pr-4">Status</th>
-                      <th className="py-2 pr-2 text-right">Aksi</th>
+                      <th className="py-2 pr-3">Kode</th>
+                      <th className="py-2 pr-3">Nama</th>
+                      <th className="py-2 pr-3">Level</th>
+                      <th className="py-2 pr-3">Jam/Minggu</th>
+                      <th className="py-2 pr-3">Pengampu</th>
+                      <th className="py-2 pr-3">Status</th>
+                      <th className="py-2 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody
-                    className="divide-y"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    {rows.length === 0 ? (
+                  <tbody>
+                    {rows.map((r) => (
+                      <tr
+                        key={r.id}
+                        className="border-b"
+                        style={{ borderColor: palette.silver1 }}
+                      >
+                        <td className="py-2 pr-3">{r.code}</td>
+                        <td className="py-2 pr-3">{r.name}</td>
+                        <td className="py-2 pr-3">{r.level}</td>
+                        <td className="py-2 pr-3">{r.hours_per_week}</td>
+                        <td className="py-2 pr-3">{r.teacher_name}</td>
+                        <td className="py-2 pr-3">
+                          <Badge
+                            palette={palette}
+                            variant={
+                              r.status === "active" ? "success" : "outline"
+                            }
+                          >
+                            {r.status === "active" ? "Aktif" : "Nonaktif"}
+                          </Badge>
+                        </td>
+                        <td className="py-2 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setDetailData(r)}
+                            >
+                              <Eye size={14} />
+                            </Btn>
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditData(r);
+                                setOpenForm(true);
+                              }}
+                            >
+                              <Pencil size={14} />
+                            </Btn>
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="quaternary"
+                              onClick={() => handleDelete(r.id)}
+                            >
+                              <Trash2 size={14} />
+                            </Btn>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {rows.length === 0 && (
                       <tr>
                         <td
                           colSpan={7}
-                          className="py-8 text-center"
-                          style={{ color: palette.silver2 }}
+                          className="py-6 text-center text-silver-500"
                         >
                           Tidak ada data.
                         </td>
                       </tr>
-                    ) : (
-                      rows.map((r) => (
-                        <tr key={r.id} className="align-middle">
-                          <td className="py-3 pr-4 font-medium">{r.code}</td>
-                          <td className="py-3 pr-4">{r.name}</td>
-                          <td className="py-3 pr-4">{r.level ?? "-"}</td>
-                          <td className="py-3 pr-4">
-                            {r.hours_per_week ?? "-"}
-                          </td>
-                          <td className="py-3 pr-4">{r.teacher_name ?? "-"}</td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              palette={palette}
-                              variant={
-                                r.status === "active" ? "success" : "outline"
-                              }
-                            >
-                              {r.status === "active" ? "Aktif" : "Nonaktif"}
-                            </Badge>
-                          </td>
-                          <td className="py-3 pr-2">
-                            <div className="flex justify-end gap-2">
-                              <Btn
-                                palette={palette}
-                                size="sm"
-                                variant="outline"
-                                className="gap-1"
-                              >
-                                <Pencil size={14} /> Edit
-                              </Btn>
-                              <Btn
-                                palette={palette}
-                                size="sm"
-                                variant="quaternary"
-                                className="gap-1"
-                              >
-                                <Trash2 size={14} /> Hapus
-                              </Btn>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
                     )}
                   </tbody>
                 </table>
-
-                <div
-                  className="pt-3 text-xs"
-                  style={{ color: palette.silver2 }}
-                >
-                  Menampilkan {rows.length} mapel
-                </div>
               </div>
             </SectionCard>
           </section>
         </div>
       </main>
+
+      {/* Modals */}
+      <SubjectFormModal
+        open={openForm}
+        palette={palette}
+        onClose={() => {
+          setOpenForm(false);
+          setEditData(null);
+        }}
+        initial={editData}
+        onSave={handleSave}
+      />
+      <SubjectDetailModal
+        open={!!detailData}
+        palette={palette}
+        subject={detailData}
+        onClose={() => setDetailData(null)}
+      />
     </div>
   );
 };
 
 export default SchoolSubject;
-
-/* ================= Small UI helpers ================= */
-function KpiTile({
-  palette,
-  label,
-  value,
-  icon,
-  tone,
-}: {
-  palette: Palette;
-  label: string;
-  value: number | string;
-  icon?: React.ReactNode;
-  tone?: "success" | "warning" | "danger";
-}) {
-  const toneBg =
-    tone === "success"
-      ? "#DCFCE7"
-      : tone === "warning"
-        ? "#FEF3C7"
-        : tone === "danger"
-          ? "#FEE2E2"
-          : undefined;
-  return (
-    <SectionCard palette={palette}>
-      <div className="p-4 md:p-5 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{
-            background: toneBg ?? palette.primary2,
-            color: palette.primary,
-          }}
-        >
-          {icon ?? <LibraryBig size={18} />}
-        </span>
-        <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
-            {label}
-          </div>
-          <div className="text-xl font-semibold">{value}</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}

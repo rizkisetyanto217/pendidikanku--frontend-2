@@ -86,21 +86,19 @@ export default function CreateInvoiceModal({
     description: defaultValues.description ?? "",
   });
 
+ 
   // lock scroll + ESC untuk menutup
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+ useEffect(() => {
+   if (open) {
+     document.body.classList.add("lock-scroll");
+   } else {
+     document.body.classList.remove("lock-scroll");
+   }
+   return () => {
+     document.body.classList.remove("lock-scroll");
+   };
+ }, [open]);
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
 
   const set = <K extends keyof FormValue>(k: K, v: FormValue[K]) =>
     setForm((s) => ({ ...s, [k]: v }));
@@ -125,13 +123,14 @@ export default function CreateInvoiceModal({
       <div className="w-full max-w-[700px]">
         <SectionCard
           palette={palette}
-          className="rounded-2xl shadow-xl"
+          className="rounded-2xl shadow-xl flex flex-col max-h-[90vh] overflow-hidden"
           style={{ background: palette.white1, color: palette.black1 }}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div
-            className="p-4 md:p-5 flex items-center justify-between"
-            style={{ borderBottom: `1px solid ${palette.silver1}` }}
+            className="p-4 md:p-5 flex items-center justify-between border-b"
+            style={{ borderColor: palette.silver1 }}
           >
             <div className="flex items-center gap-2 min-w-0">
               <PlusCircle size={20} color={palette.quaternary} />
@@ -156,7 +155,7 @@ export default function CreateInvoiceModal({
           </div>
 
           {/* Body */}
-          <div className="p-4 md:p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
             {!!error && (
               <div
                 className="rounded-lg px-3 py-2 text-sm"

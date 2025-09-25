@@ -300,7 +300,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
   const [openTambah, setOpenTambah] = useState(false);
   const [openTambahLevel, setOpenTambahLevel] = useState(false);
   const { slug = "" } = useParams<{ slug: string }>();
-
+ const isFromMenuUtama = location.pathname.includes("/menu-utama/");
   const q = (sp.get("q") ?? "").trim();
   const status = (sp.get("status") ?? "all") as ClassStatus | "all";
   const shift = (sp.get("shift") ?? "all") as "Pagi" | "Sore" | "all";
@@ -435,7 +435,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
         gregorianDate={new Date().toISOString()}
         dateFmt={dateLong}
         hijriDate={hijriWithWeekday(new Date().toISOString())}
-        showBack
+        showBack={isFromMenuUtama}
       />
 
       <main className="w-full px-4 md:px-6  md:py-8">
@@ -457,7 +457,6 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   className="inline-flex items-center gap-2"
                 >
                   <ArrowLeft size={20} />
-          
                 </Btn>
               )}
               <h1 className="text-lg font-semibold">Seluruh Kelas</h1>

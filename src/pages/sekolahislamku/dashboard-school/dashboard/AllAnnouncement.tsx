@@ -995,13 +995,15 @@ const AllAnnouncement: React.FC = () => {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto Replace px-4 py-6 md:py-8">
-        <div className="lg:flex lg:items-start lg:gap-4">
-          {/* Sidebar kiri */}
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-5 px-4">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header + Add Button */}
 
             <div className="flex items-start md:justify-between justify-start gap-6">
@@ -1018,7 +1020,11 @@ const AllAnnouncement: React.FC = () => {
                   <h1 className="text-lg font-semibold">Pengumuman</h1>
                 </div>
               </div>
-              <Btn className="-ml-5 md:-ml-0" palette={palette} onClick={() => setOpenAdd(true)}>
+              <Btn
+                className="-ml-5 md:-ml-0"
+                palette={palette}
+                onClick={() => setOpenAdd(true)}
+              >
                 <Plus size={20} />
               </Btn>
             </div>

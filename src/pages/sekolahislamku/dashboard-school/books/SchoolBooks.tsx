@@ -201,6 +201,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
   const offset = Math.max(Number(sp.get("offset") || 0), 0);
 
   const booksQ = useBooksList({ limit, offset });
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
   const [bookModal, setBookModal] = useState<{
     mode: "create" | "edit";
@@ -337,8 +338,14 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
       {items.map((b) => (
         <div
           key={b.books_id}
-          className="rounded-xl border p-3 flex gap-3"
+          className="rounded-xl border p-3 flex gap-3 cursor-pointer transition hover:bg-gray-50"
           style={{ borderColor: palette.silver1, background: palette.white1 }}
+          onClick={() => {
+            const qs = sp.toString();
+            nav(
+              `${base}/sekolah/buku/detail/${b.books_id}${qs ? `?${qs}` : ""}`
+            );
+          }}
         >
           <div className="shrink-0">
             {b.books_image_url ? (
@@ -377,11 +384,12 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                   rel="noreferrer noopener"
                   className="inline-flex items-center gap-1 text-xs underline"
                   style={{ color: palette.primary }}
+                  onClick={(e) => e.stopPropagation()} // biar gak trigger ke detail
                 >
                   <ExternalLink size={14} /> Kunjungi
                 </a>
               )}
-              <div className="ml-auto">
+              <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
                 <ActionEditDelete
                   onEdit={() => setBookModal({ mode: "edit", book: b })}
                   onDelete={() => {
@@ -413,7 +421,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         gregorianDate={new Date().toISOString()}
         hijriDate={hijriWithWeekday(new Date().toISOString())}
         dateFmt={dateLong}
-        showBack
+        showBack={isFromMenuUtama}
       />
 
       <main className="w-full px-4 md:px-6  md:py-8">
@@ -436,7 +444,6 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                     className="inline-flex items-center gap-2"
                   >
                     <ArrowLeft size={20} />
-                  
                   </Btn>
                 )}
                 <h1 className="text-lg font-semibold">Buku Pelajaran</h1>

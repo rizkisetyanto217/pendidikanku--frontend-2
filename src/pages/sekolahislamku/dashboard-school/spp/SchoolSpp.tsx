@@ -1,15 +1,14 @@
 // src/pages/sekolahislamku/pages/finance/SchoolSpp.tsx
-
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import axios from "@/lib/axios";
 
 // Theme & utils
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import axios from "@/lib/axios";
 
-// UI primitives & layout
+// UI primitives
 import {
   SectionCard,
   Badge,
@@ -21,18 +20,14 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 
 // Icons
 import {
-  Banknote,
   BarChart2,
-  CreditCard,
-  Users,
-  CalendarDays,
   Filter as FilterIcon,
   RefreshCcw,
   Download,
   ArrowLeft,
 } from "lucide-react";
 
-/* ================== Date & format helpers ================== */
+/* ================= Helpers ================= */
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
@@ -69,14 +64,6 @@ const idr = (n?: number) =>
 /* ================= Types ================= */
 export type SppStatus = "unpaid" | "partial" | "paid" | "overdue";
 
-type SppSummary = {
-  month: string;
-  scheduled: number;
-  collected: number;
-  outstanding: number;
-  students_affected: number;
-};
-
 type SppBillRow = {
   id: string;
   student_id: string;
@@ -92,15 +79,14 @@ type ApiSppBillsResp = {
   classes?: string[];
 };
 
-/* =============== Page =============== */
+/* ================= Page ================= */
 const SchoolSpp: React.FC = () => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-
   const gregorianISO = toLocalNoonISO(new Date());
 
-  // ==== Filters ====
+  // Filters
   const today = new Date();
   const ym = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
   const [month, setMonth] = useState<string>(ym);
@@ -108,18 +94,11 @@ const SchoolSpp: React.FC = () => {
   const [status, setStatus] = useState<SppStatus | "semua">("semua");
   const [q, setQ] = useState<string>("");
 
-  // ==== Data dummy (sementara) ====
-  const summaryQ = useQuery({
-    queryKey: ["spp-summary", month],
-    queryFn: async () => ({
-      month,
-      scheduled: 120,
-      collected: 72000000,
-      outstanding: 18500000,
-      students_affected: 37,
-    }),
-  });
+  // State modal
+  const [detailBill, setDetailBill] = useState<SppBillRow | null>(null);
+  const [tagihBill, setTagihBill] = useState<SppBillRow | null>(null);
 
+  // Dummy data
   const billsQ = useQuery({
     queryKey: ["spp-bills", { month, q, kelas, status }],
     queryFn: async () => {
@@ -146,7 +125,7 @@ const SchoolSpp: React.FC = () => {
   });
 
   const bills = billsQ.data?.list ?? [];
-  const classOptions = billsQ.data?.classes ?? ["1A", "1B", "2A", "2B"];
+  const classOptions = billsQ.data?.classes ?? [];
 
   return (
     <div
@@ -162,7 +141,7 @@ const SchoolSpp: React.FC = () => {
         showBack
       />
 
-      <main className="w-full px-4 md:px-6  md:py-8">
+      <main className="w-full px-4 md:px-6 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
@@ -171,8 +150,8 @@ const SchoolSpp: React.FC = () => {
 
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {/* Back button biasa */}
-            <div className="md:flex  hidden gap-3 items-center">
+            {/* Back */}
+            <div className="md:flex hidden gap-3 items-center">
               <Btn
                 palette={palette}
                 variant="ghost"
@@ -190,6 +169,7 @@ const SchoolSpp: React.FC = () => {
                 <FilterIcon size={18} /> Filter
               </div>
               <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+                {/* Bulan */}
                 <div>
                   <div
                     className="text-xs mb-1"
@@ -201,13 +181,14 @@ const SchoolSpp: React.FC = () => {
                     type="month"
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
+                    className="w-full h-11 rounded-lg border px-3 text-sm bg-transparent"
                     style={{
                       borderColor: palette.silver1,
                       color: palette.black1,
                     }}
                   />
                 </div>
+                {/* Kelas */}
                 <div>
                   <div
                     className="text-xs mb-1"
@@ -218,7 +199,7 @@ const SchoolSpp: React.FC = () => {
                   <select
                     value={kelas}
                     onChange={(e) => setKelas(e.target.value)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
+                    className="w-full h-11 rounded-lg border px-3 text-sm bg-transparent"
                     style={{
                       borderColor: palette.silver1,
                       color: palette.black1,
@@ -232,6 +213,7 @@ const SchoolSpp: React.FC = () => {
                     ))}
                   </select>
                 </div>
+                {/* Status */}
                 <div>
                   <div
                     className="text-xs mb-1"
@@ -242,7 +224,7 @@ const SchoolSpp: React.FC = () => {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
+                    className="w-full h-11 rounded-lg border px-3 text-sm bg-transparent"
                     style={{
                       borderColor: palette.silver1,
                       color: palette.black1,
@@ -255,6 +237,7 @@ const SchoolSpp: React.FC = () => {
                     <option value="overdue">Terlambat</option>
                   </select>
                 </div>
+                {/* Cari */}
                 <div className="md:col-span-2">
                   <div
                     className="text-xs mb-1"
@@ -267,7 +250,7 @@ const SchoolSpp: React.FC = () => {
                       value={q}
                       onChange={(e) => setQ(e.target.value)}
                       placeholder="Ketik nama siswa…"
-                      className="w-full h-11 rounded-lg border px-3 bg-transparent text-sm"
+                      className="w-full h-11 rounded-lg border px-3 text-sm bg-transparent"
                       style={{
                         borderColor: palette.silver1,
                         color: palette.black1,
@@ -350,11 +333,20 @@ const SchoolSpp: React.FC = () => {
                         </td>
                         <td className="py-3 pr-2">
                           <div className="flex justify-end gap-2">
-                            <Btn palette={palette} size="sm" variant="outline">
+                            <Btn
+                              palette={palette}
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setDetailBill(r)}
+                            >
                               Detail
                             </Btn>
                             {r.status !== "paid" && (
-                              <Btn palette={palette} size="sm">
+                              <Btn
+                                palette={palette}
+                                size="sm"
+                                onClick={() => setTagihBill(r)}
+                              >
                                 Tagih
                               </Btn>
                             )}
@@ -369,40 +361,148 @@ const SchoolSpp: React.FC = () => {
           </section>
         </div>
       </main>
+
+      {/* Modals */}
+      <SppDetailModal
+        bill={detailBill}
+        onClose={() => setDetailBill(null)}
+        palette={palette}
+      />
+      <SppTagihModal
+        bill={tagihBill}
+        onClose={() => setTagihBill(null)}
+        palette={palette}
+      />
     </div>
   );
 };
 
 export default SchoolSpp;
 
-/* ================= Small UI helpers ================= */
-function KpiTile({
+/* ================= Modals ================= */
+function SppDetailModal({
+  bill,
+  onClose,
   palette,
-  label,
-  value,
-  icon,
 }: {
+  bill: SppBillRow | null;
+  onClose: () => void;
   palette: Palette;
-  label: string;
-  value: number | string;
-  icon?: React.ReactNode;
 }) {
+  if (!bill) return null;
   return (
-    <SectionCard palette={palette}>
-      <div className="p-4 md:p-5 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{ background: palette.primary2, color: palette.primary }}
-        >
-          {icon ?? <BarChart2 size={18} />}
-        </span>
-        <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
-            {label}
-          </div>
-          <div className="text-xl font-semibold">{value}</div>
+    <div
+      className="fixed inset-0 z-50 grid place-items-center"
+      style={{ background: "rgba(0,0,0,0.35)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-[min(480px,94vw)] rounded-2xl shadow-xl p-5 bg-white"
+        style={{ color: palette.black1 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Detail Tagihan</h3>
+          <button
+            className="text-sm px-2 py-1 rounded-lg"
+            style={{ color: palette.silver2 }}
+            onClick={onClose}
+          >
+            Tutup
+          </button>
+        </div>
+        <div className="grid gap-3 text-sm">
+          <InfoRow label="Nama" value={bill.student_name} />
+          <InfoRow label="ID" value={bill.student_id} />
+          <InfoRow label="Kelas" value={bill.class_name ?? "-"} />
+          <InfoRow label="Nominal" value={idr(bill.amount)} />
+          <InfoRow
+            label="Jatuh Tempo"
+            value={new Date(bill.due_date).toLocaleDateString("id-ID")}
+          />
+          <InfoRow
+            label="Status"
+            value={
+              <Badge
+                palette={palette}
+                variant={
+                  bill.status === "paid"
+                    ? "success"
+                    : bill.status === "partial"
+                      ? "info"
+                      : bill.status === "unpaid"
+                        ? "outline"
+                        : "warning"
+                }
+              >
+                {bill.status === "paid"
+                  ? "Lunas"
+                  : bill.status === "partial"
+                    ? "Sebagian"
+                    : bill.status === "unpaid"
+                      ? "Belum Bayar"
+                      : "Terlambat"}
+              </Badge>
+            }
+          />
         </div>
       </div>
-    </SectionCard>
+    </div>
+  );
+}
+
+function SppTagihModal({
+  bill,
+  onClose,
+  palette,
+}: {
+  bill: SppBillRow | null;
+  onClose: () => void;
+  palette: Palette;
+}) {
+  if (!bill) return null;
+
+  const handleSend = () => {
+    alert(`Notifikasi tagihan dikirim ke ${bill.student_name}`);
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center"
+      style={{ background: "rgba(0,0,0,0.35)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-[min(420px,94vw)] rounded-2xl shadow-xl p-5 bg-white"
+        style={{ color: palette.black1 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-semibold mb-3">Tagih SPP</h3>
+        <p className="text-sm mb-4">
+          Kirim notifikasi penagihan kepada{" "}
+          <span className="font-medium">{bill.student_name}</span> untuk nominal{" "}
+          <span className="font-medium">{idr(bill.amount)}</span>?
+        </p>
+        <div className="flex justify-end gap-2">
+          <Btn palette={palette} variant="ghost" onClick={onClose}>
+            Batal
+          </Btn>
+          <Btn palette={palette} onClick={handleSend}>
+            Kirim Tagihan
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= Helpers ================= */
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex flex-col">
+      <span className="text-xs opacity-70">{label}</span>
+      <span className="font-medium">{value}</span>
+    </div>
   );
 }

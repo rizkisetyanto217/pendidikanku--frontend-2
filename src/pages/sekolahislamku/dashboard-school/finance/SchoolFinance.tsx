@@ -829,6 +829,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
   const qc = useQueryClient();
 
   const gregorianISO = toLocalNoonISO(new Date());
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
   // ===== MODALS =====
   const [openExport, setOpenExport] = useState(false);
@@ -971,9 +972,10 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
     },
   });
 
-  // ===== Event Handlers =====
+  // ===== Event Handlers =====// ===== Event Handlers =====
   const onDetail = (inv: InvoiceItem) => {
-    console.log("Detail invoice:", inv);
+    // Navigate ke halaman detail dengan ID invoice
+    navigate(`detail/${inv.id}`);
   };
 
   const handleGoBack = () => {
@@ -1014,7 +1016,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
         gregorianDate={gregorianISO}
         hijriDate={hijriLong(gregorianISO)}
         dateFmt={dateLong}
-        showBack
+        showBack={isFromMenuUtama}
       />
 
       <main className="w-full px-4 md:px-6  md:py-8">

@@ -169,7 +169,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
   });
 
   const [editOpen, setEditOpen] = useState(false);
-
+ const isFromMenuUtama = location.pathname.includes("/menu-utama/");
   const nowISO = toLocalNoonISO(new Date());
   const foundedYear = useMemo(() => {
     if (!data?.foundedAt) return "-";
@@ -187,7 +187,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
         title="Profil Sekolah"
         gregorianDate={nowISO}
         dateFmt={topbarDateFmt}
-        showBack
+        showBack={isFromMenuUtama}
       />
 
       <main className="w-full px-4 md:px-6 md:py-8">

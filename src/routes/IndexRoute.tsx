@@ -236,6 +236,7 @@ import TeacherCertificate from "@/pages/sekolahislamku/dashboard-teacher/menu-ut
 import DetailTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/components/DetailTeacher";
 import StudentProfil from "@/pages/sekolahislamku/dashboard-student/profil/StudentProfil";
 import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
+import DetailBill from "@/pages/sekolahislamku/dashboard-school/finance/DetailBill";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -644,7 +645,7 @@ export default function AppRoutes() {
           <Route path="finnance-list" element={<ListFinance />} />
           <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
           <Route path="profil-murid" element={<StudentProfil />} />
-          <Route path="sertifikat-murid" element={<StudentCertificate  />} />
+          <Route path="sertifikat-murid" element={<StudentCertificate />} />
         </Route>
       </Route>
       {/* ==== Protected Routes - Guru (teacher only) ==== */}
@@ -785,6 +786,7 @@ export default function AppRoutes() {
         <Route path="all-schedule" element={<AllSchedule />} />
         <Route path="profil-sekolah" element={<SchoolProfile />} />
         <Route path="keuangan" element={<SchoolFinance />} />
+        <Route path="keuangan/detail/:id" element={<DetailBill />} />
         <Route path="guru">
           <Route index element={<SchoolTeacher />} />
           <Route path=":id" element={<DetailTeacher />} />
@@ -825,6 +827,7 @@ export default function AppRoutes() {
           {/* <Route path="academic" element={<AcademicSchool showBack />} /> */}
           <Route path="profil-sekolah" element={<SchoolProfile showBack />} />
           <Route path="keuangan" element={<SchoolFinance showBack />} />
+          <Route path="keuangan/detail/:id" element={<DetailBill />} />
           <Route path="guru" element={<SchoolTeacher showBack />} />
           <Route path="all-announcement" element={<AllAnnouncement />} />
           <Route path="sekolah" element={<SchoolDashboard showBack />} />

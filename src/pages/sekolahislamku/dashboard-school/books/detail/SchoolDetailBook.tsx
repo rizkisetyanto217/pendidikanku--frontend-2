@@ -135,23 +135,25 @@ export default function SchoolBookDetail() {
         title="Detail Buku"
         gregorianDate={new Date().toISOString()}
         dateFmt={dateLong}
+        showBack
       />
 
-      <main className="mx-auto px-6 md:px-8 py-6 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main className="w-full px-4 py-4 md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
-          <aside className="hidden lg:block lg:col-span-2">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
           {/* Main */}
-          <section className="lg:col-span-10 space-y-6 min-w-0">
+          <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header */}
             <div className="flex items-center gap-3">
               <Btn
                 palette={palette}
                 variant="ghost"
                 onClick={() => navigate(-1)}
+                className=" items-center gap-1.5 md:mt-0 hidden md:flex"
               >
                 <ArrowLeft size={18} />
               </Btn>

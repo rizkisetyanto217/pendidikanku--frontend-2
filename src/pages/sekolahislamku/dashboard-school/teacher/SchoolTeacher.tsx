@@ -416,7 +416,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName as ThemeName, isDark);
   const navigate = useNavigate();
-
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
   const [openAdd, setOpenAdd] = useState(false);
   const [openImport, setOpenImport] = useState(false);
   const [q, setQ] = useState("");
@@ -495,7 +495,7 @@ const TeachersPage: React.FC<SchoolTeacherProps> = ({ showBack = false }) => {
         palette={palette}
         title="Guru"
         hijriDate={hijriWithWeekday(new Date().toISOString())}
-        showBack={true}
+        showBack={isFromMenuUtama}
       />
 
       {/* Container */}

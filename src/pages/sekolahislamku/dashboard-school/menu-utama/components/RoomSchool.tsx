@@ -412,53 +412,67 @@ interface RoomDetailProps {
 
 function RoomDetail({ room, onClose, palette }: RoomDetailProps) {
   if (!room) return null;
+
   return (
     <div
-      className="fixed inset-0 z-[60] flex justify-end"
-      style={{ background: "rgba(0,0,0,.25)" }}
+      className="fixed inset-0 z-[70] grid place-items-center"
+      style={{ background: "rgba(0,0,0,.35)" }}
       onClick={onClose}
     >
       <div
-        className="w-[min(420px,94vw)] h-full p-4 overflow-auto"
+        className="w-[min(500px,94vw)] max-h-[90vh] overflow-y-auto rounded-2xl p-5 shadow-xl"
         style={{
           background: palette.white1,
           color: palette.black1,
-          boxShadow: "rgba(0,0,0,0.1) -6px 0 20px",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="text-lg font-semibold mb-2">Detail Ruangan</div>
-        <div className="grid gap-2 text-sm">
-          <div>
-            <div className="opacity-70">Nama</div>
-            <div className="font-medium">{room.name}</div>
-          </div>
-          <div>
-            <div className="opacity-70">Kapasitas</div>
-            <div className="font-medium">{room.capacity}</div>
-          </div>
-          <div>
-            <div className="opacity-70">Lokasi</div>
-            <div className="font-medium">
-              {room.location || <span className="opacity-60">—</span>}
-            </div>
-          </div>
-          <div>
-            <div className="opacity-70">Status</div>
-            <Badge
-              palette={palette}
-              variant={room.is_active ? "success" : "outline"}
-            >
-              {room.is_active ? "Aktif" : "Nonaktif"}
-            </Badge>
-          </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Detail Ruangan</h3>
+          <button
+            className="text-sm px-2 py-1 rounded-lg"
+            style={{ color: palette.silver2 }}
+            onClick={onClose}
+          >
+            Tutup
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="grid gap-4 text-sm">
+          <InfoRow label="Nama" value={room.name} />
+          <InfoRow label="Kapasitas" value={`${room.capacity} siswa`} />
+          <InfoRow label="Lokasi" value={room.location ?? "—"} />
+          <InfoRow
+            label="Status"
+            value={
+              <Badge
+                palette={palette}
+                variant={room.is_active ? "success" : "outline"}
+              >
+                {room.is_active ? "Aktif" : "Nonaktif"}
+              </Badge>
+            }
+          />
           {room.updated_at && (
-            <div className="opacity-70">
-              Diperbarui: {new Date(room.updated_at).toLocaleString("id-ID")}
-            </div>
+            <InfoRow
+              label="Diperbarui"
+              value={new Date(room.updated_at).toLocaleString("id-ID")}
+            />
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* Small reusable row */
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex flex-col">
+      <span className="text-xs opacity-70">{label}</span>
+      <span className="font-medium">{value}</span>
     </div>
   );
 }
@@ -641,6 +655,8 @@ export default function RoomSchool() {
   const pageCount = Math.max(1, Math.ceil(total / limit));
   const page = Math.min(Math.floor(offset / limit) + 1, pageCount);
 
+  const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+
   // Handlers
   const gotoPage = (p: number) => {
     const np = Math.min(Math.max(1, p), pageCount);
@@ -687,7 +703,7 @@ export default function RoomSchool() {
       <ParentTopBar
         palette={palette}
         title="Manajemen Ruangan"
-        showBack={true}
+        showBack={isFromMenuUtama}
         gregorianDate={topbarGregorianISO}
         hijriDate={new Date(topbarGregorianISO).toLocaleDateString(
           "id-ID-u-ca-islamic-umalqura",
@@ -761,7 +777,6 @@ export default function RoomSchool() {
                 </div>
                 <Btn palette={palette} onClick={handleAddRoom}>
                   <Plus size={16} className="mr-2" />
-                  Tambah Ruangan
                 </Btn>
               </div>
             </SectionCard>

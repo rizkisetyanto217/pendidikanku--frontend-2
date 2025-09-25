@@ -11,3 +11,4 @@ body {
 blockquote {
   @apply pl-4 ml-0 border-l-4 italic text-sm text-[#555] border-[#ccc] dark:text-[#ccc] dark:border-[#444];
 }
+

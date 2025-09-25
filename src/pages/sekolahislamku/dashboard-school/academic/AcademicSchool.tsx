@@ -135,7 +135,8 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
   const navigate = useNavigate();
   // State kecil untuk filter rooms
   const [filter, setFilter] = useState<"all" | "physical" | "virtual">("all");
-
+ const isFromMenuUtama = location.pathname.includes("/menu-utama/");
+ 
   const rooms = useMemo(() => {
     if (filter === "physical")
       return DUMMY_ROOMS.filter((r) => !r.class_rooms_is_virtual);
@@ -167,7 +168,7 @@ const AcademicSchool: React.FC<SchoolAcademicProps> = ({
         title="Akademik"
         gregorianDate={topbarISO}
         dateFmt={dateLong}
-        showBack={showBack}
+        showBack={isFromMenuUtama}
       />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">

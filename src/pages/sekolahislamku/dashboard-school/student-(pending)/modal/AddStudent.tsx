@@ -13,12 +13,7 @@ type Props = {
   onClose: () => void;
 };
 
-export default function AddStudent({
-  open,
-  palette,
-  classes,
-  onClose,
-}: Props) {
+export default function AddStudent({ open, palette, classes, onClose }: Props) {
   const [form, setForm] = useState({
     nis: "",
     name: "",
@@ -34,19 +29,20 @@ export default function AddStudent({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4"
       style={{ background: "rgba(0,0,0,0.35)" }}
       role="dialog"
       aria-modal="true"
     >
       <SectionCard
         palette={palette}
-        className="w-full max-w-2xl p-0 overflow-hidden shadow-2xl rounded-2xl"
+        className="w-full max-w-2xl flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+        style={{ background: palette.white1 }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b"
-          style={{ borderColor: palette.white3, background: palette.white1 }}
+          style={{ borderColor: palette.white3 }}
         >
           <div className="flex items-center gap-2">
             <div
@@ -77,8 +73,8 @@ export default function AddStudent({
           </button>
         </div>
 
-        {/* Body / Form */}
-        <div className="px-4 py-4 space-y-4">
+        {/* Body / Form → scrollable */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 max-h-[70vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Field
               label="Nama*"
@@ -145,7 +141,7 @@ export default function AddStudent({
             <label className="text-xs" style={{ color: palette.secondary }}>
               Status
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {(["aktif", "nonaktif", "alumni"] as const).map((st) => (
                 <button
                   key={st}
@@ -170,7 +166,7 @@ export default function AddStudent({
         {/* Footer */}
         <div
           className="px-4 py-3 flex items-center justify-end gap-2 border-t"
-          style={{ borderColor: palette.white3, background: palette.white1 }}
+          style={{ borderColor: palette.white3 }}
         >
           <Btn palette={palette} size="sm" variant="ghost" onClick={onClose}>
             Batal
@@ -183,7 +179,7 @@ export default function AddStudent({
               onClose();
             }}
           >
-            Simpan (dummy)
+            Simpan
           </Btn>
         </div>
       </SectionCard>
