@@ -135,7 +135,7 @@ export default function Bill({
       style={{ background: palette.white2, color: palette.black1 }}
     >
       {/* TopBar */}
-      <ParentTopBar palette={palette} title="Tagihan & Pembayaran" />
+      <ParentTopBar showBack palette={palette} title="Tagihan & Pembayaran" />
 
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -148,10 +148,9 @@ export default function Bill({
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 justify-between">
-              <div className="flex items-center gap-3">
+              <div className="md:flex hidden items-center gap-3">
                 <Btn
                   variant="ghost"
-            
                   palette={palette}
                   onClick={() => navigate(-1)}
                   className="inline-flex items-center gap-2"
@@ -280,7 +279,7 @@ export default function Bill({
                     disabled={isPaid}
                     onClick={handleBayar}
                   >
-                    {isPaid ? "Sudah Dibayar" : "Bayar Sekarang"}
+                    {isPaid ? "Sudah Dibayar" : "Hubungi Sekarang"}
                   </Btn>
                   {!isPaid && payUrl && (
                     <a

@@ -744,6 +744,7 @@ export default function RoomSchool() {
               <h1 className="font-semibold text-lg">Ruangan</h1>
             </div>
 
+
             {/* Toolbar */}
             <SectionCard palette={palette}>
               <div className="p-3 md:p-4 flex flex-col md:flex-row md:items-center gap-3">

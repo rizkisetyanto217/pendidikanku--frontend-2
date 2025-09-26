@@ -143,7 +143,7 @@ export default function TodayScheduleCard<TState = unknown>({
                 variant="ghost"
                 className="w-full"
                 palette={palette}
-                style={{ background: palette.white2, color: palette.black1, borderColor: palette.silver1 }}
+                // style={{ background: palette.white2, color: palette.black1, borderColor: palette.silver1 }}
               >
                 Lihat Jadwal <ChevronRight className="ml-1" size={16} />
               </Btn>

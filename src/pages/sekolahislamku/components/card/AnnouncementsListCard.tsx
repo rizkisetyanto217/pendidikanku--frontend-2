@@ -79,23 +79,30 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
             Pengumuman
           </h3>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden md:flex flex-wrap items-center gap-2">
             {canAdd &&
               (onAdd ? (
-                <p></p>
+                <Btn size="sm" palette={palette} onClick={onAdd}>
+                  <Plus className="mr-1" size={16} />
+                </Btn>
               ) : addHref ? (
                 <Link to={addHref}>
                   <Btn size="sm" palette={palette}>
                     <Plus className="mr-1" size={16} />
-                    <span className="hidden xs:inline">Tambah</span>
                   </Btn>
                 </Link>
               ) : null)}
 
+            {/* tombol lihat semua desktop */}
             <Link to={seeAllPath} state={seeAllState as unknown}>
-              <Btn variant="ghost" size="sm" palette={palette}>
-                <span className=" xs:inline">Lihat semua</span>
-                <ChevronRight className="xs:ml-1" size={16} />
+              <Btn
+                variant="ghost"
+                size="sm"
+                palette={palette}
+                className="gap-1"
+              >
+                Lihat semua
+                <ChevronRight size={16} />
               </Btn>
             </Link>
           </div>
@@ -132,7 +139,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
                 }}
               >
                 <div className="p-3 sm:p-4 md:p-5 grid gap-3 md:gap-4 md:grid-cols-[1fr,auto]">
-                  {/* Left: content (clickable) */}
+                  {/* Left: content */}
                   <Link to={detailHref} className="min-w-0 block">
                     <div className="font-medium truncate">{a.title}</div>
                     <div
@@ -163,12 +170,51 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
                     </div>
                   </Link>
 
-                  {/* Right: actions */}
-                
+                  {/* Right: actions (edit/hapus) */}
+                  {showActions && (
+                    <div className="flex items-center gap-2 justify-end">
+                      {onEdit && (
+                        <Btn
+                          size="sm"
+                          variant="outline"
+                          palette={palette}
+                          onClick={() => onEdit(a)}
+                        >
+                          <Edit3 size={14} />
+                        </Btn>
+                      )}
+                      {onDelete && (
+                        <Btn
+                          size="sm"
+                          variant="quaternary"
+                          palette={palette}
+                          onClick={() => onDelete(a)}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 size={14} />
+                        </Btn>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
+      </div>
+
+      {/* ===== Footer tombol khusus mobile ===== */}
+      <div className="px-4 pb-4 md:hidden">
+        <Link to={seeAllPath} state={seeAllState as unknown}>
+          <Btn
+            size="sm"
+            variant="ghost"
+            palette={palette}
+            className="w-full flex items-center justify-center gap-1"
+          >
+            Lihat semua
+            <ChevronRight size={16} />
+          </Btn>
+        </Link>
       </div>
     </SectionCard>
   );

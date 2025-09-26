@@ -70,6 +70,7 @@ export default function DetailSchedule() {
         palette={palette}
         title="Detail Jadwal"
         gregorianDate={new Date().toISOString()}
+        showBack
       />
 
       {/* Modal Edit */}
@@ -84,7 +85,7 @@ export default function DetailSchedule() {
         onDelete={handleDelete}
       />
 
-      <main className="px-4 md:px-6 py-4 md:py-8">
+      <main className="px-4 md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
@@ -93,7 +94,7 @@ export default function DetailSchedule() {
           <div className="flex-1 min-w-0 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3 font-semibold text-lg">
+              <div className="md:flex hidden items-center gap-3 font-semibold text-lg">
                 <Btn
                   palette={palette}
                   variant="ghost"

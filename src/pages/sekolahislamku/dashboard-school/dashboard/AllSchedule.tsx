@@ -190,6 +190,7 @@ export default function AllSchedule() {
         palette={palette}
         gregorianDate={new Date().toISOString()}
         title={heading || "Jadwal Hari Ini"}
+        showBack
       />
 
       {/* Modal Edit */}
@@ -224,7 +225,7 @@ export default function AllSchedule() {
           <div className="flex-1 flex flex-col space-y-6 min-w-0">
             {/* Header actions — selaras ScheduleThreeDays */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-3 font-semibold text-lg">
+              <div className="md:flex hidden items-center gap-3 font-semibold text-lg">
                 <Btn
                   palette={palette}
                   variant="ghost"
@@ -237,7 +238,7 @@ export default function AllSchedule() {
               <div className="flex gap-2">
                 <Btn palette={palette} size="sm" onClick={openAdd}>
                   <Plus size={16} className="mr-1" />
-                  Tambah Jadwal
+                
                 </Btn>
               </div>
             </div>

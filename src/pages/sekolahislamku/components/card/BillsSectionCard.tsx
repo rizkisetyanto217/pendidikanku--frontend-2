@@ -121,7 +121,7 @@ function BillCard({
               className="w-full md:w-auto md:px-6 md:mt-2"
               disabled={isPaid}
             >
-              {isPaid ? "Sudah dibayar" : "Bayar"}
+              {isPaid ? "Sudah dibayar" : "Detail"}
             </Btn>
           </Link>
         </div>
@@ -144,8 +144,6 @@ export default function BillsSectionCard({
 }: BillsSectionCardProps) {
   const unpaidBills = bills.filter((bill) => bill.status !== "paid");
 
-  // Default path yang konsisten dengan router di bawah
-  // Default path yang konsisten dengan router di bawah
   const _seeAllPath =
     seeAllPath ?? (basePath ? `${basePath}/all-invoices` : `all-invoices`);
   const _getPayHref =
@@ -165,9 +163,11 @@ export default function BillsSectionCard({
           Tagihan & Pembayaran
         </h3>
 
+        {/* tombol hanya tampil di desktop */}
         <Link
           to={_seeAllPath}
           state={seeAllState ?? { bills, heading: "Semua Tagihan" }}
+          className="hidden md:block"
         >
           <Btn
             size="sm"
@@ -197,6 +197,24 @@ export default function BillsSectionCard({
             />
           ))
         )}
+      </div>
+
+      {/* tombol di bawah hanya tampil di mobile */}
+      <div className="px-4 pb-4 md:hidden">
+        <Link
+          to={_seeAllPath}
+          state={seeAllState ?? { bills, heading: "Semua Tagihan" }}
+        >
+          <Btn
+            size="sm"
+            variant="ghost"
+            palette={palette}
+            className="w-full flex items-center justify-center gap-1"
+          >
+            Lihat semua
+            <ChevronRight size={16} />
+          </Btn>
+        </Link>
       </div>
     </SectionCard>
   );

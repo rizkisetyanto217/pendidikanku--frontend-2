@@ -11,7 +11,7 @@ import {
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
 import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 import axios from "@/lib/axios";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import Swal from "sweetalert2";
 
 /* ===== Types ===== */
@@ -446,6 +446,7 @@ export default function AllInvoices() {
         palette={palette}
         gregorianDate={currentDate}
         title={state?.heading ?? "Semua Tagihan"}
+        showBack  
       />
 
       {/* Modals */}
@@ -466,10 +467,11 @@ export default function AllInvoices() {
         defaultValue={selected ?? undefined}
         title={`Edit Tagihan${selected ? `: ${selected.title}` : ""}`}
         onSubmit={handleEdit}
+        
       />
 
       {/* Layout */}
-      <main className="w-full px-4 md:px-6 py-6">
+      <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
@@ -477,7 +479,7 @@ export default function AllInvoices() {
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
             <div className="flex items-center justify-between">
-              <div className="  flex items-center gap-3">
+              <div className="  md:flex hidden items-center gap-3">
                 <Btn
                   palette={palette}
                   variant="ghost"
@@ -491,7 +493,7 @@ export default function AllInvoices() {
 
               <div className="flex items-center justify-between">
                 <Btn palette={palette} onClick={() => setOpenAdd(true)}>
-                  Tambah Tagihan
+                  <Plus />
                 </Btn>
               </div>
             </div>

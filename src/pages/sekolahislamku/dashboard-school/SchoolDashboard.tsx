@@ -25,6 +25,7 @@ import {
   CheckSquare,
   BarChart2,
   ArrowLeft,
+  Wallet,
 } from "lucide-react";
 // ✅ import type + helper + mock jadwal
 import {
@@ -531,175 +532,6 @@ function AddThemeModal({
   );
 }
 
-/* ============ Unified Announcement Modal (Add + Edit) ============ */
-function AnnouncementModal({
-  open,
-  onClose,
-  initial,
-  onSubmit,
-  saving,
-  error,
-  palette,
-  themes,
-  onAddTheme,
-}: {
-  open: boolean;
-  onClose: () => void;
-  initial: AnnouncementUI | null; // kalau null → create, ada → edit
-  onSubmit: (v: UpsertAnnouncementForm) => void;
-  saving?: boolean;
-  error?: string | null;
-  palette: Palette;
-  themes: AnnouncementTheme[];
-  onAddTheme: () => void;
-}) {
-  const isEdit = !!initial;
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [dateYmd, setDateYmd] = useState("");
-  const [themeId, setThemeId] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    if (initial) {
-      setTitle(initial.title ?? "");
-      setBody(initial.body ?? "");
-      setDateYmd(isoToInputDate(initial.date));
-      setThemeId(initial.themeId ?? "");
-    } else {
-      setTitle("");
-      setBody("");
-      setDateYmd("");
-      setThemeId("");
-    }
-  }, [open, initial]);
-
-  if (!open) return null;
-  const disabled = saving || !title.trim() || !dateYmd;
-
-  return (
-    <div
-      className="fixed inset-0 z-[60] grid place-items-center"
-      style={{ background: "rgba(0,0,0,.35)" }}
-    >
-      <SectionCard
-        palette={palette}
-        className="w-[min(720px,94vw)] p-4 md:p-5 rounded-2xl shadow-xl"
-        style={{ background: palette.white1, color: palette.black1 }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold">
-            {isEdit ? "Edit Pengumuman" : "Tambah Pengumuman"}
-          </h3>
-        </div>
-
-        <div className="grid gap-3">
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Judul</label>
-            <input
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Judul pengumuman"
-            />
-          </div>
-
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Tanggal</label>
-            <input
-              type="date"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={dateYmd}
-              onChange={(e) => setDateYmd(e.target.value)}
-            />
-          </div>
-
-          {/* Tema: Select + Tambah */}
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Tema (opsional)</label>
-            <div className="flex items-center gap-2">
-              <select
-                className="w-full rounded-lg border px-3 py-2 text-sm"
-                style={{
-                  borderColor: palette.silver2,
-                  background: palette.white2,
-                }}
-                value={themeId}
-                onChange={(e) => setThemeId(e.target.value)}
-              >
-                <option value="">— Tanpa Tema —</option>
-                {themes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-              <Btn palette={palette} variant="ghost" onClick={onAddTheme}>
-                + Tema
-              </Btn>
-            </div>
-          </div>
-
-          <div className="grid gap-1">
-            <label className="text-sm opacity-80">Isi</label>
-            <textarea
-              rows={5}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Konten pengumuman"
-            />
-          </div>
-
-          {!!error && (
-            <div className="text-sm" style={{ color: palette.error1 }}>
-              {error}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <Btn
-            palette={palette}
-            variant="ghost"
-            onClick={onClose}
-            disabled={saving}
-          >
-            Batal
-          </Btn>
-          <Btn
-            palette={palette}
-            onClick={() =>
-              onSubmit({
-                id: initial?.id,
-                title: title.trim(),
-                body: body.trim(),
-                date: inputDateToIsoUTC(dateYmd),
-                themeId: themeId?.trim() || undefined,
-              })
-            }
-            disabled={disabled}
-          >
-            {saving ? "Menyimpan…" : isEdit ? "Simpan" : "Tambah"}
-          </Btn>
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
-
 /* ================= Page ================= */
 const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
   showBack = false,
@@ -919,7 +751,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-           
             {/* Back button */}
             {showBack && (
               <div className="flex py-2">
@@ -962,7 +793,22 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
               {/* Keuangan */}
               <div className="md:col-span-1 lg:col-span-6 space-y-6 min-w-0">
                 <SectionCard palette={palette}>
-                  <div className="p-4 pb-1 font-medium">Snapshot Keuangan</div>
+                  <div className="p-4 pb-1 font-medium flex items-center gap-2 mb-4">
+                    {/* icon */}
+                    <div
+                      className="h-9 w-9 rounded-xl flex items-center justify-center "
+                      style={{
+                        background: palette.white3,
+                        color: palette.quaternary,
+                      }}
+                    >
+                      <Wallet size={18} />
+                    </div>
+                    <h1 className="text-base font-semibold">
+                      Snapshot Keuangan
+                    </h1>
+                  </div>
+
                   <div className="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <MiniStat
                       palette={palette}

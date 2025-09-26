@@ -361,7 +361,7 @@ const SchoolSubject: React.FC = () => {
                   <ArrowLeft className="cursor-pointer" size={20} />
                 </Btn>
 
-                <h1 className="font-semibold text-lg">Ruangan</h1>
+                <h1 className="font-semibold text-lg">Daftar Pelajaran</h1>
               </div>
               <Btn
                 palette={palette}
