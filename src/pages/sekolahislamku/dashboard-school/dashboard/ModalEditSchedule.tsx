@@ -185,17 +185,24 @@ const ModalEditSchedule: React.FC<ModalEditScheduleProps> = ({
 
             <div className="space-y-1.5">
               <label className="text-sm">Lokasi / Ruang</label>
-              <input
+              <select
                 value={room}
                 onChange={(e) => setRoom(e.target.value)}
-                placeholder="Aula 1"
                 className="w-full rounded-xl px-3 h-10 outline-none text-sm"
                 style={{
                   background: palette.white2,
                   color: palette.black1,
                   border: `1px solid ${palette.silver1}`,
                 }}
-              />
+              >
+                <option value="">Pilih Ruang</option>
+                <option value="aula-1">Aula 1</option>
+                <option value="aula-2">Aula 2</option>
+                <option value="kelas-1a">Kelas 1A</option>
+                <option value="kelas-1b">Kelas 1B</option>
+                <option value="perpustakaan">Perpustakaan</option>
+                <option value="lapangan">Lapangan</option>
+              </select>
             </div>
           </div>
         </form>
@@ -205,7 +212,6 @@ const ModalEditSchedule: React.FC<ModalEditScheduleProps> = ({
           className="px-5 py-4 flex items-center justify-between border-t"
           style={{ borderColor: palette.silver1, background: palette.white2 }}
         >
-          
           <div className="flex gap-2">
             <Btn palette={palette} size="sm" variant="ghost" onClick={onClose}>
               Batal

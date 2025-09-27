@@ -357,16 +357,31 @@ function RoomModal({
 
           <label className="grid gap-1 text-sm">
             <span className="opacity-80">Lokasi (opsional)</span>
-            <input
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Lantai 2"
-            />
+            <div className="relative">
+              <select
+                className="w-full h-10 rounded-lg border px-3 pr-8 text-sm outline-none appearance-none"
+                style={{
+                  borderColor: palette.silver2,
+                  background: palette.white2,
+                  color: palette.black1,
+                }}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              >
+                <option value="">Pilih Lokasi</option>
+                <option value="Lantai 1">Lantai 1</option>
+                <option value="Lantai 2">Lantai 2</option>
+                <option value="Gedung A">Gedung A</option>
+                <option value="Gedung B">Gedung B</option>
+                <option value="Perpustakaan">Perpustakaan</option>
+                <option value="Lab Komputer">Lab Komputer</option>
+              </select>
+
+              {/* Ikon dropdown custom */}
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                ▼
+              </span>
+            </div>
           </label>
 
           <label className="flex items-center gap-2 text-sm">
