@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2";
-import { Users } from "lucide-react";
+import { BookOpen, GraduationCap, UserCog, Users } from "lucide-react";
 
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -105,6 +105,37 @@ type APITeacherHome = {
   upcomingClasses?: APIUpcomingClass[];
   announcements?: Announcement[];
 };
+
+function KpiTile({
+  palette,
+  label,
+  value,
+  icon,
+}: {
+  palette: Palette;
+  label: string;
+  value: number | string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <SectionCard palette={palette}>
+      <div className="p-4 md:p-5 flex items-center gap-3">
+        <span
+          className="h-10 w-10 grid place-items-center rounded-xl"
+          style={{ background: palette.primary2, color: palette.primary }}
+        >
+          {icon}
+        </span>
+        <div>
+          <div className="text-xs" style={{ color: palette.black2 }}>
+            {label}
+          </div>
+          <div className="text-xl font-semibold">{value}</div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
 
 /* ================= Page ================= */
 export default function TeacherDashboard() {
@@ -347,7 +378,27 @@ export default function TeacherDashboard() {
           </aside>
 
           {/* Main */}
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: "Guru", value: 26, icon: <UserCog size={18} /> },
+                { label: "Siswa", value: 342, icon: <Users size={18} /> },
+                {
+                  label: "Program",
+                  value: 12,
+                  icon: <GraduationCap size={18} />,
+                },
+                { label: "Kelas", value: 18, icon: <BookOpen size={18} /> },
+              ].map((k) => (
+                <KpiTile
+                  key={k.label}
+                  palette={palette}
+                  label={k.label}
+                  value={k.value}
+                  icon={k.icon}
+                />
+              ))}
+            </div>
             {/* ===== Row 1 ===== */}
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
               {/* Jadwal 3 Hari Kedepan */}

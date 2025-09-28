@@ -237,6 +237,7 @@ import DetailTeacher from "@/pages/sekolahislamku/dashboard-school/teacher/compo
 import StudentProfil from "@/pages/sekolahislamku/dashboard-student/profil/StudentProfil";
 import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
 import DetailBill from "@/pages/sekolahislamku/dashboard-school/finance/DetailBill";
+import DetailRoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/DetailRoomSchool";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -832,6 +833,7 @@ export default function AppRoutes() {
           <Route path="all-announcement" element={<AllAnnouncement />} />
           <Route path="sekolah" element={<SchoolDashboard showBack />} />
           <Route path="room-school" element={<RoomSchool />} />
+          <Route path="room-school/:id" element={<DetailRoomSchool />} />
           <Route path="spp" element={<SchoolSpp />} />
           <Route path="pelajaran" element={<SchoolSubject />} />
           <Route path="sertifikat" element={<SchoolCertificate />} />

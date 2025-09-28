@@ -14,6 +14,7 @@ import {
 } from "@/pages/sekolahislamku/components/ui/Primitives";
 
 import ParentTopBar from "@/pages/sekolahislamku/components/home/ParentTopBar";
+import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar";
 import TodayScheduleCard from "@/pages/sekolahislamku/components/card/TodayScheduleCard";
 import AnnouncementsList from "@/pages/sekolahislamku/components/card/AnnouncementsListCard";
 import BillsSectionCard from "@/pages/sekolahislamku/components/card/BillsSectionCard";
@@ -22,31 +23,48 @@ import {
   Users,
   UserCog,
   BookOpen,
-  CheckSquare,
-  BarChart2,
   ArrowLeft,
   Wallet,
+  GraduationCap,
+  CalendarDays,
 } from "lucide-react";
-// ✅ import type + helper + mock jadwal
+
 import {
   TodayScheduleItem,
   mapSessionsToTodaySchedule,
   mockTodaySchedule,
 } from "./types/TodaySchedule";
-import ParentSidebar from "../components/home/ParentSideBar";
 
 /* ================= Types (API & UI) ================ */
 export type AnnouncementUI = {
   id: string;
   title: string;
-  date: string; // ISO
+  date: string;
   body: string;
   themeId?: string | null;
   type?: "info" | "warning" | "success";
   slug?: string;
 };
 
-// ✅ API shape dari backend
+type AnnouncementAPI = {
+  announcement_id: string;
+  announcement_masjid_id: string;
+  announcement_theme_id?: string | null;
+  announcement_class_section_id?: string | null;
+  announcement_created_by_user_id?: string | null;
+  announcement_title: string;
+  announcement_date: string;
+  announcement_content: string;
+  announcement_attachment_url?: string | null;
+  announcement_is_active: boolean;
+  announcement_created_at: string;
+  theme?: { id: string; name: string; color?: string | null } | null;
+};
+type AnnouncementsAPIResponse = {
+  data: AnnouncementAPI[];
+  pagination: { limit: number; offset: number; total: number };
+};
+
 type AnnouncementThemeAPI = {
   announcement_themes_id: string;
   announcement_themes_masjid_id: string;
@@ -57,13 +75,10 @@ type AnnouncementThemeAPI = {
   announcement_themes_is_active: boolean;
   announcement_themes_created_at: string;
 };
-
 type AnnouncementThemesListResponse = {
   data: AnnouncementThemeAPI[];
   pagination: { limit: number; offset: number; total: number };
 };
-
-// ✅ UI shape yang dipakai di komponen
 type AnnouncementTheme = {
   id: string;
   name: string;
@@ -108,28 +123,7 @@ type LembagaStats = {
   lembaga_stats_created_at: string;
   lembaga_stats_updated_at: string;
 };
-
 type LembagaStatsResponse = { data: LembagaStats; found: boolean };
-
-type AnnouncementAPI = {
-  announcement_id: string;
-  announcement_masjid_id: string;
-  announcement_theme_id?: string | null;
-  announcement_class_section_id?: string | null;
-  announcement_created_by_user_id?: string | null;
-  announcement_title: string;
-  announcement_date: string;
-  announcement_content: string;
-  announcement_attachment_url?: string | null;
-  announcement_is_active: boolean;
-  announcement_created_at: string;
-  theme?: { id: string; name: string; color?: string | null } | null;
-};
-
-type AnnouncementsAPIResponse = {
-  data: AnnouncementAPI[];
-  pagination: { limit: number; offset: number; total: number };
-};
 
 type SessionsItem = {
   class_attendance_sessions_id: string;
@@ -138,16 +132,22 @@ type SessionsItem = {
   class_attendance_sessions_general_info?: string;
   class_attendance_sessions_note?: string;
 };
-
 type SessionsResponse = {
   message: string;
   data: { limit: number; offset: number; count: number; items: SessionsItem[] };
 };
 
 type SchoolDashboardProps = {
-  showBack?: boolean; // default: false
-  backTo?: string; // optional: kalau diisi, navigate ke path ini, kalau tidak pakai nav(-1)
-  backLabel?: string; // teks tombol
+  showBack?: boolean;
+  backTo?: string;
+  backLabel?: string;
+};
+export type UpsertAnnouncementForm = {
+  id?: string;
+  title: string;
+  date: string;
+  body: string;
+  themeId?: string | null;
 };
 
 /* ============ Query Keys ============ */
@@ -179,25 +179,15 @@ const themeToType = (a: AnnouncementAPI): AnnouncementUI["type"] => {
 
 const yyyyMmDdLocal = (d = new Date()) => {
   const pad = (n: number) => String(n).padStart(2, "0");
-  const y = d.getFullYear();
-  const m = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  return `${y}-${m}-${day}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-const isoToInputDate = (iso: string) => (iso ? iso.slice(0, 10) : "");
-const inputDateToIsoUTC = (ymd: string) =>
-  ymd ? new Date(`${ymd}T00:00:00.000Z`).toISOString() : "";
-
-/* ======== Timezone-safe date helpers (TopBar & display) ======== */
-// set ke 12:00 siang lokal untuk cegah geser hari
 const atLocalNoon = (d: Date) => {
   const x = new Date(d);
   x.setHours(12, 0, 0, 0);
   return x;
 };
 const toLocalNoonISO = (d: Date) => atLocalNoon(d).toISOString();
-// tampilan panjang (Senin, 1 Januari 2025)
 const dateFmt = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID", {
@@ -207,7 +197,6 @@ const dateFmt = (iso?: string) =>
         day: "numeric",
       })
     : "-";
-// hijriah Umm al-Qura
 const hijriLong = (iso?: string) =>
   iso
     ? new Date(iso).toLocaleDateString("id-ID-u-ca-islamic-umalqura", {
@@ -218,7 +207,135 @@ const hijriLong = (iso?: string) =>
       })
     : "-";
 
-/* ============ Small shared UI ============ */
+const formatIDR = (n: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(n);
+
+/* ============ Dummy Home ============ */
+async function fetchSchoolHome(): Promise<SchoolHome> {
+  const now = new Date();
+  const iso = now.toISOString();
+  return {
+    schoolName: "Sekolah Islamku",
+    hijriDate: "16 Muharram 1447 H",
+    gregorianDate: iso,
+    finance: {
+      unpaidCount: 18,
+      unpaidTotal: 7_500_000,
+      paidThisMonth: 42_250_000,
+      outstandingBills: [
+        {
+          id: "b101",
+          title: "SPP Agustus - Kelas 3A",
+          amount: 150_000,
+          dueDate: new Date(now.getTime() + 5 * 864e5).toISOString(),
+          status: "unpaid",
+        },
+        {
+          id: "b102",
+          title: "SPP Agustus - Kelas 4B",
+          amount: 300_000,
+          dueDate: new Date(now.getTime() + 3 * 864e5).toISOString(),
+          status: "unpaid",
+        },
+        {
+          id: "b103",
+          title: "Seragam Baru",
+          amount: 250_000,
+          dueDate: new Date(now.getTime() + 9 * 864e5).toISOString(),
+          status: "unpaid",
+        },
+      ],
+    },
+    todaySchedule: mockTodaySchedule,
+    announcements: [],
+    attendanceTodayByStatus: {
+      hadir: 286,
+      online: 8,
+      sakit: 10,
+      izin: 9,
+      alpa: 7,
+    },
+  };
+}
+
+/* ============ Hooks ============ */
+function useAnnouncements() {
+  return useQuery<AnnouncementUI[]>({
+    queryKey: QK.ANNOUNCEMENTS,
+    queryFn: async () => {
+      const res = await axios.get<AnnouncementsAPIResponse>(
+        "/api/a/announcements",
+        { params: { limit: 20, offset: 0 }, withCredentials: true }
+      );
+      const items = res.data?.data ?? [];
+      return items.map<AnnouncementUI>((a) => ({
+        id: a.announcement_id,
+        title: a.announcement_title,
+        date: a.announcement_date,
+        body: a.announcement_content,
+        themeId: a.announcement_theme_id ?? undefined,
+        type: themeToType(a),
+        slug: slugify(a.announcement_title),
+      }));
+    },
+  });
+}
+function useAnnouncementThemes() {
+  return useQuery<AnnouncementTheme[]>({
+    queryKey: QK.THEMES,
+    queryFn: async () => {
+      const res = await axios.get<AnnouncementThemesListResponse>(
+        "/api/a/announcement-themes",
+        { params: { limit: 50, offset: 0 }, withCredentials: true }
+      );
+      return (
+        res.data?.data.map<AnnouncementTheme>((t) => ({
+          id: t.announcement_themes_id,
+          name: t.announcement_themes_name,
+          color: t.announcement_themes_color ?? undefined,
+          description: t.announcement_themes_description ?? undefined,
+          slug: t.announcement_themes_slug,
+          isActive: t.announcement_themes_is_active,
+          createdAt: t.announcement_themes_created_at,
+        })) ?? []
+      );
+    },
+  });
+}
+function useLembagaStats() {
+  return useQuery<LembagaStats | null>({
+    queryKey: QK.STATS,
+    queryFn: async () => {
+      const res = await axios.get<LembagaStatsResponse>(
+        "/api/a/lembaga-stats",
+        { withCredentials: true }
+      );
+      return res.data?.found ? res.data.data : null;
+    },
+  });
+}
+function useTodaySessions() {
+  const today = yyyyMmDdLocal();
+  return useQuery<SessionsItem[]>({
+    queryKey: QK.TODAY_SESSIONS(today),
+    queryFn: async () => {
+      const res = await axios.get<SessionsResponse>(
+        "/api/u/class-attendance-sessions",
+        {
+          params: { date_from: today, date_to: today, limit: 50, offset: 0 },
+          withCredentials: true,
+        }
+      );
+      return res.data?.data?.items ?? [];
+    },
+  });
+}
+
+/* ============ Shared UI ============ */
 function Flash({
   palette,
   flash,
@@ -242,168 +359,86 @@ function Flash({
     </div>
   );
 }
-
-/* ============ Hooks: API Queries ============ */
-function useAnnouncements() {
-  return useQuery<AnnouncementUI[]>({
-    queryKey: QK.ANNOUNCEMENTS,
-    queryFn: async () => {
-      const res = await axios.get<AnnouncementsAPIResponse>(
-        "/api/a/announcements",
-        { params: { limit: 20, offset: 0 }, withCredentials: true }
-      );
-      const items = res.data?.data ?? [];
-      return items.map<AnnouncementUI>((a) => ({
-        id: a.announcement_id,
-        title: a.announcement_title,
-        date: a.announcement_date,
-        body: a.announcement_content,
-        themeId: a.announcement_theme_id ?? undefined,
-        type: themeToType(a),
-        slug: slugify(a.announcement_title),
-      }));
-    },
-    staleTime: 60_000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: "always",
-    retry: 1,
-  });
+function KpiTile({
+  palette,
+  label,
+  value,
+  icon,
+}: {
+  palette: Palette;
+  label: string;
+  value: number | string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <SectionCard palette={palette}>
+      <div className="p-4 md:p-5 flex items-center gap-3">
+        <span
+          className="h-10 w-10 grid place-items-center rounded-xl"
+          style={{ background: palette.primary2, color: palette.primary }}
+        >
+          {icon}
+        </span>
+        <div>
+          <div className="text-xs" style={{ color: palette.black2 }}>
+            {label}
+          </div>
+          <div className="text-xl font-semibold">{value}</div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+function MiniStat({
+  palette,
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  palette: Palette;
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "warning" | "normal";
+}) {
+  const badgeVariant = tone === "warning" ? "warning" : "outline";
+  return (
+    <div
+      className="p-3 rounded-xl border w-full"
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+        <div
+          className="text-xs font-medium leading-tight md:flex-1 truncate"
+          style={{ color: palette.silver2 }}
+        >
+          {label}
+        </div>
+        <Badge
+          palette={palette}
+          variant={badgeVariant}
+          className="flex-shrink-0 w-fit"
+        >
+          {label.includes("Tunggakan") ? "Perlu perhatian" : "OK"}
+        </Badge>
+      </div>
+      <div className="text-lg md:text-xl font-semibold leading-tight mb-1">
+        {value}
+      </div>
+      {sub && (
+        <div
+          className="text-xs leading-relaxed"
+          style={{ color: palette.silver2 }}
+        >
+          {sub}
+        </div>
+      )}
+    </div>
+  );
 }
 
-function useAnnouncementThemes() {
-  return useQuery<AnnouncementTheme[]>({
-    queryKey: QK.THEMES,
-    queryFn: async () => {
-      const res = await axios.get<AnnouncementThemesListResponse>(
-        "/api/a/announcement-themes",
-        { params: { limit: 50, offset: 0 }, withCredentials: true }
-      );
-      const items = res.data?.data ?? [];
-      return items.map<AnnouncementTheme>((t) => ({
-        id: t.announcement_themes_id,
-        name: t.announcement_themes_name,
-        color: t.announcement_themes_color ?? undefined,
-        description: t.announcement_themes_description ?? undefined,
-        slug: t.announcement_themes_slug,
-        isActive: t.announcement_themes_is_active,
-        createdAt: t.announcement_themes_created_at,
-      }));
-    },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
-}
-
-function useLembagaStats() {
-  return useQuery<LembagaStats | null>({
-    queryKey: QK.STATS,
-    queryFn: async () => {
-      const res = await axios.get<LembagaStatsResponse>(
-        "/api/a/lembaga-stats",
-        { withCredentials: true }
-      );
-      return res.data?.found ? res.data.data : null;
-    },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: "always",
-    retry: 1,
-  });
-}
-
-function useTodaySessions() {
-  const today = yyyyMmDdLocal();
-  return useQuery<SessionsItem[]>({
-    queryKey: QK.TODAY_SESSIONS(today),
-    queryFn: async () => {
-      const res = await axios.get<SessionsResponse>(
-        "/api/u/class-attendance-sessions",
-        {
-          params: { date_from: today, date_to: today, limit: 50, offset: 0 },
-          withCredentials: true,
-        }
-      );
-      return res.data?.data?.items ?? [];
-    },
-    staleTime: 60_000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: "always",
-    retry: 1,
-  });
-}
-
-/* ============ Dummy Home (fallback layout) ============ */
-async function fetchSchoolHome(): Promise<SchoolHome> {
-  const now = new Date();
-  const iso = now.toISOString();
-  return {
-    schoolName: "Sekolah Islamku",
-    hijriDate: "16 Muharram 1447 H",
-    gregorianDate: iso,
-    finance: {
-      unpaidCount: 18,
-      unpaidTotal: 7_500_000,
-      paidThisMonth: 42_250_000,
-      outstandingBills: [
-        {
-          id: "b101",
-          title: "SPP Agustus - Kelas 3A (subset)",
-          amount: 150_000,
-          dueDate: new Date(now.getTime() + 5 * 864e5).toISOString(),
-          status: "unpaid",
-        },
-        {
-          id: "b102",
-          title: "SPP Agustus - Kelas 4B (subset)",
-          amount: 300_000,
-          dueDate: new Date(now.getTime() + 3 * 864e5).toISOString(),
-          status: "unpaid",
-        },
-        {
-          id: "b103",
-          title: "Seragam Baru (gelombang 2)",
-          amount: 250_000,
-          dueDate: new Date(now.getTime() + 9 * 864e5).toISOString(),
-          status: "unpaid",
-        },
-      ],
-    },
-    todaySchedule: mockTodaySchedule,
-    announcements: [],
-    attendanceTodayByStatus: {
-      hadir: 286,
-      online: 8,
-      sakit: 10,
-      izin: 9,
-      alpa: 7,
-    },
-  };
-}
-
-/* ============ Currency helper (dipakai card/tagihan) ============ */
-const formatIDR = (n: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(n);
-
-/* ============ Forms ============ */
-export type UpsertAnnouncementForm = {
-  id?: string; // kalau ada → edit, kalau tidak → create
-  title: string;
-  date: string; // ISO
-  body: string;
-  themeId?: string | null;
-};
-
-/* ============ Add Theme Modal (unchanged) ============ */
+/* ============ AddThemeModal tetap ada ============ */
 function AddThemeModal({
   open,
   onClose,
@@ -434,7 +469,6 @@ function AddThemeModal({
       setDescription("");
     }
   }, [open]);
-
   if (!open) return null;
   const disabled = saving || !name.trim();
 
@@ -452,7 +486,6 @@ function AddThemeModal({
         }}
       >
         <div className="mb-3 text-lg font-semibold">Tambah Tema Pengumuman</div>
-
         <div className="grid gap-3">
           <label className="grid gap-1 text-sm">
             <span className="opacity-80">Nama Tema</span>
@@ -467,7 +500,6 @@ function AddThemeModal({
               placeholder="Mis. 'Pengumuman', 'Peringatan', 'Sukses'"
             />
           </label>
-
           <label className="grid gap-1 text-sm">
             <span className="opacity-80">Deskripsi (opsional)</span>
             <textarea
@@ -482,7 +514,6 @@ function AddThemeModal({
               placeholder="Penjelasan singkat tema"
             />
           </label>
-
           <label className="grid gap-1 text-sm">
             <span className="opacity-80">Warna (opsional)</span>
             <input
@@ -496,14 +527,12 @@ function AddThemeModal({
               onChange={(e) => setColor(e.target.value)}
             />
           </label>
-
           {!!error && (
             <div className="text-sm" style={{ color: palette.error1 }}>
               {error}
             </div>
           )}
         </div>
-
         <div className="mt-4 flex items-center justify-end gap-2">
           <Btn
             palette={palette}
@@ -555,176 +584,23 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
   useEffectiveMasjidId();
 
-  // Dummy home (layout & finance snapshot)
-  const homeQ = useQuery({
-    queryKey: QK.HOME,
-    queryFn: fetchSchoolHome,
-    staleTime: 60_000,
-  });
-
-  // Real APIs
+  const homeQ = useQuery({ queryKey: QK.HOME, queryFn: fetchSchoolHome });
   const statsQ = useLembagaStats();
   const todaySessionsQ = useTodaySessions();
   const announcementsQ = useAnnouncements();
-  const themesQ = useAnnouncementThemes();
 
-  // Add Theme modal state
-  const [createThemeOpen, setCreateThemeOpen] = useState(false);
-
-  // Create Theme mutation
-  const createThemeMutation = useMutation({
-    mutationFn: async (form: {
-      name: string;
-      color?: string | null;
-      description?: string | null;
-    }) => {
-      await axios.post(
-        "/api/a/announcement-themes",
-        {
-          announcement_themes_name: form.name,
-          announcement_themes_description: form.description ?? null,
-          announcement_themes_color: form.color ?? null,
-        },
-        { withCredentials: true }
-      );
-    },
-    onSuccess: async () => {
-      setFlash({ type: "success", msg: "Tema berhasil ditambah." });
-      setCreateThemeOpen(false);
-      await qc.invalidateQueries({ queryKey: QK.THEMES });
-    },
-    onError: (err: any) =>
-      setFlash({
-        type: "error",
-        msg: err?.response?.data?.message ?? "Gagal menambah tema.",
-      }),
-  });
-
-  // Modal state (unified)
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalInitial, setModalInitial] = useState<AnnouncementUI | null>(null);
-
-  // Optimistic update helper khusus edit
-  const applyOptimistic = useCallback(
-    (form: UpsertAnnouncementForm & { date: string }) => {
-      if (!form.id) return; // hanya untuk edit
-      qc.setQueryData<AnnouncementUI[] | undefined>(QK.ANNOUNCEMENTS, (prev) =>
-        (prev ?? [])?.map((a) =>
-          a.id === form.id
-            ? {
-                ...a,
-                title: form.title,
-                body: form.body,
-                date: form.date,
-                themeId: form.themeId ?? undefined,
-              }
-            : a
-        )
-      );
-    },
-    [qc]
-  );
-
-  // Upsert mutation (POST + PUT dalam satu)
-  const upsertMutation = useMutation({
-    mutationFn: async (form: UpsertAnnouncementForm) => {
-      const dateOnly = form.date.slice(0, 10);
-      const payload: any = {
-        announcement_title: form.title,
-        announcement_date: dateOnly,
-        announcement_content: form.body,
-      };
-      if (form.themeId) payload.announcement_theme_id = form.themeId;
-
-      if (form.id) {
-        // EDIT
-        applyOptimistic({ ...form, date: dateOnly });
-        await axios.put(`/api/a/announcements/${form.id}`, payload, {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        });
-      } else {
-        // CREATE
-        await axios.post(`/api/a/announcements`, payload, {
-          withCredentials: true,
-        });
-      }
-    },
-    onSuccess: async (_data, variables) => {
-      setFlash({
-        type: "success",
-        msg: variables.id
-          ? "Pengumuman berhasil disimpan."
-          : "Pengumuman berhasil ditambah.",
-      });
-
-      // Untuk create, bisa tambahkan item sementara (optional)
-      if (!variables.id) {
-        qc.setQueryData<AnnouncementUI[]>(QK.ANNOUNCEMENTS, (prev = []) => [
-          {
-            id: `temp-${Date.now()}`,
-            title: variables.title,
-            date: variables.date,
-            body: variables.body,
-            themeId: variables.themeId,
-            type: "info",
-            slug: slugify(variables.title),
-          },
-          ...(prev || []),
-        ]);
-      }
-
-      await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
-      setModalOpen(false);
-      setModalInitial(null);
-    },
-    onError: async (err: any) => {
-      setFlash({
-        type: "error",
-        msg:
-          err?.response?.data?.message ??
-          err?.message ??
-          "Gagal menyimpan pengumuman.",
-      });
-      await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await axios.delete(`/api/a/announcements/${id}`, {
-        withCredentials: true,
-      });
-    },
-
-    onSuccess: async () => {
-      setFlash({ type: "success", msg: "Pengumuman dihapus." });
-      await qc.invalidateQueries({ queryKey: QK.ANNOUNCEMENTS });
-    },
-    onError: (err: any) =>
-      setFlash({
-        type: "error",
-        msg: err?.response?.data?.message ?? "Gagal menghapus.",
-      }),
-  });
-
-  // KPI dari lembaga_stats
-  const kpis = {
-    students: statsQ.data?.lembaga_stats_active_students ?? 0,
-    teachers: statsQ.data?.lembaga_stats_active_teachers ?? 0,
-    program: statsQ.data?.lembaga_stats_active_classes ?? 0,
-    class: statsQ.data?.lembaga_stats_active_sections ?? 0,
-  };
-
-  // Jadwal hari ini
+  // Jadwal
   const scheduleItems: TodayScheduleItem[] = useMemo(() => {
     const apiItems = todaySessionsQ.data ?? [];
-    if (apiItems.length > 0) return mapSessionsToTodaySchedule(apiItems);
-    return mockTodaySchedule;
+    return apiItems.length > 0
+      ? mapSessionsToTodaySchedule(apiItems)
+      : mockTodaySchedule;
   }, [todaySessionsQ.data]);
 
-  // TopBar date (stabil & konsisten): pakai local-noon sekarang
+
+
   const topbarGregorianISO = toLocalNoonISO(new Date());
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div
@@ -738,20 +614,41 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
         hijriDate={hijriLong(topbarGregorianISO)}
         dateFmt={(iso) => dateFmt(iso)}
       />
-
       <Flash palette={palette} flash={flash} />
 
-      {/* ====== CONTAINER ====== */}
+      {/* Main */}
       <main className="w-full px-4 md:px-6 py-4 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
-          {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
-            <ParentSidebar palette={palette}  />
+            <ParentSidebar
+              palette={palette}
+              mode="auto"
+              openMobile={mobileOpen}
+              onCloseMobile={() => setMobileOpen(false)}
+            />
           </aside>
 
-          {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            {/* Back button */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: "Guru", value: 26, icon: <UserCog size={18} /> },
+                { label: "Siswa", value: 342, icon: <Users size={18} /> },
+                {
+                  label: "Program",
+                  value: 12,
+                  icon: <GraduationCap size={18} />,
+                },
+                { label: "Kelas", value: 18, icon: <BookOpen size={18} /> },
+              ].map((k) => (
+                <KpiTile
+                  key={k.label}
+                  palette={palette}
+                  label={k.label}
+                  value={k.value}
+                  icon={k.icon}
+                />
+              ))}
+            </div>
             {showBack && (
               <div className="flex py-2">
                 <Btn
@@ -760,15 +657,14 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                   onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
                   className="inline-flex items-center gap-2"
                 >
-                  <ArrowLeft size={20} />
-                  {backLabel}
+                  <ArrowLeft size={20} /> {backLabel}
                 </Btn>
               </div>
             )}
 
             <Outlet />
 
-            {/* ===== Jadwal • Keuangan • Pengumuman ===== */}
+            {/* Jadwal • Keuangan • Pengumuman */}
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-stretch">
               {/* Jadwal */}
               <div className="col-span-1 md:col-span-6">
@@ -777,11 +673,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                   items={scheduleItems}
                   title="Jadwal Hari Ini"
                   maxItems={3}
-                  seeAllPath="all-schedule"
-                  seeAllState={{
-                    items: scheduleItems,
-                    heading: "Semua Jadwal Hari Ini",
-                  }}
                 />
                 {(todaySessionsQ.isLoading || todaySessionsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
@@ -794,7 +685,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
               <div className="md:col-span-1 lg:col-span-6 space-y-6 min-w-0">
                 <SectionCard palette={palette}>
                   <div className="p-4 pb-1 font-medium flex items-center gap-2 mb-4">
-                    {/* icon */}
                     <div
                       className="h-9 w-9 rounded-xl flex items-center justify-center "
                       style={{
@@ -808,7 +698,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                       Snapshot Keuangan
                     </h1>
                   </div>
-
                   <div className="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <MiniStat
                       palette={palette}
@@ -824,7 +713,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                     />
                   </div>
                 </SectionCard>
-
                 <BillsSectionCard
                   palette={palette}
                   bills={homeQ.data?.finance.outstandingBills ?? []}
@@ -847,21 +735,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                   seeAllPath="all-announcement"
                   getDetailHref={(a) => `/pengumuman/${a.slug ?? a.id}`}
                   showActions
-                  canAdd={true}
-                  onAdd={() => {
-                    setModalInitial(null);
-                    setModalOpen(true);
-                  }}
-                  onEdit={(a) => {
-                    setModalInitial(a);
-                    setModalOpen(true);
-                  }}
-                  onDelete={(a) => {
-                    if (deleteMutation.isPending) return;
-                    const ok = confirm(`Hapus pengumuman "${a.title}"?`);
-                    if (!ok) return;
-                    deleteMutation.mutate(a.id);
-                  }}
+                  canAdd
                 />
                 {(announcementsQ.isLoading || announcementsQ.isFetching) && (
                   <div className="px-4 pt-2 text-xs opacity-70">
@@ -882,52 +756,3 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
   );
 };
 export default SchoolDashboard;
-
-function MiniStat({
-  palette,
-  label,
-  value,
-  sub,
-  tone,
-}: {
-  palette: Palette;
-  label: string;
-  value: string;
-  sub?: string;
-  tone?: "warning" | "normal";
-}) {
-  const badgeVariant = tone === "warning" ? "warning" : "outline";
-  return (
-    <div
-      className="p-3 rounded-xl border w-full"
-      style={{ borderColor: palette.silver1, background: palette.white1 }}
-    >
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-        <div
-          className="text-xs font-medium leading-tight md:flex-1 truncate"
-          style={{ color: palette.silver2 }}
-        >
-          {label}
-        </div>
-        <Badge
-          palette={palette}
-          variant={badgeVariant}
-          className="flex-shrink-0 w-fit"
-        >
-          {label.includes("Tunggakan") ? "Perlu perhatian" : "OK"}
-        </Badge>
-      </div>
-      <div className="text-lg md:text-xl font-semibold leading-tight mb-1">
-        {value}
-      </div>
-      {sub && (
-        <div
-          className="text-xs leading-relaxed"
-          style={{ color: palette.silver2 }}
-        >
-          {sub}
-        </div>
-      )}
-    </div>
-  );
-}

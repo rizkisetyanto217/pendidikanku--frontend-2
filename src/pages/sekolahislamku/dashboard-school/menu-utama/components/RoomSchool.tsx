@@ -15,30 +15,57 @@ import ParentSidebar from "@/pages/sekolahislamku/components/home/ParentSideBar"
 
 import {
   Building2,
-  Users as UsersIcon,
   MapPin,
   Plus,
   Edit3,
   Trash2,
-  CalendarDays,
   Loader2,
   Eye,
   ArrowLeft,
 } from "lucide-react";
 
 /* ===================== CONFIG ===================== */
-// Toggle untuk pakai data dummy (tanpa backend). Set ke false jika API siap.
 const USE_DUMMY = true;
 
 /* ===================== TYPES ====================== */
 export type Room = {
   id: string;
+  masjid_id?: string;
   name: string;
+  code?: string;
+  slug?: string;
+  description?: string;
   capacity: number;
   location?: string | null;
+  is_virtual?: boolean;
   is_active: boolean;
+
+  image_url?: string | null;
+
+  features?: string[];
+  platform?: string | null;
+  join_url?: string | null;
+  meeting_id?: string | null;
+  passcode?: string | null;
+
+  schedule?: {
+    label: string;
+    day?: string;
+    date?: string;
+    from: string;
+    to: string;
+    group: string;
+  }[];
+
+  notes?: {
+    ts: string;
+    text: string;
+    author_id?: string;
+  }[];
+
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null;
 };
 
 type RoomsResponse = {
@@ -87,33 +114,85 @@ const ensureRoomsResponse = (
 ): RoomsResponse => x ?? emptyRooms(limit, offset);
 
 /* ============== DUMMY IN-MEMORY STORE ============= */
-const seed: Room[] = [
+export const seed: Room[] = [
   {
-    id: "r-101",
-    name: "Kelas 3A",
+    id: "d44c6e58-5a6a-4f76-9d2e-8e3f2f5b1c11",
+    masjid_id: "3a7f5b8e-2f20-4a81-9d04-6a7d1b7d9c22",
+    name: "Virtual Room — Kelas 7",
+    code: "V-7",
+    slug: "virtual-room-kelas-7",
+    location: "Online",
+    capacity: 90,
+    description: "Ruang virtual untuk Kelas 7.",
+    is_virtual: true,
+    is_active: true,
+    features: ["virtual", "recording", "waiting-room"],
+    platform: "zoom",
+    join_url: "https://zoom.us/j/111?pwd=pg",
+    meeting_id: "111-111-111",
+    passcode: "pg07",
+    schedule: [
+      {
+        label: "Kelas 7A - Pagi",
+        day: "mon",
+        from: "07:00",
+        to: "09:00",
+        group: "7A",
+      },
+      {
+        label: "Kelas 7B - Siang",
+        day: "wed",
+        from: "13:00",
+        to: "15:00",
+        group: "7B",
+      },
+      {
+        label: "Tryout Spesial",
+        date: "2025-10-03",
+        from: "08:00",
+        to: "10:00",
+        group: "7C",
+      },
+    ],
+    notes: [
+      {
+        ts: "2025-09-25T10:00:00Z",
+        text: "Uji bandwidth berhasil (100 Mbps up/down).",
+      },
+      {
+        ts: "2025-09-26T02:00:00Z",
+        text: "Host pindah ke akun Zoom baru.",
+        author_id: "b1a2c3d4",
+      },
+    ],
+    created_at: "2025-09-10T03:30:00Z",
+    updated_at: "2025-09-27T03:30:00Z",
+  },
+  {
+    id: "8b9c2fcb-7c0c-4a7c-a2b3-3d7c1d9e2a10",
+    masjid_id: "3a7f5b8e-2f20-4a81-9d04-6a7d1b7d9c22",
+    name: "Ruang Kelas A1",
+    code: "A1",
+    slug: "ruang-kelas-a1",
+    location: "Lantai 2, Gedung Utama",
     capacity: 30,
-    location: "Gedung A - Lantai 2",
+    description: "Ruang kelas utama.",
+    is_virtual: false,
     is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "r-102",
-    name: "Lab Sains",
-    capacity: 20,
-    location: "Gedung B - Lantai 1",
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "r-103",
-    name: "Aula Serbaguna",
-    capacity: 120,
-    location: "Gedung Utama",
-    is_active: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    features: ["ac", "whiteboard"],
+    schedule: [
+      {
+        label: "Tahfizh Pagi",
+        day: "mon",
+        from: "06:30",
+        to: "08:00",
+        group: "A1",
+      },
+      { label: "Fiqih", day: "thu", from: "09:00", to: "10:30", group: "A1" },
+    ],
+    notes: [],
+    created_at: "2025-09-20T02:00:00Z",
+    updated_at: "2025-09-27T02:00:00Z",
   },
 ];
 
@@ -159,7 +238,7 @@ function useDummyRooms() {
   const stats = (): RoomStats => {
     const total = rooms.length;
     const active = rooms.filter((r) => r.is_active).length;
-    const inUseNow = Math.min(active, Math.floor(active / 3)); // dummy
+    const inUseNow = Math.min(active, Math.floor(active / 3));
     const availableToday = Math.max(0, active - inUseNow);
     return { total, active, inUseNow, availableToday };
   };
@@ -216,7 +295,7 @@ function Flash({ palette, flash }: FlashProps) {
   if (!flash) return null;
   const isOk = flash.type === "success";
   return (
-    <div className="mx-auto Replace px-4">
+    <div className="mx-auto px-4">
       <div
         className="mb-3 rounded-lg px-3 py-2 text-sm"
         style={{
@@ -377,7 +456,6 @@ function RoomModal({
                 <option value="Lab Komputer">Lab Komputer</option>
               </select>
 
-              {/* Ikon dropdown custom */}
               <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                 ▼
               </span>
@@ -418,127 +496,6 @@ function RoomModal({
   );
 }
 
-/* ================== DETAIL DRAWER ================= */
-interface RoomDetailProps {
-  room: Room | null;
-  onClose: () => void;
-  palette: Palette;
-}
-
-function RoomDetail({ room, onClose, palette }: RoomDetailProps) {
-  if (!room) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[70] grid place-items-center"
-      style={{ background: "rgba(0,0,0,.35)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-[min(500px,94vw)] max-h-[90vh] overflow-y-auto rounded-2xl p-5 shadow-xl"
-        style={{
-          background: palette.white1,
-          color: palette.black1,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Detail Ruangan</h3>
-          <button
-            className="text-sm px-2 py-1 rounded-lg"
-            style={{ color: palette.silver2 }}
-            onClick={onClose}
-          >
-            Tutup
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="grid gap-4 text-sm">
-          <InfoRow label="Nama" value={room.name} />
-          <InfoRow label="Kapasitas" value={`${room.capacity} siswa`} />
-          <InfoRow label="Lokasi" value={room.location ?? "—"} />
-          <InfoRow
-            label="Status"
-            value={
-              <Badge
-                palette={palette}
-                variant={room.is_active ? "success" : "outline"}
-              >
-                {room.is_active ? "Aktif" : "Nonaktif"}
-              </Badge>
-            }
-          />
-          {room.updated_at && (
-            <InfoRow
-              label="Diperbarui"
-              value={new Date(room.updated_at).toLocaleString("id-ID")}
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* Small reusable row */
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-xs opacity-70">{label}</span>
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}
-
-/* ============== SMALL UI HELPERS ============== */
-interface KpiTileProps {
-  palette: Palette;
-  label: string;
-  value: number | string;
-  icon?: React.ReactNode;
-  tone?: "success" | "warning" | "danger";
-}
-
-function KpiTile({ palette, label, value, icon, tone }: KpiTileProps) {
-  const toneBg =
-    tone === "success"
-      ? palette.success2
-      : tone === "warning"
-        ? palette.warning1
-        : tone === "danger"
-          ? palette.error2
-          : palette.primary2;
-  const toneTxt =
-    tone === "success"
-      ? palette.success1
-      : tone === "warning"
-        ? palette.warning1
-        : tone === "danger"
-          ? palette.error1
-          : palette.primary;
-
-  return (
-    <SectionCard palette={palette}>
-      <div className="p-4 md:p-5 flex items-center gap-3">
-        <span
-          className="h-10 w-10 grid place-items-center rounded-xl"
-          style={{ background: toneBg, color: toneTxt }}
-        >
-          {icon ?? <Building2 size={18} />}
-        </span>
-        <div>
-          <div className="text-xs" style={{ color: palette.silver2 }}>
-            {label}
-          </div>
-          <div className="text-xl font-semibold">{value}</div>
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
-
 /* ===================== PAGE ======================= */
 export default function RoomSchool() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -550,7 +507,6 @@ export default function RoomSchool() {
     msg: string;
   } | null>(null);
 
-  // Auto-hide flash messages
   useEffect(() => {
     if (flash) {
       const t = setTimeout(() => setFlash(null), 3000);
@@ -558,24 +514,17 @@ export default function RoomSchool() {
     }
   }, [flash]);
 
-  // Filter & pagination
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
 
-  // Dummy store (aktif kalau USE_DUMMY = true)
   const dummy = useDummyRooms();
-
-  // Queries (dimatikan saat dummy)
   const roomsQ = useRoomsQuery(search, limit, offset);
   const statsQ = useRoomStatsQuery();
 
-  // Modal & detail
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInitial, setModalInitial] = useState<Room | null>(null);
-  const [detailRoom, setDetailRoom] = useState<Room | null>(null);
 
-  /* ----------------- MUTATIONS ----------------- */
   const upsertMutation = useMutation({
     mutationFn: async (form: {
       id?: string;
@@ -655,16 +604,10 @@ export default function RoomSchool() {
     onError: () => setFlash({ type: "error", msg: "Gagal menghapus ruangan." }),
   });
 
-  /* ----------------- DATA MERGE ---------------- */
   const listResp: RoomsResponse = USE_DUMMY
     ? dummy.list(search, limit, offset)
     : ensureRoomsResponse(roomsQ.data, limit, offset);
 
-  const stats: RoomStats = USE_DUMMY
-    ? dummy.stats()
-    : (statsQ.data ?? { total: 0, active: 0, inUseNow: 0, availableToday: 0 });
-
-  // Computed values
   const topbarGregorianISO = useMemo(() => atLocalNoonISO(new Date()), []);
   const total = listResp.pagination.total;
   const pageCount = Math.max(1, Math.ceil(total / limit));
@@ -672,7 +615,6 @@ export default function RoomSchool() {
 
   const isFromMenuUtama = location.pathname.includes("/menu-utama/");
 
-  // Handlers
   const gotoPage = (p: number) => {
     const np = Math.min(Math.max(1, p), pageCount);
     setOffset((np - 1) * limit);
@@ -738,16 +680,14 @@ export default function RoomSchool() {
 
       <Flash palette={palette} flash={flash} />
 
-      <main className="w-full px-4 md:px-6  md:py-8">
+      <main className="w-full px-4 md:px-6 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
             <ParentSidebar palette={palette} />
           </aside>
 
-          {/* Content */}
           <section className="flex-1 min-w-0 space-y-6">
-            <div className="mx-auto  md:flex hidden items-center gap-3">
+            <div className="mx-auto md:flex hidden items-center gap-3">
               <Btn
                 palette={palette}
                 variant="ghost"
@@ -759,8 +699,6 @@ export default function RoomSchool() {
               <h1 className="font-semibold text-lg">Ruangan</h1>
             </div>
 
-
-            {/* Toolbar */}
             <SectionCard palette={palette}>
               <div className="p-3 md:p-4 flex flex-col md:flex-row md:items-center gap-3">
                 <div className="flex-1 flex gap-2">
@@ -797,7 +735,6 @@ export default function RoomSchool() {
               </div>
             </SectionCard>
 
-            {/* List */}
             <SectionCard palette={palette}>
               <div className="p-3 md:p-4">
                 <div className="mb-3 font-medium">Daftar Ruangan</div>
@@ -859,7 +796,7 @@ export default function RoomSchool() {
                               <Btn
                                 palette={palette}
                                 variant="ghost"
-                                onClick={() => setDetailRoom(r)}
+                                onClick={() => navigate(`./${r.id}`)}
                                 title="Detail"
                               >
                                 <Eye size={16} />
@@ -900,7 +837,6 @@ export default function RoomSchool() {
                   </table>
                 </div>
 
-                {/* Pagination */}
                 {total > 0 && (
                   <div className="mt-3 flex items-center justify-between text-sm">
                     <div className="opacity-70">
@@ -932,7 +868,6 @@ export default function RoomSchool() {
         </div>
       </main>
 
-      {/* Modals */}
       <RoomModal
         open={modalOpen}
         onClose={closeModal}
@@ -945,11 +880,6 @@ export default function RoomSchool() {
           (upsertMutation.error as any)?.message ??
           null
         }
-      />
-      <RoomDetail
-        room={detailRoom}
-        onClose={() => setDetailRoom(null)}
-        palette={palette}
       />
     </div>
   );
