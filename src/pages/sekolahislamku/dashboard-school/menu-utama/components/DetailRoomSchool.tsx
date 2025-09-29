@@ -288,7 +288,7 @@ export default function DetailRoomSchool() {
                 <div className="p-5 space-y-4">
                   <InfoSection title="Informasi Dasar" palette={palette}>
                     <div
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                       style={{ color: palette.black1 }}
                     >
                       <InfoRow
@@ -340,12 +340,12 @@ export default function DetailRoomSchool() {
               {/* Virtual Room Info */}
               {room.is_virtual && (
                 <SectionCard palette={palette}>
-                  <div className="p-5 space-y-4 flex">
+                  <div className="p-5 space-y-4">
                     <InfoSection
                       title="Informasi Virtual Room"
                       palette={palette}
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <InfoRow
                           label="Platform"
                           value={room.platform ?? "—"}
@@ -410,18 +410,18 @@ export default function DetailRoomSchool() {
             {/* Schedule */}
             {room.schedule && room.schedule.length > 0 && (
               <SectionCard palette={palette}>
-                <div className="p-5 space-y-3">
+                <div className="p-5 space-y-3 items-center flex-col">
                   <h3
                     className="font-semibold text-base pb-2 border-b"
                     style={{ borderColor: palette.silver1 }}
                   >
                     Jadwal
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:flex  items-center justify-center gap-3">
                     {room.schedule.map((s, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-lg border"
+                        className="p-3 rounded-lg border w-full gap-x-3 flex-col  items-center "
                         style={{
                           borderColor: palette.silver1,
                           background: palette.white1,

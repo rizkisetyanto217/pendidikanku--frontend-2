@@ -238,6 +238,11 @@ import StudentProfil from "@/pages/sekolahislamku/dashboard-student/profil/Stude
 import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
 import DetailBill from "@/pages/sekolahislamku/dashboard-school/finance/DetailBill";
 import DetailRoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/DetailRoomSchool";
+import SupportPage from "@/pages/masjidku/website/pages/support";
+import Panduan from "@/pages/masjidku/website/pages/panduan";
+import Fitur from "@/pages/masjidku/website/pages/fitur";
+import About from "@/pages/masjidku/website/pages/about";
+import Contact from "@/pages/masjidku/website/pages/contact";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -251,6 +256,12 @@ export default function AppRoutes() {
         <Route path="masjid" element={<MasjidkuListMasjid />} />
         <Route path="profil" element={<MasjidkuProfil />} />
         <Route path="website" element={<MasjidkuWebHome />} />
+        <Route path="website/dukungan" element={<SupportPage />} />
+        <Route path="website/panduan" element={<Panduan />} />
+        <Route path="website/fitur" element={<Fitur />} />
+        <Route path="website/about" element={<About />} />
+        <Route path="website/hubungi-kami" element={<Contact />} />
+
         <Route path="program" element={<MasjidkuProgram />} />
         {financeRoutes.map((route, index) => (
           <Route
