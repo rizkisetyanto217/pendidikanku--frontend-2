@@ -124,7 +124,7 @@ export default function WebsiteNavbar() {
           <img
             src="https://picsum.photos/200/300"
             alt="Logo"
-            className="h-8 w-8 rounded object-cover"
+            className="h-8 w-8 rounded-full object-cover"
           />
           <span style={{ color: theme.black1 }}>SekolahIslamku</span>
         </NavLink>
