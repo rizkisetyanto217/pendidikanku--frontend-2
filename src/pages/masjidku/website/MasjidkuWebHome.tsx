@@ -11,6 +11,12 @@ import {
   Phone,
   Star,
 } from "lucide-react";
+import sekolah1 from "@/assets/sekolah1.jpeg";
+import sekolah2 from "@/assets/sekolah2.jpeg";
+import sekolah3 from "@/assets/sekolah3.jpg"
+import sekolah4 from "@/assets/sekolah4.webp"
+import sekolah5 from "@/assets/sekolah5.png"
+import keuangan from "@/assets/keuangan.jpg"
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
 import WebsiteFooter from "./components/MasjidkuWebFooter";
@@ -29,38 +35,38 @@ const modules = [
     title: "Penerimaan Siswa Baru (PPDB)",
     desc: "Form online, seleksi, verifikasi berkas, pembayaran, hingga penetapan kelas otomatis.",
     icon: Users,
-    img: "https://images.unsplash.com/photo-1601935111741-a8da1e5b0534?q=80&w=1400&auto=format&fit=crop",
+    img: sekolah4,
   },
   {
     title: "Akademik & Kurikulum",
     desc: "RPP, penjadwalan, penilaian, rapor digital, kelulusan—semuanya tersentral.",
     icon: BookOpen,
-    img: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1400&auto=format&fit=crop",
+    img: sekolah5,
   },
   {
     title: "Absensi & Kehadiran",
     desc: "Scan QR/ID, izin/surat sakit, rekap kehadiran real-time untuk guru & siswa.",
     icon: Clock,
-    img: "https://images.unsplash.com/photo-1596495578065-8fe1800a2a4b?q=80&w=1400&auto=format&fit=crop",
+    img: sekolah3,
   },
 ];
 
 const features = [
   {
     title: "Keuangan & SPP",
-    img: "https://images.unsplash.com/photo-1454165205744-3b78555e5572?q=80&w=1400&auto=format&fit=crop",
+    img: keuangan,
   },
   {
     title: "Komunikasi & Notifikasi",
-    img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1400&auto=format&fit=crop",
+    img: sekolah4,
   },
   {
     title: "LMS & E-Learning",
-    img: "https://images.unsplash.com/photo-1584697964199-10c09b6b29a3?q=80&w=1400&auto=format&fit=crop",
+    img: sekolah5,
   },
   {
     title: "Inventaris & Perpustakaan",
-    img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1400&auto=format&fit=crop",
+    img: sekolah3,
   },
 ];
 
@@ -97,7 +103,7 @@ const testimonials: TestimonialItem[] = [
     role: "Kepala Sekolah SMP Nurul Fajar",
     quote:
       "Administrasi jauh lebih tertib. Orang tua bisa pantau nilai & SPP dari rumah, guru fokus mengajar.",
-    img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
+    img: sekolah4,
   },
   {
     name: "Fajar Nugraha",
@@ -207,14 +213,14 @@ export default function SekolahIslamkuHome() {
         {/* HERO */}
         <div className="relative overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2400&auto=format&fit=crop"
+            src={sekolah1}
             alt="Hero background"
             className="absolute inset-0 h-full w-full object-cover"
             style={{ opacity: isDark ? 0.3 : 0.25, filter: "saturate(0.9)" }}
             loading="eager"
           />
 
-          <Section className="relative py-16 sm:py-20 lg:py-28">
+          <Section className="relative py-20 sm:py-20 lg:py-28">
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               {/* Left: copy + CTA */}
               <div>
@@ -273,7 +279,7 @@ export default function SekolahIslamkuHome() {
                   style={{ borderColor: theme.white3 }}
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2000&auto=format&fit=crop"
+                    src={sekolah4}
                     alt="Dashboard Sekolah"
                     className="h-full w-full object-cover"
                     loading="lazy"
@@ -447,7 +453,7 @@ export default function SekolahIslamkuHome() {
                 style={{ borderColor: theme.white3 }}
               >
                 <img
-                  src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1600&auto=format&fit=crop"
+                  src={sekolah4}
                   alt="Tim implementasi"
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -494,7 +500,7 @@ export default function SekolahIslamkuHome() {
           }}
         >
           <img
-            src="https://images.unsplash.com/photo-1544717305-996b815c338c?q=80&w=2000&auto=format&fit=crop"
+            src={sekolah5}
             alt="CTA Demo"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             style={{ opacity: 0.1 }}

@@ -426,7 +426,8 @@ export default function DetailRoomSchool() {
                           borderColor: palette.silver1,
                           background: palette.white1,
                         }}
-                      >
+                      >r
+                      
                         <div className="font-medium text-sm mb-1">
                           {s.label}
                         </div>

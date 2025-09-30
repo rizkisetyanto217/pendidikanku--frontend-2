@@ -4,6 +4,7 @@ import { Menu, X, Sun, Moon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { colors } from "@/constants/colorsThema";
 import useHtmlDarkMode from "@/hooks/userHTMLDarkMode";
+import masjid from "@/assets/Gambar-Masjid.jpeg";
 
 /* ================= NAV ITEMS ================= */
 const navItems = [
@@ -122,9 +123,9 @@ export default function WebsiteNavbar() {
           className="flex items-center gap-2 font-bold text-lg"
         >
           <img
-            src="https://picsum.photos/200/300"
+            src={masjid}
             alt="Logo"
-            className="h-8 w-8 rounded-full object-cover"
+            className="h-12 w-12 rounded-full object-cover"
           />
           <span style={{ color: theme.black1 }}>SekolahIslamku</span>
         </NavLink>

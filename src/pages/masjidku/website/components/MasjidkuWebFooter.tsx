@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
+import masjid from "@/assets/Gambar-Masjid.jpeg"
 
 export default function WebsiteFooter() {
   const { isDark, themeName } = useHtmlDarkMode();
@@ -29,9 +30,9 @@ export default function WebsiteFooter() {
               style={{ color: theme.black1 }}
             >
               <img
-                src="https://images.unsplash.com/photo-1614851099008-94fddf0ae3a5?q=80&w=200&auto=format&fit=crop"
+                src={masjid}
                 alt="Logo SekolahIslamku"
-                className="h-8 w-8 rounded-lg object-cover"
+                className="h-12 w-12 rounded-full object-cover"
                 loading="lazy"
               />
               SekolahIslamku Suite
