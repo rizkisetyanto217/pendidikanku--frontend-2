@@ -1,11 +1,10 @@
-// src/pages/auth/Register.tsx
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "@/layout/AuthLayout";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import api from "@/lib/axios";
-import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton"; // ⬅️
+import GoogleIdentityButton from "@/pages/dashboard/auth/components/GoogleIdentityButton";
 
 import {
   EyeIcon,
@@ -13,7 +12,6 @@ import {
   Mail,
   User,
   Lock,
-  HelpCircle,
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
@@ -21,9 +19,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-/* =======================
-   Consts & Types
-======================= */
 const securityQuestions = [
   "Sebutkan nama orang",
   "Sebutkan istilah dalam islam",
@@ -39,10 +34,7 @@ type FormState = {
   security_answer: string;
 };
 
-/* =======================
-   Component
-======================= */
-export default function RegisterAdminMasjid() {
+export default function Register() {
   const [form, setForm] = useState<FormState>({
     user_name: "",
     email: "",
@@ -63,11 +55,6 @@ export default function RegisterAdminMasjid() {
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
 
-  // ⬅️ pakai env agar gak 403 di GSI (Authorized JavaScript origins)
-  const GOOGLE_CLIENT_ID =
-    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-    "330051036041-8src8un315p823ap640hv70vp3448ruh.apps.googleusercontent.com";
-
   const styles = useMemo(
     () => ({
       card: {
@@ -80,189 +67,87 @@ export default function RegisterAdminMasjid() {
         color: theme.black1,
         borderColor: theme.white3,
       },
+      inputFocus: {
+        borderColor: theme.primary,
+        boxShadow: `0 0 0 3px ${theme.primary}22`,
+      },
       muted: { color: theme.silver2 },
       primaryBtn: {
         backgroundColor: loading ? theme.primary2 : theme.primary,
         color: theme.white1,
       },
       ghostBtn: {
-        backgroundColor: isDark ? theme.white2 : theme.white1,
+        backgroundColor: "transparent",
         borderColor: theme.white3,
         color: theme.black1,
       },
-      ringFocus: `0 0 0 3px ${theme.primary}33`,
+      progressBg: {
+        backgroundColor: theme.white2,
+      },
+      divider: {
+        backgroundColor: theme.white3,
+      },
     }),
     [theme, loading, isDark]
   );
 
-  /* =======================
-     Form helpers & validation
-  ======================= */
-  const onChange =
-    (key: keyof FormState) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setForm((s) => ({ ...s, [key]: e.target.value }));
-      setError("");
-    };
-
+  // validation helpers
   const emailValid = /^\S+@\S+\.\S+$/.test(form.email);
   const usernameValid = form.user_name.trim().length >= 3;
-
-  const pwdLen = form.password.length;
-  const pwdHasNum = /\d/.test(form.password);
-  const pwdHasLetter = /[A-Za-z]/.test(form.password);
-  const pwdStrongPoints =
-    Number(pwdLen >= 8) + Number(pwdHasNum) + Number(pwdHasLetter);
-  const pwdMatch = form.password === form.confirm_password;
-
-  const step1Valid =
-    usernameValid && emailValid && pwdStrongPoints >= 2 && pwdMatch;
-
+  const passwordValid = form.password.length >= 8;
+  const pwdMatch =
+    form.password === form.confirm_password && form.password.length > 0;
+  const step1Valid = usernameValid && emailValid && passwordValid && pwdMatch;
   const step2Valid =
     !!form.security_question && form.security_answer.trim().length > 0;
 
-  /* =======================
-     Navigation (steps)
-  ======================= */
-  const handleNext = () => {
-    if (!step1Valid) {
-      setError("Mohon lengkapi data pada Langkah 1 dengan benar.");
-      return;
-    }
-    setError("");
-    setStep(2);
-  };
-
-  const handleBack = () => {
-    setError("");
-    setStep(1);
-  };
-
-  /* =======================
-   Google Sign Up / Sign In
-======================= */
-  const handleGoogleSignup = async (credential: string) => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
-    try {
-      // Prefer endpoint register jika ada, fallback ke login
-      let res;
-      try {
-        res = await api.post("/auth/register-google", { id_token: credential });
-      } catch {
-        res = await api.post("/auth/login-google", { id_token: credential });
-      }
-
-      const token = res.data?.data?.access_token ?? res.data?.access_token;
-      if (token) localStorage.setItem("access_token", token);
-
-      setSuccess("Berhasil menggunakan Google. Mengarahkan…");
-      // 👉 arahkan ke halaman registrasi lembaga
-      setTimeout(() => navigate("/register-detail-sekolah"), 800);
-    } catch (err: any) {
-      if (err?.response?.status === 403) {
-        setError(
-          "Origin tidak diizinkan untuk Client ID ini. Tambahkan origin frontend di Google Cloud Console (Authorized JavaScript origins)."
-        );
-      } else {
-        setError("Gagal menggunakan Google. Silakan coba lagi.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* =======================
-     Submit manual (Langkah 2)
-  ======================= */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (!step2Valid) {
-      setError("Mohon isi pertanyaan & jawaban keamanan.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const payload = {
-        user_name: form.user_name.trim(),
-        email: form.email.trim(),
-        password: form.password,
-        security_question: form.security_question,
-        security_answer: form.security_answer.trim(),
-      };
-
-      const res = await api.post("/auth/register", payload);
-      if (res.data?.status === "success") {
-        setSuccess("Registrasi berhasil! Silakan lengkapi data lembaga…");
-        // 👉 arahkan ke halaman registrasi lembaga
-        setTimeout(() => navigate("/register-detail-sekolah"), 1200);
-      } else {
-        setError(res.data?.message || "Registrasi gagal, coba lagi.");
-      }
-    } catch (err: any) {
-      if (err.response)
-        setError(err.response.data?.message || "Registrasi gagal.");
-      else if (err.request) setError("Tidak ada respon dari server.");
-      else setError("Terjadi kesalahan saat mendaftar.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* =======================
-     UI
-  ======================= */
   return (
-    <AuthLayout mode="register" fullWidth contentClassName="max-w-xl mx-auto">
+    <AuthLayout mode="register" fullWidth contentClassName="max-w-md mx-auto">
       {/* Brand */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2">
-          <img
-            src="https://picsum.photos/200/300"
-            alt="Logo"
-            className="h-10 w-10 rounded object-cover"
-          />
-          <div className="text-left">
-            <div className="font-bold text-lg" style={{ color: theme.black1 }}>
-              SekolahIslamku Suite
-            </div>
-            <div className="text-xs" style={styles.muted}>
-              Satu platform untuk operasional sekolah yang rapi & efisien
-            </div>
-          </div>
-        </div>
+      <div className="text-center mb-8">
+        <img
+          src="https://picsum.photos/200/300"
+          alt="Logo"
+          className="h-16 w-16  rounded-2xl mx-auto mb-4 object-cover shadow-md"
+        />
+        <h1 className="text-2xl font-bold mb-1" style={{ color: theme.black1 }}>
+          SekolahIslamku Suite
+        </h1>
+        <p className="text-sm" style={styles.muted}>
+          Satu platform untuk operasional sekolah yang rapi & efisien
+        </p>
       </div>
 
       {/* Card */}
-      <div className="w-full rounded-2xl p-6 md:p-8" style={styles.card}>
-        {/* Header + progress */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold" style={{ color: theme.black1 }}>
+      <div
+        className="max-w-md mx-auto  rounded-2xl p-8 shadow-lg border transition-shadow hover:shadow-xl"
+        style={styles.card}
+      >
+        {/* Header + Progress */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2
+              className="text-xl font-semibold"
+              style={{ color: theme.black1 }}
+            >
               Buat Akun Baru
-            </h1>
+            </h2>
             <span
-              className="text-xs px-2 py-1 rounded-full"
+              className="text-xs font-medium px-3 py-1.5 rounded-full"
               style={{
-                backgroundColor: theme.white2,
-                border: `1px solid ${theme.white3}`,
-                color: theme.black1,
+                backgroundColor: `${theme.primary}15`,
+                color: theme.primary,
               }}
             >
-              Langkah {step} dari 2
+              Langkah {step} / 2
             </span>
           </div>
           <div
             className="h-1.5 w-full rounded-full overflow-hidden"
-            style={{ backgroundColor: theme.white2 }}
+            style={styles.progressBg}
           >
             <div
-              className="h-full transition-all"
+              className="h-full transition-all duration-500 ease-out rounded-full"
               style={{
                 width: step === 1 ? "50%" : "100%",
                 backgroundColor: theme.primary,
@@ -272,237 +157,96 @@ export default function RegisterAdminMasjid() {
         </div>
 
         {/* Google Sign-Up */}
-        <div className="mb-6">
-          <div className="w-full flex justify-center">
+        {step === 1 && (
+          <div className="mb-6">
             <GoogleIdentityButton
-              clientId={GOOGLE_CLIENT_ID}
-              onSuccess={handleGoogleSignup}
+              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+              onSuccess={() => navigate("/register-detail-sekolah")}
               theme={isDark ? "outline" : "filled_blue"}
               size="large"
               text="signup_with"
-              className="w-full max-w-sm"
+              className="w-full rounded-xl"
             />
-          </div>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div
-              className="h-px flex-1"
-              style={{ backgroundColor: theme.white3 }}
-            />
-            <div className="text-xs" style={styles.muted}>
-              atau daftar secara manual
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1" style={styles.divider} />
+              <span className="text-xs font-medium" style={styles.muted}>
+                atau daftar manual
+              </span>
+              <div className="h-px flex-1" style={styles.divider} />
             </div>
-            <div
-              className="h-px flex-1"
-              style={{ backgroundColor: theme.white3 }}
-            />
           </div>
-        </div>
+        )}
 
         {/* Alerts */}
         {error && (
-          <div
-            className="mb-5 rounded-xl px-3 py-2 text-sm border flex items-center gap-2"
-            style={{
-              backgroundColor: isDark
-                ? `${theme.error1}10`
-                : `${theme.error1}0D`,
-              borderColor: `${theme.error1}33`,
-              color: theme.error1,
-            }}
-          >
-            <AlertCircle className="h-4 w-4" /> {error}
+          <div className="mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm border border-red-200 bg-red-50 text-red-700">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
           </div>
         )}
         {success && (
-          <div
-            className="mb-5 rounded-xl px-3 py-2 text-sm border flex items-center gap-2"
-            style={{
-              backgroundColor: isDark
-                ? `${theme.success1}10`
-                : `${theme.success1}0D`,
-              borderColor: `${theme.success1}33`,
-              color: theme.success1,
-            }}
-          >
-            <CheckCircle2 className="h-4 w-4" /> {success}
+          <div className="mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm border border-green-200 bg-green-50 text-green-700">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <span>{success}</span>
           </div>
         )}
 
-        {/* ====== FORM ====== */}
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-          aria-busy={loading ? true : undefined}
-        >
+        {/* FORM */}
+        <form className="space-y-5">
           {step === 1 ? (
             <>
-              {/* Username */}
-              <Field
+              <InputField
                 label="Username"
-                icon={<User className="h-5 w-5" style={styles.muted as any} />}
-              >
-                <input
-                  type="text"
-                  name="user_name"
-                  value={form.user_name}
-                  onChange={onChange("user_name")}
-                  required
-                  autoComplete="username"
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{
-                    ...styles.input,
-                    boxShadow: `0 0 0 0px transparent`,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                />
-              </Field>
-              {!usernameValid && form.user_name && (
-                <SmallError>Minimal 3 karakter.</SmallError>
-              )}
-
-              {/* Email */}
-              <Field
+                icon={<User className="h-5 w-5" style={styles.muted} />}
+                value={form.user_name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm((f) => ({ ...f, user_name: e.target.value }))
+                }
+                placeholder="Minimal 3 karakter"
+                styles={styles}
+                valid={usernameValid || form.user_name.length === 0}
+              />
+              <InputField
                 label="Email"
-                icon={<Mail className="h-5 w-5" style={styles.muted as any} />}
-              >
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={onChange("email")}
-                  required
-                  autoComplete="email"
-                  className="w-full rounded-xl border px-10 py-3 outline-none"
-                  style={{
-                    ...styles.input,
-                    boxShadow: `0 0 0 0px transparent`,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                />
-              </Field>
-              {!emailValid && form.email && (
-                <SmallError>Format email tidak valid.</SmallError>
-              )}
-
-              {/* Password */}
-              <Field
+                type="email"
+                icon={<Mail className="h-5 w-5" style={styles.muted} />}
+                value={form.email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                }
+                placeholder="nama@email.com"
+                styles={styles}
+                valid={emailValid || form.email.length === 0}
+              />
+              <PasswordField
                 label="Password"
-                icon={<Lock className="h-5 w-5" style={styles.muted as any} />}
-              >
-                <div className="relative">
-                  <input
-                    type={showPw ? "text" : "password"}
-                    name="password"
-                    value={form.password}
-                    onChange={onChange("password")}
-                    required
-                    autoComplete="new-password"
-                    className="w-full rounded-xl border px-10 py-3 outline-none"
-                    style={{
-                      ...styles.input,
-                      boxShadow: `0 0 0 0px transparent`,
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.boxShadow = styles.ringFocus)
-                    }
-                    onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPw((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1"
-                    aria-label={
-                      showPw ? "Sembunyikan password" : "Tampilkan password"
-                    }
-                    style={{ color: theme.silver2 }}
-                  >
-                    {showPw ? (
-                      <EyeOffIcon className="w-5 h-5" />
-                    ) : (
-                      <EyeIcon className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-
-                {/* Strength meter */}
-                <div className="mt-2 flex items-center gap-2">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className="h-1.5 w-1/3 rounded-full"
-                      style={{
-                        backgroundColor:
-                          pwdStrongPoints > i ? theme.primary : theme.white3,
-                        opacity: pwdStrongPoints > i ? 1 : 0.6,
-                      }}
-                    />
-                  ))}
-                  <span className="text-xs" style={styles.muted}>
-                    <HelpCircle className="inline h-3.5 w-3.5 mr-1" />
-                    ≥8 karakter, kombinasi huruf & angka
-                  </span>
-                </div>
-              </Field>
-
-              {/* Confirm Password */}
-              <Field
+                value={form.password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm((f) => ({ ...f, password: e.target.value }))
+                }
+                show={showPw}
+                toggle={() => setShowPw((s) => !s)}
+                styles={styles}
+                helper="≥8 karakter, kombinasi huruf & angka"
+              />
+              <PasswordField
                 label="Konfirmasi Password"
-                icon={<Lock className="h-5 w-5" style={styles.muted as any} />}
-              >
-                <div className="relative">
-                  <input
-                    type={showPw2 ? "text" : "password"}
-                    name="confirm_password"
-                    value={form.confirm_password}
-                    onChange={onChange("confirm_password")}
-                    required
-                    autoComplete="new-password"
-                    className="w-full rounded-xl border px-10 py-3 outline-none"
-                    style={{
-                      ...styles.input,
-                      boxShadow: `0 0 0 0px transparent`,
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.boxShadow = styles.ringFocus)
-                    }
-                    onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPw2((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1"
-                    aria-label={
-                      showPw2 ? "Sembunyikan password" : "Tampilkan password"
-                    }
-                    style={{ color: theme.silver2 }}
-                  >
-                    {showPw2 ? (
-                      <EyeOffIcon className="w-5 h-5" />
-                    ) : (
-                      <EyeIcon className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </Field>
-              {!pwdMatch && form.confirm_password && (
-                <SmallError>Password tidak sama.</SmallError>
-              )}
+                value={form.confirm_password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm((f) => ({ ...f, confirm_password: e.target.value }))
+                }
+                show={showPw2}
+                toggle={() => setShowPw2((s) => !s)}
+                styles={styles}
+                valid={pwdMatch || form.confirm_password.length === 0}
+              />
 
-              {/* Actions step 1 */}
-              <div className="pt-2 flex justify-end">
+              <div className="flex justify-end pt-2">
                 <button
                   type="button"
-                  onClick={handleNext}
-                  disabled={!step1Valid || loading}
-                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={!step1Valid}
+                  onClick={() => setStep(2)}
+                  className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-all hover:opacity-90 hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
                   style={styles.primaryBtn}
                 >
                   Lanjutkan
@@ -512,154 +256,201 @@ export default function RegisterAdminMasjid() {
             </>
           ) : (
             <>
-              {/* Security Q & A */}
               <div>
                 <label
-                  className="block text-sm font-medium"
+                  className="block text-sm font-semibold mb-2"
                   style={{ color: theme.black1 }}
                 >
                   Pertanyaan Keamanan
                 </label>
-                <select
-                  name="security_question"
-                  value={form.security_question}
-                  onChange={onChange("security_question")}
-                  required
-                  className="w-full rounded-xl border px-4 py-3 mt-2 outline-none"
-                  style={{
-                    ...styles.input,
-                    boxShadow: `0 0 0 0px transparent`,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                >
-                  <option value="">Pilih pertanyaan…</option>
-                  {securityQuestions.map((q) => (
-                    <option key={q} value={q}>
-                      {q}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <ShieldCheck
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+                    style={styles.muted}
+                  />
+                  <select
+                    className="w-full rounded-xl border pl-10 pr-4 py-3 outline-none transition-all focus:ring-2"
+                    style={styles.input}
+                    value={form.security_question}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setForm((f) => ({
+                        ...f,
+                        security_question: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Pilih pertanyaan…</option>
+                    {securityQuestions.map((q) => (
+                      <option key={q} value={q}>
+                        {q}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  style={{ color: theme.black1 }}
-                >
-                  Jawaban Keamanan
-                </label>
-                <input
-                  type="text"
-                  name="security_answer"
-                  value={form.security_answer}
-                  onChange={onChange("security_answer")}
-                  required
-                  className="w-full rounded-xl border px-4 py-3 mt-2 outline-none"
-                  style={{
-                    ...styles.input,
-                    boxShadow: `0 0 0 0px transparent`,
-                  }}
-                  onFocus={(e) =>
-                    (e.currentTarget.style.boxShadow = styles.ringFocus)
-                  }
-                  onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-                />
-              </div>
+              <InputField
+                label="Jawaban Keamanan"
+                icon={<Lock className="h-5 w-5" style={styles.muted} />}
+                value={form.security_answer}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm((f) => ({ ...f, security_answer: e.target.value }))
+                }
+                placeholder="Masukkan jawaban Anda"
+                styles={styles}
+              />
 
-              {/* Info keamanan */}
               <div
-                className="flex items-center gap-2 text-xs"
-                style={styles.muted}
+                className="flex items-center gap-2 text-xs rounded-lg p-3"
+                style={{
+                  backgroundColor: `${theme.primary}08`,
+                  color: theme.silver2,
+                }}
               >
-                <ShieldCheck className="h-4 w-4" />
-                Data Anda disimpan dan dienkripsi sesuai kebijakan kami.
+                <ShieldCheck
+                  className="h-4 w-4"
+                  style={{ color: theme.primary }}
+                />
+                <span>Data Anda dienkripsi dan aman</span>
               </div>
 
-              {/* Actions step 2 */}
-              <div className="pt-2 flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3 pt-3">
                 <button
                   type="button"
-                  onClick={handleBack}
-                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2 border"
+                  onClick={() => setStep(1)}
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 border font-medium transition-all hover:bg-opacity-80"
                   style={styles.ghostBtn}
                 >
-                  <ArrowLeft className="h-4 w-4" /> Kembali
+                  <ArrowLeft className="h-4 w-4" />
+                  Kembali
                 </button>
-
                 <button
                   type="submit"
                   disabled={!step2Valid || loading}
-                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-all hover:opacity-90 hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
                   style={styles.primaryBtn}
                 >
-                  {loading ? (
-                    <>
-                      <svg
-                        className="animate-spin h-4 w-4"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
-                      </svg>
-                      Mendaftar…
-                    </>
-                  ) : (
-                    <>
-                      Selesaikan Pendaftaran{" "}
-                      <CheckCircle2 className="h-4 w-4" />
-                    </>
-                  )}
+                  {loading ? "Memproses..." : "Selesai"}
+                  <CheckCircle2 className="h-4 w-4" />
                 </button>
               </div>
             </>
           )}
         </form>
+
+        {/* Footer Link */}
+        {step === 1 && (
+          <div className="mt-6 text-center text-sm">
+            <span style={styles.muted}>Sudah punya akun? </span>
+            <button
+              onClick={() => navigate("/login")}
+              className="font-semibold hover:underline"
+              style={{ color: theme.primary }}
+            >
+              Login
+            </button>
+          </div>
+        )}
       </div>
     </AuthLayout>
   );
 }
 
-/* =======================
-   Small Presentational Bits
-======================= */
-function Field({
+/* --- Subcomponents --- */
+function InputField({
   label,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
   icon,
-  children,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
+  styles,
+  valid = true,
+}: any) {
   return (
     <div>
-      <label className="block text-sm font-medium">{label}</label>
-      <div className="relative mt-2">
-        <span className="absolute inset-y-0 left-3 flex items-center">
+      <label
+        className="block text-sm font-semibold mb-2"
+        style={{ color: styles.input.color }}
+      >
+        {label}
+      </label>
+      <div className="relative">
+        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
           {icon}
         </span>
-        {children}
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={`w-full rounded-xl border pl-10 pr-4 py-3 outline-none transition-all focus:ring-2 ${!valid && value.length > 0 ? "border-red-400" : ""}`}
+          style={{
+            ...styles.input,
+            borderColor:
+              !valid && value.length > 0 ? "#f87171" : styles.input.borderColor,
+          }}
+        />
       </div>
     </div>
   );
 }
 
-function SmallError({ children }: { children: React.ReactNode }) {
-  return <p className="mt-1 text-xs text-red-500">{children}</p>;
+function PasswordField({
+  label,
+  value,
+  onChange,
+  show,
+  toggle,
+  styles,
+  helper,
+  valid = true,
+}: any) {
+  return (
+    <div>
+      <label
+        className="block text-sm font-semibold mb-2"
+        style={{ color: styles.input.color }}
+      >
+        {label}
+      </label>
+      <div className="relative">
+        <Lock
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+          style={styles.muted}
+        />
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={onChange}
+          className={`w-full rounded-xl border pl-10 pr-12 py-3 outline-none transition-all focus:ring-2 ${!valid && value.length > 0 ? "border-red-400" : ""}`}
+          style={{
+            ...styles.input,
+            borderColor:
+              !valid && value.length > 0 ? "#f87171" : styles.input.borderColor,
+          }}
+        />
+        <button
+          type="button"
+          onClick={toggle}
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          {show ? (
+            <EyeOffIcon className="h-5 w-5" style={styles.muted} />
+          ) : (
+            <EyeIcon className="h-5 w-5" style={styles.muted} />
+          )}
+        </button>
+      </div>
+      {helper && (
+        <p
+          className="mt-1.5 text-xs flex items-center gap-1.5"
+          style={styles.muted}
+        >
+          <ShieldCheck className="h-3.5 w-3.5" />
+          {helper}
+        </p>
+      )}
+    </div>
+  );
 }

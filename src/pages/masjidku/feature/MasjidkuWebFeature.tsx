@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import WebsiteFooter from "../components/MasjidkuWebFooter";
+import WebsiteFooter from "../website/components/MasjidkuWebFooter";
 
 import useHtmlThema from "@/hooks/useHTMLThema";
 import { pickTheme, ThemeName } from "@/constants/thema";

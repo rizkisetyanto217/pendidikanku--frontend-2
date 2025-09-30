@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
-import WebsiteFooter from "../components/MasjidkuWebFooter"; // sesuaikan jika path kamu beda
+import WebsiteFooter from "../website/components/MasjidkuWebFooter"; // sesuaikan jika path kamu beda
 
 import useHtmlThema from "@/hooks/useHTMLThema"; // ✅ gunakan file yang kamu kirim
 import { pickTheme, ThemeName } from "@/constants/thema"; // ✅ gunakan colorsThema

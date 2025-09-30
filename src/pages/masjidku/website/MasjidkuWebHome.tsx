@@ -21,6 +21,7 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import TestimonialSlider, {
   TestimonialItem,
 } from "./components/MasjidkuTestimonialSlider";
+import { Link } from "react-router-dom";
 
 /** =================== Data =================== */
 const modules = [
@@ -197,11 +198,11 @@ export default function SekolahIslamkuHome() {
       <div
         id="home"
         className="min-h-screen overflow-x-hidden w-screen"
-        style={{ background: pageBg, color: theme.black1 }}
+        // style={{ background: pageBg, color: theme.black1 }}
       >
         {/* NAVBAR */}
         <WebsiteNavbar />
-        <div style={{ height: "5.5rem" }} />
+        <div  />
 
         {/* HERO */}
         <div className="relative overflow-hidden">
@@ -238,7 +239,7 @@ export default function SekolahIslamkuHome() {
                   Cepat, & Transparan
                 </h1>
 
-                <p className="mt-4 max-w-3xl" style={{ color: theme.silver2 }}>
+                <p className="mt-4 max-w-3xl" style={{ color: theme.black2 }}>
                   Dari PPDB, akademik, kehadiran, keuangan, hingga komunikasi
                   orang tua—semua terintegrasi dalam satu platform yang ringan
                   dan aman.
@@ -246,22 +247,22 @@ export default function SekolahIslamkuHome() {
 
                 {/* CTA row */}
                 <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <a
-                    href="#daftar"
+                  <Link
+                    to={"/website/daftar-sekarang"}
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm shadow-sm transition hover:shadow-md"
                     style={primaryBtnStyle}
                   >
                     <ChevronRight className="h-4 w-4" />
                     Daftar Sekarang Gratis
-                  </a>
+                  </Link>
 
-                  <a
-                    href="#dukung"
+                  <Link
+                 to={"dukungan"}
                     className="inline-flex items-center gap-2 rounded-full ring-1 px-5 py-2.5 text-sm transition hover:opacity-90"
                     style={supportBtnStyle}
                   >
                     🤝 Dukung Kami
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -302,11 +303,11 @@ export default function SekolahIslamkuHome() {
           <header className="mb-8 md:mb-12 text-center">
             <h2
               className="text-3xl md:text-4xl font-bold"
-              style={{ color: theme.black1 }}
+              style={{ color: theme.black2 }}
             >
               Modul Inti Platform
             </h2>
-            <p className="mt-3" style={{ color: theme.silver2 }}>
+            <p className="mt-3" style={{ color: theme.black2 }}>
               Tersedia lengkap—siap digunakan dari hari pertama implementasi.
             </p>
           </header>
@@ -357,7 +358,7 @@ export default function SekolahIslamkuHome() {
             >
               Fitur Tambahan yang Kuat
             </h2>
-            <p className="mt-3" style={{ color: theme.silver2 }}>
+            <p className="mt-3" style={{ color: theme.black2 }}>
               Sesuaikan kebutuhan sekolah—aktifkan modul sesuai prioritas.
             </p>
           </header>
@@ -399,7 +400,7 @@ export default function SekolahIslamkuHome() {
               >
                 Mengapa Memilih Kami
               </h2>
-              <p className="mt-3 max-w-prose" style={{ color: theme.silver2 }}>
+              <p className="mt-3 max-w-prose" style={{ color: theme.black2 }}>
                 Tim kami berpengalaman membantu sekolah negeri & swasta
                 meningkatkan efisiensi operasional tanpa mengubah budaya kerja
                 inti.
@@ -463,7 +464,7 @@ export default function SekolahIslamkuHome() {
         </Section>
 
         {/* TESTIMONI */}
-        <Section id="testimoni" className="py-16 md:py-20">
+        <Section id="testimoni" className="py-16 md:py-28">
           <header className="mb-8 md:mb-12 text-center">
             <h2
               className="text-3xl md:text-4xl font-bold"
@@ -471,7 +472,7 @@ export default function SekolahIslamkuHome() {
             >
               Kata Mereka
             </h2>
-            <p className="mt-3" style={{ color: theme.silver2 }}>
+            <p className="mt-3" style={{ color: theme.black2 }}>
               Dampak nyata di sekolah pengguna layanan kami.
             </p>
           </header>
@@ -570,7 +571,7 @@ export default function SekolahIslamkuHome() {
                 >
                   Dapatkan Update Fitur & Studi Kasus
                 </h3>
-                <p className="mt-2" style={{ color: theme.silver2 }}>
+                <p className="mt-2" style={{ color: theme.black2 }}>
                   Kami kirim ringkas—insight dan rilis terbaru ke email Anda.
                 </p>
               </div>

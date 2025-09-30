@@ -3,7 +3,6 @@ import { Star } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
-// CSS Swiper (boleh dipindah ke main.tsx jika mau global)
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -23,15 +22,15 @@ export type TestimonialItem = {
   role: string;
   quote: string;
   img: string;
-  rating?: number; // default 5
+  rating?: number;
 };
 
 type Props = {
   items: TestimonialItem[];
-  theme: Palette; // kirim dari halaman (colors.light / colors.dark)
+  theme: Palette;
   className?: string;
-  autoplayDelayMs?: number; // default 4000
-  showArrows?: boolean; // default true
+  autoplayDelayMs?: number;
+  showArrows?: boolean;
 };
 
 const TestimonialSlider: React.FC<Props> = ({
@@ -42,23 +41,21 @@ const TestimonialSlider: React.FC<Props> = ({
   showArrows = true,
 }) => {
   return (
-    <div className={className}>
+    <div className={`relative ${className}`}>
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
-        spaceBetween={24}
+
         slidesPerView={1}
         navigation={showArrows}
         pagination={{ clickable: true }}
         autoplay={{ delay: autoplayDelayMs, disableOnInteraction: false }}
         breakpoints={{
-          768: { slidesPerView: 2, spaceBetween: 32 },
-          1024: { slidesPerView: 2, spaceBetween: 32 },
+          768: { slidesPerView: 2, spaceBetween: 10 },
+          1024: { slidesPerView: 2, spaceBetween: 10 },
         }}
         className="pb-10"
         style={
           {
-            // warna bullet/panah mengikuti tema
-            // @ts-ignore
             "--swiper-theme-color": theme.primary,
           } as React.CSSProperties
         }
@@ -68,7 +65,7 @@ const TestimonialSlider: React.FC<Props> = ({
           return (
             <SwiperSlide key={`${t.name}-${idx}`}>
               <blockquote
-                className="rounded-3xl border shadow-sm p-6 h-full flex flex-col justify-between transition hover:shadow"
+                className="rounded-3xl border shadow-sm p-5 h-full flex flex-col justify-center mx-auto transition hover:shadow max-w-3xl"
                 style={{
                   backgroundColor: theme.white1,
                   borderColor: theme.white3,
@@ -106,6 +103,29 @@ const TestimonialSlider: React.FC<Props> = ({
           );
         })}
       </Swiper>
+
+      {/* Override posisi arrow agar sejajar tengah */}
+      {showArrows && (
+        <style>
+          {`
+          .swiper-button-next,
+          .swiper-button-prev {
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            background: ${theme.white1};
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          }
+          .swiper-button-next::after,
+          .swiper-button-prev::after {
+            font-size: 16px !important;
+            color: ${theme.black1};
+          }
+        `}
+        </style>
+      )}
     </div>
   );
 };

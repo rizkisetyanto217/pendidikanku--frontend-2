@@ -41,7 +41,7 @@ function NavItemLink({
       className="relative text-sm font-medium group"
     >
       {({ isActive }) => (
-        <span className="inline-block py-2" style={{ color }}>
+        <span className="inline-block py-2 text-base" style={{ color }}>
           {label}
           {/* active underline */}
           <span

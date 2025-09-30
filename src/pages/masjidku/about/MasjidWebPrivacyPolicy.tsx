@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
-import WebsiteFooter from "../components/MasjidkuWebFooter";
+import WebsiteFooter from "../website/components/MasjidkuWebFooter";
 import WebsiteNavbar from "@/components/common/public/WebsiteNavbar";
 
 /* ====== Utilities layout (samain feel dengan Home) ====== */

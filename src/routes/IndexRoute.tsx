@@ -238,11 +238,11 @@ import StudentProfil from "@/pages/sekolahislamku/dashboard-student/profil/Stude
 import StudentCertificate from "@/pages/sekolahislamku/dashboard-student/certificate/StudentCertificate";
 import DetailBill from "@/pages/sekolahislamku/dashboard-school/finance/DetailBill";
 import DetailRoomSchool from "@/pages/sekolahislamku/dashboard-school/menu-utama/components/DetailRoomSchool";
-import SupportPage from "@/pages/masjidku/website/pages/support";
-import Panduan from "@/pages/masjidku/website/pages/panduan";
-import Fitur from "@/pages/masjidku/website/pages/fitur";
-import About from "@/pages/masjidku/website/pages/about";
-import Contact from "@/pages/masjidku/website/pages/contact";
+import SupportPage from "@/pages/masjidku/website/pages/navbar-page/support";
+import Panduan from "@/pages/masjidku/website/pages/navbar-page/panduan";
+import Fitur from "@/pages/masjidku/website/pages/navbar-page/fitur";
+import About from "@/pages/masjidku/website/pages/navbar-page/about";
+import Contact from "@/pages/masjidku/website/pages/navbar-page/contact";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -273,7 +273,7 @@ export default function AppRoutes() {
       </Route>
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
-      <Route path="/register-sekolah" element={<RegisterAdminMasjid />} />
+      <Route path="/website/daftar-sekarang" element={<RegisterAdminMasjid />} />
       <Route
         path="/register-detail-sekolah"
         element={<RegisterDetailAdminMasjid />}

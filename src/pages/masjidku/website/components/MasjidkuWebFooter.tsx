@@ -16,7 +16,7 @@ export default function WebsiteFooter() {
   const theme = pickTheme(themeName as ThemeName, isDark);
 
   const linkCls = "text-sm hover:underline";
-  const textMuted = { color: theme.silver2 };
+  const textMuted = { color: theme.black2 };
 
   return (
     <footer className="border-t" style={{ borderColor: theme.white3 }}>
@@ -176,14 +176,14 @@ export default function WebsiteFooter() {
         </div>
 
         <div
-          className="mt-8 border-t pt-4 text-xs flex flex-col md:flex-row items-center justify-between"
-          style={{ borderColor: theme.white3, color: theme.silver2 }}
+          className="mt-8 border-t pt-4 text-xs flex flex-col items-center gap-2 md:flex-row md:justify-center md:gap-6 text-center"
+          style={{ borderColor: theme.white3, color: theme.primary }}
         >
           <div>
             © {new Date().getFullYear()} SekolahIslamku Suite. All rights
             reserved.
           </div>
-          <div className="mt-2 md:mt-0 flex gap-4">
+          <div className="flex gap-4">
             <a href="#" className="hover:underline">
               Kebijakan Privasi
             </a>
