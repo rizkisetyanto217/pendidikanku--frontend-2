@@ -259,7 +259,7 @@ const TeacherTableRow = ({
       <td className="py-3">
         <div className="font-medium">{teacher.name}</div>
         {teacher.email && (
-          <div className="text-xs opacity-70">{teacher.email}</div>
+          <div className="text-sm opacity-70">{teacher.email}</div>
         )}
       </td>
       <td className="py-3">{teacher.subject ?? "-"}</td>
@@ -352,7 +352,7 @@ const TeachersTable = ({
         <thead>
           <tr
             className="text-left border-b"
-            style={{ color: palette.silver2, borderColor: palette.silver1 }}
+            style={{ color: palette.black2, borderColor: palette.silver1 }}
           >
             <th className="py-3 px-5">NIP</th>
             <th>Nama</th>
@@ -398,8 +398,8 @@ const TeachersTable = ({
     </div>
 
     <div
-      className="p-3 text-xs flex items-center justify-between border-t"
-      style={{ color: palette.silver2, borderColor: palette.silver1 }}
+      className="p-3 text-sm flex items-center justify-between border-t"
+      style={{ color: palette.black2, borderColor: palette.silver1 }}
     >
       <div>
         {isFetching ? "Memuat ulang…" : `Menampilkan ${teachers.length} data`}

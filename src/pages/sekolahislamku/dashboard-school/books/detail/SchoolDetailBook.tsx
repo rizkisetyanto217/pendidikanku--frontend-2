@@ -138,7 +138,7 @@ export default function SchoolBookDetail() {
         showBack
       />
 
-      <main className="w-full px-4 py-4 md:py-8">
+      <main className="w-full px-4 py-4 md:px-6 md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
@@ -155,14 +155,14 @@ export default function SchoolBookDetail() {
                 onClick={() => navigate(-1)}
                 className=" items-center gap-1.5 md:mt-0 hidden md:flex"
               >
-                <ArrowLeft size={18} />
+                <ArrowLeft size={20} />
               </Btn>
               <div>
                 <h1 className="text-lg md:text-xl font-semibold">
                   {book?.books_title ??
                     (q.isLoading ? "Memuat…" : "Buku tidak ditemukan")}
                 </h1>
-                <p className="text-sm" style={{ color: palette.silver2 }}>
+                <p className="text-sm" style={{ color: palette.black2 }}>
                   {book?.books_author ?? "—"}
                 </p>
               </div>
@@ -184,7 +184,7 @@ export default function SchoolBookDetail() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="flex flex-col items-center text-xs opacity-70">
+                      <div className="flex flex-col items-center text-sm opacity-70">
                         <ImageOff size={18} />
                         <span>Tidak ada cover</span>
                       </div>
@@ -205,13 +205,7 @@ export default function SchoolBookDetail() {
                       value={book?.books_author ?? "—"}
                       palette={palette}
                     />
-                    <InfoBlock
-                      label="Slug"
-                      value={
-                        book?.books_slug ?? book?.books_id.slice(0, 8) ?? "—"
-                      }
-                      palette={palette}
-                    />
+                   
                   </div>
                   {book?.books_url && (
                     <a
@@ -227,8 +221,8 @@ export default function SchoolBookDetail() {
                   {book?.books_desc && (
                     <div>
                       <div
-                        className="text-xs mb-1"
-                        style={{ color: palette.silver2 }}
+                        className="text-sm mb-1"
+                        style={{ color: palette.black2 }}
                       >
                         Deskripsi
                       </div>
@@ -251,11 +245,11 @@ export default function SchoolBookDetail() {
               </div>
               <div className="p-4 md:p-6">
                 {!book ? (
-                  <p className="text-sm" style={{ color: palette.silver2 }}>
+                  <p className="text-sm" style={{ color: palette.black2 }}>
                     {q.isLoading ? "Memuat…" : "Buku tidak ditemukan."}
                   </p>
                 ) : sectionsFlat.length === 0 ? (
-                  <p className="text-sm" style={{ color: palette.silver2 }}>
+                  <p className="text-sm" style={{ color: palette.black2 }}>
                     Belum terhubung ke kelas/section.
                   </p>
                 ) : (
@@ -264,10 +258,10 @@ export default function SchoolBookDetail() {
                       <Link
                         key={s.class_sections_id}
                         to={`${base}/sekolah/classes/${s.class_sections_id}`}
-                        className="px-3 py-1 rounded-full text-xs border"
+                        className="px-3 py-1 rounded-full text-sm border"
                         style={{
                           borderColor: palette.silver1,
-                          color: palette.quaternary,
+                          color: palette.black2,
                         }}
                       >
                         {s.class_sections_name}
@@ -297,7 +291,7 @@ function InfoBlock({
 }) {
   return (
     <div>
-      <div className="text-xs mb-1" style={{ color: palette.silver2 }}>
+      <div className="text-sm mb-1" style={{ color: palette.black2 }}>
         {label}
       </div>
       <div className="font-medium text-sm">{value}</div>

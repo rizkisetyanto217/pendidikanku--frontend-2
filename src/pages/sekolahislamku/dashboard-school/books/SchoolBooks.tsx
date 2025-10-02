@@ -282,11 +282,11 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           <div className="font-medium truncate">
             {b.books_title || "(Tanpa judul)"}
           </div>
-          <div className="text-xs opacity-70 truncate">
+          <div className="text-sm opacity-70 truncate">
             {b.books_author || "-"}
           </div>
           {!!b.books_desc && (
-            <div className="text-[11px] opacity-60 mt-1 line-clamp-2">
+            <div className="text-sm opacity-60 mt-1 line-clamp-2" style={{ color: palette.black2 }}>
               {b.books_desc}
             </div>
           )}
@@ -295,7 +295,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
               href={b.books_url}
               target="_blank"
               rel="noreferrer noopener"
-              className="inline-flex items-center gap-1 text-xs underline mt-1"
+              className="inline-flex items-center gap-1 text-sm underline mt-1"
               style={{ color: palette.primary }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -309,14 +309,6 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         <div onClick={(e) => e.stopPropagation()}>
           <ActionEditDelete
             onEdit={() => setBookModal({ mode: "edit", book: b })}
-            onDelete={() => {
-              if (deleteBook.isPending) return;
-              const ok = confirm(
-                `Hapus buku ini?\nJudul: ${b.books_title ?? "-"}`
-              );
-              if (!ok) return;
-              deleteBook.mutate(b.books_id);
-            }}
           />
         </div>
       );
@@ -326,7 +318,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
         cover,
         titleBlock,
         "-",
-        b.books_slug ?? b.books_id,
+     
         actions,
       ];
     });
@@ -368,7 +360,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             <div className="font-medium truncate">
               {b.books_title || "(Tanpa judul)"}
             </div>
-            <div className="text-xs opacity-70 truncate">
+            <div className="text-sm opacity-70 truncate">
               {b.books_author || "-"}
             </div>
             {!!b.books_desc && (
@@ -379,10 +371,10 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             <div className="mt-3 flex items-center gap-2">
               {b.books_url && (
                 <a
-                  href={b.books_url}
+                  // href={b.books_url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex items-center gap-1 text-xs underline"
+                  className="inline-flex items-center gap-1 text-sm underline"
                   style={{ color: palette.primary }}
                   onClick={(e) => e.stopPropagation()} // biar gak trigger ke detail
                 >
@@ -477,7 +469,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             </SectionCard>
 
             {/* Summary */}
-            <div className="text-xs px-1" style={{ color: palette.black2 }}>
+            <div className="text-sm px-1" style={{ color: palette.black2 }}>
               {yyyyMmDdLocal()} •{" "}
               {booksQ.isFetching ? "memuat…" : `${total} total`}
             </div>
@@ -510,7 +502,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                   "Cover",
                   "Judul & Penulis",
                   "Dipakai di",
-                  "Slug/ID",
+             
                   "Aksi",
                 ]}
                 rows={rows}
@@ -527,7 +519,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-sm">
               <div>
                 Menampilkan {showing} dari {total}
               </div>

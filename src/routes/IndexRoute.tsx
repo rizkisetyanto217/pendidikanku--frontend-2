@@ -243,6 +243,8 @@ import Panduan from "@/pages/masjidku/website/pages/navbar-page/panduan";
 import Fitur from "@/pages/masjidku/website/pages/navbar-page/fitur";
 import About from "@/pages/masjidku/website/pages/navbar-page/about";
 import Contact from "@/pages/masjidku/website/pages/navbar-page/contact";
+import QuizPage from "@/pages/sekolahislamku/dashboard-school/class/components/QuizPage";
+import QuizDetailPage from "@/pages/sekolahislamku/dashboard-school/class/components/QuizDetailPage";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -273,7 +275,10 @@ export default function AppRoutes() {
       </Route>
       {/* ==== Public Routes ==== */}
       <Route path="/login" element={<Login />} />
-      <Route path="/website/daftar-sekarang" element={<RegisterAdminMasjid />} />
+      <Route
+        path="/website/daftar-sekarang"
+        element={<RegisterAdminMasjid />}
+      />
       <Route
         path="/register-detail-sekolah"
         element={<RegisterDetailAdminMasjid />}
@@ -825,6 +830,8 @@ export default function AppRoutes() {
         <Route path="kelas">
           <Route index element={<SchoolClasses />} />
           <Route path="detail/:id" element={<SchoolManageClass />} />
+          <Route path="quiz/:id" element={<QuizPage />} />
+          <Route path="quiz/:id/do" element={<QuizDetailPage />} />
         </Route>
         <Route path="kehadiran" element={<SchoolAttendance />} />
 
@@ -844,6 +851,7 @@ export default function AppRoutes() {
           <Route path="all-announcement" element={<AllAnnouncement />} />
           <Route path="sekolah" element={<SchoolDashboard showBack />} />
           <Route path="room-school" element={<RoomSchool />} />
+
           <Route path="room-school/:id" element={<DetailRoomSchool />} />
           <Route path="spp" element={<SchoolSpp />} />
           <Route path="pelajaran" element={<SchoolSubject />} />

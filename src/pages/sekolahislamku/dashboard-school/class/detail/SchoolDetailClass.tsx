@@ -176,6 +176,29 @@ interface Task {
   status: "pending" | "submitted" | "graded";
 }
 
+/* ========= Dummy Mapel & Tugas & Quiz ========= */
+interface Quiz {
+  id: string;
+  subjectId: string;
+  title: string;
+  status: "open" | "closed" | "graded";
+}
+
+const DUMMY_QUIZZES: Quiz[] = [
+  {
+    id: "qz-1",
+    subjectId: "sbj-1", // Matematika
+    title: "Quiz Aljabar Dasar",
+    status: "open",
+  },
+  {
+    id: "qz-2",
+    subjectId: "sbj-1",
+    title: "Quiz Geometri",
+    status: "closed",
+  },
+];
+
 const DUMMY_SUBJECTS: Subject[] = [
   { id: "sbj-1", name: "Matematika", teacher: "Budi Santoso" },
   { id: "sbj-2", name: "Bahasa Indonesia", teacher: "Siti Nurhaliza" },
@@ -299,7 +322,7 @@ export default function SchoolDetailClass() {
         dateFmt={dateLong}
         showBack
       />
-      <main className="px-4 md:px-6  md:py-8">
+      <main className="px-4  md:px-6  md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
@@ -345,7 +368,7 @@ export default function SchoolDetailClass() {
                     <User size={18} />
                   </span>
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Wali Kelas
                     </div>
                     <div className="font-medium">
@@ -353,10 +376,10 @@ export default function SchoolDetailClass() {
                     </div>
                     {section?.teacher?.email && (
                       <div
-                        className="text-xs"
-                        style={{ color: palette.silver2 }}
+                        className="text-sm"
+                        style={{ color: palette.black2 }}
                       >
-                        {section.teacher.email}
+                        <h1 className="text-sm"> {section.teacher.email}</h1>
                       </div>
                     )}
                   </div>
@@ -374,7 +397,7 @@ export default function SchoolDetailClass() {
                     <CalendarDays size={18} />
                   </span>
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Hari & Lokasi
                     </div>
                     <div className="font-medium">
@@ -382,7 +405,7 @@ export default function SchoolDetailClass() {
                         ", "
                       ) || "-"}
                     </div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       {section?.class_sections_schedule?.location ?? "-"}
                     </div>
                   </div>
@@ -400,7 +423,7 @@ export default function SchoolDetailClass() {
                     <Clock4 size={18} />
                   </span>
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Waktu
                     </div>
                     <div className="font-medium">
@@ -422,7 +445,7 @@ export default function SchoolDetailClass() {
                     className="border-b"
                     style={{
                       borderColor: palette.silver1,
-                      color: palette.silver2,
+                      color: palette.black2,
                     }}
                   >
                     <tr>
@@ -451,7 +474,7 @@ export default function SchoolDetailClass() {
                             {p.email && (
                               <a
                                 href={`mailto:${p.email}`}
-                                className="text-xs underline"
+                                className="text-sm underline"
                                 style={{ color: palette.primary }}
                               >
                                 {p.email}
@@ -476,15 +499,15 @@ export default function SchoolDetailClass() {
               </div>
             </SectionCard>
 
-           
-
             {/* Mata Pelajaran & Tugas */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5 pb-2 flex items-center justify-between">
                 <div className="font-medium flex items-center gap-2">
                   <BookOpen size={18} /> Mata Pelajaran
                 </div>
-                <Btn palette={palette}>+ Tambah Mapel</Btn>
+                <Btn palette={palette} variant="ghost">
+                  + Tambah Mapel
+                </Btn>
               </div>
 
               <div className="px-4 md:px-5 pb-4 space-y-4">
@@ -498,24 +521,25 @@ export default function SchoolDetailClass() {
                       <div>
                         <div className="font-semibold">{subj.name}</div>
                         <div
-                          className="text-xs"
-                          style={{ color: palette.silver2 }}
+                          className="text-sm"
+                          style={{ color: palette.black2 }}
                         >
                           Guru: {subj.teacher}
                         </div>
                       </div>
-                      <Btn palette={palette} size="sm">
+                      <Btn palette={palette} size="sm" variant="ghost">
                         Tambah Tugas
                       </Btn>
                     </div>
 
+                    {/* Tabel tugas */}
                     {/* Tabel tugas */}
                     <div className="mt-3 overflow-x-auto">
                       <table className="min-w-[500px] w-full text-sm">
                         <thead
                           className="text-left border-b"
                           style={{
-                            color: palette.silver2,
+                            color: palette.black2,
                             borderColor: palette.silver1,
                           }}
                         >
@@ -533,11 +557,11 @@ export default function SchoolDetailClass() {
                             (t) => t.subjectId === subj.id
                           ).map((t) => (
                             <tr key={t.id}>
-                              <td className="py-3 pr-4">{t.title}</td>
+                              <td className="py-3 pr-4 text-sm">{t.title}</td>
                               <td className="py-3 pr-4">
                                 {dateLong(t.dueDate)}
                               </td>
-                              <td className="py-3 pr-4">
+                              <td className="py-3 pr-4 text-sm">
                                 <Badge
                                   palette={palette}
                                   variant={
@@ -550,6 +574,62 @@ export default function SchoolDetailClass() {
                                 >
                                   {t.status}
                                 </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Bagian Quiz */}
+                    <div className="mt-5">
+                      <div className="font-medium mb-2">Quiz</div>
+                      <table className="min-w-[400px] w-full text-sm">
+                        <thead
+                          className="text-left border-b"
+                          style={{
+                            color: palette.black2,
+                            borderColor: palette.silver1,
+                          }}
+                        >
+                          <tr>
+                            <th className="py-2 pr-4">Judul</th>
+                            <th className="py-2 pr-4">Status</th>
+                            <th className="py-2 pr-4">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody
+                          className="divide-y"
+                          style={{ borderColor: palette.silver1 }}
+                        >
+                          {DUMMY_QUIZZES.filter(
+                            (q) => q.subjectId === subj.id
+                          ).map((q) => (
+                            <tr key={q.id}>
+                              <td className="py-3 pr-4">{q.title}</td>
+                              <td className="py-3 pr-4">
+                                <Badge
+                                  palette={palette}
+                                  variant={
+                                    q.status === "graded"
+                                      ? "success"
+                                      : q.status === "open"
+                                        ? "secondary"
+                                        : "outline"
+                                  }
+                                >
+                                  {q.status}
+                                </Badge>
+                              </td>
+                              <td className="py-3 pr-4">
+                                <Btn
+                                  palette={palette}
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => navigate(`../quiz/${q.id}`)}
+                                >
+                                  Detail
+                                </Btn>
                               </td>
                             </tr>
                           ))}

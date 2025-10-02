@@ -74,10 +74,18 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
         style={{ borderColor: palette.silver1 }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
-            <Bell size={20} color={palette.quaternary} />
-            Pengumuman
-          </h3>
+          <div className=" pb-1 font-medium flex items-center gap-2 md:-mt-1">
+            <div
+              className="h-9 w-9 rounded-xl flex items-center justify-center "
+              style={{
+                background: palette.white3,
+                color: palette.quaternary,
+              }}
+            >
+              <Bell size={18} />
+            </div>
+            <h1 className="text-base font-semibold">Pengumuman</h1>
+          </div>
 
           <div className="hidden md:flex flex-wrap items-center gap-2">
             {canAdd &&

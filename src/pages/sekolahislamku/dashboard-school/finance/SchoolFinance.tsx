@@ -307,7 +307,7 @@ const KpiTile: React.FC<{
       </span>
       <div className="min-w-0 flex-1">
         <div
-          className="text-xs sm:text-sm truncate"
+          className="text-sm sm:text-sm truncate"
           style={{ color: palette.black2 }}
         >
           {label}
@@ -374,7 +374,7 @@ const InvoiceTable: React.FC<{
                     </div>
                     {inv.type && (
                       <span
-                        className="inline-block px-2 py-1 text-xs rounded-md"
+                        className="inline-block px-2 py-1 text-sm rounded-md"
                         style={{
                           backgroundColor: palette.primary2,
                           color: palette.primary,
@@ -416,7 +416,7 @@ const InvoiceTable: React.FC<{
                     </div>
                     {inv.paid_amount && (
                       <div
-                        className="text-xs"
+                        className="text-sm"
                         style={{ color: palette.black2 }}
                       >
                         Dibayar: {idr(inv.paid_amount)}
@@ -443,7 +443,7 @@ const InvoiceTable: React.FC<{
                       palette={palette}
                       onClick={() => markPaid.mutate({ id: inv.id })}
                       disabled={markPaid.isPending}
-                      className="ml-auto text-xs px-3 py-1"
+                      className="ml-auto text-sm px-3 py-1"
                     >
                       {markPaid.isPending ? (
                         <div className="flex items-center gap-1">
@@ -534,7 +534,7 @@ const InvoiceTable: React.FC<{
                   </div>
                   {inv.type && (
                     <span
-                      className="inline-block px-2 py-1 text-xs rounded-md"
+                      className="inline-block px-2 py-1 text-sm rounded-md"
                       style={{
                         backgroundColor: palette.primary2,
                         color: palette.primary,
@@ -563,7 +563,7 @@ const InvoiceTable: React.FC<{
                   </div>
                   {inv.paid_amount && (
                     <div
-                      className="text-xs mt-1"
+                      className="text-sm mt-1"
                       style={{ color: palette.black2 }}
                     >
                       Dibayar: {idr(inv.paid_amount)}
@@ -588,7 +588,7 @@ const InvoiceTable: React.FC<{
                         palette={palette}
                         onClick={() => markPaid.mutate({ id: inv.id })}
                         disabled={markPaid.isPending}
-                        className="text-xs px-3 py-1"
+                        className="text-sm px-3 py-1"
                       >
                         {markPaid.isPending ? (
                           <div className="flex items-center gap-1">
@@ -781,7 +781,7 @@ const PaymentTable: React.FC<{
                   </td>
                   <td className="py-4 px-4">
                     <div
-                      className="max-w-xs truncate"
+                      className="max-w-sm truncate"
                       title={p.invoice_title ?? "-"}
                     >
                       {p.invoice_title ?? "-"}
@@ -1112,7 +1112,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
                 <Badge
                   palette={palette}
                   variant="secondary"
-                  className="text-xs"
+                  className="text-sm"
                 >
                   {invoices.length}
                 </Badge>
@@ -1128,7 +1128,7 @@ const SchoolFinance: React.FC<SchoolFinanceProps> = ({
                 <Badge
                   palette={palette}
                   variant="secondary"
-                  className="text-xs"
+                  className="text-sm"
                 >
                   {payments.length}
                 </Badge>

@@ -380,7 +380,7 @@ function KpiTile({
           {icon}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.black2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>
@@ -410,15 +410,15 @@ function MiniStat({
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
         <div
-          className="text-xs font-medium leading-tight md:flex-1 truncate"
-          style={{ color: palette.silver2 }}
+          className="text-sm font-medium leading-tight md:flex-1 truncate"
+          style={{ color: palette.black2 }}
         >
           {label}
         </div>
         <Badge
           palette={palette}
           variant={badgeVariant}
-          className="flex-shrink-0 w-fit"
+          className="flex-shrink-0 w-fit text-sm"
         >
           {label.includes("Tunggakan") ? "Perlu perhatian" : "OK"}
         </Badge>
@@ -428,8 +428,8 @@ function MiniStat({
       </div>
       {sub && (
         <div
-          className="text-xs leading-relaxed"
-          style={{ color: palette.silver2 }}
+          className="text-sm leading-relaxed"
+          style={{ color: palette.black2 }}
         >
           {sub}
         </div>
@@ -629,7 +629,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
           </aside>
 
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 ">
               {[
                 { label: "Guru", value: 26, icon: <UserCog size={18} /> },
                 { label: "Siswa", value: 342, icon: <Users size={18} /> },
@@ -641,6 +641,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 { label: "Kelas", value: 18, icon: <BookOpen size={18} /> },
               ].map((k) => (
                 <KpiTile
+                 
                   key={k.label}
                   palette={palette}
                   label={k.label}
@@ -671,6 +672,7 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 <TodayScheduleCard
                   palette={palette}
                   items={scheduleItems}
+                  seeAllPath="all-schedule"
                   title="Jadwal Hari Ini"
                   maxItems={3}
                 />

@@ -80,7 +80,7 @@ function BillCard({
         {/* Info Tagihan */}
         <div className="min-w-0">
           <div className="font-medium truncate">{bill.title}</div>
-          <div className="text-xs" style={{ color: palette.black2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             Jatuh tempo: {dateFmt(bill.dueDate)}
           </div>
         </div>
@@ -158,10 +158,18 @@ export default function BillsSectionCard({
     >
       {/* Header */}
       <div className="p-3 pb-2 flex items-center justify-between">
-        <h3 className="text-base font-semibold tracking-tight flex items-center gap-2">
-          <Wallet size={20} color={palette.quaternary} />
-          Tagihan & Pembayaran
-        </h3>
+        <div className=" pb-1 font-medium flex items-center gap-2 md:-mt-1">
+          <div
+            className="h-9 w-9 rounded-xl flex items-center justify-center "
+            style={{
+              background: palette.white3,
+              color: palette.quaternary,
+            }}
+          >
+            <Wallet size={18} />
+          </div>
+          <h1 className="text-base font-semibold">Tagihan dan Pembayaran</h1>
+        </div>
 
         {/* tombol hanya tampil di desktop */}
         <Link

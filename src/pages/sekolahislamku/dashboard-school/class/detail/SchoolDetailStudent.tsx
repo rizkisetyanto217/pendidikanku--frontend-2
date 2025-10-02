@@ -539,7 +539,7 @@ export default function SchoolDetailStudent() {
                   <div className="text-lg font-semibold">
                     {student?.name ?? "Siswa"}
                   </div>
-                  <div className="text-xs" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.silver2 }}>
                     NIS: {student?.nis ?? "-"} • {student?.class_name ?? "-"} •{" "}
                     {student?.status ?? "-"}
                   </div>
@@ -548,7 +548,7 @@ export default function SchoolDetailStudent() {
 
               {/* Filter */}
               <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: palette.silver2 }}>
+                <span className="text-sm" style={{ color: palette.silver2 }}>
                   Semester
                 </span>
                 <select
@@ -585,11 +585,11 @@ export default function SchoolDetailStudent() {
                     <User size={18} />
                   </span>
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       Biodata
                     </div>
                     <div className="font-medium">{student?.name ?? "-"}</div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       {student?.gender ?? "-"} • {student?.phone ?? "-"}{" "}
                       {student?.email ? (
                         <>
@@ -619,13 +619,13 @@ export default function SchoolDetailStudent() {
                     <CalendarDays size={18} />
                   </span>
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       Kelas & Mulai Belajar
                     </div>
                     <div className="font-medium">
                       {student?.class_name ?? "-"}
                     </div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       {student?.join_date ? shortDate(student.join_date) : "-"}
                     </div>
                   </div>
@@ -643,10 +643,10 @@ export default function SchoolDetailStudent() {
                     <ClipboardList size={18} />
                   </span>
                   <div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       Ringkasan ({semester === "ALL" ? "Semua" : semester})
                     </div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       Nilai:{" "}
                       <span
                         className="font-medium"
@@ -656,7 +656,7 @@ export default function SchoolDetailStudent() {
                       </span>{" "}
                       ({stats.countGrades} penilaian)
                     </div>
-                    <div className="text-xs" style={{ color: palette.silver2 }}>
+                    <div className="text-sm" style={{ color: palette.silver2 }}>
                       Absensi:{" "}
                       <span
                         className="font-medium"
@@ -768,8 +768,8 @@ export default function SchoolDetailStudent() {
                 </table>
 
                 <div
-                  className="pt-3 text-xs"
-                  style={{ color: palette.silver2 }}
+                  className="pt-3 text-sm"
+                  style={{ color: palette.black2 }}
                 >
                   Menampilkan {grades.length} baris nilai
                 </div>
@@ -859,7 +859,7 @@ export default function SchoolDetailStudent() {
                 </table>
 
                 <div
-                  className="pt-3 text-xs"
+                  className="pt-3 text-sm"
                   style={{ color: palette.silver2 }}
                 >
                   Menampilkan {attends.length} baris absensi
@@ -898,7 +898,7 @@ export default function SchoolDetailStudent() {
                               {n.note_type ?? "catatan"}
                             </Badge>
                             <span
-                              className="text-xs"
+                              className="text-sm"
                               style={{ color: palette.silver2 }}
                             >
                               {n.date ? shortDate(n.date) : "-"} •{" "}
@@ -906,7 +906,7 @@ export default function SchoolDetailStudent() {
                             </span>
                           </div>
                           <span
-                            className="text-xs"
+                            className="text-sm"
                             style={{ color: palette.silver2 }}
                           >
                             {n.author_name ?? "-"}
@@ -919,7 +919,7 @@ export default function SchoolDetailStudent() {
                 )}
 
                 <div
-                  className="pt-3 text-xs"
+                  className="pt-3 text-sm"
                   style={{ color: palette.silver2 }}
                 >
                   Menampilkan {notes.length} catatan

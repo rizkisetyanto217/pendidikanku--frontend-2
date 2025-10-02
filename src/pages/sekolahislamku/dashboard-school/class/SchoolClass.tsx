@@ -503,7 +503,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                       onClick={() => setParam("level_id", lv.id)}
                     >
                       {lv.name}{" "}
-                      <span style={{ color: palette.silver2 }}>({cnt})</span>
+                      <span style={{ color: palette.black2 }}>({cnt})</span>
                     </button>
                   );
                 })}
@@ -517,7 +517,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
               </div>
               <div className="px-4 md:px-5 pb-4 grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="md:col-span-2">
-                  <div className="text-xs mb-1">Pencarian</div>
+                  <div className="text-sm mb-1">Pencarian</div>
                   <input
                     placeholder="Cari slug/nama/kode…"
                     defaultValue={sp.get("q") ?? ""}
@@ -530,7 +530,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   />
                 </div>
                 <div>
-                  <div className="text-xs mb-1">Shift</div>
+                  <div className="text-sm mb-1">Shift</div>
                   <SelectBox
                     value={shift}
                     onChange={(e) => setParam("shift", e.target.value)}
@@ -542,7 +542,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   </SelectBox>
                 </div>
                 <div>
-                  <div className="text-xs mb-1">Status</div>
+                  <div className="text-sm mb-1">Status</div>
                   <SelectBox
                     value={status}
                     onChange={(e) => setParam("status", e.target.value)}
@@ -570,7 +570,7 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                   <thead
                     className="text-left border-b"
                     style={{
-                      color: palette.silver2,
+                      color: palette.black2,
                       borderColor: palette.silver1,
                     }}
                   >
@@ -642,8 +642,8 @@ const SchoolClass: React.FC<SchoolClassProps> = ({
                 </table>
 
                 <div
-                  className="pt-3 flex items-center justify-between text-xs"
-                  style={{ color: palette.silver2 }}
+                  className="pt-3 flex items-center justify-between text-sm"
+                  style={{ color: palette.black2 }}
                 >
                   <div>Menampilkan {items.length} kelas</div>
                   <button onClick={() => refetch()} className="underline">
