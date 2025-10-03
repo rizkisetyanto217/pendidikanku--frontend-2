@@ -188,22 +188,27 @@ export default function StudentNotesSummary() {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
+      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar kiri (PC) */}
-          <ParentSidebar palette={palette} />
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
-            <Btn
-              palette={palette}
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={16} className="mr-1" />
-              Kembali
-            </Btn>
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                onClick={() => navigate(-1)}
+                variant="ghost"
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+
+              <h1 className="text-lg font-semibold">Catatan</h1>
+            </div>
             {/* Ringkasan */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="font-medium mb-3 flex items-center gap-2">
@@ -216,7 +221,7 @@ export default function StudentNotesSummary() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Total Catatan
                     </div>
                     <div className="mt-1 font-semibold">{s.stats.total}</div>
@@ -226,7 +231,7 @@ export default function StudentNotesSummary() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Ada Hafalan
                     </div>
                     <Badge className="mt-1" variant="info" palette={palette}>
@@ -238,7 +243,7 @@ export default function StudentNotesSummary() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Ada PR
                     </div>
                     <Badge
@@ -254,7 +259,7 @@ export default function StudentNotesSummary() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Ada Nilai
                     </div>
                     <Badge className="mt-1" variant="outline" palette={palette}>
@@ -269,7 +274,7 @@ export default function StudentNotesSummary() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Rata-rata Nilai
                     </div>
                     <div className="mt-1 flex items-center gap-2">
@@ -295,7 +300,7 @@ export default function StudentNotesSummary() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.black2 }}>
+                  <label className="text-sm" style={{ color: palette.black2 }}>
                     Periode
                   </label>
                   <select
@@ -311,7 +316,7 @@ export default function StudentNotesSummary() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.black2 }}>
+                  <label className="text-sm" style={{ color: palette.black2 }}>
                     Kategori
                   </label>
                   <select
@@ -330,7 +335,7 @@ export default function StudentNotesSummary() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.black2 }}>
+                  <label className="text-sm" style={{ color: palette.black2 }}>
                     Cari
                   </label>
                   <div
@@ -380,7 +385,7 @@ export default function StudentNotesSummary() {
                     }}
                   >
                     <div
-                      className="text-xs mb-2"
+                      className="text-sm mb-2"
                       style={{ color: palette.black2 }}
                     >
                       {dateShort(n.date)} • {dateLong(n.date)}

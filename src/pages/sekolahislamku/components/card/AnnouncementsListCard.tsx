@@ -122,7 +122,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
         {isEmpty && (
           <div
             className="rounded-xl border p-4 text-sm"
-            style={{ borderColor: palette.silver1, color: palette.silver2 }}
+            style={{ borderColor: palette.silver1, color: palette.black2 }}
           >
             Belum ada pengumuman.
           </div>
@@ -151,7 +151,7 @@ export default function AnnouncementsListCard<TSeeAllState = unknown>({
                   <Link to={detailHref} className="min-w-0 block">
                     <div className="font-medium truncate">{a.title}</div>
                     <div
-                      className="mt-0.5 text-[12px]"
+                      className="mt-0.5 text-sm"
                       style={{ color: palette.black2 }}
                     >
                       {dateFmt(a.date)}

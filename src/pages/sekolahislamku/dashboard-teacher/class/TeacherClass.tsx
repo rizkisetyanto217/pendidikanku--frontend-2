@@ -470,7 +470,7 @@ function AttendanceBar({
           }}
         />
       </div>
-      <div className="text-xs" style={{ color: palette.black2 }}>
+      <div className="text-sm" style={{ color: palette.black2 }}>
         <span className="font-medium">{hadir}</span> dari {total} siswa hadir
       </div>
     </div>
@@ -587,7 +587,7 @@ function ClassCard({
                       {c.nextSession.title}
                     </div>
                     <div
-                      className="text-xs mt-0.5"
+                      className="text-sm mt-0.5"
                       style={{ color: palette.black2 }}
                     >
                       {dateShort(c.nextSession.dateISO)} • {c.nextSession.time}
@@ -627,7 +627,7 @@ function ClassCard({
                   <Badge
                     palette={palette}
                     variant="secondary"
-                    className="text-xs"
+                    className="text-sm"
                   >
                     Hari ini
                   </Badge>
@@ -752,7 +752,7 @@ function FilterControls({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 ">
         <div className="space-y-2">
           <label
-            className="text-xs font-medium"
+            className="text-sm font-medium"
             style={{ color: palette.black2 }}
           >
             Ruang Kelas
@@ -779,7 +779,7 @@ function FilterControls({
 
         <div className="space-y-2">
           <label
-            className="text-xs font-medium"
+            className="text-sm font-medium"
             style={{ color: palette.black2 }}
           >
             Tahun Ajaran
@@ -806,7 +806,7 @@ function FilterControls({
 
         <div className="space-y-2">
           <label
-            className="text-xs font-medium"
+            className="text-sm font-medium"
             style={{ color: palette.black2 }}
           >
             Angkatan
@@ -833,7 +833,7 @@ function FilterControls({
 
         <div className="space-y-2">
           <label
-            className="text-xs font-medium"
+            className="text-sm font-medium"
             style={{ color: palette.black2 }}
           >
             Urutkan
@@ -1060,7 +1060,7 @@ const TeacherClassesList: React.FC<TeacherClassesProps> = ({
                     Menampilkan {filtered.length} dari {classes.length} kelas
                   </div>
                   {filtered.length > 0 && (
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Diurutkan berdasarkan:{" "}
                       {sortBy === "name"
                         ? "Nama Kelas"

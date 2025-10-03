@@ -68,21 +68,24 @@ export default function StudentDetail() {
         }
       />
 
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-6">
-          <ParentSidebar palette={palette} />
+      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
-          <div className="flex-1 space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
               <Btn
-                onClick={() => navigate(-1)}
                 palette={palette}
+                onClick={() => navigate(-1)}
                 variant="ghost"
-                size="sm"
+                className="cursor-pointer flex items-center gap-2"
               >
-                <ArrowLeft size={16} className="mr-1" />
-                Kembali
+                <ArrowLeft size={20} />
               </Btn>
+
+              <h1 className="text-lg font-semibold">Detail Murid</h1>
             </div>
 
             {/* Info siswa */}

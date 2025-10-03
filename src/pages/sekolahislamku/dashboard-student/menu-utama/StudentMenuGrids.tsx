@@ -113,7 +113,7 @@ export default function StudentMenuGrids() {
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-8 min-w-0 ">
             <SectionCard palette={palette} className="p-4 md:p-5">
-              <div className="mb-4 font-semibold text-base">
+              <div className="mb-4 font-semibold text-lg">
                 Akses Cepat Murid
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">

@@ -333,7 +333,7 @@ function MiniKPI({
           {icon}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.black2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>
@@ -354,7 +354,7 @@ function RoomCard({ room, palette }: { room: ClassRoom; palette: Palette }) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="font-semibold truncate">{room.class_rooms_name}</div>
-          <div className="text-xs mt-0.5" style={{ color: palette.black2 }}>
+          <div className="text-sm mt-0.5" style={{ color: palette.black2 }}>
             Kode: {room.class_rooms_code}
           </div>
         </div>

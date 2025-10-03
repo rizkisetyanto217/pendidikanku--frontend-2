@@ -302,7 +302,7 @@ const AttendanceStatusBadge = ({
 
   return (
     <span
-      className={`px-2 py-1 rounded text-xs font-medium ${config.color} ${config.bg}`}
+      className={`px-2 py-1 rounded text-sm font-medium ${config.color} ${config.bg}`}
     >
       {config.label}
     </span>
@@ -442,7 +442,7 @@ const ClassDetail: React.FC = () => {
                         {classDetail.homeroom}
                       </div>
                       <div
-                        className="text-xs"
+                        className="text-sm"
                         style={{ color: palette.black2 }}
                       >
                         Wali Kelas
@@ -460,7 +460,7 @@ const ClassDetail: React.FC = () => {
                         {classDetail.studentsCount} Siswa
                       </div>
                       <div
-                        className="text-xs"
+                        className="text-sm"
                         style={{ color: palette.black2 }}
                       >
                         Total Siswa
@@ -478,7 +478,7 @@ const ClassDetail: React.FC = () => {
                         {attendanceSummary.hadir || 0} Hadir
                       </div>
                       <div
-                        className="text-xs"
+                        className="text-sm"
                         style={{ color: palette.black2 }}
                       >
                         Hari Ini
@@ -548,7 +548,7 @@ const ClassDetail: React.FC = () => {
                             </p>
                             {student.parentPhone && (
                               <div
-                                className="flex items-center gap-2 text-xs mt-2"
+                                className="flex items-center gap-2 text-sm mt-2"
                                 style={{ color: palette.black2 }}
                               >
                                 <Phone size={12} />
@@ -587,7 +587,7 @@ const ClassDetail: React.FC = () => {
                               {item.teacher}
                             </p>
                             <div
-                              className="flex items-center gap-4 text-xs mt-2"
+                              className="flex items-center gap-4 text-sm mt-2"
                               style={{ color: palette.black2 }}
                             >
                               <div className="flex items-center gap-1">
@@ -631,7 +631,7 @@ const ClassDetail: React.FC = () => {
                               {assignment.subject}
                             </p>
                             <div
-                              className="flex items-center gap-4 text-xs mt-2"
+                              className="flex items-center gap-4 text-sm mt-2"
                               style={{ color: palette.black2 }}
                             >
                               <span>
@@ -697,7 +697,7 @@ const ClassDetail: React.FC = () => {
                               {material.subject}
                             </p>
                             <div
-                              className="flex items-center gap-4 text-xs mt-2"
+                              className="flex items-center gap-4 text-sm mt-2"
                               style={{ color: palette.black2 }}
                             >
                               <span>

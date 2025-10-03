@@ -59,7 +59,7 @@ interface InfoRowProps {
 function InfoRow({ label, value, palette }: InfoRowProps) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs opacity-90" style={{ color: palette.black1 }}>
+      <span className="text-sm opacity-90" style={{ color: palette.black1 }}>
         {label}
       </span>
       <span className="font-medium text-sm">{value}</span>
@@ -245,7 +245,7 @@ export default function DetailRoomSchool() {
                   </div>
                   <div>
                     <div
-                      className="text-xs opacity-90"
+                      className="text-sm opacity-90"
                       style={{ color: palette.black1 }}
                     >
                       Kapasitas
@@ -268,7 +268,7 @@ export default function DetailRoomSchool() {
                   </div>
                   <div>
                     <div
-                      className="text-xs opacity-90"
+                      className="text-sm opacity-90"
                       style={{ color: palette.black1 }}
                     >
                       Lokasi
@@ -426,12 +426,12 @@ export default function DetailRoomSchool() {
                           borderColor: palette.silver1,
                           background: palette.white1,
                         }}
-                      >r
+                      >
                       
                         <div className="font-medium text-sm mb-1">
                           {s.label}
                         </div>
-                        <div className="text-xs opacity-70">
+                        <div className="text-sm opacity-90">
                           {s.day ?? s.date} • {s.from} – {s.to} • Grup {s.group}
                         </div>
                       </div>
@@ -461,7 +461,7 @@ export default function DetailRoomSchool() {
                           background: palette.white1,
                         }}
                       >
-                        <div className="text-xs opacity-70 mb-1">
+                        <div className="text-sm opacity-90 mb-1">
                           {new Date(note.ts).toLocaleString("id-ID", {
                             weekday: "short",
                             year: "numeric",

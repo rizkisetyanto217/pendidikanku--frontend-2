@@ -133,7 +133,7 @@ const AttendanceDetailPage: React.FC = () => {
                 </div>
 
                 {!data ? (
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Memuat data…
                   </div>
                 ) : (
@@ -226,7 +226,7 @@ function InputField({
 }) {
   return (
     <div>
-      <div className="text-xs mb-1 text-gray-500">{label}</div>
+      <div className="text-sm mb-1 text-gray-500">{label}</div>
       <input
         type={type}
         value={value}
@@ -271,7 +271,7 @@ function SelectField({
 }) {
   return (
     <div>
-      <div className="text-xs mb-1 text-gray-500">{label}</div>
+      <div className="text-sm mb-1 text-gray-500">{label}</div>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}

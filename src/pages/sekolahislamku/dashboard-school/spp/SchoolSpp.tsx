@@ -172,7 +172,7 @@ const SchoolSpp: React.FC = () => {
                 {/* Bulan */}
                 <div>
                   <div
-                    className="text-xs mb-1"
+                    className="text-sm mb-1"
                     style={{ color: palette.black2 }}
                   >
                     Bulan
@@ -191,7 +191,7 @@ const SchoolSpp: React.FC = () => {
                 {/* Kelas */}
                 <div>
                   <div
-                    className="text-xs mb-1"
+                    className="text-sm mb-1"
                     style={{ color: palette.black2 }}
                   >
                     Kelas
@@ -216,7 +216,7 @@ const SchoolSpp: React.FC = () => {
                 {/* Status */}
                 <div>
                   <div
-                    className="text-xs mb-1"
+                    className="text-sm mb-1"
                     style={{ color: palette.black2 }}
                   >
                     Status
@@ -240,7 +240,7 @@ const SchoolSpp: React.FC = () => {
                 {/* Cari */}
                 <div className="md:col-span-2">
                   <div
-                    className="text-xs mb-1"
+                    className="text-sm mb-1"
                     style={{ color: palette.black2 }}
                   >
                     Cari siswa/ID
@@ -281,7 +281,7 @@ const SchoolSpp: React.FC = () => {
                 <table className="w-full text-sm min-w-[880px]">
                   <thead
                     className="text-left"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     <tr
                       className="border-b"
@@ -405,7 +405,7 @@ function SppDetailModal({
           <h3 className="text-lg font-semibold">Detail Tagihan</h3>
           <button
             className="text-sm px-2 py-1 rounded-lg"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
             onClick={onClose}
           >
             Tutup
@@ -501,7 +501,7 @@ function SppTagihModal({
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col">
-      <span className="text-xs opacity-70">{label}</span>
+      <span className="text-sm opacity-70">{label}</span>
       <span className="font-medium">{value}</span>
     </div>
   );

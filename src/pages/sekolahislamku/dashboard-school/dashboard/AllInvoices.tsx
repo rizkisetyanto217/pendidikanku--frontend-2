@@ -329,7 +329,7 @@ const Total = ({ data, palette }: { data: Tagihan[]; palette: Palette }) => {
       <h3 className="text-lg font-semibold mb-3">Ringkasan Tagihan</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="p-3 rounded-lg" style={{ background: palette.white1 }}>
-          <p className="text-sm opacity-70">Total Tagihan</p>
+          <p className="text-sm opacity-90" style={{color : palette.black2}}>Total Tagihan</p>
           <p className="text-xl font-bold">
             Rp {totalSemua.toLocaleString("id-ID")}
           </p>
@@ -506,7 +506,7 @@ export default function AllInvoices() {
                 style={{ borderColor: palette.silver1 }}
               >
                 <h2 className="text-xl font-semibold">Daftar Tagihan</h2>
-                <p className="text-sm opacity-70 mt-1">
+                <p className="text-sm opacity-90 mt-1">
                   Berikut adalah daftar semua tagihan sekolah
                 </p>
               </div>

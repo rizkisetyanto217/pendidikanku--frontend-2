@@ -289,15 +289,16 @@ const CalenderAcademic: React.FC = () => {
                 {/* Grid tanggal */}
                 <div className="grid grid-cols-7 gap-1 sm:gap-2">
                   {days.map((c, i) => {
-                    const has = c.dateKey ? byDate.get(c.dateKey) : undefined;
+                    const events = c.dateKey
+                      ? byDate.get(c.dateKey)
+                      : undefined;
                     const selected = selectedDay === c.dateKey;
                     return (
                       <button
                         key={i}
                         disabled={!c.dateKey}
                         onClick={() => setSelectedDay(c.dateKey!)}
-                        className="aspect-square rounded-lg border text-left relative p-1 sm:p-2 
-                       transition disabled:opacity-50"
+                        className="aspect-square rounded-lg border text-left relative p-1 sm:p-2 transition disabled:opacity-50"
                         style={{
                           borderColor: palette.silver1,
                           background: selected
@@ -305,19 +306,31 @@ const CalenderAcademic: React.FC = () => {
                             : palette.white1,
                         }}
                       >
+                        {/* Nomor tanggal */}
                         <div className="text-[10px] sm:text-xs font-medium">
                           {c.label ?? ""}
                         </div>
-                        {/* Dot events */}
-                        {!!has && has.length > 0 && (
+
+                        {/* Titik indikator */}
+                        {!!events && events.length > 0 && (
                           <div className="absolute right-1 top-1 flex gap-0.5">
-                            {has.slice(0, 3).map((_, idx) => (
+                            {events.slice(0, 3).map((_, idx) => (
                               <span
                                 key={idx}
                                 className="h-1.5 w-1.5 rounded-full"
                                 style={{ background: palette.primary }}
                               />
                             ))}
+                          </div>
+                        )}
+
+                        {/* Ringkasan judul event pertama */}
+                        {events && events[0] && (
+                          <div
+                            className="mt-1 text-[10px] sm:text-[11px] line-clamp-2 leading-snug"
+                            style={{ color: palette.black2 }}
+                          >
+                            {events[0].title}
                           </div>
                         )}
                       </button>

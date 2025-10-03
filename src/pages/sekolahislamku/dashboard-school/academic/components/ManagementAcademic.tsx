@@ -150,7 +150,7 @@ export default function ManagementAcademic() {
                     className="rounded-xl border p-4 text-sm text-center"
                     style={{
                       borderColor: palette.silver1,
-                      color: palette.silver2,
+                      color: palette.black2,
                     }}
                   >
                     Belum ada ruang terdaftar.
@@ -172,7 +172,7 @@ export default function ManagementAcademic() {
                           </div>
                           <div
                             className="text-xs"
-                            style={{ color: palette.silver2 }}
+                            style={{ color: palette.black2 }}
                           >
                             {room.class_rooms_code}
                           </div>

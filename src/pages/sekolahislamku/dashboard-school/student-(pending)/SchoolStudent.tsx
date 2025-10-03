@@ -122,7 +122,7 @@ function StudentDetailModal({
           <button
             className="p-1 rounded-lg"
             onClick={onClose}
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             <X size={16} />
           </button>
@@ -225,7 +225,7 @@ function StudentEditModal({
           <button
             className="p-1 rounded-lg"
             onClick={onClose}
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
           >
             <X size={16} />
           </button>
@@ -385,7 +385,7 @@ const StudentsPage: React.FC<SchoolStudentProps> = () => {
             <SectionCard palette={palette}>
               <div className="overflow-x-auto">
                 <table className="min-w-[800px] w-full text-sm border-collapse">
-                  <thead style={{ color: palette.silver2 }}>
+                  <thead style={{ color: palette.black2 }}>
                     <tr
                       className="border-b"
                       style={{ borderColor: palette.silver1 }}

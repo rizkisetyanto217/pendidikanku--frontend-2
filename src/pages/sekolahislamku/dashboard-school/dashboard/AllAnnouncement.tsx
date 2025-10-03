@@ -66,7 +66,7 @@ const PriorityBadge: React.FC<{ prioritas: PriorityLevel }> = ({
           : "📝";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${style}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-semibold border ${style}`}
     >
       <span>{icon}</span>
       {prioritas}
@@ -93,7 +93,7 @@ const CategoryBadge: React.FC<{ kategori: CategoryType }> = ({ kategori }) => {
           : "📢";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${style}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-medium border ${style}`}
     >
       <span>{icon}</span>
       {kategori}
@@ -110,7 +110,7 @@ const StatusBadge: React.FC<{ status: StatusType }> = ({ status }) => {
         : "bg-gray-100 text-gray-800 border-gray-300";
   return (
     <span
-      className={`px-2 py-1 rounded-full text-xs font-medium border ${style}`}
+      className={`px-2 py-1 rounded-full text-sm font-medium border ${style}`}
     >
       {status}
     </span>
@@ -521,7 +521,7 @@ function PengumumanCard({
             <StatusBadge status={pengumuman.status} />
           </div>
           {expSoon && (
-            <div className="text-orange-600 text-xs font-medium px-2 py-1 bg-orange-100 rounded">
+            <div className="text-orange-600 text-sm font-medium px-2 py-1 bg-orange-100 rounded">
               Akan berakhir
             </div>
           )}
@@ -575,14 +575,14 @@ function PengumumanCard({
         {/* Target & tags */}
         <div className="space-y-3 mb-4">
           <div>
-            <p className="text-xs font-semibold opacity-60 mb-1">
+            <p className="text-sm font-semibold opacity-60 mb-1">
               TARGET PESERTA
             </p>
             <div className="flex flex-wrap gap-1">
               {pengumuman.target.map((t, i) => (
                 <span
                   key={i}
-                  className="px-2 py-1 rounded text-xs"
+                  className="px-2 py-1 rounded text-sm"
                   style={{
                     background: palette.white1,
                     border: `1px solid ${palette.silver1}`,
@@ -597,12 +597,12 @@ function PengumumanCard({
 
           {pengumuman.tags.length > 0 && (
             <div>
-              <p className="text-xs font-semibold opacity-60 mb-1">TAGS</p>
+              <p className="text-sm font-semibold opacity-60 mb-1">TAGS</p>
               <div className="flex flex-wrap gap-1">
                 {pengumuman.tags.map((tag, i) => (
                   <span
                     key={i}
-                    className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                    className="px-2 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
                   >
                     #{tag}
                   </span>
@@ -615,12 +615,12 @@ function PengumumanCard({
         {/* Lampiran */}
         {pengumuman.lampiran?.length ? (
           <div className="mb-4">
-            <p className="text-xs font-semibold opacity-60 mb-2">LAMPIRAN</p>
+            <p className="text-sm font-semibold opacity-60 mb-2">LAMPIRAN</p>
             <div className="flex flex-wrap gap-2">
               {pengumuman.lampiran.map((f, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-sm"
                   style={{
                     background: palette.white1,
                     border: `1px solid ${palette.silver1}`,
@@ -649,7 +649,7 @@ function PengumumanCard({
           className="flex items-center justify-between pt-4 border-t"
           style={{ borderColor: palette.silver1 }}
         >
-          <div className="text-xs opacity-60">
+          <div className="text-sm opacity-60">
             {pengumuman.tanggalBerakhir && (
               <span>Berakhir: {formatDate(pengumuman.tanggalBerakhir)}</span>
             )}
@@ -1139,7 +1139,7 @@ const AllAnnouncement: React.FC = () => {
                         Arsip Pengumuman
                       </p>
                       <p
-                        className="text-xs opacity-90"
+                        className="text-sm opacity-90"
                         style={{ color: palette.black2 }}
                       >
                         Lihat pengumuman lama
@@ -1176,7 +1176,7 @@ const AllAnnouncement: React.FC = () => {
                         Kategori Favorit
                       </p>
                       <p
-                        className="text-xs opacity-90"
+                        className="text-sm opacity-90"
                         style={{ color: palette.black2 }}
                       >
                         Atur preferensi
@@ -1209,7 +1209,7 @@ const AllAnnouncement: React.FC = () => {
                     <div>
                       <p className="font-medium text-sm">Hubungi Admin</p>
                       <p
-                        className="text-xs opacity-90"
+                        className="text-sm opacity-90"
                         style={{ color: palette.black2 }}
                       >
                         Ada pertanyaan?
@@ -1238,7 +1238,7 @@ const AllAnnouncement: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">Informasi Penting</h3>
-                  <p className="text-sm opacity-70 leading-relaxed">
+                  <p className="text-sm opacity-90 leading-relaxed">
                     Pastikan Anda selalu memeriksa pengumuman terbaru setiap
                     hari. Pengumuman dengan prioritas "Urgent" memerlukan
                     perhatian segera. Untuk notifikasi lewat WhatsApp/email,

@@ -196,22 +196,27 @@ export default function StudentAbsence() {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
+      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar kiri (PC) */}
-          <ParentSidebar palette={palette} />
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
-            <Btn
-              palette={palette}
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={16} className="mr-1" />
-              Kembali
-            </Btn>
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                onClick={() => navigate(-1)}
+                variant="ghost"
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+
+              <h1 className="text-lg font-semibold">Absensi Kehadiran</h1>
+            </div>
             {/* Ringkasan */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="font-medium mb-3 flex items-center gap-2">
@@ -241,7 +246,7 @@ export default function StudentAbsence() {
                         style={{ background: palette.white2 }}
                       >
                         <div
-                          className="text-xs"
+                          className="text-sm"
                           style={{ color: palette.black2 }}
                         >
                           {label}
@@ -251,7 +256,7 @@ export default function StudentAbsence() {
                             {value}
                           </Badge>
                           <span
-                            className="text-xs inline-flex items-center gap-1"
+                            className="text-sm inline-flex items-center gap-1"
                             style={{ color: palette.black2 }}
                           >
                             <Percent size={12} /> {pct}%
@@ -269,7 +274,7 @@ export default function StudentAbsence() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Total Sesi
                     </div>
                     <div className="mt-1">
@@ -290,7 +295,7 @@ export default function StudentAbsence() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.black2 }}>
+                  <label className="text-sm" style={{ color: palette.black2 }}>
                     Periode
                   </label>
                   <select
@@ -306,7 +311,7 @@ export default function StudentAbsence() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.black2 }}>
+                  <label className="text-sm" style={{ color: palette.black2 }}>
                     Status
                   </label>
                   <select
@@ -325,7 +330,7 @@ export default function StudentAbsence() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs" style={{ color: palette.black2 }}>
+                  <label className="text-sm" style={{ color: palette.black2 }}>
                     Mode
                   </label>
                   <select
@@ -378,7 +383,7 @@ export default function StudentAbsence() {
                     <div className="text-sm">
                       <div className="font-medium">{dateShort(a.date)}</div>
                       <div
-                        className="text-xs"
+                        className="text-sm"
                         style={{ color: palette.black2 }}
                       >
                         {a.mode
@@ -389,7 +394,7 @@ export default function StudentAbsence() {
                         {a.time ? `• ${a.time}` : ""}
                       </div>
                       <div
-                        className="text-xs mt-1"
+                        className="text-sm mt-1"
                         style={{ color: palette.black2 }}
                       >
                         {dateLong(a.date)}

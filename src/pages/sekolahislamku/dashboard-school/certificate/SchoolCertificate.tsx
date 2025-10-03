@@ -453,7 +453,7 @@ const SchoolCertificate: React.FC = () => {
                 <div className="px-4 md:px-5 pb-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <div
-                      className="text-xs mb-1"
+                      className="text-sm mb-1"
                       style={{ color: palette.black2 }}
                     >
                       Bulan Terbit
@@ -536,7 +536,7 @@ const SchoolCertificate: React.FC = () => {
                               {c.name}
                             </div>
                             <div
-                              className="text-xs"
+                              className="text-sm"
                               style={{ color: palette.black2 }}
                             >
                               Tahun Ajaran {c.academic_year}
@@ -812,7 +812,7 @@ const SchoolCertificate: React.FC = () => {
                   </table>
 
                   <div
-                    className="pt-3 text-xs flex items-center justify-between"
+                    className="pt-3 text-sm flex items-center justify-between"
                     style={{ color: palette.silver2 }}
                   >
                     <div>
@@ -870,7 +870,7 @@ function KpiTile({
           {icon ?? <Award size={18} />}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.black2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>

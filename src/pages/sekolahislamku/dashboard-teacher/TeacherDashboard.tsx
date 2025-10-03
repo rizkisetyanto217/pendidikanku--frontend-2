@@ -127,7 +127,7 @@ function KpiTile({
           {icon}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.black2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>
@@ -418,8 +418,18 @@ export default function TeacherDashboard() {
               <div className="lg:col-span-6">
                 <SectionCard palette={palette}>
                   <div className="p-4 md:p-5 pb-2 font-medium flex items-center gap-2">
-                    <Users size={16} color={palette.quaternary} />
-                    Kelas yang Saya Kelola
+                    <div className=" pb-1 font-medium flex items-center gap-2 md:-mt-1">
+                      <div
+                        className="h-9 w-9 rounded-xl flex items-center justify-center "
+                        style={{
+                          background: palette.white3,
+                          color: palette.quaternary,
+                        }}
+                      >
+                        <Users size={18} />
+                      </div>
+                      <h1 className="text-base font-semibold">Kelas yang Saya Kelola</h1>
+                    </div>
                   </div>
                   <div className="px-4 md:px-5 pb-4 grid gap-2">
                     {managedClasses.length > 0 ? (
@@ -510,7 +520,7 @@ function MyClassItem({
     >
       <div className="min-w-0">
         <div className="font-medium truncate">{name}</div>
-        <div className="text-xs truncate" style={{ color: palette.black2 }}>
+        <div className="text-sm truncate" style={{ color: palette.black2 }}>
           {typeof students === "number" ? `${students} siswa` : "—"}{" "}
           {lastSubject ? `• ${lastSubject}` : ""}
         </div>

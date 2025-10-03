@@ -146,7 +146,7 @@ const SchoolActiveClass: React.FC = () => {
                 <table className="w-full text-sm min-w-[760px]">
                   <thead
                     className="text-left"
-                    style={{ color: palette.silver2 }}
+                    style={{ color: palette.black2 }}
                   >
                     <tr
                       className="border-b"
@@ -168,7 +168,7 @@ const SchoolActiveClass: React.FC = () => {
                         <td
                           colSpan={5}
                           className="py-8 text-center"
-                          style={{ color: palette.silver2 }}
+                          style={{ color: palette.black2 }}
                         >
                           Tidak ada data kelas.
                         </td>
@@ -196,8 +196,8 @@ const SchoolActiveClass: React.FC = () => {
                   </tbody>
                 </table>
                 <div
-                  className="pt-3 text-xs"
-                  style={{ color: palette.silver2 }}
+                  className="pt-3 text-sm"
+                  style={{ color: palette.black2 }}
                 >
                   Menampilkan {rows.length} kelas
                 </div>

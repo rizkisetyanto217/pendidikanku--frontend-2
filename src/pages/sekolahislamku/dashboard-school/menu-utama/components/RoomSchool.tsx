@@ -397,7 +397,7 @@ function RoomModal({
             <input
               className="w-full rounded-lg border px-3 py-2 text-sm"
               style={{
-                borderColor: palette.silver2,
+                borderColor: palette.black2,
                 background: palette.white2,
               }}
               value={name}
@@ -419,7 +419,7 @@ function RoomModal({
               min={1}
               className="w-full rounded-lg border px-3 py-2 text-sm"
               style={{
-                borderColor: palette.silver2,
+                borderColor: palette.black2,
                 background: palette.white2,
               }}
               value={capacity}
@@ -440,7 +440,7 @@ function RoomModal({
               <select
                 className="w-full h-10 rounded-lg border px-3 pr-8 text-sm outline-none appearance-none"
                 style={{
-                  borderColor: palette.silver2,
+                  borderColor: palette.black2,
                   background: palette.white2,
                   color: palette.black1,
                 }}
@@ -705,7 +705,7 @@ export default function RoomSchool() {
                   <input
                     className="w-full rounded-lg border px-3 py-2 text-sm"
                     style={{
-                      borderColor: palette.silver2,
+                      borderColor: palette.black2,
                       background: palette.white2,
                       color: palette.black1,
                     }}
@@ -716,7 +716,7 @@ export default function RoomSchool() {
                   <select
                     className="rounded-lg border px-2 py-2 text-sm"
                     style={{
-                      borderColor: palette.silver2,
+                      borderColor: palette.black2,
                       background: palette.white2,
                     }}
                     value={limit}
@@ -756,7 +756,7 @@ export default function RoomSchool() {
                     <thead>
                       <tr
                         className="text-left"
-                        style={{ color: palette.silver2 }}
+                        style={{ color: palette.black2 }}
                       >
                         <th className="py-2 pr-3">Nama</th>
                         <th className="py-2 pr-3">Kapasitas</th>
@@ -839,7 +839,7 @@ export default function RoomSchool() {
 
                 {total > 0 && (
                   <div className="mt-3 flex items-center justify-between text-sm">
-                    <div className="opacity-70">
+                    <div className="opacity-90">
                       Total: {total} • Halaman {page}/{pageCount}
                     </div>
                     <div className="flex items-center gap-2">

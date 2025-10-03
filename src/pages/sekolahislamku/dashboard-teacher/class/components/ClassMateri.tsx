@@ -641,7 +641,7 @@ export default function ClassMateri() {
                         )}
 
                         <div
-                          className="mt-2 flex flex-wrap items-center gap-2 text-xs"
+                          className="mt-2 flex flex-wrap items-center gap-2 text-sm"
                           style={{ color: palette.black2 }}
                         >
                           <CalendarDays size={14} />
@@ -666,7 +666,7 @@ export default function ClassMateri() {
                     className="px-4 md:px-5 pb-4 md:pb-5 pt-3 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                     style={{ borderColor: palette.silver1 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Aksi cepat untuk materi ini
                     </div>
                     <div className="flex gap-2">

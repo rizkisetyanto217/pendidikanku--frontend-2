@@ -253,7 +253,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
                           Akreditasi {data.accreditation}
                         </Badge>
                       )}
-                      <Badge palette={palette} variant="outline">
+                      <Badge palette={palette} variant="outline"  >
                         Berdiri {foundedYear}
                       </Badge>
                     </div>
@@ -446,7 +446,7 @@ const SchoolProfile: React.FC<SchoolProfileProps> = ({
                         />
                         {g.caption && (
                           <figcaption
-                            className="px-2 py-1 text-xs truncate"
+                            className="px-2 py-1 text-sm truncate"
                             style={{ color: palette.black2 }}
                             title={g.caption}
                           >
@@ -515,7 +515,7 @@ function InfoRow({
     <div className="flex items-start gap-3">
       <span className="mt-1 shrink-0">{icon}</span>
       <div className="min-w-0 flex-1" style={{ color: palette.black2 }}>
-        <div className="text-xs opacity-90 mb-1">
+        <div className="text-sm opacity-90 mb-1">
           <p style={{ color: palette.black2 }}>{label}</p>
         </div>
         <div className="text-sm break-words leading-relaxed">{value}</div>

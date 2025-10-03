@@ -151,7 +151,7 @@ export default function SchoolMenuGrids() {
 
           {/* Main */}
           <section className="flex-1 flex flex-col space-y-6 min-w-0">
-            <div className="mb-2 font-semibold text-base">Akses Cepat</div>
+            <div className="mb-2 font-semibold text-lg">Akses Cepat</div>
 
             {/* Grid menu */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
@@ -173,17 +173,21 @@ function MenuTile({ item, palette }: { item: MenuItem; palette: Palette }) {
   const content = (
     <div
       className="h-full w-full rounded-2xl border p-3 md:p-4 flex flex-col items-center justify-center text-center gap-2 transition-transform"
-      style={{ borderColor: palette.silver1 }}
+      style={{ borderColor: palette.silver1, background: palette.white1 }}
     >
-      <span style={{ color: palette.primary }} aria-hidden>
+      <span
+        className="h-12 w-12 md:h-14 md:w-14 grid place-items-center rounded-xl"    
+        style={{ color: palette.primary, background: palette.primary2 }}
+        aria-hidden
+      >
         <Icon size={22} />
       </span>
-      <div className="text-xs md:text-sm font-medium leading-tight line-clamp-2">
+      <div className="text-sm md:text-sm font-medium leading-tight line-clamp-2">
         {item.label}
       </div>
       {item.note && (
         <div
-          className="text-[11px] md:text-xs"
+          className="text-[11px] md:text-sm"
           style={{ color: palette.silver2 }}
         >
           {item.note}

@@ -104,7 +104,7 @@ function StatusPill({
         <button
           key={o}
           onClick={() => onChange(o)}
-          className="h-7 px-2 rounded-lg text-xs font-medium"
+          className="h-7 px-2 rounded-lg text-sm font-medium"
           style={{
             background: value === o ? palette.primary2 : palette.white2,
             color: value === o ? palette.primary : palette.black1,
@@ -138,7 +138,7 @@ function StudentRow({
       <div className="min-w-0">
         <div className="text-sm font-medium truncate">{s.name}</div>
         {s.nis && (
-          <div className="text-xs" style={{ color: palette.silver2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             NIS: {s.nis}
           </div>
         )}
@@ -311,7 +311,7 @@ export default function ClassAttandence() {
                   <CheckSquare size={18} color={palette.quaternary} />
                   <div>
                     <div className="font-semibold">Absensi Hari Ini</div>
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       <CalendarDays size={12} className="inline mr-1" />
                       {dateLong(todayISO)} — {hijriLong(todayISO)}
                     </div>
@@ -421,7 +421,7 @@ export default function ClassAttandence() {
                     style={{
                       borderColor: palette.silver1,
                       background: palette.white2,
-                      color: palette.silver2,
+                      color: palette.black2,
                     }}
                   >
                     Tidak ada siswa yang cocok.

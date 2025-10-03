@@ -285,7 +285,7 @@ const SchoolStatistik: React.FC = () => {
                       {levelBars.map((b) => (
                         <div key={b.label}>
                           <div
-                            className="flex justify-between text-xs mb-1"
+                            className="flex justify-between text-sm mb-1"
                             style={{ color: palette.black2 }}
                           >
                             <span>{b.label}</span>
@@ -398,7 +398,7 @@ function KpiTile({
           {icon}
         </span>
         <div>
-          <div className="text-xs" style={{ color: palette.black2 }}>
+          <div className="text-sm" style={{ color: palette.black2 }}>
             {label}
           </div>
           <div className="text-xl font-semibold">{value}</div>

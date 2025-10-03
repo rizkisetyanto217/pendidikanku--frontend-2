@@ -164,7 +164,7 @@ function SubjectFormModal({
 
           {/* Status */}
           <div>
-            <label className="text-xs">Status</label>
+            <label className="text-sm">Status</label>
             <select
               value={form.status}
               onChange={(e) =>
@@ -247,7 +247,7 @@ function SubjectDetailModal({
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between border-b py-1 text-sm">
-      <span className="opacity-70">{label}</span>
+      <span className="opacity-90">{label}</span>
       <span>{value}</span>
     </div>
   );
@@ -266,7 +266,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs">{label}</label>
+      <label className="text-sm">{label}</label>
       <input
         type={type}
         value={value}

@@ -282,11 +282,11 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
           <div className="font-medium truncate">
             {b.books_title || "(Tanpa judul)"}
           </div>
-          <div className="text-sm opacity-70 truncate">
+          <div className="text-sm opacity-90 truncate">
             {b.books_author || "-"}
           </div>
           {!!b.books_desc && (
-            <div className="text-sm opacity-60 mt-1 line-clamp-2" style={{ color: palette.black2 }}>
+            <div className="text-sm opacity-90 mt-1 line-clamp-2" >
               {b.books_desc}
             </div>
           )}
@@ -357,14 +357,23 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-medium truncate">
+            <div
+              className="font-medium truncate"
+              style={{ color: palette.black2 }}
+            >
               {b.books_title || "(Tanpa judul)"}
             </div>
-            <div className="text-sm opacity-70 truncate">
+            <div
+              className="text-sm opacity-90 truncate"
+              style={{ color: palette.black2 }}
+            >
               {b.books_author || "-"}
             </div>
             {!!b.books_desc && (
-              <div className="text-[11px] opacity-60 mt-1 line-clamp-2">
+              <div
+                className="text-sm opacity-80 mt-1 line-clamp-2"
+                style={{ color: palette.black2 }}
+              >
                 {b.books_desc}
               </div>
             )}
@@ -484,7 +493,7 @@ const SchoolBooks: React.FC<SchoolBooksProps> = ({
                 </div>
               ) : items.length === 0 ? (
                 <SectionCard palette={palette} className="p-10 text-center">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     {q
                       ? "Tidak ada hasil untuk pencarianmu."
                       : "Belum ada buku."}

@@ -175,7 +175,7 @@ export default function ChildSummaryCard({
             <div className="mt-2">
               <ProgressBar value={quickRate} palette={palette} />
               <div
-                className="mt-1 text-[11px]"
+                className="mt-1 text-sm"
                 style={{ color: palette.black2 }}
               >
                 {quickRate}% hadir
@@ -243,7 +243,7 @@ export default function ChildSummaryCard({
 
             {todayDisplay === "compact" ? (
               <>
-                <div className="flex flex-wrap items-center gap-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
                   <span className="inline-flex items-center gap-1">
                     {renderStatusBadge(today.attendance.status)}
                     {today.attendance.time && (

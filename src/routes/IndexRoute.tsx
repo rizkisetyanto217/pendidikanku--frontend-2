@@ -657,6 +657,11 @@ export default function AppRoutes() {
           <Route path="announcements" element={<AnnouncementsStudent />} />
           <Route path="progress" element={<StudentProgressDetail />} />
           <Route path="progress/raport" element={<StudentRaport />} />
+          <Route path="progress/absensi" element={<StudentAbsence />} />
+          <Route
+            path="progress/catatan-hasil"
+            element={<StudentNotesSummary />}
+          />
           <Route path="jadwal" element={<StudentSchedule />} />
           <Route path="finance" element={<StudentFInance />} />
           <Route path="finnance-list" element={<ListFinance />} />

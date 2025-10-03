@@ -183,7 +183,7 @@ export default function AnnouncementsStudent() {
                         <div className="min-w-0">
                           <div className="font-medium truncate">{a.title}</div>
                           <div
-                            className="text-xs mt-0.5"
+                            className="text-sm mt-0.5"
                             style={{ color: palette.black2 }}
                           >
                             {dateFmt(a.date)}

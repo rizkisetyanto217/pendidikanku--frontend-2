@@ -171,7 +171,7 @@ function Row({
       style={mergedStyle}
       {...rest}
     >
-      <span style={{ color: palette.silver2 }}>{left}</span>
+      <span style={{ color: palette.black2 }}>{left}</span>
       <span style={{ fontWeight: boldRight ? 700 : 500 }}>{right}</span>
     </div>
   );
@@ -249,7 +249,7 @@ function ItemsTable({
         style={{ borderColor: palette.silver1, background: palette.white2 }}
       >
         <div
-          className="grid grid-cols-12 px-3 py-2 text-xs"
+          className="grid grid-cols-12 px-3 py-2 text-sm"
           style={{ color: palette.black2 }}
         >
           <div className="col-span-7">Item</div>
@@ -260,7 +260,7 @@ function ItemsTable({
         {loading && (
           <div
             className="px-3 py-3 text-sm"
-            style={{ color: palette.silver2 }}
+            style={{ color: palette.black2 }}
             aria-live="polite"
           >
             Memuat...
@@ -283,7 +283,7 @@ function ItemsTable({
           ))}
 
         {!loading && (!items || items.length === 0) && (
-          <div className="px-3 py-3 text-sm" style={{ color: palette.silver2 }}>
+          <div className="px-3 py-3 text-sm" style={{ color: palette.black2 }}>
             Tidak ada item.
           </div>
         )}
@@ -372,15 +372,15 @@ function SummaryCard({
             className="rounded-xl border p-3 text-sm"
             style={{ borderColor: palette.silver1, background: palette.white2 }}
           >
-            <div style={{ color: palette.silver2 }}>Tanggal</div>
+            <div style={{ color: palette.black2 }}>Tanggal</div>
             <div className="font-medium">{dateLong(data.payment.date)}</div>
 
-            <div className="mt-2" style={{ color: palette.silver2 }}>
+            <div className="mt-2" style={{ color: palette.black2 }}>
               Metode
             </div>
             <div className="font-medium">{data.payment.method}</div>
 
-            <div className="mt-2" style={{ color: palette.silver2 }}>
+            <div className="mt-2" style={{ color: palette.black2 }}>
               Ref
             </div>
             <div className="font-medium">{data.payment.ref}</div>
@@ -424,7 +424,7 @@ export default function StudentFinance() {
         showBack={isFromMenuUtama}
       />
 
-      <main className="w-full px-4 md:px-6 py-4  md:py-8">
+      <main className="w-full px-4 md:px-6 py-4   md:py-8">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">

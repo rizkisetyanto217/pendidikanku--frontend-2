@@ -314,7 +314,7 @@ export default function DetailClass() {
               <SectionCard palette={palette} className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Jumlah Siswa
                     </div>
                     <div className="text-xl font-semibold">
@@ -323,7 +323,7 @@ export default function DetailClass() {
                     {/* Info kecil jika masih pakai fallback */}
                     {students.length === 0 && fallbackTotal > 0 && (
                       <div
-                        className="text-xs mt-0.5"
+                        className="text-sm mt-0.5"
                         style={{ color: palette.black2 }}
                       >
                         (fallback: {fallbackTotal})
@@ -338,7 +338,7 @@ export default function DetailClass() {
               <SectionCard palette={palette} className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Kehadiran Hari Ini
                     </div>
                     <div className="text-xl font-semibold">
@@ -353,7 +353,7 @@ export default function DetailClass() {
               <SectionCard palette={palette} className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Materi • Tugas
                     </div>
                     <div className="text-xl font-semibold">
@@ -424,7 +424,7 @@ export default function DetailClass() {
                     />
                   </div>
                   <div
-                    className="mt-1 text-xs"
+                    className="mt-1 text-sm"
                     style={{ color: palette.black2 }}
                   >
                     {hadir}/{total || 0} hadir • {pct}%

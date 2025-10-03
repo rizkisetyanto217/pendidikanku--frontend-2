@@ -125,7 +125,7 @@ export default function DetailAcademic() {
                 <div className="font-semibold">Periode Akademik</div>
                 {term.academic_terms_is_active && (
                   <span
-                    className="ml-auto text-xs px-2.5 py-1 rounded-full"
+                    className="ml-auto text-sm px-2.5 py-1 rounded-full"
                     style={{
                       background: palette.success2,
                       color: palette.success1,
@@ -138,7 +138,7 @@ export default function DetailAcademic() {
 
               <div className="p-5 grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Tahun Ajaran / Semester
                   </div>
                   <div className="text-xl font-semibold">
@@ -156,7 +156,7 @@ export default function DetailAcademic() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-sm" style={{ color: palette.silver2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Angkatan & Status
                   </div>
                   <div className="text-xl font-semibold">
@@ -226,7 +226,7 @@ function InfoRow({
         {icon}
       </div>
       <div className="min-w-0">
-        <div className="text-xs" style={{ color: palette.silver2 }}>
+        <div className="text-sm" style={{ color: palette.black2 }}>
           {label}
         </div>
         <div className="text-sm font-medium break-words">{value}</div>
