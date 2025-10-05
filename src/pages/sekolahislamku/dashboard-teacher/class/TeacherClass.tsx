@@ -604,12 +604,12 @@ function ClassCard({
           </div>
         ) : (
           <div className="space-y-4">
-            <AttendanceBar
+            {/* <AttendanceBar
               pct={pct}
               total={total}
               hadir={hadir}
               palette={palette}
-            />
+            /> */}
             <div
               className="rounded-xl border p-4 space-y-3"
               style={{

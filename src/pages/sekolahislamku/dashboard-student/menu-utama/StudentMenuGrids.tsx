@@ -47,7 +47,7 @@ export default function StudentMenuGrids() {
       {
         key: "kelas-saya",
         label: "Kelas Saya",
-        to: "progress",
+        to: "my-class",
         icon: <BookOpen />,
       },
       {

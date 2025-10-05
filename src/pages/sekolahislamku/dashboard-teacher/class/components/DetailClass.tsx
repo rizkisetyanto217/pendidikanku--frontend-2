@@ -269,11 +269,7 @@ export default function DetailClass() {
                       {cls?.room ?? "-"}
                     </Badge>
                     <span>Wali Kelas: {cls?.homeroom ?? "-"}</span>
-                    {cls?.assistants?.length ? (
-                      <span title={cls.assistants.join(", ")}>
-                        • Asisten: {cls.assistants.join(", ")}
-                      </span>
-                    ) : null}
+                   
                     <span>
                       •{" "}
                       {cls?.academicTerm ?? location.state?.academicTerm ?? "-"}
@@ -342,7 +338,7 @@ export default function DetailClass() {
                       Kehadiran Hari Ini
                     </div>
                     <div className="text-xl font-semibold">
-                      {hadir}/{total || 0} ({pct}%)
+                      {hadir}/{total || 0} 
                     </div>
                   </div>
                   <ClipboardList size={18} />
@@ -365,74 +361,7 @@ export default function DetailClass() {
               </SectionCard>
             </section>
 
-            {/* Kehadiran breakdown */}
-            <SectionCard palette={palette}>
-              <div className="p-4 md:p-5">
-                <div className="text-sm mb-2" style={{ color: palette.black2 }}>
-                  Ringkasan Kehadiran Hari Ini
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                  <Badge
-                    palette={palette}
-                    variant="success"
-                    className="justify-center"
-                  >
-                    Hadir: {cls?.todayAttendance.hadir ?? 0}
-                  </Badge>
-                  <Badge
-                    palette={palette}
-                    variant="info"
-                    className="justify-center"
-                  >
-                    Online: {cls?.todayAttendance.online ?? 0}
-                  </Badge>
-                  <Badge
-                    palette={palette}
-                    variant="warning"
-                    className="justify-center"
-                  >
-                    Sakit: {cls?.todayAttendance.sakit ?? 0}
-                  </Badge>
-                  <Badge
-                    palette={palette}
-                    variant="secondary"
-                    className="justify-center"
-                  >
-                    Izin: {cls?.todayAttendance.izin ?? 0}
-                  </Badge>
-                  <Badge
-                    palette={palette}
-                    variant="destructive"
-                    className="justify-center"
-                  >
-                    Alpa: {cls?.todayAttendance.alpa ?? 0}
-                  </Badge>
-                </div>
-
-                {/* Progress bar */}
-                <div className="mt-3">
-                  <div
-                    className="h-2 w-full rounded-full overflow-hidden"
-                    style={{ background: palette.white2 }}
-                  >
-                    <div
-                      className="h-full"
-                      style={{
-                        width: `${pct}%`,
-                        background: palette.secondary,
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="mt-1 text-sm"
-                    style={{ color: palette.black2 }}
-                  >
-                    {hadir}/{total || 0} hadir • {pct}%
-                  </div>
-                </div>
-              </div>
-            </SectionCard>
-
+           
             {/* Jadwal terdekat */}
             <SectionCard palette={palette}>
               <div className="p-4 md:p-5">

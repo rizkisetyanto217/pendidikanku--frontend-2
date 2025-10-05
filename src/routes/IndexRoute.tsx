@@ -245,6 +245,11 @@ import About from "@/pages/masjidku/website/pages/navbar-page/about";
 import Contact from "@/pages/masjidku/website/pages/navbar-page/contact";
 import QuizPage from "@/pages/sekolahislamku/dashboard-school/class/components/QuizPage";
 import QuizDetailPage from "@/pages/sekolahislamku/dashboard-school/class/components/QuizDetailPage";
+import DetailClassQuiz from "@/pages/sekolahislamku/dashboard-teacher/class/components/DetailClassQuiz";
+import MyClass from "@/pages/sekolahislamku/dashboard-student/class/MyClass";
+import StudentMateri from "@/pages/sekolahislamku/dashboard-student/class/StudentMateri";
+import StudentAssignment from "@/pages/sekolahislamku/dashboard-student/class/StudentAssignment";
+import StudentQuizPage from "@/pages/sekolahislamku/dashboard-student/class/QuizPage";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -655,7 +660,10 @@ export default function AppRoutes() {
           <Route index element={<StudentMenuGrids />} />
           <Route path="menu-utama" element={<StudentMenuGrids />} />
           <Route path="announcements" element={<AnnouncementsStudent />} />
-          <Route path="progress" element={<StudentProgressDetail />} />
+          <Route path="my-class" element={<MyClass />} />
+          <Route path="my-class/:id/materi" element={<StudentMateri />} />
+          <Route path="my-class/:id/tugas" element={<StudentAssignment />} />
+          <Route path="my-class/:id/quiz" element={<StudentQuizPage/>} />
           <Route path="progress/raport" element={<StudentRaport />} />
           <Route path="progress/absensi" element={<StudentAbsence />} />
           <Route
@@ -679,6 +687,7 @@ export default function AppRoutes() {
         <Route path="penilaian" element={<TeacherGrading />} />
         <Route path="penilaian/:id" element={<DetailGrading />} />
         <Route path="pengumuman" element={<TeacherAnnouncements />} />
+        <Route path="quizClass/:id" element={<DetailClassQuiz />} />
         <Route path="jadwal" element={<TeacherSchedule />} />
         <Route path="assignments" element={<AllAssignment />} />
         <Route path="assignments/:id" element={<DetailStudent />} />
@@ -726,6 +735,10 @@ export default function AppRoutes() {
           <Route path=":id/material/:materialId" element={<DetailMateri />} />
           {/* <Route path=":id/assignment/:id" element={<DetailAssignment />} /> */}
           <Route path=":id/materi" element={<ClassMateri />} />
+          <Route
+            path=":id/materi/quizClass/:quizId"
+            element={<DetailClassQuiz />}
+          />
           <Route path=":id/tugas" element={<AssignmentClass />} />
           <Route
             path=":id/assignment/:assignmentId"
