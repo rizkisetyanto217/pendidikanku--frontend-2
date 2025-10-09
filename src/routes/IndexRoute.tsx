@@ -250,6 +250,9 @@ import MyClass from "@/pages/sekolahislamku/dashboard-student/class/MyClass";
 import StudentMateri from "@/pages/sekolahislamku/dashboard-student/class/StudentMateri";
 import StudentAssignment from "@/pages/sekolahislamku/dashboard-student/class/StudentAssignment";
 import StudentQuizPage from "@/pages/sekolahislamku/dashboard-student/class/QuizPage";
+import StudentExam from "@/pages/sekolahislamku/dashboard-student/class/StudentExam";
+import StudentAssignmentClass from "@/pages/sekolahislamku/dashboard-student/assignment/StudentAssignmentClass";
+import StudentAttandenceClass from "@/pages/sekolahislamku/dashboard-student/class/StudentAttandenceClass";
 
 // import { schoolRoutes } from "@/pages/sekolahislamku/dashboard-school/routes";
 
@@ -629,6 +632,7 @@ export default function AppRoutes() {
         <Route path="progress" element={<StudentProgressDetail />} />
         <Route path="all-schedule" element={<AllScheduleStudent />} />
         <Route path="profil-murid" element={<StudentProfil />} />
+        <Route path="tugas" element={<StudentAssignmentClass />} />
 
         <Route
           path="all-schedule/detail/:scheduleId"
@@ -663,7 +667,11 @@ export default function AppRoutes() {
           <Route path="my-class" element={<MyClass />} />
           <Route path="my-class/:id/materi" element={<StudentMateri />} />
           <Route path="my-class/:id/tugas" element={<StudentAssignment />} />
-          <Route path="my-class/:id/quiz" element={<StudentQuizPage/>} />
+          <Route path="my-class/:id/quiz" element={<StudentQuizPage />} />
+          <Route path="my-class/:id/kehadiran" element={<StudentAttandenceClass />} />
+
+          <Route path="my-class/:id/ujian" element={<StudentExam />} />
+
           <Route path="progress/raport" element={<StudentRaport />} />
           <Route path="progress/absensi" element={<StudentAbsence />} />
           <Route

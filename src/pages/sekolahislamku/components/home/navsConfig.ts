@@ -43,6 +43,7 @@ export const NAVS: NavDict = {
     { path: "progress", label: "Progress Anak", icon: ClipboardCheck },
     { path: "finance", label: "Pembayaran", icon: Wallet },
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
+    { path: "tugas", label: "Tugas", icon: ClipboardCheck },
     { path: "profil-murid", label: "Profil", icon: Users },
     // kalau mau nambah "Pengumuman" atau "Rapor Nilai", tambahkan di sini
     // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
@@ -52,6 +53,8 @@ export const NAVS: NavDict = {
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "kelas", label: "Kelas Saya", icon: Users },
+    { path: "guru-mapel", label: "Guru Mapel", icon: Users },
+
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "profil-guru", label: "Profil", icon: Users },
   ],

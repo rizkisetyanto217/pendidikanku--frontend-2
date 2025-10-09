@@ -1,3 +1,4 @@
+// src/pages/sekolahislamku/pages/student/MyClass.tsx
 import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
@@ -18,7 +19,11 @@ import {
   ClipboardList,
   GraduationCap,
   ChevronRight,
+  ChevronDown,
   Search,
+  Activity,
+  Video,
+  Info,
 } from "lucide-react";
 
 /* ===== Helpers ===== */
@@ -32,23 +37,23 @@ const dateLong = (iso?: string) =>
       })
     : "-";
 
-/* ===== Dummy data kelas yang diikuti murid ===== */
+/* ===== Dummy data kelas ===== */
 type EnrolledClass = {
   id: string;
   name: string;
   room?: string;
   homeroom: string;
   nextSession?: { dateISO: string; time: string; title: string };
-  progress?: number; // 0-100 (kemajuan materi)
+  progress?: number;
   pendingAssignments?: number;
   activeQuizzes?: number;
-  lastScore?: number; // nilai terakhir
+  lastScore?: number;
 };
 
 const ENROLLED: EnrolledClass[] = [
   {
-    id: "tpa-a",
-    name: "TPA A",
+    id: "tahsin",
+    name: "Tahsin",
     room: "Aula 1",
     homeroom: "Ustadz Abdullah",
     nextSession: {
@@ -62,8 +67,8 @@ const ENROLLED: EnrolledClass[] = [
     lastScore: 88,
   },
   {
-    id: "tpa-b",
-    name: "TPA B",
+    id: "tahfidz",
+    name: "Tahfidz",
     room: "R. Tahfiz",
     homeroom: "Ustadz Salman",
     nextSession: {
@@ -78,13 +83,40 @@ const ENROLLED: EnrolledClass[] = [
   },
 ];
 
+/* ===== Zoom per-kelas (dummy) ===== */
+const ZOOM_INFO: Record<
+  string,
+  | {
+      url: string;
+      topic: string;
+      meetingId: string;
+      passcode: string;
+      startAtLabel: string;
+    }
+  | undefined
+> = {
+  tahsin: {
+    url: "https://us04web.zoom.us/j/74836152611?pwd=28Lxo5tjoNgArUWEEFZenOsxaDBuSk.1",
+    topic: "Sumini's Zoom Meeting",
+    meetingId: "748 3615 2611",
+    passcode: "4pj4qt",
+    startAtLabel: "Kamis, 9 Okt 2025 • 13:00 WIB",
+  },
+  tahfidz: {
+    url: "https://us04web.zoom.us/j/74836152611?pwd=28Lxo5tjoNgArUWEEFZenOsxaDBuSk.1",
+    topic: "Sumini's Zoom Meeting",
+    meetingId: "748 3615 2611",
+    passcode: "4pj4qt",
+    startAtLabel: "Kamis, 9 Okt 2025 • 13:00 WIB",
+  },
+};
+
 const MyClass: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const palette: Palette = pickTheme(themeName, isDark);
 
-  // kalau rute kamu memakai /:slug/siswa atau /:slug/santri, ubah konstanta ini
   const base = `/${slug}/murid`;
 
   const [q, setQ] = useState("");
@@ -159,127 +191,211 @@ const MyClass: React.FC = () => {
 
             {/* List kelas */}
             <div className="grid gap-3">
-              {list.map((c) => (
-                <SectionCard key={c.id} palette={palette} className="p-0">
-                  <div className="p-4 md:p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <div className="text-base md:text-lg font-semibold">
-                            {c.name}
+              {list.map((c) => {
+                const z = ZOOM_INFO[c.id];
+                return (
+                  <SectionCard key={c.id} palette={palette} className="p-0">
+                    {/* Body */}
+                    <div className="p-4 md:p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="text-base md:text-lg font-semibold">
+                              {c.name}
+                            </div>
+                            {c.room && (
+                              <Badge
+                                palette={palette}
+                                variant="outline"
+                                className="h-6"
+                              >
+                                {c.room}
+                              </Badge>
+                            )}
                           </div>
-                          {c.room && (
-                            <Badge
-                              palette={palette}
-                              variant="outline"
-                              className="h-6"
-                            >
-                              {c.room}
-                            </Badge>
-                          )}
-                        </div>
 
-                        {/* meta */}
-                        <div
-                          className="mt-2 flex flex-wrap items-center gap-3 text-sm"
-                          style={{ color: palette.black2 }}
-                        >
-                          <span>Wali Kelas: {c.homeroom}</span>
-                          <span>• Progres: {c.progress ?? 0}%</span>
-                          <span>
-                            • Tugas menunggu: {c.pendingAssignments ?? 0}
-                          </span>
-                          <span>• Quiz aktif: {c.activeQuizzes ?? 0}</span>
-                          {typeof c.lastScore === "number" && (
-                            <span>• Nilai terakhir: {c.lastScore}</span>
-                          )}
-                        </div>
-
-                        {/* sesi berikutnya */}
-                        {c.nextSession && (
+                          {/* meta */}
                           <div
-                            className="mt-2 flex flex-wrap items-center gap-2 text-sm"
+                            className="mt-2 flex flex-wrap items-center gap-3 text-sm"
                             style={{ color: palette.black2 }}
                           >
-                            <CalendarDays size={14} />
+                            <span>Wali Kelas: {c.homeroom}</span>
+                            <span>• Progres: {c.progress ?? 0}%</span>
                             <span>
-                              {dateLong(c.nextSession.dateISO)} •{" "}
-                              {c.nextSession.time}
+                              • Tugas menunggu: {c.pendingAssignments ?? 0}
                             </span>
-                            <span>— {c.nextSession.title}</span>
+                            <span>• Quiz aktif: {c.activeQuizzes ?? 0}</span>
+                            {typeof c.lastScore === "number" && (
+                              <span>• Nilai terakhir: {c.lastScore}</span>
+                            )}
+                          </div>
+
+                          {/* sesi berikutnya */}
+                          {c.nextSession && (
+                            <div
+                              className="mt-2 flex flex-wrap items-center gap-2 text-sm"
+                              style={{ color: palette.black2 }}
+                            >
+                              <CalendarDays size={14} />
+                              <span>
+                                {dateLong(c.nextSession.dateISO)} •{" "}
+                                {c.nextSession.time}
+                              </span>
+                              <span>— {c.nextSession.title}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Aksi cepat - COLLAPSIBLE */}
+                    <div
+                      className="px-4 md:px-5 pb-4 md:pb-5 pt-3 border-t"
+                      style={{ borderColor: palette.silver1 }}
+                    >
+                      <details className="group">
+                        <summary
+                          className="flex items-center justify-between cursor-pointer select-none rounded-lg px-3 py-2"
+                          style={{ background: palette.white1 }}
+                        >
+                          <span
+                            className="text-sm"
+                            style={{ color: palette.black2 }}
+                          >
+                            Aksi cepat
+                          </span>
+                          <ChevronDown
+                            size={18}
+                            className="transition-transform group-open:rotate-180"
+                          />
+                        </summary>
+
+                        {/* optional info zoom ringkas */}
+                        {z && (
+                          <div
+                            className="mt-3 rounded-lg border p-3 text-xs md:text-sm"
+                            style={{
+                              borderColor: palette.silver1,
+                              background: palette.white1,
+                              color: palette.black2,
+                            }}
+                          >
+                            <div className="flex items-center gap-2 font-medium">
+                              <Info size={14} />
+                              {z.topic} • {z.startAtLabel}
+                            </div>
+                            <div className="mt-1">
+                              ID:{" "}
+                              <span className="font-semibold">
+                                {z.meetingId}
+                              </span>
+                              {" • "}Passcode:{" "}
+                              <span className="font-semibold">
+                                {z.passcode}
+                              </span>
+                            </div>
                           </div>
                         )}
-                      </div>
 
-                      <Btn
-                        palette={palette}
-                        variant="ghost"
-                        onClick={() => go(`/kelas/${c.id}`)}
-                        className="shrink-0"
-                      >
-                        <ChevronRight size={18} />
-                      </Btn>
-                    </div>
-                  </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {/* Zoom button */}
+                          {z && (
+                            <a
+                              href={z.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0"
+                            >
+                              <Btn palette={palette} size="sm">
+                                <Video size={16} className="mr-1" />
+                                Masuk Kelas (Zoom)
+                              </Btn>
+                            </a>
+                          )}
 
-                  {/* Aksi cepat (Murid) */}
-                  <div
-                    className="px-4 md:px-5 pb-4 md:pb-5 pt-3 border-t flex flex-wrap items-center justify-between gap-3"
-                    style={{ borderColor: palette.silver1 }}
-                  >
-                    <div className="text-sm" style={{ color: palette.black2 }}>
-                      Aksi cepat
+                          {/* <Btn
+                            palette={palette}
+                            size="sm"
+                            onClick={() => go(`/kelas/${c.id}`)}
+                          >
+                            Masuk Kelas
+                          </Btn> */}
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              go(`/menu-utama/my-class/${c.id}/kehadiran`)
+                            }
+                          >
+                            <Activity size={16} className="mr-1" />
+                            Kehadiran
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              go(`/menu-utama/my-class/${c.id}/materi`)
+                            }
+                          >
+                            <BookOpen size={16} className="mr-1" />
+                            Materi
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              go(`/menu-utama/my-class/${c.id}/tugas`)
+                            }
+                          >
+                            <FileText size={16} className="mr-1" />
+                            Tugas
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              go(`/menu-utama/my-class/${c.id}/quiz`)
+                            }
+                          >
+                            <ClipboardList size={16} className="mr-1" />
+                            Quiz
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              go(`/menu-utama/my-class/${c.id}/ujian`)
+                            }
+                          >
+                            <ClipboardList size={16} className="mr-1" />
+                            Ujian
+                          </Btn>
+
+                          <Btn
+                            palette={palette}
+                            size="sm"
+                            variant="outline"
+                            onClick={() => go(`/kelas/${c.id}/score`)}
+                          >
+                            <GraduationCap size={16} className="mr-1" />
+                            Nilai
+                          </Btn>
+                        </div>
+                      </details>
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        onClick={() => go(`/kelas/${c.id}`)}
-                      >
-                        Masuk Kelas
-                      </Btn>
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          go(`/menu-utama/my-class/${c.id}/materi`)
-                        }
-                      >
-                        <BookOpen size={16} className="mr-1" />
-                        Materi
-                      </Btn>
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => go(`/menu-utama/my-class/${c.id}/tugas`)}
-                      >
-                        <FileText size={16} className="mr-1" />
-                        Tugas
-                      </Btn>
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => go(`/menu-utama/my-class/${c.id}/quiz`)}
-                      >
-                        <ClipboardList size={16} className="mr-1" />
-                        Quiz
-                      </Btn>
-                      <Btn
-                        palette={palette}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => go(`/kelas/${c.id}/score`)}
-                      >
-                        <GraduationCap size={16} className="mr-1" />
-                        Nilai
-                      </Btn>
-                    </div>
-                  </div>
-                </SectionCard>
-              ))}
+                  </SectionCard>
+                );
+              })}
 
               {list.length === 0 && (
                 <SectionCard palette={palette}>

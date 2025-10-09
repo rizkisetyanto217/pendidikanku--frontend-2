@@ -198,22 +198,27 @@ export default function StudentRaport() {
       />
 
       {/* Content + Sidebar */}
-      <main className="mx-auto Replace px-4 py-6">
-        <div className="lg:flex lg:items-start lg:gap-4">
+      <main className="w-full px-4 md:px-6 py-4   md:py-8">
+        <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Sidebar kiri (PC) */}
-          <ParentSidebar palette={palette} />
+          <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <ParentSidebar palette={palette} />
+          </aside>
 
           {/* Konten utama */}
-          <div className="flex-1 space-y-6">
-            <Btn
-              palette={palette}
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={16} className="mr-1" />
-              Kembali
-            </Btn>
+          <div className="flex-1 flex flex-col space-y-6 min-w-0">
+            <div className="md:flex hidden items-center gap-3">
+              <Btn
+                palette={palette}
+                onClick={() => navigate(-1)}
+                variant="ghost"
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <ArrowLeft size={20} />
+              </Btn>
+
+              <h1 className="text-lg font-semibold">Raport Siswa</h1>
+            </div>
             {/* Ringkasan Siswa & Periode */}
             <SectionCard palette={palette} className="p-4 md:p-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -222,7 +227,7 @@ export default function StudentRaport() {
                   className="p-3"
                   style={{ background: palette.white2 }}
                 >
-                  <div className="text-xs" style={{ color: palette.black2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Siswa
                   </div>
                   <div className="mt-1 flex items-center gap-2">
@@ -230,7 +235,7 @@ export default function StudentRaport() {
                     <div className="font-medium">{s?.student.name}</div>
                   </div>
                   <div
-                    className="text-xs mt-1"
+                    className="text-sm mt-1"
                     style={{ color: palette.black2 }}
                   >
                     Kelas: {s?.student.className}
@@ -242,12 +247,12 @@ export default function StudentRaport() {
                   className="p-3"
                   style={{ background: palette.white2 }}
                 >
-                  <div className="text-xs" style={{ color: palette.black2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Periode
                   </div>
                   <div className="mt-1 font-medium">{s?.period.label}</div>
                   <div
-                    className="text-xs mt-1"
+                    className="text-sm mt-1"
                     style={{ color: palette.black2 }}
                   >
                     {s ? `${toID(s.period.start)} — ${toID(s.period.end)}` : ""}
@@ -259,7 +264,7 @@ export default function StudentRaport() {
                   className="p-3"
                   style={{ background: palette.white2 }}
                 >
-                  <div className="text-xs" style={{ color: palette.black2 }}>
+                  <div className="text-sm" style={{ color: palette.black2 }}>
                     Rata-rata Nilai
                   </div>
                   <div className="mt-1 flex items-center gap-2">
@@ -278,7 +283,7 @@ export default function StudentRaport() {
                   </div>
                   {s && (
                     <div
-                      className="text-xs mt-1"
+                      className="text-sm mt-1"
                       style={{ color: palette.black2 }}
                     >
                       Min {s.scores.min} • Max {s.scores.max}
@@ -336,7 +341,7 @@ export default function StudentRaport() {
                         style={{ background: palette.white2 }}
                       >
                         <div
-                          className="text-xs"
+                          className="text-sm"
                           style={{ color: palette.black2 }}
                         >
                           {it.label}
@@ -346,13 +351,13 @@ export default function StudentRaport() {
                             {it.value}
                           </Badge>
                           <span
-                            className="text-xs"
+                            className="text-sm"
                             style={{ color: palette.black2 }}
                           >
                             / {s.attendance.totalSessions} sesi
                           </span>
                         </div>
-                        <div className="mt-2 flex items-center gap-2 text-xs">
+                        <div className="mt-2 flex items-center gap-2 text-sm">
                           <Percent size={12} /> {pct}%
                         </div>
                         <div className="mt-2">
@@ -388,7 +393,7 @@ export default function StudentRaport() {
                         style={{ background: palette.white2 }}
                       >
                         <div
-                          className="text-xs"
+                          className="text-sm"
                           style={{ color: palette.black2 }}
                         >
                           {a.label}
@@ -421,7 +426,7 @@ export default function StudentRaport() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Progres Juz (≈)
                     </div>
                     <div className="mt-2">
@@ -432,7 +437,7 @@ export default function StudentRaport() {
                         palette={palette}
                       />
                       <div
-                        className="mt-1 text-xs"
+                        className="mt-1 text-sm"
                         style={{ color: palette.black2 }}
                       >
                         ~ {s.memorization.juzProgress} Juz
@@ -445,7 +450,7 @@ export default function StudentRaport() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Level Iqra
                     </div>
                     <div className="mt-1 flex items-center gap-2">
@@ -461,7 +466,7 @@ export default function StudentRaport() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Setoran Terakhir
                     </div>
                     <div className="mt-1 text-sm space-y-1">
@@ -475,7 +480,7 @@ export default function StudentRaport() {
                           }}
                         >
                           <div
-                            className="text-xs"
+                            className="text-sm"
                             style={{ color: palette.black2 }}
                           >
                             {toID(m.date)}
@@ -496,7 +501,7 @@ export default function StudentRaport() {
                           </div>
                           {m.note && (
                             <div
-                              className="text-xs mt-1"
+                              className="text-sm mt-1"
                               style={{ color: palette.black2 }}
                             >
                               <p style={{ color: palette.black2 }}>{m.note}</p>
@@ -522,7 +527,7 @@ export default function StudentRaport() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Catatan
                     </div>
                     <p className="mt-1 text-sm">{s.remarks.homeroom}</p>
@@ -533,7 +538,7 @@ export default function StudentRaport() {
                     className="p-3"
                     style={{ background: palette.white2 }}
                   >
-                    <div className="text-xs" style={{ color: palette.black2 }}>
+                    <div className="text-sm" style={{ color: palette.black2 }}>
                       Rekomendasi / PR
                     </div>
                     <ul className="mt-1 list-disc pl-5 text-sm">
