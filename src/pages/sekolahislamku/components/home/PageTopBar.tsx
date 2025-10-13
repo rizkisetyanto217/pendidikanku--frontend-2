@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+// src/pages/sekolahislamku/components/home/PageTopBar.tsx
+import { Link } from "react-router-dom";
+import { ArrowLeft, Menu } from "lucide-react"; // + Menu
 import {
   Btn,
   type Palette,
 } from "@/pages/sekolahislamku/components/ui/Primitives";
-import PublicUserDropdown from "@/components/common/public/UserDropDown"; // ⬅️ import
+import PublicUserDropdown from "@/components/common/public/UserDropDown";
 
 type PageTopBarProps = {
   palette: Palette;
@@ -12,9 +13,10 @@ type PageTopBarProps = {
   onBack?: () => void;
   label?: React.ReactNode;
   title?: React.ReactNode;
-  rightSlot?: React.ReactNode; // biarkan optional
+  rightSlot?: React.ReactNode;
   sticky?: boolean;
   className?: string;
+  onOpenSidebar?: () => void; // + NEW: trigger drawer mobile
 };
 
 export default function PageTopBar({
@@ -23,12 +25,11 @@ export default function PageTopBar({
   onBack,
   label,
   title,
-  rightSlot = <PublicUserDropdown variant="icon" />, // ⬅️ default-nya dropdown
+  rightSlot = <PublicUserDropdown variant="icon" />,
   sticky = true,
   className,
+  onOpenSidebar, // + NEW
 }: PageTopBarProps) {
-  const navigate = useNavigate();
-
   return (
     <div
       className={`${sticky ? "sticky top-0 z-40" : ""} border-b ${className ?? ""}`}
@@ -75,7 +76,22 @@ export default function PageTopBar({
           )}
         </div>
 
-        {rightSlot /* akan default ke PublicUserDropdown kalau tidak diisi */}
+        <div className="flex items-center gap-2">
+          {/* Tombol hamburger hanya di mobile */}
+          {onOpenSidebar && (
+            <Btn
+              palette={palette}
+              variant="outline"
+              size="sm"
+              className="lg:hidden"
+              onClick={onOpenSidebar}
+              aria-label="Buka menu"
+            >
+              <Menu size={18} />
+            </Btn>
+          )}
+          {rightSlot}
+        </div>
       </div>
     </div>
   );

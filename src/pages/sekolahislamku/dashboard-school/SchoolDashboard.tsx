@@ -5,6 +5,8 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import axios from "@/lib/axios";
 import { useEffectiveMasjidId } from "@/hooks/useEffectiveMasjidId";
+import { openSidebarEvt, closeSidebarEvt } from "@/hooks/sidebarBus";
+
 
 import {
   SectionCard,
@@ -438,128 +440,6 @@ function MiniStat({
   );
 }
 
-/* ============ AddThemeModal tetap ada ============ */
-function AddThemeModal({
-  open,
-  onClose,
-  onSubmit,
-  saving,
-  error,
-  palette,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (v: {
-    name: string;
-    color?: string | null;
-    description?: string | null;
-  }) => void;
-  saving?: boolean;
-  error?: string | null;
-  palette: Palette;
-}) {
-  const [name, setName] = useState("");
-  const [color, setColor] = useState("#007074");
-  const [description, setDescription] = useState("");
-
-  useEffect(() => {
-    if (open) {
-      setName("");
-      setColor("#007074");
-      setDescription("");
-    }
-  }, [open]);
-  if (!open) return null;
-  const disabled = saving || !name.trim();
-
-  return (
-    <div
-      className="fixed inset-0 z-[70] grid place-items-center"
-      style={{ background: "rgba(0,0,0,.35)" }}
-    >
-      <div
-        className="w-[min(520px,92vw)] rounded-2xl p-4 shadow-xl ring-1"
-        style={{
-          background: palette.white1,
-          color: palette.black1,
-          borderColor: palette.silver1,
-        }}
-      >
-        <div className="mb-3 text-lg font-semibold">Tambah Tema Pengumuman</div>
-        <div className="grid gap-3">
-          <label className="grid gap-1 text-sm">
-            <span className="opacity-80">Nama Tema</span>
-            <input
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Mis. 'Pengumuman', 'Peringatan', 'Sukses'"
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="opacity-80">Deskripsi (opsional)</span>
-            <textarea
-              rows={3}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Penjelasan singkat tema"
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="opacity-80">Warna (opsional)</span>
-            <input
-              type="color"
-              className="h-9 w-16 rounded border"
-              style={{
-                borderColor: palette.silver2,
-                background: palette.white2,
-              }}
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
-          </label>
-          {!!error && (
-            <div className="text-sm" style={{ color: palette.error1 }}>
-              {error}
-            </div>
-          )}
-        </div>
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <Btn
-            palette={palette}
-            variant="ghost"
-            onClick={onClose}
-            disabled={saving}
-          >
-            Batal
-          </Btn>
-          <Btn
-            palette={palette}
-            onClick={() =>
-              onSubmit({
-                name: name.trim(),
-                color,
-                description: description.trim() || undefined,
-              })
-            }
-            disabled={disabled}
-          >
-            {saving ? "Menyimpan…" : "Tambah"}
-          </Btn>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ================= Page ================= */
 const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
@@ -601,6 +481,8 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
 
   const topbarGregorianISO = toLocalNoonISO(new Date());
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openSidebar, setOpenSidebar] = useState(false);
+
 
   return (
     <div
@@ -613,7 +495,9 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
         gregorianDate={topbarGregorianISO}
         hijriDate={hijriLong(topbarGregorianISO)}
         dateFmt={(iso) => dateFmt(iso)}
+        
       />
+
       <Flash palette={palette} flash={flash} />
 
       {/* Main */}
@@ -641,7 +525,6 @@ const SchoolDashboard: React.FC<SchoolDashboardProps> = ({
                 { label: "Kelas", value: 18, icon: <BookOpen size={18} /> },
               ].map((k) => (
                 <KpiTile
-                 
                   key={k.label}
                   palette={palette}
                   label={k.label}

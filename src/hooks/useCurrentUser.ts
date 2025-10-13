@@ -1,91 +1,93 @@
-// import { useQuery } from "@tanstack/react-query";
-// import axios from "@/lib/axios"; // harus pakai withCredentials: true
-
-// export function useCurrentUser() {
-//   const query = useQuery({
-//     queryKey: ["currentUser"],
-//     queryFn: async () => {
-//       try {
-//         const res = await axios.get("/api/auth/me");
-//         return res.data?.user ?? null;
-//       } catch (err: any) {
-//         if (err?.response?.status === 401) return null;
-//         throw err;
-//       }
-//     },
-//     retry: false,
-//     staleTime: 1000 * 60 * 5,
-//   });
-
-//   return {
-//     user: query.data,
-//     isLoggedIn: !!query.data,
-//     ...query, // kalau mau akses isLoading, refetch, dll
-//   };
-// }
-
-// src/hooks/useCurrentUser.ts
 import { useQuery } from "@tanstack/react-query";
-import axios from "@/lib/axios";
+import api from "@/lib/axios";
 
-type CurrentUser = {
-  id: string;
+/* ===================================================
+   TYPES
+=================================================== */
+export type CurrentUser = {
+  user_id: string;
   user_name: string;
-  email: string;
-  role: string; // "dkm" | "teacher" | "student" | dll
-  masjid_admin_ids?: string[] | null;
-  masjid_teacher_ids?: string[] | null;
-  masjid_student_ids?: string[] | null;
+  email?: string;
+  memberships?: Array<{
+    masjid_id: string;
+    role: "dkm" | "teacher" | "student" | "admin" | "user";
+  }>;
 };
 
-function normalizeIds(x?: string[] | null): string[] {
-  return Array.isArray(x) ? x.filter(Boolean) : [];
+/* ===================================================
+   HELPERS
+=================================================== */
+function getCtxMasjidId(): string | null {
+  try {
+    return localStorage.getItem("ctx_masjid_id");
+  } catch {
+    return null;
+  }
 }
 
-function getEffectiveMasjidId(
-  u: CurrentUser | null | undefined
-): string | null {
-  if (!u) return null;
-  const admin = normalizeIds(u.masjid_admin_ids);
-  const teacher = normalizeIds(u.masjid_teacher_ids);
-  const student = normalizeIds(u.masjid_student_ids);
-  return admin[0] ?? teacher[0] ?? student[0] ?? null;
+/**
+ * Menentukan masjid_id aktif dari user.
+ * Jika tidak ada memberships, akan null.
+ */
+function deriveActiveMasjidId(u?: CurrentUser | null): string | null {
+  if (!u?.memberships?.length) return null;
+  return u.memberships[0].masjid_id || null;
 }
 
+/**
+ * Menentukan role aktif dari user.
+ * Jika tidak ada memberships, fallback ke "user".
+ */
+function deriveRole(u?: CurrentUser | null): string {
+  if (!u?.memberships?.length) return "user";
+  return u.memberships[0].role || "user";
+}
+
+/* ===================================================
+   MAIN HOOK
+=================================================== */
 export function useCurrentUser() {
   const query = useQuery<CurrentUser | null>({
     queryKey: ["currentUser"],
     queryFn: async () => {
       try {
-        const res = await axios.get("/api/auth/me", {
-          withCredentials: true,
-        });
-        const u = (res.data?.user ?? null) as CurrentUser | null;
-        if (!u) return null;
+        // Ambil context masjid dari localStorage
+        const ctxMasjidId = getCtxMasjidId();
 
-        // pastikan field array tidak undefined/null
+        // Gunakan endpoint context-aware (lebih aman)
+        const url = ctxMasjidId
+          ? `/api/auth/me/context?masjid_id=${ctxMasjidId}`
+          : `/api/auth/me/context`;
+
+        const res = await api.get(url);
+
+        // Normalisasi data user
+        const data = res.data?.data || res.data?.user || null;
+        if (!data) return null;
+
         return {
-          ...u,
-          masjid_admin_ids: normalizeIds(u.masjid_admin_ids),
-          masjid_teacher_ids: normalizeIds(u.masjid_teacher_ids),
-          masjid_student_ids: normalizeIds(u.masjid_student_ids),
-        };
+          ...data,
+          memberships: Array.isArray(data.memberships) ? data.memberships : [],
+        } as CurrentUser;
       } catch (err: any) {
         if (err?.response?.status === 401) return null;
+        console.error("[useCurrentUser] gagal ambil user:", err);
         throw err;
       }
     },
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // cache 5 menit
   });
 
-  const masjidId = getEffectiveMasjidId(query.data);
+  const user = query.data;
+  const masjidId = deriveActiveMasjidId(user);
+  const role = deriveRole(user);
 
   return {
-    user: query.data,
-    masjidId, // <-- pakai ini di payload/update
-    role: query.data?.role ?? null,
-    isLoggedIn: !!query.data,
-    ...query, // isLoading, refetch, dll
+    user,
+    masjidId,
+    role,
+    isLoggedIn: !!user,
+    ...query, // expose isLoading, refetch, dll
   };
 }

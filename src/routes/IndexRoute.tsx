@@ -604,11 +604,11 @@ export default function AppRoutes() {
       {/*  */}
       {/*  */}
       {/* ==== Protected Routes - Author ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["author"]} />}>
+      {/* <Route element={<RequireRoleRoute allowedRoles={["author"]} />}>
         <Route path="/author" element={<AuthorLayout />}>
           <Route index element={<AuthorHome />} />
         </Route>
-      </Route>
+      </Route> */}
       {/* ==== Protected Routes - Teacher ==== */}
       {/* <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
         <Route path="/teacher" element={<TeacherLayout />}>
@@ -616,186 +616,143 @@ export default function AppRoutes() {
         </Route>
       </Route> */}
       {/* ==== Protected Routes - Teacher ==== */}
-      <Route element={<RequireRoleRoute allowedRoles={["treasurer"]} />}>
+      {/* <Route element={<RequireRoleRoute allowedRoles={["treasurer"]} />}>
         <Route path="/treasurer" element={<TreasurerLayout />}>
           <Route index element={<TreasurerHome />} />
         </Route>
-      </Route>
+      </Route> */}
       {/* ==== Protected Routes - Teacher ==== */}
       <Route element={<RequireRoleRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
         </Route>
       </Route>
-      <Route path=":slug/murid" element={<StudentLayout />}>
-        <Route index element={<StudentDashboard />} />
-        <Route path="progress" element={<StudentProgressDetail />} />
-        <Route path="all-schedule" element={<AllScheduleStudent />} />
-        <Route path="profil-murid" element={<StudentProfil />} />
-        <Route path="tugas" element={<StudentAssignmentClass />} />
+      <Route element={<RequireRoleRoute allowedRoles={["student"]} />}>
+        <Route path=":slug/murid" element={<StudentLayout />}>
+          <Route index element={<StudentDashboard />} />
+          <Route path="progress" element={<StudentProgressDetail />} />
+          <Route path="all-schedule" element={<AllScheduleStudent />} />
+          <Route path="profil-murid" element={<StudentProfil />} />
+          <Route path="tugas" element={<StudentAssignmentClass />} />
 
-        <Route
-          path="all-schedule/detail/:scheduleId"
-          element={<DetailScheduleStudent />}
-        />
-        <Route path="announcements" element={<AnnouncementsStudent />} />
-        <Route
-          path="announcements/:id"
-          element={<DetailAnnouncementStudent />}
-        />
-        <Route path="tagihan/:id" element={<InvoiceTagihan />} />
-        <Route path="progress/raport" element={<StudentRaport />} />
-        <Route path="detail" element={<StudentDetail />} />
-        <Route path="finance" element={<StudentFInance />} />
-        <Route path="jadwal" element={<StudentSchedule />} />
-        <Route path="finnance-list" element={<ListFinance />} />
-        <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
-        <Route path="pengumuman">
-          <Route index element={<StudentAnnouncement />} />
-          <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
-        </Route>
-        <Route path="progress/absensi" element={<StudentAbsence />} />
-        <Route
-          path="progress/catatan-hasil"
-          element={<StudentNotesSummary />}
-        />
-        {/* Menu Utama Murid */}
-        <Route path="menu-utama">
-          <Route index element={<StudentMenuGrids />} />
-          <Route path="menu-utama" element={<StudentMenuGrids />} />
+          <Route
+            path="all-schedule/detail/:scheduleId"
+            element={<DetailScheduleStudent />}
+          />
           <Route path="announcements" element={<AnnouncementsStudent />} />
-          <Route path="my-class" element={<MyClass />} />
-          <Route path="my-class/:id/materi" element={<StudentMateri />} />
-          <Route path="my-class/:id/tugas" element={<StudentAssignment />} />
-          <Route path="my-class/:id/quiz" element={<StudentQuizPage />} />
-          <Route path="my-class/:id/kehadiran" element={<StudentAttandenceClass />} />
-
-          <Route path="my-class/:id/ujian" element={<StudentExam />} />
-
+          <Route
+            path="announcements/:id"
+            element={<DetailAnnouncementStudent />}
+          />
+          <Route path="tagihan/:id" element={<InvoiceTagihan />} />
           <Route path="progress/raport" element={<StudentRaport />} />
+          <Route path="detail" element={<StudentDetail />} />
+          <Route path="finance" element={<StudentFInance />} />
+          <Route path="jadwal" element={<StudentSchedule />} />
+          <Route path="finnance-list" element={<ListFinance />} />
+          <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
+          <Route path="pengumuman">
+            <Route index element={<StudentAnnouncement />} />
+            <Route path="detail/:id" element={<StudentDetailAnnouncement />} />
+          </Route>
           <Route path="progress/absensi" element={<StudentAbsence />} />
           <Route
             path="progress/catatan-hasil"
             element={<StudentNotesSummary />}
           />
-          <Route path="jadwal" element={<StudentSchedule />} />
-          <Route path="finance" element={<StudentFInance />} />
-          <Route path="finnance-list" element={<ListFinance />} />
-          <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
-          <Route path="profil-murid" element={<StudentProfil />} />
-          <Route path="sertifikat-murid" element={<StudentCertificate />} />
+          {/* Menu Utama Murid */}
+          <Route path="menu-utama">
+            <Route index element={<StudentMenuGrids />} />
+            <Route path="menu-utama" element={<StudentMenuGrids />} />
+            <Route path="announcements" element={<AnnouncementsStudent />} />
+            <Route path="my-class" element={<MyClass />} />
+            <Route path="my-class/:id/materi" element={<StudentMateri />} />
+            <Route path="my-class/:id/tugas" element={<StudentAssignment />} />
+            <Route path="my-class/:id/quiz" element={<StudentQuizPage />} />
+            <Route
+              path="my-class/:id/kehadiran"
+              element={<StudentAttandenceClass />}
+            />
+
+            <Route path="my-class/:id/ujian" element={<StudentExam />} />
+
+            <Route path="progress/raport" element={<StudentRaport />} />
+            <Route path="progress/absensi" element={<StudentAbsence />} />
+            <Route
+              path="progress/catatan-hasil"
+              element={<StudentNotesSummary />}
+            />
+            <Route path="jadwal" element={<StudentSchedule />} />
+            <Route path="finance" element={<StudentFInance />} />
+            <Route path="finnance-list" element={<ListFinance />} />
+            <Route path="finnance-list/:id" element={<InvoiceTagihan />} />
+            <Route path="profil-murid" element={<StudentProfil />} />
+            <Route path="sertifikat-murid" element={<StudentCertificate />} />
+          </Route>
         </Route>
       </Route>
       {/* ==== Protected Routes - Guru (teacher only) ==== */}
-      <Route path=":slug/guru" element={<StudentLayout />}>
-        <Route index element={<TeacherDashboard />} />
-        <Route path="kehadiran" element={<TeacherAttendance />} />
-        <Route path="kehadiran/:id" element={<AttendanceDetail />} />
-        <Route path="profil-guru" element={<TeacherProfil />} />
-        <Route path="penilaian" element={<TeacherGrading />} />
-        <Route path="penilaian/:id" element={<DetailGrading />} />
-        <Route path="pengumuman" element={<TeacherAnnouncements />} />
-        <Route path="quizClass/:id" element={<DetailClassQuiz />} />
-        <Route path="jadwal" element={<TeacherSchedule />} />
-        <Route path="assignments" element={<AllAssignment />} />
-        <Route path="assignments/:id" element={<DetailStudent />} />
-        <Route path="kelas/:id/score" element={<TaskScore />} />
-        <Route
-          path="attendance-management"
-          element={<AttendanceManagement />}
-        />
-
-        <Route path="kelas/homeroom" element={<HomeroomTeacher />} />
-        <Route
-          path="all-announcement-teacher"
-          element={<AllAnnouncementTeacher />}
-        />
-        <Route
-          path="all-announcement-teacher/detail/:id"
-          element={<DetailAnnouncementTeacher />}
-        />
-
-        <Route path="management-class/:name" element={<ManagementClass />} />
-        {/* ===== 3 Hari (GLOBAL) ===== */}
-        <Route path="schedule-3-hari">
-          <Route index element={<ScheduleThreeDays />} />
-          <Route path=":scheduleId" element={<DetailScheduleThreeDays />} />
-        </Route>
-
-        {/* ===== 7 Hari (GLOBAL) =====
-     Parent TIDAK memiliki element langsung; anak ⁠ index ⁠ & ⁠ :scheduleId ⁠ yang render. */}
-        <Route path="schedule-seven-days">
-          <Route index element={<ScheduleSevenDays />} />
-          <Route path=":scheduleId" element={<DetailScheduleSevenDays />} />
-        </Route>
-
-        {/* (Opsional) Aliases lama → redirect */}
-        <Route
-          path="schedule-seven-days/*"
-          element={<Navigate to="../schedule-seven-days" replace />}
-        />
-
-        {/* ===== DALAM /kelas ===== */}
-        <Route path="kelas">
-          <Route index element={<TeacherClass />} />
-          <Route path=":id" element={<DetailClass />} />
-          <Route path=":id/absensi" element={<ClassAttandence />} />
-          <Route path=":id/material/:materialId" element={<DetailMateri />} />
-          {/* <Route path=":id/assignment/:id" element={<DetailAssignment />} /> */}
-          <Route path=":id/materi" element={<ClassMateri />} />
-          <Route
-            path=":id/materi/quizClass/:quizId"
-            element={<DetailClassQuiz />}
-          />
-          <Route path=":id/tugas" element={<AssignmentClass />} />
-          <Route
-            path=":id/assignment/:assignmentId"
-            element={<DetailAssignmentClass />}
-          />
-          <Route
-            path=":id/student/:studentId/score"
-            element={<StudentScore />}
-          />
+      <Route element={<RequireRoleRoute allowedRoles={["teacher"]} />}>
+        <Route path=":slug/guru" element={<StudentLayout />}>
+          <Route index element={<TeacherDashboard />} />
+          <Route path="kehadiran" element={<TeacherAttendance />} />
+          <Route path="kehadiran/:id" element={<AttendanceDetail />} />
+          <Route path="profil-guru" element={<TeacherProfil />} />
+          <Route path="penilaian" element={<TeacherGrading />} />
+          <Route path="penilaian/:id" element={<DetailGrading />} />
+          <Route path="pengumuman" element={<TeacherAnnouncements />} />
+          <Route path="quizClass/:id" element={<DetailClassQuiz />} />
           <Route path="jadwal" element={<TeacherSchedule />} />
-          <Route path="kehadiran" element={<TeacherClassAttendance />} />
+          <Route path="assignments" element={<AllAssignment />} />
+          <Route path="assignments/:id" element={<DetailStudent />} />
+          <Route path="kelas/:id/score" element={<TaskScore />} />
+          <Route
+            path="attendance-management"
+            element={<AttendanceManagement />}
+          />
 
-          {/* 7 Hari (DALAM /kelas) — lengkap list+detail */}
+          <Route path="kelas/homeroom" element={<HomeroomTeacher />} />
+          <Route
+            path="all-announcement-teacher"
+            element={<AllAnnouncementTeacher />}
+          />
+          <Route
+            path="all-announcement-teacher/detail/:id"
+            element={<DetailAnnouncementTeacher />}
+          />
+
+          <Route path="management-class/:name" element={<ManagementClass />} />
+          {/* ===== 3 Hari (GLOBAL) ===== */}
+          <Route path="schedule-3-hari">
+            <Route index element={<ScheduleThreeDays />} />
+            <Route path=":scheduleId" element={<DetailScheduleThreeDays />} />
+          </Route>
+
+          {/* ===== 7 Hari (GLOBAL) =====
+     Parent TIDAK memiliki element langsung; anak ⁠ index ⁠ & ⁠ :scheduleId ⁠ yang render. */}
           <Route path="schedule-seven-days">
             <Route index element={<ScheduleSevenDays />} />
             <Route path=":scheduleId" element={<DetailScheduleSevenDays />} />
           </Route>
 
-          {/* (Opsional) alias lama di /kelas */}
+          {/* (Opsional) Aliases lama → redirect */}
           <Route
-            path="schedule-7-hari/*"
+            path="schedule-seven-days/*"
             element={<Navigate to="../schedule-seven-days" replace />}
           />
-        </Route>
 
-        {/* Router Menu Utama Guru*/}
-        <Route path="menu-utama">
-          <Route index element={<TeacherMenuGrids />} />
-          <Route path="all-classes">
-            <Route index element={<AllClasses />} />
-            <Route path=":id" element={<ClassDetail />} />
-          </Route>
-          <Route path="jadwal" element={<TeacherSchedule showBack />} />
-          <Route path="profil-guru" element={<TeacherProfil showBack />} />
-          <Route path="pengaturan" element={<TeacherSettings />} />
-          <Route path="tugas" element={<TeacherAssignment />} />
-          <Route path="sertifikat" element={<TeacherCertificate />} />
-
-          <Route
-            path="all-announcement-teacher"
-            element={<AllAnnouncementTeacher />}
-          />
+          {/* ===== DALAM /kelas ===== */}
           <Route path="kelas">
-            <Route index element={<TeacherClass showBack />} />
+            <Route index element={<TeacherClass />} />
             <Route path=":id" element={<DetailClass />} />
             <Route path=":id/absensi" element={<ClassAttandence />} />
             <Route path=":id/material/:materialId" element={<DetailMateri />} />
             {/* <Route path=":id/assignment/:id" element={<DetailAssignment />} /> */}
             <Route path=":id/materi" element={<ClassMateri />} />
+            <Route
+              path=":id/materi/quizClass/:quizId"
+              element={<DetailClassQuiz />}
+            />
             <Route path=":id/tugas" element={<AssignmentClass />} />
             <Route
               path=":id/assignment/:assignmentId"
@@ -820,91 +777,149 @@ export default function AppRoutes() {
               element={<Navigate to="../schedule-seven-days" replace />}
             />
           </Route>
+
+          {/* Router Menu Utama Guru*/}
+          <Route path="menu-utama">
+            <Route index element={<TeacherMenuGrids />} />
+            <Route path="all-classes">
+              <Route index element={<AllClasses />} />
+              <Route path=":id" element={<ClassDetail />} />
+            </Route>
+            <Route path="jadwal" element={<TeacherSchedule showBack />} />
+            <Route path="profil-guru" element={<TeacherProfil showBack />} />
+            <Route path="pengaturan" element={<TeacherSettings />} />
+            <Route path="tugas" element={<TeacherAssignment />} />
+            <Route path="sertifikat" element={<TeacherCertificate />} />
+
+            <Route
+              path="all-announcement-teacher"
+              element={<AllAnnouncementTeacher />}
+            />
+            <Route path="kelas">
+              <Route index element={<TeacherClass showBack />} />
+              <Route path=":id" element={<DetailClass />} />
+              <Route path=":id/absensi" element={<ClassAttandence />} />
+              <Route
+                path=":id/material/:materialId"
+                element={<DetailMateri />}
+              />
+              {/* <Route path=":id/assignment/:id" element={<DetailAssignment />} /> */}
+              <Route path=":id/materi" element={<ClassMateri />} />
+              <Route path=":id/tugas" element={<AssignmentClass />} />
+              <Route
+                path=":id/assignment/:assignmentId"
+                element={<DetailAssignmentClass />}
+              />
+              <Route
+                path=":id/student/:studentId/score"
+                element={<StudentScore />}
+              />
+              <Route path="jadwal" element={<TeacherSchedule />} />
+              <Route path="kehadiran" element={<TeacherClassAttendance />} />
+
+              {/* 7 Hari (DALAM /kelas) — lengkap list+detail */}
+              <Route path="schedule-seven-days">
+                <Route index element={<ScheduleSevenDays />} />
+                <Route
+                  path=":scheduleId"
+                  element={<DetailScheduleSevenDays />}
+                />
+              </Route>
+
+              {/* (Opsional) alias lama di /kelas */}
+              <Route
+                path="schedule-7-hari/*"
+                element={<Navigate to="../schedule-seven-days" replace />}
+              />
+            </Route>
+          </Route>
         </Route>
       </Route>
       {/* ==== Protected Routes - Sekolah (dkm only) ==== */}
-      <Route path=":slug/sekolah" element={<StudentLayout />}>
-        <Route index element={<SchoolDashboard />} />
-        <Route path="murid" element={<SchoolStudent />} />
-        <Route path="all-schedule" element={<AllSchedule />} />
-        <Route path="profil-sekolah" element={<SchoolProfile />} />
-        <Route path="keuangan" element={<SchoolFinance />} />
-        <Route path="keuangan/detail/:id" element={<DetailBill />} />
-        <Route path="guru">
-          <Route index element={<SchoolTeacher />} />
-          <Route path=":id" element={<DetailTeacher />} />
-        </Route>
-        <Route path="academic">
-          <Route index element={<AcademicSchool />} />
-          <Route path="detail" element={<DetailAcademic />} />
-          <Route path="manage" element={<ManagementAcademic />} />
-        </Route>
-
-        <Route
-          path="all-schedule/detail/:scheduleId"
-          element={<DetailSchedule />}
-        />
-        {/* ✅ Tagihan */}
-        <Route path="all-invoices">
-          <Route index element={<AllInvoices />} />
-          <Route path=":id" element={<Bill />} /> {/* detail/bayar */}
-        </Route>
-
-        <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
-        <Route path="all-announcement" element={<AllAnnouncement />} />
-
-        <Route path="kelas">
-          <Route index element={<SchoolClasses />} />
-          <Route path="detail/:id" element={<SchoolManageClass />} />
-          <Route path="quiz/:id" element={<QuizPage />} />
-          <Route path="quiz/:id/do" element={<QuizDetailPage />} />
-        </Route>
-        <Route path="kehadiran" element={<SchoolAttendance />} />
-
-        <Route path="pengumuman" element={<SchoolAnnouncement />} />
-        <Route path="buku">
-          <Route index element={<SchoolBooks />} />
-          <Route path="detail/:id" element={<SchoolDetailBook />} />
-        </Route>
-        {/* Route Menu Utama */}
-        <Route path="menu-utama">
-          <Route index element={<SchoolMenuGrids />} />
-          {/* <Route path="academic" element={<AcademicSchool showBack />} /> */}
-          <Route path="profil-sekolah" element={<SchoolProfile showBack />} />
-          <Route path="keuangan" element={<SchoolFinance showBack />} />
+      <Route element={<RequireRoleRoute allowedRoles={["dkm"]} />}>
+        <Route path=":slug/sekolah" element={<StudentLayout />}>
+          <Route index element={<SchoolDashboard />} />
+          <Route path="murid" element={<SchoolStudent />} />
+          <Route path="all-schedule" element={<AllSchedule />} />
+          <Route path="profil-sekolah" element={<SchoolProfile />} />
+          <Route path="keuangan" element={<SchoolFinance />} />
           <Route path="keuangan/detail/:id" element={<DetailBill />} />
-          <Route path="guru" element={<SchoolTeacher showBack />} />
-          <Route path="all-announcement" element={<AllAnnouncement />} />
-          <Route path="sekolah" element={<SchoolDashboard showBack />} />
-          <Route path="room-school" element={<RoomSchool />} />
-
-          <Route path="room-school/:id" element={<DetailRoomSchool />} />
-          <Route path="spp" element={<SchoolSpp />} />
-          <Route path="pelajaran" element={<SchoolSubject />} />
-          <Route path="sertifikat" element={<SchoolCertificate />} />
-          <Route path="kalender" element={<CalenderAcademic />} />
-          <Route path="statistik" element={<SchoolStatistik />} />
-          <Route path="pengaturan" element={<SchoolSettings />} />
-          <Route path="kelas-aktif" element={<SchoolActiveClass />} />
-
-          <Route
-            path="sertifikat/detail/:classId/:studentId"
-            element={<DetailCertificate />}
-          />
-          <Route path="murid" element={<SchoolStudent showBack />} />
-
-          <Route path="buku">
-            <Route index element={<SchoolBooks showBack />} />
-            <Route path="detail/:id" element={<SchoolDetailBook />} />
-          </Route>
-          <Route path="kelas">
-            <Route index element={<SchoolClasses showBack />} />
-            <Route path="detail/:id" element={<SchoolManageClass />} />
+          <Route path="guru">
+            <Route index element={<SchoolTeacher />} />
+            <Route path=":id" element={<DetailTeacher />} />
           </Route>
           <Route path="academic">
-            <Route index element={<AcademicSchool showBack />} />
+            <Route index element={<AcademicSchool />} />
             <Route path="detail" element={<DetailAcademic />} />
             <Route path="manage" element={<ManagementAcademic />} />
+          </Route>
+
+          <Route
+            path="all-schedule/detail/:scheduleId"
+            element={<DetailSchedule />}
+          />
+          {/* ✅ Tagihan */}
+          <Route path="all-invoices">
+            <Route index element={<AllInvoices />} />
+            <Route path=":id" element={<Bill />} /> {/* detail/bayar */}
+          </Route>
+
+          <Route path="tryout-tahfizh-exam" element={<TryoutTahfizhExam />} />
+          <Route path="all-announcement" element={<AllAnnouncement />} />
+
+          <Route path="kelas">
+            <Route index element={<SchoolClasses />} />
+            <Route path="detail/:id" element={<SchoolManageClass />} />
+            <Route path="quiz/:id" element={<QuizPage />} />
+            <Route path="quiz/:id/do" element={<QuizDetailPage />} />
+          </Route>
+          <Route path="kehadiran" element={<SchoolAttendance />} />
+
+          <Route path="pengumuman" element={<SchoolAnnouncement />} />
+          <Route path="buku">
+            <Route index element={<SchoolBooks />} />
+            <Route path="detail/:id" element={<SchoolDetailBook />} />
+          </Route>
+          {/* Route Menu Utama */}
+          <Route path="menu-utama">
+            <Route index element={<SchoolMenuGrids />} />
+            {/* <Route path="academic" element={<AcademicSchool showBack />} /> */}
+            <Route path="profil-sekolah" element={<SchoolProfile showBack />} />
+            <Route path="keuangan" element={<SchoolFinance showBack />} />
+            <Route path="keuangan/detail/:id" element={<DetailBill />} />
+            <Route path="guru" element={<SchoolTeacher showBack />} />
+            <Route path="all-announcement" element={<AllAnnouncement />} />
+            <Route path="sekolah" element={<SchoolDashboard showBack />} />
+            <Route path="room-school" element={<RoomSchool />} />
+
+            <Route path="room-school/:id" element={<DetailRoomSchool />} />
+            <Route path="spp" element={<SchoolSpp />} />
+            <Route path="pelajaran" element={<SchoolSubject />} />
+            <Route path="sertifikat" element={<SchoolCertificate />} />
+            <Route path="kalender" element={<CalenderAcademic />} />
+            <Route path="statistik" element={<SchoolStatistik />} />
+            <Route path="pengaturan" element={<SchoolSettings />} />
+            <Route path="kelas-aktif" element={<SchoolActiveClass />} />
+
+            <Route
+              path="sertifikat/detail/:classId/:studentId"
+              element={<DetailCertificate />}
+            />
+            <Route path="murid" element={<SchoolStudent showBack />} />
+
+            <Route path="buku">
+              <Route index element={<SchoolBooks showBack />} />
+              <Route path="detail/:id" element={<SchoolDetailBook />} />
+            </Route>
+            <Route path="kelas">
+              <Route index element={<SchoolClasses showBack />} />
+              <Route path="detail/:id" element={<SchoolManageClass />} />
+            </Route>
+            <Route path="academic">
+              <Route index element={<AcademicSchool showBack />} />
+              <Route path="detail" element={<DetailAcademic />} />
+              <Route path="manage" element={<ManagementAcademic />} />
+            </Route>
           </Route>
         </Route>
       </Route>

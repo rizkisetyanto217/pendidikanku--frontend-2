@@ -11,12 +11,11 @@ import {
   School,
 } from "lucide-react";
 
-/* ================= Types ================= */
 export type NavItem = {
-  path: "" | "." | string;
+  path: "" | "." | string; // "" = dashboard root
   label: string;
   icon: React.ComponentType<any>;
-  end?: boolean;
+  end?: boolean; // true = match exact
 };
 
 export type NavDict = {
@@ -25,7 +24,13 @@ export type NavDict = {
   guru: NavItem[];
 };
 
-/* ================= Default Navs ================= */
+// path profil per role (dipakai footer)
+export const PROFILE_PATH: Record<keyof NavDict, string> = {
+  sekolah: "profil-sekolah",
+  murid: "profil-murid",
+  guru: "profil-guru",
+};
+
 export const NAVS: NavDict = {
   sekolah: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -45,16 +50,12 @@ export const NAVS: NavDict = {
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "tugas", label: "Tugas", icon: ClipboardCheck },
     { path: "profil-murid", label: "Profil", icon: Users },
-    // kalau mau nambah "Pengumuman" atau "Rapor Nilai", tambahkan di sini
-    // { path: "pengumuman", label: "Pengumuman", icon: Megaphone },
-    // { path: "rapor", label: "Rapor Nilai", icon: FileSpreadsheet },
   ],
   guru: [
     { path: "", label: "Dashboard", icon: LayoutDashboard, end: true },
     { path: "menu-utama", label: "Menu Utama", icon: ChartBar },
     { path: "kelas", label: "Kelas Saya", icon: Users },
     { path: "guru-mapel", label: "Guru Mapel", icon: Users },
-
     { path: "jadwal", label: "Jadwal", icon: CalendarDays },
     { path: "profil-guru", label: "Profil", icon: Users },
   ],
