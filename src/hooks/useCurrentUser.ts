@@ -1,96 +1,74 @@
+// src/hooks/useCurrentUser.ts
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-/* ===================================================
-   TYPES
-=================================================== */
+/* ================== TYPES (sesuai API) ================== */
+type Role = "admin" | "dkm" | "teacher" | "student" | "user";
+
+export type Membership = {
+  masjid_id: string;
+  masjid_name?: string;
+  masjid_slug?: string;
+  masjid_icon_url?: string;
+  roles: Array<Role | (string & {})>; // API bisa kirim string lain; kita toleransi
+};
+
 export type CurrentUser = {
-  // Properti dasar user
   user_id: string;
   user_name: string;
   email?: string;
 
-  // Alias agar kompatibel dengan kode lama
-  id?: string;
-  role?: "dkm" | "teacher" | "student" | "admin" | "user";
+  // kompatibilitas lama:
+  id?: string; // mirror dari user_id
+  role?: Role; // single role utama (turunan dari memberships[0].roles)
   masjid_admin_ids?: string[];
-
-  // Relasi ke masjid & role
-  memberships?: Array<{
-    masjid_id: string;
-    role: "dkm" | "teacher" | "student" | "admin" | "user";
-  }>;
+  memberships?: Membership[];
 };
 
-/* ===================================================
-   HELPERS
-=================================================== */
-
-/**
- * Ambil ID masjid dari localStorage (context aktif).
- */
-function getCtxMasjidId(): string | null {
-  try {
-    return localStorage.getItem("ctx_masjid_id");
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Ambil masjid_id aktif dari memberships.
- */
+/* ================== HELPERS ================== */
 function deriveActiveMasjidId(u?: CurrentUser | null): string | null {
   if (!u?.memberships?.length) return null;
-  return u.memberships[0].masjid_id || null;
+  return u.memberships[0]?.masjid_id ?? null;
 }
 
-/**
- * Ambil role aktif user.
- */
-function deriveRole(u?: CurrentUser | null): CurrentUser["role"] {
-  if (!u?.memberships?.length) return "user";
-  return u.memberships[0].role || "user";
+function derivePrimaryRole(u?: CurrentUser | null): Role {
+  // cast ke string[] agar .includes menerima literal Role tanpa keluhan
+  const roles = (u?.memberships?.[0]?.roles ?? []) as readonly string[];
+  const priority: Role[] = ["admin", "dkm", "teacher", "student", "user"];
+  for (const p of priority) if (roles.includes(p)) return p;
+  return "user";
 }
 
-/**
- * Ambil semua masjid yang di-manage user.
- */
 function deriveMasjidAdminIds(u?: CurrentUser | null): string[] {
   if (!u?.memberships?.length) return [];
-  return u.memberships
-    .filter((m) => m.role === "dkm" || m.role === "admin")
-    .map((m) => m.masjid_id);
+  const ids = new Set<string>();
+  for (const m of u.memberships) {
+    const set = new Set<string>(m.roles ?? []);
+    if (set.has("admin") || set.has("dkm")) ids.add(m.masjid_id);
+  }
+  return [...ids];
 }
 
-/* ===================================================
-   MAIN HOOK
-=================================================== */
+/* ================== MAIN HOOK ================== */
 export function useCurrentUser() {
   const query = useQuery<CurrentUser | null>({
     queryKey: ["currentUser"],
     queryFn: async () => {
       try {
-        // Ambil context masjid dari localStorage
-        const ctxMasjidId = getCtxMasjidId();
+        // Sesuai Postman: /api/auth/me/simple-context
+        const res = await api.get("/api/auth/me/simple-context");
+        // Bentuk: { data: { user_id, user_name, memberships: [...] }, message: "..." }
+        const raw = res.data?.data;
+        if (!raw) return null;
 
-        // Endpoint dengan konteks masjid
-        const url = ctxMasjidId
-          ? `/api/auth/me/context?masjid_id=${ctxMasjidId}`
-          : `/api/auth/me/context`;
-
-        const res = await api.get(url);
-        const data = res.data?.data || res.data?.user || null;
-        if (!data) return null;
-
-        // Normalisasi struktur agar kompatibel di seluruh app
         const normalized: CurrentUser = {
-          ...data,
-          id: data.user_id,
-          role: deriveRole(data),
-          masjid_admin_ids: deriveMasjidAdminIds(data),
-          memberships: Array.isArray(data.memberships) ? data.memberships : [],
+          ...raw,
+          id: raw.user_id,
+          memberships: Array.isArray(raw.memberships) ? raw.memberships : [],
         };
+
+        normalized.role = derivePrimaryRole(normalized);
+        normalized.masjid_admin_ids = deriveMasjidAdminIds(normalized);
 
         return normalized;
       } catch (err: any) {
@@ -100,12 +78,12 @@ export function useCurrentUser() {
       }
     },
     retry: false,
-    staleTime: 5 * 60 * 1000, // cache 5 menit
+    staleTime: 5 * 60 * 1000,
   });
 
   const user = query.data;
   const masjidId = deriveActiveMasjidId(user);
-  const role = deriveRole(user);
+  const role = derivePrimaryRole(user);
   const masjidAdminIds = deriveMasjidAdminIds(user);
 
   return {
@@ -114,6 +92,6 @@ export function useCurrentUser() {
     role,
     masjidAdminIds,
     isLoggedIn: !!user,
-    ...query, // expose isLoading, refetch, dll
+    ...query, // isLoading, refetch, dll
   };
 }
