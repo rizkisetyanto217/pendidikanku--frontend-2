@@ -111,7 +111,7 @@ export default function MasjidkuHome() {
   const masjidku = {
     masjidku_name: "MasjidKu",
     masjidku_description:
-      "Lembaga untuk Digitalisasi Masjid dan Lembaga Islam Indonesia",
+      "Lembaga untuk Digitalisasi Masjid dan Lembaga Islam Indonesia ini",
     masjidku_image_url: "/image/Gambar-Masjid.jpeg",
     masjidku_instagram_url: "https://instagram.com/masjidbaitussalam",
     masjidku_whatsapp_url: "https://wa.me/6281234567890",

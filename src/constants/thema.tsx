@@ -75,7 +75,7 @@ const sunriseLight: Palette = {
   primary2: "#F9731633",
   secondary: "#F59E0B",
   tertiary: "#FDBA74",
-  quaternary: "#FBBF24",
+  quaternary: "#e02c08ff",
   success1: "#22C55E",
   success2: "#DCFCE7",
   white1: "#FFF7ED",

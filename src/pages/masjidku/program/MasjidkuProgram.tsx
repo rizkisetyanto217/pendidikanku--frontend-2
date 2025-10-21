@@ -4,7 +4,7 @@ import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 import { Target, ListChecks, Wallet, CalendarCheck } from "lucide-react";
 
-export default function MasjidkuProgram() {
+export default function PendidikankuProgram() {
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
@@ -12,7 +12,7 @@ export default function MasjidkuProgram() {
   return (
     <>
       <PageHeaderUser
-        title="Program 100 Masjid"
+        title="Program Pendidikanku"
         onBackClick={() => navigate("/")}
         withPaddingTop
       />
@@ -24,19 +24,25 @@ export default function MasjidkuProgram() {
         {/* Hero / Intro */}
         <header className="space-y-2">
           <h1 className="text-2xl font-bold" style={{ color: theme.primary }}>
-            Rencana Donasi Digitalisasi 100 Masjid
+            Inisiatif Digitalisasi Pendidikan di Era Modern
           </h1>
           <p className="leading-relaxed" style={{ color: theme.black1 }}>
-            Inisiatif untuk mempercepat digitalisasi masjid: profil online,
-            jadwal kajian & sholat, publikasi konten, serta pelaporan yang
-            transparan. Program menargetkan 100 masjid dengan dukungan pendanaan
-            terukur dan pendampingan berkelanjutan.
+            Program <b>Pendidikanku</b> adalah gerakan untuk mempercepat
+            transformasi digital di dunia pendidikan Indonesia. Melalui platform
+            terpadu, program ini membantu sekolah, guru, dan siswa dalam
+            mengelola pembelajaran, administrasi, serta komunikasi secara lebih
+            efisien dan terintegrasi. 
+          </p>
+          <p className="leading-relaxed" style={{ color: theme.black1 }}>
+            Fokus utama kami adalah menciptakan ekosistem belajar yang inklusif,
+            adaptif, dan berbasis teknologi, agar proses pendidikan dapat
+            berlangsung kapan saja dan di mana saja.
           </p>
         </header>
 
         {/* Tujuan */}
         <section className="space-y-3">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-black">
+          <div className="flex items-center gap-2 p-2 rounded-lg ">
             <Target size={18} style={{ color: theme.quaternary }} />
             <h2
               className="text-lg font-semibold"
@@ -51,24 +57,24 @@ export default function MasjidkuProgram() {
             style={{ color: theme.black1 }}
           >
             <li>
-              Menyediakan kehadiran digital yang rapi untuk masjid (profil,
-              agenda, konten).
+              Meningkatkan literasi digital dan kemampuan teknologi bagi guru,
+              siswa, dan lembaga pendidikan.
             </li>
             <li>
-              Memudahkan komunikasi masjid–jamaah melalui kanal resmi yang mudah
-              diakses.
+              Menyediakan platform pembelajaran digital yang mudah diakses dan
+              terintegrasi antara siswa, guru, dan orang tua.
             </li>
             <li>
-              Mendorong transparansi lewat ringkasan laporan kegiatan &
-              finansial.
+              Mendukung efisiensi administrasi sekolah seperti jadwal, absensi,
+              penilaian, dan laporan akademik.
             </li>
             <li>
-              Meningkatkan literasi digital pengurus melalui pelatihan singkat &
-              modul praktik.
+              Mendorong kolaborasi antar sekolah dan pendidik untuk berbagi
+              praktik terbaik.
             </li>
             <li>
-              Membangun jejaring antar masjid agar saling berbagi praktik
-              terbaik.
+              Membangun budaya belajar berkelanjutan melalui sistem edukasi yang
+              interaktif dan adaptif.
             </li>
           </ul>
         </section>
@@ -89,37 +95,29 @@ export default function MasjidkuProgram() {
             style={{ color: theme.black1 }}
           >
             <li>
-              <b>Seleksi & Komitmen Masjid</b>: pengumpulan minat, verifikasi
-              pengurus, dan kesediaan PIC.
+              <b>Pemetaan Sekolah & Kebutuhan</b>: identifikasi kondisi,
+              infrastruktur digital, serta kesiapan SDM pendidikan.
             </li>
             <li>
-              <b>Asesmen Awal</b>: inventarisasi data (logo, alamat, kontak,
-              jadwal, konten awal, kebutuhan khusus).
+              <b>Pelatihan Guru & Staf</b>: sesi peningkatan kompetensi digital
+              dan penggunaan platform pembelajaran daring.
             </li>
             <li>
-              <b>Setup Teknis</b>: pembuatan halaman profil/jadwal, integrasi
-              domain/subdomain, dan konfigurasi analitik.
+              <b>Implementasi Platform</b>: aktivasi dashboard, integrasi
+              sistem kelas online, serta akses pengguna (guru–siswa–orang tua).
             </li>
             <li>
-              <b>Desain & Slicing</b>: implementasi tampilan sesuai guideline,
-              aksesibilitas, & mobile-first.
+              <b>Pendampingan & Evaluasi</b>: pemantauan efektivitas, umpan
+              balik, dan penyesuaian fitur sesuai kebutuhan pengguna.
             </li>
             <li>
-              <b>Pelatihan Pengurus</b>: 60–90 menit (online), modul singkat &
-              panduan operasional.
-            </li>
-            <li>
-              <b>Go-Live & Publikasi</b>: uji cepat, rilis, dan pengumuman ke
-              kanal media sosial.
-            </li>
-            <li>
-              <b>Monitoring & Laporan</b>: dukungan 1–3 bulan, metrik
-              keterjangkauan, dan umpan balik perbaikan.
+              <b>Publikasi & Kolaborasi</b>: berbagi hasil implementasi,
+              praktik terbaik, dan pengembangan jaringan antar sekolah.
             </li>
           </ol>
         </section>
 
-        {/* Perincian Dana */}
+        {/* Estimasi Anggaran */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Wallet size={18} style={{ color: theme.quaternary }} />
@@ -127,107 +125,86 @@ export default function MasjidkuProgram() {
               className="text-lg font-semibold"
               style={{ color: theme.quaternary }}
             >
-              Perincian Dana (Contoh Estimasi)
+              Estimasi Anggaran
             </h2>
           </div>
 
-          {/* Per Masjid */}
-          <div
-            className=""
-            // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
-          >
+          {/* Per Sekolah */}
+          <div>
             <h3 className="font-semibold mb-3" style={{ color: theme.black1 }}>
-              A. Per Masjid
+              A. Per Sekolah
             </h3>
             <div
               className="grid grid-cols-12 gap-2 text-sm"
               style={{ color: theme.black1 }}
             >
-              <div className="col-span-8">1) Setup & Onboarding Teknis</div>
-              <div className="col-span-4 text-right font-semibold">300.000</div>
-
-              <div className="col-span-8">2) Desain & Slicing Halaman</div>
-              <div className="col-span-4 text-right font-semibold">250.000</div>
-
-              <div className="col-span-8">3) Pelatihan Pengurus (online)</div>
-              <div className="col-span-4 text-right font-semibold">150.000</div>
-
-              <div className="col-span-8">4) Produksi Konten Awal</div>
-              <div className="col-span-4 text-right font-semibold">200.000</div>
+              <div className="col-span-8">1) Implementasi Platform & Setup</div>
+              <div className="col-span-4 text-right font-semibold">500.000</div>
 
               <div className="col-span-8">
-                5) Dukungan Operasional (1–3 bulan)
+                2) Pelatihan Guru & Staf Pendidikan
+              </div>
+              <div className="col-span-4 text-right font-semibold">400.000</div>
+
+              <div className="col-span-8">
+                3) Dukungan Teknis & Operasional (3 bulan)
               </div>
               <div className="col-span-4 text-right font-semibold">300.000</div>
 
-              <div className="col-span-8 opacity-80">
-                Opsional: Custom Domain / Tahun
-              </div>
-              <div className="col-span-4 text-right font-semibold opacity-80">
-                200.000
-              </div>
+              <div className="col-span-8">4) Materi & Modul Pembelajaran</div>
+              <div className="col-span-4 text-right font-semibold">200.000</div>
 
               <div className="col-span-8 mt-2 font-semibold">
-                Subtotal Per Masjid (tanpa domain)
+                Subtotal Per Sekolah
               </div>
               <div
                 className="col-span-4 mt-2 text-right font-bold"
                 style={{ color: theme.specialColor }}
               >
-                1.200.000
+                1.400.000
               </div>
             </div>
           </div>
 
-          {/* Skala 100 Masjid */}
-          <div
-            className=""
-            // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
-          >
+          {/* Skala Nasional */}
+          <div>
             <h3 className="font-semibold mb-3" style={{ color: theme.black1 }}>
-              B. Skala Program 100 Masjid
+              B. Skala Program 100 Sekolah
             </h3>
             <div
               className="grid grid-cols-12 gap-2 text-sm"
               style={{ color: theme.black1 }}
             >
               <div className="col-span-8">
-                Implementasi 100 Masjid (Rp1.200.000 x 100)
+                Implementasi 100 Sekolah (Rp1.400.000 x 100)
               </div>
               <div className="col-span-4 text-right font-semibold">
-                120.000.000
+                140.000.000
               </div>
 
-              <div className="col-span-8">
-                Pool Program (shared): Platform & Infra
-              </div>
+              <div className="col-span-8">Platform & Infrastruktur Server</div>
               <div className="col-span-4 text-right font-semibold">
-                10.000.000
+                15.000.000
               </div>
 
-              <div className="col-span-8">Support, QA, & Koordinasi</div>
+              <div className="col-span-8">Manajemen Program & QA</div>
               <div className="col-span-4 text-right font-semibold">
-                5.000.000
+                7.500.000
               </div>
 
-              <div className="col-span-8">Pelatihan & Materi</div>
-              <div className="col-span-4 text-right font-semibold">
-                5.000.000
-              </div>
-
-              <div className="col-span-8">Cadangan/Risiko</div>
+              <div className="col-span-8">Produksi Materi Pelatihan</div>
               <div className="col-span-4 text-right font-semibold">
                 5.000.000
               </div>
 
               <div className="col-span-8 mt-2 font-semibold">
-                Total Target Program (contoh)
+                Total Estimasi Program
               </div>
               <div
                 className="col-span-4 mt-2 text-right font-bold"
                 style={{ color: theme.specialColor }}
               >
-                145.000.000
+                167.500.000
               </div>
             </div>
 
@@ -235,39 +212,40 @@ export default function MasjidkuProgram() {
               className="text-xs mt-3 opacity-80"
               style={{ color: theme.black1 }}
             >
-              Catatan: angka di atas adalah <b>contoh estimasi</b> dan dapat
-              disesuaikan menurut kebijakan donasi, kebutuhan lapangan, atau
-              dukungan in-kind.
+              Catatan: angka di atas merupakan <b>perkiraan estimasi</b> dan
+              dapat disesuaikan berdasarkan skala sekolah, jumlah peserta, atau
+              dukungan pihak ketiga.
             </p>
           </div>
 
           {/* Timeline singkat */}
-          <div
-          // className="rounded-lg ring-1 p-4"
-          // style={{ backgroundColor: theme.white2, borderColor: theme.white3 }}
-          >
+          <div>
             <div className="flex items-center gap-2 mb-2">
               <CalendarCheck size={16} style={{ color: theme.quaternary }} />
-              <h3 className="font-semibold" style={{ color: theme.black1 }}>
-                Timeline Ringkas
-              </h3>
+              <h2 className="text-lg font-semibold"
+              style={{ color: theme.quaternary }}>
+              
+                Timeline Pelaksanaan
+              </h2>
             </div>
             <ul
               className="list-disc pl-5 space-y-1 text-sm"
               style={{ color: theme.black1 }}
             >
-              <li>Bulan 1: Seleksi & asesmen 20–30 masjid pertama.</li>
-              <li>Bulan 2–3: Setup & pelatihan batch 1–3, go-live bertahap.</li>
+              <li>Bulan 1: Pemetaan sekolah & pelatihan awal guru.</li>
               <li>
-                Bulan 4–5: Monitoring, optimalisasi, rilis batch berikutnya.
+                Bulan 2–3: Implementasi platform dan pendampingan teknis.
               </li>
-              <li>Bulan 6: Evaluasi, publikasi capaian, penyiapan scale-up.</li>
+              <li>Bulan 4–5: Evaluasi & optimalisasi pembelajaran digital.</li>
+              <li>
+                Bulan 6: Publikasi capaian & ekspansi ke sekolah berikutnya.
+              </li>
             </ul>
           </div>
         </section>
 
         {/* CTA / Penutup */}
-        <footer className="flex flex-wrap  items-center gap-3">
+        <footer className="flex flex-wrap items-center gap-3">
           <button
             className="px-4 py-2 rounded-lg font-semibold w-full"
             style={{ backgroundColor: theme.primary, color: theme.white1 }}
@@ -280,7 +258,7 @@ export default function MasjidkuProgram() {
             style={{ color: theme.primary, borderColor: theme.primary }}
             onClick={() => navigate("/finansial")}
           >
-            Lihat Skema Donasi
+            Lihat Skema Program
           </button>
         </footer>
       </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { pickTheme, ThemeName } from "@/constants/thema";
 import useHtmlDarkMode from "@/hooks/useHTMLThema";
 
-export default function MasjidkuProfil() {
+export default function PendidikankuProfil() {
   const navigate = useNavigate();
   const { isDark, themeName } = useHtmlDarkMode();
   const theme = pickTheme(themeName as ThemeName, isDark);
@@ -11,23 +11,18 @@ export default function MasjidkuProfil() {
   return (
     <>
       <PageHeaderUser
-        title="Profil MasjidKu"
+        title="Profil Pendidikanku"
         onBackClick={() => navigate(`/`)}
         withPaddingTop // aktifin padding top
       />
 
       <div
-        className="max-w-3xl mx-auto space-y-6 rounded-xl "
+        className="max-w-3xl mx-auto space-y-6 rounded-xl"
         style={{
           backgroundColor: theme.white1, // kartu latar mengikuti tema
           borderColor: theme.white3, // garis halus
         }}
       >
-        {/* Judul
-        <h1 className="text-2xl font-bold" style={{ color: theme.primary }}>
-          Profil MasjidKu
-        </h1> */}
-
         {/* Latar Belakang */}
         <section>
           <h2
@@ -40,23 +35,22 @@ export default function MasjidkuProfil() {
             className="text-justify leading-relaxed"
             style={{ color: theme.black1 }}
           >
-            MasjidKu lahir dari kebutuhan untuk menghadirkan solusi digital yang
-            memudahkan pengelolaan masjid di seluruh Indonesia. Di era modern,
-            peran masjid tidak hanya sebatas tempat ibadah, tetapi juga sebagai
-            pusat edukasi, sosial, dan pemberdayaan umat. Namun, banyak masjid
-            yang masih mengandalkan sistem manual dalam pencatatan keuangan,
-            pengelolaan jadwal kegiatan, dan komunikasi dengan jamaah.
+            Pendidikanku hadir sebagai solusi digital untuk mendukung proses
+            pembelajaran modern yang lebih interaktif, efisien, dan terintegrasi.
+            Di tengah perkembangan teknologi yang pesat, dunia pendidikan
+            dituntut untuk beradaptasi agar pembelajaran tidak hanya berlangsung
+            di ruang kelas, tetapi juga dapat diakses di mana saja dan kapan saja.
           </p>
           <p
             className="text-justify leading-relaxed mt-3"
             style={{ color: theme.black1 }}
           >
-            Melihat tantangan tersebut, MasjidKu hadir sebagai platform digital
-            yang memadukan kemudahan teknologi dengan nilai-nilai islami.
-            Melalui aplikasi dan website, kami membantu masjid untuk
-            menyampaikan informasi secara cepat, transparan, dan mudah diakses,
-            sehingga jamaah dapat terhubung lebih erat dengan kegiatan
-            masjidnya.
+            Melalui platform ini, kami berkomitmen untuk membantu lembaga
+            pendidikan, pengajar, dan siswa dalam mengoptimalkan pengalaman
+            belajar mengajar dengan memanfaatkan teknologi digital. Pendidikanku
+            menjadi jembatan antara dunia pendidikan tradisional dan era digital,
+            dengan menghadirkan sistem manajemen pembelajaran, evaluasi, dan
+            komunikasi yang lebih efektif.
           </p>
         </section>
 
@@ -73,26 +67,24 @@ export default function MasjidkuProfil() {
             style={{ color: theme.black1 }}
           >
             <li>
-              Mempermudah pengurus masjid dalam mengelola kegiatan, jadwal
-              sholat, kajian, dan acara lainnya secara digital.
+              Meningkatkan efisiensi proses pembelajaran melalui sistem digital
+              yang mudah digunakan oleh guru dan siswa.
             </li>
             <li>
-              Menyediakan sistem pencatatan dan pelaporan keuangan masjid yang
-              transparan dan akuntabel, sehingga meningkatkan kepercayaan
-              jamaah.
+              Menyediakan sarana manajemen data akademik, jadwal, dan evaluasi
+              secara transparan dan terorganisir.
             </li>
             <li>
-              Memperkuat hubungan antara masjid dan jamaah melalui penyampaian
-              informasi yang cepat, tepat, dan interaktif.
+              Mendorong kolaborasi antara pendidik, peserta didik, dan lembaga
+              pendidikan dalam ekosistem yang saling terhubung.
             </li>
             <li>
-              Mendukung program dakwah dan edukasi dengan memanfaatkan media
-              digital yang mudah diakses oleh berbagai kalangan.
+              Mendukung transformasi pendidikan menuju pembelajaran berbasis
+              teknologi dan data.
             </li>
             <li>
-              Menjadi wadah kolaborasi antar masjid untuk saling berbagi
-              pengalaman, sumber daya, dan inspirasi dalam memajukan pelayanan
-              kepada umat.
+              Menjadi platform edukatif yang memberdayakan semua pihak untuk
+              belajar, berkembang, dan berinovasi tanpa batas.
             </li>
           </ul>
         </section>
